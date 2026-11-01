@@ -33,7 +33,8 @@ def start_run(
     llm.Gateway(mode)  # validates mode
     if unknown := set(inputs or {}) - set(RUN_INPUTS):
         raise ValueError(f"not a run input: {sorted(unknown)}")
-    inputs = {**(inputs or {}), "run_options": artifacts.put("run_options", options or {}).id}
+    options = {**(options or {}), **({"unattended": True} if unattended else {})}  # stages may read it
+    inputs = {**(inputs or {}), "run_options": artifacts.put("run_options", options).id}
     with db.connect() as c, c:
         c.execute("BEGIN")
         run_id = c.execute(
