@@ -16,7 +16,10 @@ KINDS: dict[str, list[str]] = {
     "real_defect": ["confirm", "reject"],
 }
 NEEDS_REASON = {("triage", "override")}
-CHOICE_DECISIONS = {("question", "pick"), ("triage", "override")}  # detail.choice = a payload choice
+CHOICE_DECISIONS = {
+    ("question", "pick"),
+    ("triage", "override"),
+}  # detail.choice = a payload choice
 # Kinds whose payload may carry `lines`: each line is decided on its own (plan C5).
 LINE_OPTIONS: dict[str, list[str]] = {"signoff": ["approve", "reject"]}
 LINE_NEEDS_COMMENT = {"reject"}
