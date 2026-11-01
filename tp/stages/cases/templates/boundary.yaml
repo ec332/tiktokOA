@@ -1,0 +1,12 @@
+id: boundary
+name: Boundary value analysis
+use_when: A rule has a numeric threshold (a length, size, count, or limit), stated or implied.
+catches: Off-by-one errors, inclusive/exclusive mistakes, missing validation at the edge.
+recipe: >-
+  Name the field and the limit, and say whether the limit itself is allowed (inclusive).
+  The expander adds the points limit-1, limit and limit+1; the calculator decides which side
+  each point is on.
+pitfalls: >-
+  Testing only one side of the limit; guessing inclusivity instead of taking it from the spec;
+  measuring length in the wrong unit.
+expander: boundary

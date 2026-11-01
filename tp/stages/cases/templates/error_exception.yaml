@@ -1,0 +1,7 @@
+id: error_exception
+name: Error and exception paths
+use_when: The spec states a failure outcome (a 4xx/5xx, a refusal, a rejection).
+catches: Wrong status code, a server error where a client error is expected, leaking details.
+recipe: One case per stated error path, with the exact input that should trigger it.
+pitfalls: Accepting any error status; not checking that nothing was changed by the failed call.
+expander: none

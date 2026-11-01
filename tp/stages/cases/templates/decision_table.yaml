@@ -1,0 +1,11 @@
+id: decision_table
+name: Decision table (incl. authorisation)
+use_when: >-
+  The outcome depends on two or more conditions, e.g. who the caller is (owner, other user,
+  superuser, anonymous) and what they do to a resource.
+catches: Missing authorisation checks, rules applied to the wrong actor, untested combinations.
+recipe: >-
+  List the conditions and one row per combination that matters, each with its expected outcome
+  taken from the spec. The expander makes one case per row and flags combinations left out.
+pitfalls: Covering only the happy row; forgetting the anonymous caller; mixing up 403 and 404.
+expander: decision_table

@@ -1,0 +1,7 @@
+id: error_guessing
+name: Error guessing
+use_when: A suspected defect was found, or experience suggests a likely failure the spec omits.
+catches: Server errors on odd input (negative, null, huge, wrong type), unbounded resources.
+recipe: One case per suspected defect, with the input that exposes it and the resolved expectation.
+pitfalls: Expecting the current (buggy) behaviour instead of the resolved one.
+expander: none
