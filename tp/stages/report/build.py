@@ -73,12 +73,25 @@ def _worklist(criteria, case_by_id, gate, tri, verdicts):
            for ac in _no_admitted(gate, case_by_id)[0]]  # fmt: skip
     health = [f for f in tri["findings"] if f["class"] in HEALTH]
     m = gate.get("mutants") or {}
-    p2 = {"findings": [{"finding": f["id"], "class": f["class"], "rule": f["rule"], "dist": f["dist"],
-                        "evidence": f["evidence"][:1]} for f in health],
-          "quarantine": tri.get("quarantine", []),
-          "redundant": num(sum(r["status"] == "ADMITTED_REDUNDANT" for r in rows), len(rows),
-                           [r["case_id"] for r in rows if r["status"] == "ADMITTED_REDUNDANT"]),
-          "mutation_strength": num(m.get("killed", 0), m.get("total", 0), [])}
+    p2 = {
+        "findings": [
+            {
+                "finding": f["id"],
+                "class": f["class"],
+                "rule": f["rule"],
+                "dist": f["dist"],
+                "evidence": f["evidence"][:1],
+            }
+            for f in health
+        ],
+        "quarantine": tri.get("quarantine", []),
+        "redundant": num(
+            sum(r["status"] == "ADMITTED_REDUNDANT" for r in rows),
+            len(rows),
+            [r["case_id"] for r in rows if r["status"] == "ADMITTED_REDUNDANT"],
+        ),
+        "mutation_strength": num(m.get("killed", 0), m.get("total", 0), []),
+    }
     gaps = [f for f in tri["findings"] if f["class"] == "SPEC_GAP"]
     p3 = [{"what": "spec gap", "ac": f["ac"], "case": f["case_id"], "why": f["rule"],
            "overridden": f.get("original_class"), "evidence": f["evidence"][:1]} for f in gaps]  # fmt: skip
@@ -89,10 +102,14 @@ def _worklist(criteria, case_by_id, gate, tri, verdicts):
 
 def _scorecard(criteria, case_by_id, gate, rr, tri):
     flags = sorted(v.removeprefix("bug:") for v in rr.get("variants", {}) if v.startswith("bug:"))
-    seeded = {d["flag"]: d for d in tri["defects"] if d["kind"] == "seeded" and d["class"] in P0_CLASSES}
+    seeded = {
+        d["flag"]: d for d in tri["defects"] if d["kind"] == "seeded" and d["class"] in P0_CLASSES
+    }
     per_flag = []
     for flag in flags:
-        targeted = [r["case_id"] for r in gate["rows"] if (r.get("seeded") or {}).get("flag") == flag]
+        targeted = [
+            r["case_id"] for r in gate["rows"] if (r.get("seeded") or {}).get("flag") == flag
+        ]
         caught = sorted(c for d in tri["defects"] if d.get("flag") == flag for c in d["cases"])
         score = next((s for s in tri.get("scores", []) if s["flag"] == flag), None)
         per_flag.append({"flag": flag, "detected": flag in seeded, "targeted": num(len(set(caught) & set(targeted)), len(targeted), targeted),
@@ -107,18 +124,24 @@ def _scorecard(criteria, case_by_id, gate, rr, tri):
              if (r.get("seeded") or {}).get("killed")]  # fmt: skip
     cls = {(f["case_id"], f["variant"]): f["class"] for f in tri["findings"]}
     right = [f"{c}@{v}" for c, v in truth if cls.get((c, v)) == "PRODUCT_DEFECT"]
-    per_crit = {ac: num(c["killed"], c["reached_mutants"], []) for ac, c in (gate.get("criteria") or {}).items()}
+    per_crit = {
+        ac: num(c["killed"], c["reached_mutants"], [])
+        for ac, c in (gate.get("criteria") or {}).items()
+    }
     no_admitted, in_scope = _no_admitted(gate, case_by_id)
     m = gate.get("mutants") or {}
     return {
-        "seeded_authored": num(sum(p["detected"] for p in per_flag), len(per_flag),
-                               [p["flag"] for p in per_flag if p["detected"]]),
+        "seeded_authored": num(
+            sum(p["detected"] for p in per_flag),
+            len(per_flag),
+            [p["flag"] for p in per_flag if p["detected"]],
+        ),
         "seeded_per_flag": per_flag,
         "seeded_blind": "not run (M7)",
         "real_defects": num(len(confirmed), len(real), [d["id"] for d in confirmed]),
         "mutation_strength": num(m.get("killed", 0), m.get("total", 0), []),
         "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits "
-                                  "mostly under the test data, so this measures authentication more than the item rules",
+        "mostly under the test data, so this measures authentication more than the item rules",
         "mutation_per_criterion": per_crit,
         "triage_correct_seeded": num(len(right), len(truth), right),
         "localisation": loc,
@@ -162,7 +185,7 @@ def _uncovered(spec, cases, gate):
         "unbound_cases": sorted(c["id"] for c in cases["cases"] if c["id"] not in rows),
         "behaviour_with_no_requirement": spec.get("unmapped_routes", []),
         "seeded_race": "BUG_FLAKE_RACE: no signed case reads an item right after creating it, so the "
-                       "suite cannot observe the late commit",
+        "suite cannot observe the late commit",
     }
 
 
@@ -171,26 +194,56 @@ def _ai(spec, cases, gate, tri, decisions):
     answers = spec.get("decisions", [])
     props = gate.get("proposals_summary") or {
         "proposed": len(gate.get("proposals", [])),
-        "equivalent": sum(p.get("equivalent", False) for p in gate.get("proposals", []))}
+        "equivalent": sum(p.get("equivalent", False) for p in gate.get("proposals", [])),
+    }
     return {
         "spec_answers": num(len(answers), None, [a["key"] for a in answers]),
-        "spec_assumed": num(sum(a.get("assumed", False) for a in answers), len(answers),
-                            [a["key"] for a in answers if a.get("assumed")]),
+        "spec_assumed": num(
+            sum(a.get("assumed", False) for a in answers),
+            len(answers),
+            [a["key"] for a in answers if a.get("assumed")],
+        ),
         "cases_llm_drafted": num(len(drafted), len(cases["cases"]), drafted),
-        "cases_signoff": {"signed": (cases.get("signoff") or {}).get("signed"),
-                          "approved": num((cases.get("signoff") or {}).get("approved", 0),
-                                          (cases.get("signoff") or {}).get("lines", 0), [])},
-        "gate_equivalence": {"equivalent": num(props["equivalent"], props["proposed"], []),
-                             "resolution": "not confirmed by a person; counted as survivors"},
+        "cases_signoff": {
+            "signed": (cases.get("signoff") or {}).get("signed"),
+            "approved": num(
+                (cases.get("signoff") or {}).get("approved", 0),
+                (cases.get("signoff") or {}).get("lines", 0),
+                [],
+            ),
+        },
+        "gate_equivalence": {
+            "equivalent": num(props["equivalent"], props["proposed"], []),
+            "resolution": "not confirmed by a person; counted as survivors",
+        },
         "triage": "no AI in M4 (rules only; the AI judge is M7)",
         "overrides": tri.get("overrides", []),
-        "review_decisions": [{"item": d["review_item"], "kind": d["kind"], "decision": d["decision"],
-                              "by": d["by"], "reason": d["reason"]} for d in decisions],
+        "review_decisions": [
+            {
+                "item": d["review_item"],
+                "kind": d["kind"],
+                "decision": d["decision"],
+                "by": d["by"],
+                "reason": d["reason"],
+            }
+            for d in decisions
+        ],
     }
 
 
-POSITIONS = {"rank", "k", "line", "upstream_line", "line_no", "status", "step", "execution", "item",
-             "review_item", "shuffle_seed"}  # positions and ids, not counts
+POSITIONS = {
+    "rank",
+    "k",
+    "line",
+    "upstream_line",
+    "line_no",
+    "status",
+    "step",
+    "execution",
+    "item",
+    "review_item",
+    "shuffle_seed",
+}  # positions and ids, not counts
 
 
 def walk(report, path=""):

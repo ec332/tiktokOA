@@ -24,7 +24,9 @@ def data(tmp_path, monkeypatch):
 @pytest.fixture(scope="module")
 def report():
     b = {n: json.loads((FX / f"{n}.json").read_text()) for n in NAMES}
-    return build.build(b["spec"], b["cases"], b["gate_report"], b["run_records"], b["triage"], [], ["real"])
+    return build.build(
+        b["spec"], b["cases"], b["gate_report"], b["run_records"], b["triage"], [], ["real"]
+    )
 
 
 def test_golden_report_json(report):
@@ -46,8 +48,10 @@ def test_worklist_orders_real_defects_first_with_evidence(report):
     o6 = next(d for d in p0 if d["ac"] == "O-6")
     assert o6["suspects"][0]["upstream_line"] == 15 and o6["cases"]["n"] == 5
     assert all(e in report["evidence"] for d in p0 for e in d["evidence"])
-    assert {p["what"] for p in report["worklist"]["P1"]} >= {"weak test (cannot fail on any mutant)",
-                                                            "signed case not bound to a test"}
+    assert {p["what"] for p in report["worklist"]["P1"]} >= {
+        "weak test (cannot fail on any mutant)",
+        "signed case not bound to a test",
+    }
     assert any(p["case"] == "TC-C13-1.a" for p in report["worklist"]["P3"])
 
 
@@ -65,7 +69,10 @@ def test_sections_populated(report):
     assert len(report["traceability"]) == 59
     cov = report["coverage"]
     assert cov["normal"]["n"] + cov["boundary"]["n"] + cov["exception"]["n"] == 59
-    assert report["uncovered"]["unbound_cases"] and report["uncovered"]["behaviour_with_no_requirement"]
+    assert (
+        report["uncovered"]["unbound_cases"]
+        and report["uncovered"]["behaviour_with_no_requirement"]
+    )
     assert report["ai_decisions"]["gate_equivalence"]["equivalent"]["d"] == 119
 
 

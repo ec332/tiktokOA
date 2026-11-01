@@ -16,12 +16,18 @@ def _num(x) -> str:
     """A number that expands to its composition."""
     if isinstance(x, dict) and set(x) == {"n", "d", "ids"} and x["ids"]:
         ids = ", ".join(_ref(i) for i in x["ids"])
-        return f"<details class=num><summary>{e(_n(x))}</summary><div class=ids>{ids}</div></details>"
+        return (
+            f"<details class=num><summary>{e(_n(x))}</summary><div class=ids>{ids}</div></details>"
+        )
     return f"<span class=num>{e(_n(x))}</span>"
 
 
 def _ref(eid: str) -> str:
-    return f'<a href="#{e(eid)}">{e(eid)}</a>' if eid.startswith(("ex:", "log:")) else f"<code>{e(eid)}</code>"
+    return (
+        f'<a href="#{e(eid)}">{e(eid)}</a>'
+        if eid.startswith(("ex:", "log:"))
+        else f"<code>{e(eid)}</code>"
+    )
 
 
 def _suspects(ss: list[dict]) -> str:
@@ -56,9 +62,11 @@ def html(r: dict) -> str:
     labels = " ".join(f"<span class=label>{e(x)}</span>" for x in h["labels"])
     unatt = h["unattended_decisions"]
     variants = ", ".join(f"<code>{e(v)}</code>" for v in h["variants"])
-    parts = [f"""<header><h1>Test report</h1><div>{labels}
-<span class=label>no AI in run/judge/report</span>{'<span class="label warn">unattended decisions ' + e(_n(unatt)) + '</span>' if unatt['n'] else ''}</div>
-<p class=muted>SUT <code>{e(str((h.get('sut') or {}).get('ref', '')))[:12]}</code> · variants {variants} · K={h['k']} · run_records <code>{e(str(h['run_records'])[:19])}</code></p></header>"""]
+    parts = [
+        f"""<header><h1>Test report</h1><div>{labels}
+<span class=label>no AI in run/judge/report</span>{'<span class="label warn">unattended decisions ' + e(_n(unatt)) + "</span>" if unatt["n"] else ""}</div>
+<p class=muted>SUT <code>{e(str((h.get("sut") or {}).get("ref", "")))[:12]}</code> · variants {variants} · K={h["k"]} · run_records <code>{e(str(h["run_records"])[:19])}</code></p></header>"""
+    ]
 
     parts.append("<section><h2>P0 — defects</h2>")
     if not w["P0"]:
@@ -69,66 +77,133 @@ def html(r: dict) -> str:
         obs = d.get("observed") or {}
         q = "&".join(f"{k}={v}" for k, v in (obs.get("query") or {}).items())
         rc = d.get("root_cause") or {}
-        parts.append(f"""<article class=card><h3>{e(d['ac'])} · {e(d['title'] or '')} <span class=label>{e(kind)}</span></h3>
-<p><b>Expected</b> {e(str(d['expected']))} · <b>observed</b> <code>{e(obs.get('method', ''))} {e(obs.get('path', ''))}{'?' + e(q) if q else ''} → {e(str(obs.get('status', '')))}</code>
-{('· <b>root cause</b> <code>' + e(rc.get('cls', '')) + ': ' + e(rc.get('msg', '')) + '</code>') if rc else ''}</p>
-<p>cases {_num(d['cases'])} · decided by <b>{e(str(dec.get('by')))}</b> ({e(str(dec.get('decision')))}{(': ' + e(dec['reason'])) if dec.get('reason') else ''}) · retest: {e(d['retest'])}</p>
-<h4>Suspects</h4>{_suspects(d['suspects'])}
-<h4>Evidence</h4>{''.join(_evidence(x, r['evidence'][x]) for x in d['evidence'] if x in r['evidence'])}</article>""")
+        parts.append(f"""<article class=card><h3>{e(d["ac"])} · {e(d["title"] or "")} <span class=label>{e(kind)}</span></h3>
+<p><b>Expected</b> {e(str(d["expected"]))} · <b>observed</b> <code>{e(obs.get("method", ""))} {e(obs.get("path", ""))}{"?" + e(q) if q else ""} → {e(str(obs.get("status", "")))}</code>
+{("· <b>root cause</b> <code>" + e(rc.get("cls", "")) + ": " + e(rc.get("msg", "")) + "</code>") if rc else ""}</p>
+<p>cases {_num(d["cases"])} · decided by <b>{e(str(dec.get("by")))}</b> ({e(str(dec.get("decision")))}{(": " + e(dec["reason"])) if dec.get("reason") else ""}) · retest: {e(d["retest"])}</p>
+<h4>Suspects</h4>{_suspects(d["suspects"])}
+<h4>Evidence</h4>{"".join(_evidence(x, r["evidence"][x]) for x in d["evidence"] if x in r["evidence"])}</article>""")
     parts.append("</section>")
 
-    parts.append("<section><h2>P1 — untested or weak</h2><table><thead><tr><th>what</th><th>criterion</th><th>case</th><th>what would close it</th></tr></thead><tbody>")
-    parts += [f"<tr><td>{e(p['what'])}</td><td>{e(p['ac'])}</td><td>{e(p['case'] or '–')}</td><td>{e(p['closes_it'])}</td></tr>" for p in w["P1"]]
+    parts.append(
+        "<section><h2>P1 — untested or weak</h2><table><thead><tr><th>what</th><th>criterion</th><th>case</th><th>what would close it</th></tr></thead><tbody>"
+    )
+    parts += [
+        f"<tr><td>{e(p['what'])}</td><td>{e(p['ac'])}</td><td>{e(p['case'] or '–')}</td><td>{e(p['closes_it'])}</td></tr>"
+        for p in w["P1"]
+    ]
     parts.append("</tbody></table></section>")
 
     p2 = w["P2"]
-    parts.append(f"<section><h2>P2 — test health</h2><p>redundant {_num(p2['redundant'])} · mutation strength {_num(p2['mutation_strength'])} · quarantined {len(p2['quarantine'])}</p>")
+    parts.append(
+        f"<section><h2>P2 — test health</h2><p>redundant {_num(p2['redundant'])} · mutation strength {_num(p2['mutation_strength'])} · quarantined {len(p2['quarantine'])}</p>"
+    )
     if p2["findings"]:
-        parts.append("<table><thead><tr><th>finding</th><th>class</th><th>dist</th><th>rule</th></tr></thead><tbody>")
-        parts += [f"<tr><td><code>{e(f['finding'])}</code></td><td>{e(f['class'])}</td><td>{e(f['dist'])}</td><td>{e(f['rule'])}</td></tr>" for f in p2["findings"]]
+        parts.append(
+            "<table><thead><tr><th>finding</th><th>class</th><th>dist</th><th>rule</th></tr></thead><tbody>"
+        )
+        parts += [
+            f"<tr><td><code>{e(f['finding'])}</code></td><td>{e(f['class'])}</td><td>{e(f['dist'])}</td><td>{e(f['rule'])}</td></tr>"
+            for f in p2["findings"]
+        ]
         parts.append("</tbody></table>")
     parts.append("</section>")
 
-    parts.append("<section><h2>P3 — spec and code drift</h2><table><thead><tr><th>what</th><th>criterion</th><th>case</th><th>why</th></tr></thead><tbody>")
-    parts += [f"<tr><td>{e(p['what'])}{' (overridden from ' + e(p['overridden']) + ')' if p.get('overridden') else ''}</td><td>{e(p['ac'])}</td><td>{e(p['case'] or '–')}</td><td>{e(p['why'])}</td></tr>" for p in w["P3"]]
+    parts.append(
+        "<section><h2>P3 — spec and code drift</h2><table><thead><tr><th>what</th><th>criterion</th><th>case</th><th>why</th></tr></thead><tbody>"
+    )
+    parts += [
+        f"<tr><td>{e(p['what'])}{' (overridden from ' + e(p['overridden']) + ')' if p.get('overridden') else ''}</td><td>{e(p['ac'])}</td><td>{e(p['case'] or '–')}</td><td>{e(p['why'])}</td></tr>"
+        for p in w["P3"]
+    ]
     parts.append("</tbody></table></section>")
 
-    rows = [("Seeded detected (authored)", _num(sc["seeded_authored"])), ("Seeded detected (blind)", e(sc["seeded_blind"])),
-            ("Real defects", _num(sc["real_defects"])),
-            ("Mutation strength", _num(sc["mutation_strength"]) + f"<div class=muted>{e(sc['mutation_strength_note'])}</div>"),
-            ("Triage correct on seeded rows", _num(sc["triage_correct_seeded"]))]
+    rows = [
+        ("Seeded detected (authored)", _num(sc["seeded_authored"])),
+        ("Seeded detected (blind)", e(sc["seeded_blind"])),
+        ("Real defects", _num(sc["real_defects"])),
+        (
+            "Mutation strength",
+            _num(sc["mutation_strength"])
+            + f"<div class=muted>{e(sc['mutation_strength_note'])}</div>",
+        ),
+        ("Triage correct on seeded rows", _num(sc["triage_correct_seeded"])),
+    ]
     rows += [(f"Localisation {k}", _num(v)) for k, v in sc["localisation"].items()]
-    rows += [("Fail before / pass after", e(sc["fail_before_pass_after"])),
-             ("Criteria without an admitted test", _num(sc["criteria_without_admitted_test"]))]
-    parts.append("<section><h2>Scorecard</h2><table><tbody>" + "".join(f"<tr><th>{e(k)}</th><td>{v}</td></tr>" for k, v in rows) + "</tbody></table>")
-    parts.append("<table><thead><tr><th>flag</th><th>detected</th><th>targeted rows caught</th><th>caught by</th><th>localisation rank</th></tr></thead><tbody>")
-    parts += [f"<tr><td><code>{e(p['flag'])}</code></td><td>{'yes' if p['detected'] else 'no'}</td><td>{_num(p['targeted'])}</td><td>{e(', '.join(p['caught_by']) or '–')}</td><td>{e(str(p['rank'] or '–'))}</td></tr>" for p in sc["seeded_per_flag"]]
+    rows += [
+        ("Fail before / pass after", e(sc["fail_before_pass_after"])),
+        ("Criteria without an admitted test", _num(sc["criteria_without_admitted_test"])),
+    ]
+    parts.append(
+        "<section><h2>Scorecard</h2><table><tbody>"
+        + "".join(f"<tr><th>{e(k)}</th><td>{v}</td></tr>" for k, v in rows)
+        + "</tbody></table>"
+    )
+    parts.append(
+        "<table><thead><tr><th>flag</th><th>detected</th><th>targeted rows caught</th><th>caught by</th><th>localisation rank</th></tr></thead><tbody>"
+    )
+    parts += [
+        f"<tr><td><code>{e(p['flag'])}</code></td><td>{'yes' if p['detected'] else 'no'}</td><td>{_num(p['targeted'])}</td><td>{e(', '.join(p['caught_by']) or '–')}</td><td>{e(str(p['rank'] or '–'))}</td></tr>"
+        for p in sc["seeded_per_flag"]
+    ]
     parts.append("</tbody></table></section>")
 
     cov = r["coverage"]
-    parts.append(f"<section><h2>Coverage</h2><p class=muted>{e(cov['by'])}</p><p>normal {_num(cov['normal'])} · boundary {_num(cov['boundary'])} · exception {_num(cov['exception'])}</p></section>")
+    parts.append(
+        f"<section><h2>Coverage</h2><p class=muted>{e(cov['by'])}</p><p>normal {_num(cov['normal'])} · boundary {_num(cov['boundary'])} · exception {_num(cov['exception'])}</p></section>"
+    )
 
-    parts.append("<section><h2>Traceability</h2><table><thead><tr><th>requirement</th><th>criterion</th><th>case</th><th>assertions</th><th>gate</th><th>verdict (reference)</th><th>evidence</th></tr></thead><tbody>")
-    parts += [f"<tr><td>{e(', '.join(t['req']))}</td><td>{e(t['ac'])}</td><td>{e(t['case'])}</td><td>{e(', '.join(t['assertions']))}</td><td>{e(t['gate'])}</td><td>{e(str(t['verdict']))} {e(str(t['dist']))}</td><td><code>{e(str(t['evidence']))}</code></td></tr>" for t in r["traceability"]]
+    parts.append(
+        "<section><h2>Traceability</h2><table><thead><tr><th>requirement</th><th>criterion</th><th>case</th><th>assertions</th><th>gate</th><th>verdict (reference)</th><th>evidence</th></tr></thead><tbody>"
+    )
+    parts += [
+        f"<tr><td>{e(', '.join(t['req']))}</td><td>{e(t['ac'])}</td><td>{e(t['case'])}</td><td>{e(', '.join(t['assertions']))}</td><td>{e(t['gate'])}</td><td>{e(str(t['verdict']))} {e(str(t['dist']))}</td><td><code>{e(str(t['evidence']))}</code></td></tr>"
+        for t in r["traceability"]
+    ]
     parts.append("</tbody></table></section>")
 
     u = r["uncovered"]
-    lst = lambda xs: "<ul>" + "".join(f"<li>{e(x if isinstance(x, str) else json.dumps(x))}</li>" for x in xs) + "</ul>" if xs else "<p>none</p>"
-    parts.append(f"""<section><h2>Not covered</h2><h4>Seeded race</h4><p>{e(u['seeded_race'])}</p>
-<h4>Behaviour with no requirement</h4>{lst(u['behaviour_with_no_requirement'])}<h4>Criteria out of this run's scope</h4>{lst(u['criteria_out_of_scope'])}
-<h4>Assumed criteria</h4>{lst(u['assumed'])}<h4>Signed cases not bound</h4>{lst(u['unbound_cases'])}<h4>Skipped templates and notes</h4>{lst(u['skipped_templates'])}<h4>Deferred</h4>{lst(u['deferred'])}</section>""")
+    lst = lambda xs: (
+        "<ul>"
+        + "".join(f"<li>{e(x if isinstance(x, str) else json.dumps(x))}</li>" for x in xs)
+        + "</ul>"
+        if xs
+        else "<p>none</p>"
+    )
+    parts.append(f"""<section><h2>Not covered</h2><h4>Seeded race</h4><p>{e(u["seeded_race"])}</p>
+<h4>Behaviour with no requirement</h4>{lst(u["behaviour_with_no_requirement"])}<h4>Criteria out of this run's scope</h4>{lst(u["criteria_out_of_scope"])}
+<h4>Assumed criteria</h4>{lst(u["assumed"])}<h4>Signed cases not bound</h4>{lst(u["unbound_cases"])}<h4>Skipped templates and notes</h4>{lst(u["skipped_templates"])}<h4>Deferred</h4>{lst(u["deferred"])}</section>""")
 
     a = r["ai_decisions"]
     parts.append(f"""<section><h2>AI decisions</h2><table><tbody>
-<tr><th>Spec answers</th><td>{_num(a['spec_answers'])}, assumed {_num(a['spec_assumed'])}</td></tr>
-<tr><th>Cases drafted by the model</th><td>{_num(a['cases_llm_drafted'])}; sign-off: signed={e(str(a['cases_signoff']['signed']))}, approved {_num(a['cases_signoff']['approved'])}</td></tr>
-<tr><th>Gate equivalence proposals</th><td>equivalent {_num(a['gate_equivalence']['equivalent'])}; {e(a['gate_equivalence']['resolution'])}</td></tr>
-<tr><th>Triage</th><td>{e(a['triage'])}</td></tr></tbody></table>""")
-    parts.append("<h4>Overrides</h4>" + (lst([f"{o['defect']}: {o['from']} → {o['to']} by {o['by']}: {o['reason']}" for o in a["overrides"]])))
-    parts.append("<h4>Review decisions</h4>" + lst([f"#{d['item']} {d['kind']}: {d['decision']} by {d['by']}{' — ' + d['reason'] if d['reason'] else ''}" for d in a["review_decisions"]]) + "</section>")
+<tr><th>Spec answers</th><td>{_num(a["spec_answers"])}, assumed {_num(a["spec_assumed"])}</td></tr>
+<tr><th>Cases drafted by the model</th><td>{_num(a["cases_llm_drafted"])}; sign-off: signed={e(str(a["cases_signoff"]["signed"]))}, approved {_num(a["cases_signoff"]["approved"])}</td></tr>
+<tr><th>Gate equivalence proposals</th><td>equivalent {_num(a["gate_equivalence"]["equivalent"])}; {e(a["gate_equivalence"]["resolution"])}</td></tr>
+<tr><th>Triage</th><td>{e(a["triage"])}</td></tr></tbody></table>""")
+    parts.append(
+        "<h4>Overrides</h4>"
+        + (
+            lst(
+                [
+                    f"{o['defect']}: {o['from']} → {o['to']} by {o['by']}: {o['reason']}"
+                    for o in a["overrides"]
+                ]
+            )
+        )
+    )
+    parts.append(
+        "<h4>Review decisions</h4>"
+        + lst(
+            [
+                f"#{d['item']} {d['kind']}: {d['decision']} by {d['by']}{' — ' + d['reason'] if d['reason'] else ''}"
+                for d in a["review_decisions"]
+            ]
+        )
+        + "</section>"
+    )
 
     return f"""<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>Test report</title><style>{CSS}</style></head><body><main>{''.join(parts)}</main></body></html>"""
+<title>Test report</title><style>{CSS}</style></head><body><main>{"".join(parts)}</main></body></html>"""
 
 
 CSS = """:root{--bg:#fbfbfa;--fg:#1d1d1b;--muted:#6b6b66;--line:#e2e1dc;--card:#fff;--accent:#9a3412;--warn:#a16207}
@@ -145,21 +220,41 @@ code,pre{font:12px/1.4 ui-monospace,monospace}pre{background:var(--card);border:
 
 def summary_md(r: dict) -> str:
     w, sc = r["worklist"], r["scorecard"]
-    out = ["# Test report — summary", "", f"Labels: {', '.join(r['header']['labels'])}", "", "## P0 — defects"]
+    out = [
+        "# Test report — summary",
+        "",
+        f"Labels: {', '.join(r['header']['labels'])}",
+        "",
+        "## P0 — defects",
+    ]
     out += [f"- **{d['ac']}** {d['title']} ({d['kind']}{', ' + d['flag'] if d['flag'] else ''}): "
             f"{(d.get('observed') or {}).get('method', '')} {(d.get('observed') or {}).get('path', '')} → "
             f"{(d.get('observed') or {}).get('status', '')}; top suspect "
             f"`{d['suspects'][0]['file']}:{d['suspects'][0]['upstream_line']}`" if d["suspects"] else f"- **{d['ac']}** {d['title']}"
             for d in w["P0"]] or ["- none"]  # fmt: skip
-    out += ["", "## P1 — untested or weak"] + [f"- {p['what']}: {p['case'] or p['ac']} → {p['closes_it']}" for p in w["P1"]]
-    out += ["", "## P2 — test health",
-            (f"- redundant {_n(w['P2']['redundant'])}, mutation strength {_n(w['P2']['mutation_strength'])}, "
-             f"health findings {len(w['P2']['findings'])}, quarantined {len(w['P2']['quarantine'])}")]
-    out += ["", "## P3 — spec and code drift"] + [f"- {p['what']}: {p['case'] or p['ac']} — {p['why']}" for p in w["P3"]]
-    out += ["", "## Scorecard", f"- seeded detected (authored) {_n(sc['seeded_authored'])}; blind {sc['seeded_blind']}",
-            f"- real defects {_n(sc['real_defects'])}", f"- triage correct on seeded rows {_n(sc['triage_correct_seeded'])}",
-            *(f"- localisation {k} {_n(v)}" for k, v in sc["localisation"].items()),
-            f"- fail before / pass after: {sc['fail_before_pass_after']}"]
+    out += ["", "## P1 — untested or weak"] + [
+        f"- {p['what']}: {p['case'] or p['ac']} → {p['closes_it']}" for p in w["P1"]
+    ]
+    out += [
+        "",
+        "## P2 — test health",
+        (
+            f"- redundant {_n(w['P2']['redundant'])}, mutation strength {_n(w['P2']['mutation_strength'])}, "
+            f"health findings {len(w['P2']['findings'])}, quarantined {len(w['P2']['quarantine'])}"
+        ),
+    ]
+    out += ["", "## P3 — spec and code drift"] + [
+        f"- {p['what']}: {p['case'] or p['ac']} — {p['why']}" for p in w["P3"]
+    ]
+    out += [
+        "",
+        "## Scorecard",
+        f"- seeded detected (authored) {_n(sc['seeded_authored'])}; blind {sc['seeded_blind']}",
+        f"- real defects {_n(sc['real_defects'])}",
+        f"- triage correct on seeded rows {_n(sc['triage_correct_seeded'])}",
+        *(f"- localisation {k} {_n(v)}" for k, v in sc["localisation"].items()),
+        f"- fail before / pass after: {sc['fail_before_pass_after']}",
+    ]
     return "\n".join(out) + "\n"
 
 
@@ -167,8 +262,12 @@ def cli(r: dict) -> str:
     w = r["worklist"]
     lines = [f"P0 defects: {len(w['P0'])}"]
     lines += [f"  {d['ac']:<5} {d['kind']:<6} {d['title']}" for d in w["P0"]]
-    lines += [f"P1 untested/weak: {len(w['P1'])}",
-              (f"P2 test health: {len(w['P2']['findings'])} finding(s), "
-               f"mutation strength {_n(w['P2']['mutation_strength'])}"),
-              f"P3 spec/code drift: {len(w['P3'])}"]
+    lines += [
+        f"P1 untested/weak: {len(w['P1'])}",
+        (
+            f"P2 test health: {len(w['P2']['findings'])} finding(s), "
+            f"mutation strength {_n(w['P2']['mutation_strength'])}"
+        ),
+        f"P3 spec/code drift: {len(w['P3'])}",
+    ]
     return "\n".join(lines)

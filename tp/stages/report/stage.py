@@ -35,7 +35,13 @@ def lineage_decisions(roots: list[str]) -> list[dict]:
 class ReportStage:
     name = "report"
     version = "1.0.0"
-    consumes: dict[str, int] = {"spec": 1, "cases": 1, "gate_report": 1, "run_records": 1, "triage": 1}  # noqa: RUF012
+    consumes: dict[str, int] = {  # noqa: RUF012
+        "spec": 1,
+        "cases": 1,
+        "gate_report": 1,
+        "run_records": 1,
+        "triage": 1,
+    }
     produces: dict[str, int] = {"report": 1}  # noqa: RUF012
 
     def run(self, ctx, inputs):
@@ -44,7 +50,15 @@ class ReportStage:
         decisions = lineage_decisions([a.id for a in inputs.values()])
         report = build.build(b["spec"], b["cases"], b["gate_report"], b["run_records"], b["triage"],
                              decisions, labels)  # fmt: skip
-        if bare := list(build.walk({k: v for k, v in report.items() if k not in ("evidence", "defects", "traceability")})):
+        if bare := list(
+            build.walk(
+                {
+                    k: v
+                    for k, v in report.items()
+                    if k not in ("evidence", "defects", "traceability")
+                }
+            )
+        ):
             return StageResult.failed(f"numbers without a composition: {bare[:5]}")
         page, md, text = render.html(report), render.summary_md(report), render.cli(report)
         out = db.data_dir() / "runs" / f"report-exec-{ctx.review.execution_id}"
