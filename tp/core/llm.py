@@ -89,12 +89,19 @@ def echo_provider(prompt: str, model: str, params: dict) -> str:
 
 class Gateway:
     def __init__(
-        self, mode: str, provider: Provider = _no_provider, budget_usd: float | None = None
+        self,
+        mode: str,
+        provider: Provider = _no_provider,
+        budget_usd: float | None = None,
+        spent_usd: float = 0.0,
+        on_cost: Callable[[float, str], None] | None = None,
     ):
+        """spent_usd: what this execution already spent (a stage resumed after a review gets
+        a new Gateway); on_cost(usd, model) is told about every live call's cost."""
         if mode not in ("live", "record", "replay"):
             raise ValueError(f"unknown mode: {mode}")
         self.mode, self.provider, self.budget_usd = mode, provider, budget_usd
-        self.spent_usd = 0.0
+        self.spent_usd, self.on_cost = spent_usd, on_cost
 
     def call(self, prompt: str, *, model: str = "claude-opus-5-5", **params) -> str:
         key = hashing.sha256({"prompt": prompt, "model": model, "params": params})
@@ -109,6 +116,8 @@ class Gateway:
         response, usage = result if isinstance(result, tuple) else (result, {})
         cost = cost_usd(model, usage) if usage else 0.0
         self.spent_usd += cost
+        if self.on_cost:
+            self.on_cost(cost, model)
         # live and record both record: every call is kept (plan Part 5).
         # Plain json, not canonical: canonical form rewrites newlines, replay must be exact.
         record = {"prompt": prompt, "model": model, "params": params, "response": response}

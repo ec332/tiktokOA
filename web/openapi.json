@@ -1144,6 +1144,25 @@
                 "type": "null"
               }
             ]
+          },
+          "flows": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flows"
+          },
+          "fresh": {
+            "type": "boolean",
+            "title": "Fresh",
+            "default": false
           }
         },
         "type": "object",

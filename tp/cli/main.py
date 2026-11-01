@@ -26,6 +26,14 @@ def _run_id(ref: str) -> int:
     return int(ref.removeprefix("r-"))
 
 
+def _options(flows: str | None, fresh: bool) -> dict:
+    """Run options for the stages that read them (spec: fresh; cases: flows, fresh)."""
+    opts: dict = {"fresh": True} if fresh else {}
+    if flows:
+        opts["flows"] = [f.strip() for f in flows.split(",") if f.strip()]
+    return opts
+
+
 def _mode(mode: str, replay: bool) -> str:
     return "replay" if replay else mode
 
@@ -57,6 +65,8 @@ def run(
     unattended: Annotated[bool, typer.Option(help="Apply default review decisions")] = False,
     story: Annotated[Path | None, typer.Option(help="A full user story (markdown file)")] = None,
     brief: Annotated[str | None, typer.Option(help="A vague feature description")] = None,
+    flows: Annotated[str | None, typer.Option(help="Cases scope, e.g. FLOW-items-crud,…")] = None,
+    fresh: Annotated[bool, typer.Option(help="Reuse no earlier answers or sign-offs")] = False,
 ):
     """Start a pipeline run and drive it until it finishes or needs a review."""
     if story and brief:
@@ -69,7 +79,7 @@ def run(
             else {"kind": "brief", "text": brief}
         )
         inputs["requirements"] = artifacts.put("requirements", req).id
-    run_id = runner.start_run(_mode(mode, replay), stub, unattended, inputs)
+    run_id = runner.start_run(_mode(mode, replay), stub, unattended, inputs, _options(flows, fresh))
     result = runner.advance(run_id)
     _print_run(result)
     raise typer.Exit(1 if result["status"] == "failed" else 0)
@@ -101,11 +111,17 @@ def stage_run(
     stub: bool = False,
     replay: bool = False,
     mode: str = "live",
+    flows: Annotated[str | None, typer.Option(help="Cases scope, e.g. FLOW-items-crud,…")] = None,
+    fresh: Annotated[bool, typer.Option(help="Reuse no earlier answers or sign-offs")] = False,
 ):
     """Run one stage against saved, hand-written or another run's inputs."""
     if name not in runner.PIPELINE:
         raise typer.BadParameter(f"unknown stage {name!r}")
-    run_id = _run_id(run_ref) if run_ref else runner.start_run(_mode(mode, replay), stub)
+    run_id = (
+        _run_id(run_ref)
+        if run_ref
+        else runner.start_run(_mode(mode, replay), stub, options=_options(flows, fresh))
+    )
     ex = runner.rerun(
         run_id, name, _parse_inputs(input or []), _run_id(from_run) if from_run else None
     )

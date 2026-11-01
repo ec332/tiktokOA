@@ -11,11 +11,12 @@ export function RunsPage() {
   const [mode, setMode] = useState("live");
   const [unattended, setUnattended] = useState(false);
   const [stub, setStub] = useState(true);
+  const [fresh, setFresh] = useState(false);
   const [kind, setKind] = useState<"none" | "story" | "brief">("none");
   const [text, setText] = useState("");
   const requirements = kind === "none" ? null : { kind, text };
   const start = useMutation({
-    mutationFn: () => ok(api.POST("/runs", { body: { mode, stub, unattended, requirements } })),
+    mutationFn: () => ok(api.POST("/runs", { body: { mode, stub, unattended, requirements, fresh } })),
     onSuccess: (run) => {
       qc.invalidateQueries({ queryKey: ["runs"] });
       nav({ to: "/runs/$runId", params: { runId: String(run.id) } });
@@ -31,6 +32,10 @@ export function RunsPage() {
         <label className="row">
           <input type="checkbox" checked={stub} onChange={(e) => setStub(e.target.checked)} />
           stubs
+        </label>
+        <label className="row" title="Reuse no earlier answers or sign-offs">
+          <input type="checkbox" checked={fresh} onChange={(e) => setFresh(e.target.checked)} />
+          fresh
         </label>
         <label className="row">
           requirements

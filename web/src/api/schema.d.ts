@@ -399,6 +399,13 @@ export interface components {
              */
             unattended: boolean;
             requirements?: components["schemas"]["Requirements"] | null;
+            /** Flows */
+            flows?: string[] | null;
+            /**
+             * Fresh
+             * @default false
+             */
+            fresh: boolean;
         };
         /** RunDetail */
         RunDetail: {

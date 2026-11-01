@@ -31,7 +31,8 @@ def test_replay_without_recording_fails_the_stage():
     run_id = runner.start_run(mode="replay", stub=True)
     run = runner.advance(run_id)
     assert run["status"] == "failed"
-    assert "ReplayMiss" in run["executions"][0]["reason"]
+    spec = next(e for e in run["executions"] if e["stage"] == "spec")
+    assert "ReplayMiss" in spec["reason"]
 
 
 def test_usage_is_priced_and_logged_and_budget_stops_live_calls(data):

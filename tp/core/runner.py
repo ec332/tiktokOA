@@ -12,7 +12,9 @@ from tp.core.contract import StageContext
 
 PIPELINE = ["spec", "cases", "generate", "gate", "env", "execute", "triage", "report", "retest"]
 DONE = ("succeeded", "stale")
-RUN_INPUTS = {"requirements": 1}  # artifact types a run itself may be given -> schema version
+# Artifact types a run itself is given -> schema version. run_options ({flows, fresh, ...}) is
+# always present ({} by default), so stages may consume it without making it mandatory.
+RUN_INPUTS = {"requirements": 1, "run_options": 1}
 
 
 # ---- runs -------------------------------------------------------------------
@@ -23,12 +25,15 @@ def start_run(
     stub: bool = False,
     unattended: bool = False,
     inputs: dict[str, str] | None = None,
+    options: dict | None = None,
 ) -> int:
     """inputs: artifact type -> id given to the run itself (e.g. requirements). They are the
-    outputs of an already-succeeded `input` execution, so heads() resolves them like any other."""
+    outputs of an already-succeeded `input` execution, so heads() resolves them like any other.
+    options: stage settings for this run (e.g. flows, fresh), stored as the run_options input."""
     llm.Gateway(mode)  # validates mode
     if unknown := set(inputs or {}) - set(RUN_INPUTS):
         raise ValueError(f"not a run input: {sorted(unknown)}")
+    inputs = {**(inputs or {}), "run_options": artifacts.put("run_options", options or {}).id}
     with db.connect() as c, c:
         c.execute("BEGIN")
         run_id = c.execute(
@@ -164,8 +169,20 @@ def _execute(
     )
     events.emit(run_id, ex_id, "stage_running", stage=stage.name)
     provider = llm.echo_provider if run["stub"] else llm.anthropic_provider
+    spent = sum(
+        e["payload"]["usd"]
+        for e in events.since(run_id)
+        if e["stage_execution"] == ex_id and e["kind"] == "llm_cost"
+    )  # the budget covers the whole execution, across review rounds
+    gateway = llm.Gateway(
+        run["mode"],
+        provider,
+        budget_usd=llm.DEFAULT_BUDGET_USD,
+        spent_usd=spent,
+        on_cost=lambda usd, model: events.emit(run_id, ex_id, "llm_cost", usd=usd, model=model),
+    )
     ctx = StageContext(
-        llm=llm.Gateway(run["mode"], provider, budget_usd=llm.DEFAULT_BUDGET_USD),
+        llm=gateway,
         review=review.ReviewHandle(ex_id),
         env=contract.SERVICES.get("env"),
         emit=lambda kind, **p: events.emit(run_id, ex_id, kind, **p),

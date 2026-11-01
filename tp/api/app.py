@@ -66,6 +66,8 @@ class RunCreate(BaseModel):
     stub: bool = True
     unattended: bool = False
     requirements: Requirements | None = None  # a full user story or a vague brief
+    flows: list[str] | None = None  # cases scope (default: the stage's own default)
+    fresh: bool = False  # reuse no earlier answers or sign-offs
 
 
 class Rerun(BaseModel):
@@ -158,7 +160,8 @@ def create_run(body: RunCreate):
         if body.requirements:
             req = body.requirements.model_dump()
             inputs["requirements"] = artifacts.put("requirements", req).id
-        run_id = runner.start_run(body.mode, body.stub, body.unattended, inputs)
+        options = {k: v for k, v in (("flows", body.flows), ("fresh", body.fresh)) if v}
+        run_id = runner.start_run(body.mode, body.stub, body.unattended, inputs, options)
     except ValueError as e:
         raise HTTPException(422, str(e))
     submit(runner.advance, run_id)

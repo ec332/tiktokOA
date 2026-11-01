@@ -20,7 +20,7 @@ def test_stub_run_blocks_on_review_then_completes_with_lineage():
     run = _approve_and_finish(run_id)
     assert run["status"] == "succeeded"
     heads = runner.heads(run_id)
-    assert len(heads) == 9
+    assert len(heads) == 10  # nine stage outputs + the run's run_options input
     gate = artifacts.get(heads["gate_report"])
     assert sorted(gate.parents) == sorted([heads["bound_tests"], heads["cases"], heads["spec"]])
     assert gate.labels == ["simulated"]
@@ -96,3 +96,37 @@ def test_resuming_a_stage_run_on_its_own_continues_only_that_stage():
     run = runner.resume(item["id"])
     statuses = {e["stage"]: e["status"] for e in run["executions"]}
     assert statuses["cases"] == "succeeded" and statuses["spec"] == "pending"
+
+
+def test_the_llm_budget_covers_the_whole_execution_across_review_rounds(monkeypatch):
+    from tp.core import contract, llm
+    from tp.core.contract import StageResult
+
+    calls = []
+
+    def provider(prompt, model, params):
+        calls.append(prompt)
+        return "ok", {"input_tokens": 500_000}  # $2 a call at Opus prices
+
+    class Spender:  # one call, a review, then two more calls after the review
+        name, version, consumes, produces = "spec", "1", {}, {"spec": 1}
+
+        def run(self, ctx, inputs):
+            if not ctx.review.items():
+                ctx.llm.call("round 1")
+                return StageResult.awaiting_review([ctx.review.create("factory_proposal", {})])
+            ctx.llm.call("round 2, first")
+            ctx.llm.call("round 2, second")
+            return StageResult.succeeded({"spec": {}})
+
+    monkeypatch.setattr(llm, "anthropic_provider", provider)
+    contract.load()  # register the real stages first, so they don't replace the test stage
+    monkeypatch.setitem(contract.REGISTRY, "spec", Spender())
+    run_id = runner.start_run("live", stub=False)
+    runner.advance(run_id)
+    item = review.list_(status="open")[-1]
+    review.resolve(item["id"], "accept", "t")
+    run = runner.resume(item["id"])
+    spec = next(e for e in run["executions"] if e["stage"] == "spec")
+    assert spec["status"] == "failed" and "BudgetExceeded" in spec["reason"]
+    assert len(calls) == 2  # $2 + $2 > $3: the third call never went out
