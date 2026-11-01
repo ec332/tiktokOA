@@ -141,9 +141,10 @@ def stage_run(
         if run_ref
         else runner.start_run(_mode(mode, replay), stub, options=_options(flows, fresh, opt))
     )
-    ex = runner.rerun(
-        run_id, name, _parse_inputs(input or []), _run_id(from_run) if from_run else None
-    )
+    overrides = _parse_inputs(input or [])
+    if from_run and (opts := _options(flows, fresh, opt)) and "run_options" not in overrides:
+        overrides["run_options"] = artifacts.put("run_options", opts).id  # else the old run's win
+    ex = runner.rerun(run_id, name, overrides, _run_id(from_run) if from_run else None)
     _print_run(runner.get_run(run_id))
     raise typer.Exit(0 if ex["status"] in ("succeeded", "awaiting_review") else 1)
 

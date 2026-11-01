@@ -1,7 +1,7 @@
 # Folder ownership (plan 1.4). The most specific path wins.
 # Stage UI panels live in web/src/panels/<stage>/ and are owned by that stage.
 # Commits tagged "[<owner>] ..." may only touch that owner's paths.
-current: M4
+current: M5
 milestones: [M0, M1, M2, M3, M4, M5, M6, M7, M8]
 folders:
   # Skeleton (M0)
