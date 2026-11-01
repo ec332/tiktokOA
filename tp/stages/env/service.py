@@ -510,6 +510,10 @@ class EnvService:
     def down(self, variant: str) -> None:
         Stack(variant).down()
 
+    def logs(self, variant: str) -> str:
+        """The backend's log since bring-up: trace lines and tracebacks (execute evidence)."""
+        return Stack(variant).compose("logs", "--no-color", "--no-log-prefix", "backend").stdout
+
     def factories(self, variant: str, tc_id: str):
         return Stack(variant).factories(tc_id)
 
