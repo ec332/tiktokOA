@@ -125,7 +125,9 @@ def _approve_all(item, reject=None):
 
 def test_a_criterion_key_with_its_title_still_matches(model, monkeypatch):
     """Real run r-0031: Haiku answered "C-5 Expired token is refused" for "C-5" → 0 cases."""
-    titled = DRAFT | {"criteria": [d | {"criterion": f"{d['criterion']} some title"} for d in DRAFT["criteria"]]}
+    titled = DRAFT | {
+        "criteria": [d | {"criterion": f"{d['criterion']} some title"} for d in DRAFT["criteria"]]
+    }
     monkeypatch.setattr(sys.modules[__name__], "DRAFT", titled)
     _run_id, ex = _run()
     assert ex["status"] == "awaiting_review", ex["reason"]
