@@ -102,13 +102,22 @@ def rerun(
 def resume(item_id: int) -> dict | None:
     """After a review is resolved: continue its run if nothing else is still open."""
     item = review.get(item_id)
+    ex_id = item["stage_execution"]
     with db.connect() as c:
-        run_id = c.execute(
-            "SELECT run_id FROM stage_executions WHERE id=?", (item["stage_execution"],)
-        ).fetchone()[0]
-    if _open_items(item["stage_execution"]):
+        run_id, stage = c.execute(
+            "SELECT run_id, stage FROM stage_executions WHERE id=?", (ex_id,)
+        ).fetchone()
+    if _open_items(ex_id):
         return None
-    return advance(run_id)
+    earlier = PIPELINE[: PIPELINE.index(stage)] if stage in PIPELINE else []
+    if all(_latest(run_id, s)["status"] in DONE for s in earlier):
+        return advance(run_id)
+    # The stage was run on its own (tp stage run): continue just that execution, with the inputs
+    # it was given (overrides aren't heads of the run).
+    _set_run(run_id, "running")
+    given = next(e for e in get_run(run_id)["executions"] if e["id"] == ex_id)["inputs"]
+    _execute(run_id, ex_id, given)
+    return _finish(run_id, _derived_status(run_id))
 
 
 def heads(run_id: int) -> dict[str, str]:

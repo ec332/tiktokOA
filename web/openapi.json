@@ -945,6 +945,17 @@
               }
             ],
             "title": "Detail"
+          },
+          "seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds"
           }
         },
         "type": "object",

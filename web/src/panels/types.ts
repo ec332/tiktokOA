@@ -13,7 +13,11 @@ export type ReviewPanel = ComponentType<{ item: ReviewItem; submit: (r: Resoluti
  * What a stage's web/src/panels/<stage>/index.tsx exports. Export, don't register:
  * the registry collects these, so stage folders never edit skeleton files.
  */
+/** Rendered above the generic decision UI for one review kind (context, not decisions). */
+export type ReviewHeader = ComponentType<{ item: ReviewItem }>;
+
 export type PanelModule = {
   artifactPanels?: Record<string, ArtifactPanel>;
   reviewPanels?: Record<string, ReviewPanel>;
+  reviewHeaders?: Record<string, ReviewHeader>;
 };

@@ -1,5 +1,5 @@
 /** Stage-specific views, keyed by artifact type and review kind (plan 2.2). */
-import type { ArtifactPanel, PanelModule, ReviewPanel } from "./types";
+import type { ArtifactPanel, PanelModule, ReviewHeader, ReviewPanel } from "./types";
 
 const modules = import.meta.glob<PanelModule>("./*/index.tsx", { eager: true });
 
@@ -16,6 +16,8 @@ function collect<T>(pick: (m: PanelModule) => Record<string, T> | undefined): Re
 
 const artifactPanels = collect((m) => m.artifactPanels);
 const reviewPanels = collect((m) => m.reviewPanels);
+const reviewHeaders = collect((m) => m.reviewHeaders);
 
 export const artifactPanel = (type: string): ArtifactPanel | undefined => artifactPanels[type];
 export const reviewPanel = (kind: string): ReviewPanel | undefined => reviewPanels[kind];
+export const reviewHeader = (kind: string): ReviewHeader | undefined => reviewHeaders[kind];

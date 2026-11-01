@@ -3,7 +3,7 @@ import { useState } from "react";
 import { api, ok, type ReviewItem } from "../api/client";
 import { Loading, Status } from "../components/bits";
 import { JsonTree } from "../components/JsonTree";
-import { reviewPanel } from "../panels/registry";
+import { reviewHeader, reviewPanel } from "../panels/registry";
 import type { Resolution } from "../panels/types";
 
 type Line = { id: string; text?: string; comment?: string };
@@ -81,11 +81,15 @@ function Detail({ item }: { item: ReviewItem }) {
   const qc = useQueryClient();
   const [by, setBy] = useState(reviewer);
   const [reason, setReason] = useState("");
+  const [shownAt] = useState(() => Date.now()); // Detail is keyed by item, so this is per item
   const resolve = useMutation({
     mutationFn: (r: Resolution) =>
       ok(api.POST("/reviews/{item_id}", {
         params: { path: { item_id: item.id } },
-        body: { by, reason: r.reason ?? reason, decision: r.decision ?? null, detail: r.detail ?? null },
+        body: {
+          by, reason: r.reason ?? reason, decision: r.decision ?? null, detail: r.detail ?? null,
+          seconds: Math.round((Date.now() - shownAt) / 100) / 10,
+        },
       })),
     onSuccess: () => {
       try { localStorage.setItem("tp.reviewer", by); } catch { /* storage may be blocked */ }
@@ -96,6 +100,7 @@ function Detail({ item }: { item: ReviewItem }) {
   const submit = (r: Resolution) => resolve.mutate(r);
   const busy = !by || resolve.isPending;
   const Panel = reviewPanel(item.kind);
+  const Header = reviewHeader(item.kind);
   const hasLines = item.line_options.length > 0;
   const hasChoices = item.kind === "question" && Array.isArray(item.payload.choices);
 
@@ -118,6 +123,7 @@ function Detail({ item }: { item: ReviewItem }) {
       {item.status === "open" ? (
         <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
           <input placeholder="your name (required)" value={by} onChange={(e) => setBy(e.target.value)} />
+          {Header && <Header item={item} />}
           {!hasLines && !hasChoices && !Panel && (
             <>
               <div className="json"><JsonTree value={item.payload} /></div>

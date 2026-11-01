@@ -88,3 +88,17 @@ def test_question_pick_needs_one_of_its_choices():
     with pytest.raises(ValueError, match="detail.choice"):
         review.resolve(q, "pick", "t", detail={"choice": "Z"})
     assert review.resolve(q, "pick", "t", detail={"choice": "B"})["detail"] == {"choice": "B"}
+
+
+def test_time_spent_is_logged_with_the_decision_not_on_the_item(data):
+    import json
+
+    from tp.core import runner
+
+    run_id = runner.start_run("live", stub=True)
+    ex = runner.rerun(run_id, "spec")["id"]
+    item = review.create(ex, "factory_proposal", {})
+    resolved = review.resolve(item, "accept", "po", seconds=12.5)
+    assert "seconds" not in (resolved["detail"] or {})
+    logged = json.loads((data / "decisions.jsonl").read_text().splitlines()[-1])
+    assert logged["seconds"] == 12.5

@@ -80,13 +80,19 @@ def get(item_id: int) -> dict:
 
 
 def resolve(
-    item_id: int, decision: str | None, by: str, reason: str = "", detail: dict | None = None
+    item_id: int,
+    decision: str | None,
+    by: str,
+    reason: str = "",
+    detail: dict | None = None,
+    seconds: float | None = None,
 ) -> dict:
     """Record the decision. Resuming the waiting stage is the runner's job (runner.resume).
 
     Line items: pass detail={"lines": {id: {"decision", "comment"}}}; the item's decision is
     derived (approve only if every line is approved). Questions: decision "pick" needs
-    detail={"choice": <choice id>}.
+    detail={"choice": <choice id>}. seconds: time the reviewer spent on the item (UI), logged
+    with the decision only, not on the item, so stages never see it.
     """
     item = get(item_id)
     if item["status"] != "open":
@@ -107,7 +113,7 @@ def resolve(
         c.execute(
             "INSERT INTO decisions (review_item, decision, detail, decided_by, reason, at) "
             "VALUES (?,?,?,?,?,?)",
-            (item_id, decision, json.dumps(detail), by, reason, at),
+            (item_id, decision, json.dumps(detail | {"seconds": seconds}), by, reason, at),
         )
     record = {
         "review_item": item_id,
@@ -117,6 +123,7 @@ def resolve(
         "by": by,
         "reason": reason,
         "at": at,
+        "seconds": seconds,
     }
     with open(db.data_dir() / "decisions.jsonl", "a") as f:
         f.write(json.dumps(record) + "\n")

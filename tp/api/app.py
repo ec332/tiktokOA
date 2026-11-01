@@ -115,6 +115,7 @@ class Resolve(BaseModel):
     by: str
     reason: str = ""
     detail: dict | None = None
+    seconds: float | None = None  # time spent on the item, measured by the UI
 
 
 class Event(BaseModel):
@@ -249,7 +250,9 @@ def list_reviews(status: str | None = None):
 @app.post("/reviews/{item_id}", response_model=ReviewItem)
 def resolve_review(item_id: int, body: Resolve):
     try:
-        item = review.resolve(item_id, body.decision, body.by, body.reason, body.detail)
+        item = review.resolve(
+            item_id, body.decision, body.by, body.reason, body.detail, body.seconds
+        )
     except KeyError:
         raise HTTPException(404, "review not found")
     except ValueError as e:

@@ -83,3 +83,16 @@ def test_run_inputs_are_heads_from_the_start():
 
 def test_unattended_never_confirms_observed_behaviour():
     assert review.UNATTENDED_DECISION["confirm_observed"] == "out_of_scope"
+
+
+def test_resuming_a_stage_run_on_its_own_continues_only_that_stage():
+    spec = artifacts.put("spec", {"stub": "spec"}, labels=["pre-generated"])
+    run_id = runner.start_run("live", stub=True)
+    ex = runner.rerun(run_id, "cases", overrides={"spec": spec.id})
+    assert ex["status"] == "awaiting_review"
+    item = review.list_(status="open")[-1]
+    lines = {ln["id"]: {"decision": "approve"} for ln in item["payload"]["lines"]}
+    review.resolve(item["id"], None, "tester", detail={"lines": lines})
+    run = runner.resume(item["id"])
+    statuses = {e["stage"]: e["status"] for e in run["executions"]}
+    assert statuses["cases"] == "succeeded" and statuses["spec"] == "pending"

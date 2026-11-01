@@ -330,6 +330,8 @@ export interface components {
             detail?: {
                 [key: string]: unknown;
             } | null;
+            /** Seconds */
+            seconds?: number | null;
         };
         /** ReviewItem */
         ReviewItem: {
