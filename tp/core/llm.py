@@ -10,7 +10,11 @@ from tp.core import db, hashing
 Provider = Callable[[str, str, dict], "str | tuple[str, dict]"]
 
 # USD per million tokens (input, output). Unknown models are priced as Opus, never as free.
-PRICES = {"claude-opus-5-5": (4.00, 20.00), "claude-haiku-5-5": (0.10, 0.50)}
+PRICES = {
+    "claude-opus-5-5": (4.00, 20.00),
+    "claude-sonnet-5-5": (2.00, 10.00),
+    "claude-haiku-5-5": (0.10, 0.50),
+}
 DEFAULT_BUDGET_USD = 3.00  # per Gateway, i.e. per stage execution (spec design D9)
 
 
@@ -55,13 +59,16 @@ def anthropic_provider(prompt: str, model: str, params: dict) -> tuple[str, dict
     if output_config:
         kwargs["output_config"] = output_config
     client = anthropic.Anthropic()
+    # Streamed so long outputs (large max_tokens) don't hit HTTP timeouts.
     if model.startswith("claude-opus"):
         # Server-side refusal fallback, routed by refusal category (Haiku has none).
-        resp = client.beta.messages.create(
+        stream = client.beta.messages.stream(
             betas=["server-side-fallback-2026-07-01"], fallbacks="default", **kwargs
         )
     else:
-        resp = client.messages.create(**kwargs)
+        stream = client.messages.stream(**kwargs)
+    with stream as s:
+        resp = s.get_final_message()
     if resp.stop_reason == "refusal":
         raise LLMError(f"refused ({getattr(resp.stop_details, 'category', None)})")
     if resp.stop_reason == "max_tokens":
