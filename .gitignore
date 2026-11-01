@@ -16,3 +16,6 @@ web/*.tsbuildinfo
 docs/*
 # macOS
 .DS_Store
+
+# local secrets
+.env

@@ -2,7 +2,9 @@
 
 import hashlib
 import json
+import os
 from collections.abc import Callable
+from pathlib import Path
 
 from tp.core import db, hashing
 
@@ -39,10 +41,22 @@ def _no_provider(prompt: str, model: str, params: dict) -> str:
     raise RuntimeError("no LLM provider configured")
 
 
+def load_dotenv(path: Path = Path(__file__).parents[2] / ".env") -> None:
+    """KEY=value lines from the repo's git-ignored .env; variables already set win."""
+    if path.exists():
+        for line in path.read_text().splitlines():
+            key, sep, value = line.strip().partition("=")
+            if sep and key and not key.startswith("#"):
+                os.environ.setdefault(key.strip(), value.strip().strip("'\""))
+
+
 def anthropic_provider(prompt: str, model: str, params: dict) -> tuple[str, dict]:
     """One Messages API call. params: schema (JSON schema for structured output), system,
-    effort, max_tokens. Credentials come from the environment (ANTHROPIC_API_KEY etc.)."""
+    effort, max_tokens. Credentials come from the environment (ANTHROPIC_API_KEY etc.),
+    or from .env (load_dotenv)."""
     import anthropic
+
+    load_dotenv()
 
     kwargs: dict = {
         "model": model,
