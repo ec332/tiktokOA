@@ -28,7 +28,9 @@ BLOCKING = {
 
 _WORDS = {
     "vague_quantifier": r"\b(some|many|few|several|large|small|fast|quickly|slow|reasonable|too long)\b",
-    "undefined_term": r"\b(valid|invalid|appropriate|proper|correct|normal|suitable)\b",
+    # "valid"/"correct" dropped: on the real story they meant the obvious ("stays valid",
+    # "the correct password") and flagged nearly every login criterion.
+    "undefined_term": r"\b(invalid|appropriate|proper|normal|suitable|acceptable)\b",
     "implicit_assumption": r"\b(as usual|etc\.?|and so on|standard|the usual)\b",
 }
 _LIMIT = r"\b(maximum|minimum|max|min|limit|cap|at most|at least|up to|longer than|shorter than)\b"
@@ -37,9 +39,15 @@ _BOUNDARY = (
     r"\b(inclusive|exclusive|up to and including|at most|at least|or more|or fewer|or less)\b"
 )
 _ACTOR = r"\b(anonymous|unauthenticated|user|owner|superuser|admin|anyone|logged[- ]in|caller)\b"
-_FAILURE = r"\b(4\d\d|5\d\d|error|reject|rejected|fails?|denied|forbidden|not found|invalid)\b"
+_FAILURE = (
+    r"\b(4\d\d|5\d\d|error|reject(ed)?|refused?|fails?|denied|forbidden|not found|invalid|"
+    r"cannot|can't|expired?|wrong|deactivated|unregistered|too long|without)\b"
+)
 _OUTCOME = (
-    r"\b(\d{3}|returns?|responds?|response|status|is (created|deleted|updated|stored)|list|count)\b"
+    r"\b(\d{3}|return(s|ed)?|responds?|response|status|created|deleted|updated|stored|"
+    r"list(s|ed)?|count|succeeds?|"
+    r"refused|rejected|accepted|denied|receives?|shown|shows|appears?|ordered|sorted|includes?|"
+    r"contains?|belongs?|expires?|cannot|can't|not (visible|returned|listed))\b"
 )
 
 

@@ -42,8 +42,8 @@ def candidates(investigated: list[dict], criteria: dict[str, dict]) -> list[dict
     return out
 
 
-def filter_(cands: list[dict], criteria: dict[str, dict], asked: set[str]) -> tuple[list, list]:
-    """-> (to ask, reused). Ask only if ≥2 distinct options change an expected value or a
+def filter_(cands: list[dict], criteria: dict[str, dict], asked: set[str]) -> tuple:
+    """-> (to ask, reused, overflow). Ask only if ≥2 distinct options change an expected value or a
     pass/fail; skip keys asked before in this spec; reuse answers from the decision log."""
     ask, reused, seen = [], [], set(asked)
     for q in cands:
@@ -61,7 +61,7 @@ def filter_(cands: list[dict], criteria: dict[str, dict], asked: set[str]) -> tu
         else:
             ask.append(q)
     ask.sort(key=lambda q: q["kind"] != "defect")  # suspected defects first
-    return ask[:PER_ROUND], reused
+    return ask[:PER_ROUND], reused, ask[PER_ROUND:]  # the overflow waits for the next round
 
 
 def _describe(c: dict | None) -> str:
@@ -122,4 +122,26 @@ def contradictions(changes: list[dict]) -> list[dict]:
         if ch["criterion"] in seen and seen[ch["criterion"]] != sc:
             out.append({"criterion": ch["criterion"], "status_codes": [seen[ch["criterion"]], sc]})
         seen[ch["criterion"]] = sc
+    return out
+
+
+def defects_from_findings(findings: list[dict], observed: list[dict]) -> list[dict]:
+    """A suspected-defect finding about in-scope behaviour (linked to a criterion) that no
+    suspected-defect observed criterion cites becomes one, so it is asked, never only listed."""
+    cited = {(s["file"], s["line"]) for o in observed if o.get("suspected_defect")
+             for s in o["sources"]}  # fmt: skip
+    out = []
+    for f in findings:
+        if f["kind"] != "suspected_defect" or not f["criteria"]:
+            continue
+        if any((e["file"], e["line"]) in cited for e in f["evidence"]):
+            continue
+        out.append({
+            "title": f["summary"][:100], "actor": "", "given": "", "when": f["summary"],
+            "then": "the current behaviour described in the finding", "status_code": None,
+            "human_judgement": False, "routes": [], "from_finding": True,
+            "sources": [{"kind": "code", "file": e["file"], "line": e["line"]} for e in f["evidence"]],
+            "suspected_defect": True, "alternatives": ["Rejected with a 4xx client error"],
+            "linked_criteria": f["criteria"],
+        })  # fmt: skip
     return out

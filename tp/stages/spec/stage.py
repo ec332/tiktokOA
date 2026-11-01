@@ -75,15 +75,22 @@ class SpecStage:
                         and (k := code_index.route_key(*r.split(" ", 1))) in known]  # fmt: skip
                 c["routes"] = sorted(set(c["routes"]) | set(hits))
         observed, rej_obs = checks.check_observed(found["observed"], index["files"])
-        for n, o in enumerate(observed, 1):
-            o.update(id=f"O-{n}", status="observed", review_needed=False)
-            o["ambiguity"] = checks.lint(o)
-        criteria += observed
         findings, rej_find = [], []
         for f in found["findings"]:
             ok = all(e["file"] in index["files"] and 1 <= e["line"] <= index["files"][e["file"]]
                      for e in f["evidence"])  # fmt: skip
             (findings if ok and f["evidence"] else rej_find).append(f)
+        observed += questions.defects_from_findings(findings, observed)
+        for n, o in enumerate(observed, 1):
+            o.update(id=f"O-{n}", status="observed", review_needed=False)
+            o["ambiguity"] = checks.lint(o)
+            if o.get("linked_criteria"):  # inherit the routes of the criteria it is about
+                o["routes"] = sorted(
+                    {r for cid in o["linked_criteria"] for r in by_id[cid]["routes"]}
+                    if all(cid in by_id for cid in o["linked_criteria"])
+                    else []
+                )
+        criteria += observed
         state = {
             "round": 1, "version": 1, "kind": kind, "requirements": req.id,
             "sut": index["sut"], "index": {"routes": len(index["routes"]),
@@ -108,7 +115,8 @@ class SpecStage:
     def _ask(self, ctx, state, path, cands=None) -> StageResult:
         crit = {c["id"]: c for c in state["criteria"]}
         cands = state.pop("candidates", []) if cands is None else cands
-        asked, reused = questions.filter_(cands, crit, set(state["asked"]))
+        asked, reused, overflow = questions.filter_(cands, crit, set(state["asked"]))
+        state["followups"] += overflow
         for q in reused:  # answered before, in any run: apply, don't ask again
             ch = questions.apply_answer(crit.get(q["criterion"]), q, q["answer"]["text"], False)
             if ch:

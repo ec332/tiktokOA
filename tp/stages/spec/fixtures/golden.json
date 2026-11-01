@@ -1,0 +1,94 @@
+{
+ "answers": {
+  "06122940dfdaeaa0": {
+   "decision": "pick",
+   "detail": {
+    "choice": "a"
+   }
+  },
+  "4dae96a5e4545c13": {
+   "decision": "pick",
+   "detail": {
+    "choice": "a"
+   }
+  },
+  "52bb8a64e5cb5064": {
+   "decision": "pick",
+   "detail": {
+    "choice": "a"
+   }
+  },
+  "60cfa0105e768182": {
+   "decision": "pick",
+   "detail": {
+    "choice": "a"
+   }
+  },
+  "66fd0ce7332fa181": {
+   "decision": "pick",
+   "detail": {
+    "choice": "d"
+   }
+  },
+  "O-1": {
+   "decision": "confirm",
+   "detail": null
+  },
+  "O-10": {
+   "decision": "confirm",
+   "detail": null
+  },
+  "O-2": {
+   "decision": "confirm",
+   "detail": null
+  },
+  "O-3": {
+   "decision": "confirm",
+   "detail": null
+  },
+  "O-4": {
+   "decision": "reject",
+   "detail": null
+  },
+  "O-8": {
+   "decision": "confirm",
+   "detail": null
+  },
+  "O-9": {
+   "decision": "confirm",
+   "detail": null
+  },
+  "a674f45404a38848": {
+   "decision": "pick",
+   "detail": {
+    "choice": "b"
+   }
+  },
+  "a7d6bdfd45bf416c": {
+   "decision": "pick",
+   "detail": {
+    "choice": "a"
+   }
+  },
+  "b6a0b7baa843e92b": {
+   "decision": "pick",
+   "detail": {
+    "choice": "a"
+   }
+  },
+  "d725d8cbb074793a": {
+   "decision": "pick",
+   "detail": {
+    "choice": "a"
+   }
+  },
+  "e4c053edc65cb771": {
+   "decision": "pick",
+   "detail": {
+    "choice": "a"
+   }
+  }
+ },
+ "spec_hash": "7349fd20195d5c26ed2db5c94db0325869dcae12ba90b9d1c36b586ba72723e0",
+ "stage_version": "1.0.0+p2ab68c6f"
+}

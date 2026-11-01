@@ -5,14 +5,20 @@ import json
 from pathlib import Path
 
 PROMPTS = Path(__file__).parent / "prompts"
-EXTRACT_MODEL = INVESTIGATE_MODEL = "claude-opus-5-5"
-WRITER_MODEL = "claude-haiku-5-5"
+# The smallest model that meets the goal (user: keep API cost minimal). Measured on the story
+# fixture: Haiku 5.5 @ medium covered every story bullet and found the P3 targets for $0.011 a
+# run; Opus 5.5 @ high cost $0.33 and found fewer. See docs/status/spec/004.
+EXTRACT_MODEL = INVESTIGATE_MODEL = WRITER_MODEL = "claude-haiku-5-5"
+EXTRACT_EFFORT = INVESTIGATE_EFFORT = "medium"
 
 
 def prompt_hash() -> str:
+    """Prompts + model choices: changing either changes the stage's behaviour (design D8)."""
     h = hashlib.sha256()
     for p in sorted(PROMPTS.glob("*.md")):
         h.update(p.name.encode() + b"\0" + p.read_bytes())
+    models = [EXTRACT_MODEL, EXTRACT_EFFORT, INVESTIGATE_MODEL, INVESTIGATE_EFFORT, WRITER_MODEL]
+    h.update("|".join(models).encode())
     return h.hexdigest()[:8]
 
 
@@ -120,13 +126,14 @@ OBSERVED = {
 }
 
 
-def _call(llm, prompt: str, model: str, schema: dict, effort: str) -> dict:
-    return json.loads(llm.call(prompt, model=model, schema=schema, effort=effort))
+def _call(llm, prompt: str, model: str, schema: dict, effort: str, max_tokens: int = 16000):
+    raw = llm.call(prompt, model=model, schema=schema, effort=effort, max_tokens=max_tokens)
+    return json.loads(raw)
 
 
 def extract(llm, kind: str, requirements: str) -> list[dict]:
     p = _prompt("extractor", KIND=kind, REQUIREMENTS=requirements)
-    return _call(llm, p, EXTRACT_MODEL, EXTRACT_SCHEMA, "high")["criteria"]
+    return _call(llm, p, EXTRACT_MODEL, EXTRACT_SCHEMA, EXTRACT_EFFORT)["criteria"]
 
 
 def investigate(llm, kind: str, requirements: str, criteria, index, source, flagged) -> dict:
@@ -143,7 +150,7 @@ def investigate(llm, kind: str, requirements: str, criteria, index, source, flag
         INDEX=json.dumps(index["routes"], indent=1),
         SOURCE=source,
     )
-    return _call(llm, p, INVESTIGATE_MODEL, INVESTIGATE_SCHEMA, "high")
+    return _call(llm, p, INVESTIGATE_MODEL, INVESTIGATE_SCHEMA, INVESTIGATE_EFFORT, 32000)
 
 
 def write_questions(llm, questions: list[dict]) -> list[dict]:

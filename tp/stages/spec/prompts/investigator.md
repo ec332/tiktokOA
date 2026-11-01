@@ -16,7 +16,7 @@ Produce four things.
    - suspected_defect: behaviour that looks wrong whatever the requirements say (e.g. an unhandled input that would produce a server error, a missing authorization check, a limit with no bound).
    - no_requirement: a behaviour or route the requirements never mention.
 
-3. observed: criteria derived from the code, for behaviour the requirements don't cover but a tester should pin down. {{OBSERVED_GUIDANCE}} Describe what the code does; never present a suspected defect as expected behaviour: set suspected_defect true and give alternatives (what should plausibly happen instead). Every observed criterion needs evidence.
+3. observed: criteria derived from the code, for behaviour the requirements don't cover but a tester should pin down. {{OBSERVED_GUIDANCE}} Describe what the code does; never present a suspected defect as expected behaviour: set suspected_defect true and give alternatives (what should plausibly happen instead). Every observed criterion needs evidence. Every suspected_defect finding about behaviour the requirements cover must also appear here as an observed criterion with suspected_defect true.
 
 4. questions: decisions a human must make because the requirements are ambiguous. Ask only when there are at least two plausible answers AND the answer changes an expected value or whether a test passes. For each: the criterion id it is about ("" if none), a short `about` key, why it matters, the plausible options, and what the answer changes (expected_value or pass_fail).
 

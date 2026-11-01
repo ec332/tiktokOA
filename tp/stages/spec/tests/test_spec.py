@@ -168,9 +168,9 @@ def fake_model(prompt, model, params):
         assert "items.py" not in prompt and "def read_items" not in prompt  # never sees code
         return json.dumps(EXTRACTED), {"input_tokens": 1000, "output_tokens": 500}
     if params["schema"] == ai.INVESTIGATE_SCHEMA:
-        assert "def read_items" in prompt and model == "claude-opus-5-5"
+        assert "def read_items" in prompt and model == ai.INVESTIGATE_MODEL
         return json.dumps(INVESTIGATED), {"input_tokens": 9000, "output_tokens": 2000}
-    assert model == "claude-haiku-5-5"
+    assert model == ai.WRITER_MODEL
     qs = json.loads(prompt.split("<questions>")[1].split("</questions>")[0])
     out = [{"key": q["key"], "text": f"Q: {q['about']}?",
             "choices": [{"id": chr(97 + i), "text": o} for i, o in enumerate(q["options"])],
@@ -310,5 +310,25 @@ def test_questions_filter_caps_and_requires_two_options():
               "changes": "pass_fail", "kind": "ambiguity"} for i in range(7)]  # fmt: skip
     cands.append({"criterion": "C-1", "about": "one", "why": "", "options": ["a", "a"],
                   "changes": "pass_fail", "kind": "ambiguity"})  # fmt: skip
-    ask, reused = questions.filter_(cands, crit, set())
+    ask, reused, overflow = questions.filter_(cands, crit, set())
     assert len(ask) == questions.PER_ROUND and reused == []
+    assert [q["about"] for q in overflow] == ["q5", "q6"]  # carried to round 2, not dropped
+
+
+def test_a_defect_found_only_as_a_finding_still_becomes_a_question(model, monkeypatch):
+    finding = {"kind": "suspected_defect", "summary": "limit has no upper bound",
+               "evidence": [{"file": ITEMS_PY, "line": 6}], "criteria": ["C-2"]}  # fmt: skip
+    found = INVESTIGATED | {"findings": [*INVESTIGATED["findings"], finding]}
+    real = fake_model
+
+    def model_with_finding(prompt, model_id, params):
+        if params["schema"] == ai.INVESTIGATE_SCHEMA:
+            return json.dumps(found), {}
+        return real(prompt, model_id, params)
+
+    monkeypatch.setattr(llm, "anthropic_provider", model_with_finding)
+    _start()
+    defects = [i for i in review.list_(status="open") if i["payload"].get("kind") == "defect"]
+    assert len(defects) == 2  # O-1 from the model, plus one made from the finding
+    made = next(d for d in defects if d["payload"]["criterion"] != "O-1")
+    assert "Rejected with a 4xx client error" in [c["text"] for c in made["payload"]["choices"]]
