@@ -1,0 +1,1387 @@
+{
+ "contradictions": [],
+ "criteria": [
+  {
+   "actor": "registered user",
+   "ambiguity": [
+    "missing_error_path"
+   ],
+   "given": "a registered user with a known email and password",
+   "human_judgement": false,
+   "id": "C-1",
+   "review_needed": false,
+   "routes": [
+    "POST /api/v1/login/access-token"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L10-L10",
+     "quote": "A user who gives the right email and password receives an access token."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the user receives an access token",
+   "title": "Correct email and password return an access token",
+   "when": "the user logs in with the right email and password"
+  },
+  {
+   "actor": "",
+   "ambiguity": [
+    "missing_actor"
+   ],
+   "given": "a wrong password for a registered email, or an email nobody has registered",
+   "human_judgement": false,
+   "id": "C-2",
+   "review_needed": false,
+   "routes": [
+    "POST /api/v1/login/access-token"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L11-L11",
+     "quote": "A wrong password, or an email nobody has registered, is refused without saying which of the two was wrong."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the login is refused and the response does not say which of the two was wrong",
+   "title": "Wrong password or unknown email is refused without revealing which was wrong",
+   "when": "someone tries to log in with those credentials"
+  },
+  {
+   "actor": "administrator",
+   "ambiguity": [
+    "missing_actor"
+   ],
+   "given": "an account that an administrator has deactivated",
+   "human_judgement": false,
+   "id": "C-3",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/users/me",
+    "POST /api/v1/login/access-token"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L12-L12",
+     "quote": "An account that an administrator has deactivated cannot be used to log in."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the login is refused and no access token is issued",
+   "title": "Deactivated account cannot log in",
+   "when": "the account owner tries to log in"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [
+    "missing_error_path"
+   ],
+   "given": "a user has received an access token",
+   "human_judgement": false,
+   "id": "C-4",
+   "resolution": "8 days (current config)",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/items/",
+    "GET /api/v1/users/me",
+    "POST /api/v1/login/access-token"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L18-L18",
+     "quote": "An access token stays valid for about a week, then expires."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the access token expires and stops being valid",
+   "title": "Access token expires after about a week",
+   "when": "about a week passes"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [],
+   "given": "a user holds an expired access token",
+   "human_judgement": false,
+   "id": "C-5",
+   "resolution": "403 (current)",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/items/",
+    "GET /api/v1/users/me",
+    "POST /api/v1/login/test-token"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L19-L19",
+     "quote": "An expired token is refused; the user has to log in again."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 403,
+   "suspected_defect": false,
+   "then": "the token is refused and the user has to log in again",
+   "title": "Expired token is refused and user must log in again",
+   "when": "the user uses the expired token"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [
+    "missing_error_path"
+   ],
+   "given": "a logged-in user",
+   "human_judgement": false,
+   "id": "C-6",
+   "review_needed": false,
+   "routes": [
+    "POST /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L25-L25",
+     "quote": "I can create an item; it belongs to me."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the item is created and belongs to that user",
+   "title": "User can create an item that belongs to them",
+   "when": "the user creates an item"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [
+    "missing_error_path"
+   ],
+   "given": "a logged-in user who owns items",
+   "human_judgement": false,
+   "id": "C-7",
+   "review_needed": false,
+   "routes": [
+    "DELETE /api/v1/items/{id}",
+    "GET /api/v1/items/{id}",
+    "PUT /api/v1/items/{id}"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L26-L26",
+     "quote": "I can see, change and delete my own items."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the operation succeeds on that item",
+   "title": "User can see, change and delete their own items",
+   "when": "the user views, changes or deletes one of their own items"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [
+    "no_observable_outcome"
+   ],
+   "given": "a logged-in user and an item belonging to someone else",
+   "human_judgement": false,
+   "id": "C-8",
+   "resolution": "403 (current)",
+   "review_needed": false,
+   "routes": [
+    "DELETE /api/v1/items/{id}",
+    "GET /api/v1/items/{id}",
+    "PUT /api/v1/items/{id}"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L27-L27",
+     "quote": "I cannot see, change or delete items that belong to someone else."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 403,
+   "suspected_defect": false,
+   "then": "the user is not able to see, change or delete the item",
+   "title": "User cannot see, change or delete other users' items",
+   "when": "the user tries to view, change or delete that item"
+  },
+  {
+   "actor": "administrator",
+   "ambiguity": [
+    "no_observable_outcome",
+    "missing_actor",
+    "missing_error_path"
+   ],
+   "given": "items belonging to various users",
+   "human_judgement": false,
+   "id": "C-9",
+   "review_needed": true,
+   "routes": [
+    "DELETE /api/v1/items/{id}",
+    "GET /api/v1/items/",
+    "GET /api/v1/items/{id}",
+    "PUT /api/v1/items/{id}"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L28-L28",
+     "quote": "An administrator can see and manage every item."
+    }
+   ],
+   "status": "assumed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the administrator can see and manage every item",
+   "title": "Administrator can see and manage every item",
+   "when": "the administrator views or manages any item"
+  },
+  {
+   "actor": "",
+   "ambiguity": [
+    "missing_actor"
+   ],
+   "given": "a request to create or save an item",
+   "human_judgement": false,
+   "id": "C-10",
+   "review_needed": false,
+   "routes": [
+    "POST /api/v1/items/",
+    "PUT /api/v1/items/{id}"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L32-L32",
+     "quote": "Every item must have a title."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the item is not accepted because it must have a title",
+   "title": "Every item must have a title",
+   "when": "the item is submitted without a title"
+  },
+  {
+   "actor": "",
+   "ambiguity": [
+    "missing_actor",
+    "unspecified_boundary"
+   ],
+   "given": "an item being submitted with a title",
+   "human_judgement": false,
+   "id": "C-11",
+   "review_needed": true,
+   "routes": [
+    "POST /api/v1/items/",
+    "PUT /api/v1/items/{id}"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L33-L33",
+     "quote": "A title can't be too long; the dashboard allows titles of up to 255 characters."
+    }
+   ],
+   "status": "assumed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the title is refused; titles up to 255 characters are allowed",
+   "title": "Item title has a maximum length of 255 characters",
+   "when": "the title is longer than the dashboard limit"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [
+    "vague_quantifier",
+    "missing_error_path"
+   ],
+   "given": "a user with several items",
+   "human_judgement": false,
+   "id": "C-12",
+   "review_needed": true,
+   "routes": [
+    "GET /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L39-L39",
+     "quote": "The item list shows the newest items first."
+    }
+   ],
+   "status": "assumed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the newest items appear first",
+   "title": "Item list shows newest items first",
+   "when": "the user requests the item list"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [
+    "vague_quantifier",
+    "missing_error_path"
+   ],
+   "given": "a user with many items",
+   "human_judgement": false,
+   "id": "C-13",
+   "review_needed": true,
+   "routes": [
+    "GET /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L40-L40",
+     "quote": "I can ask for a page of items by saying how many to skip and how many to show."
+    }
+   ],
+   "status": "assumed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the returned page contains the requested slice of items",
+   "title": "User can page through items by skip and show counts",
+   "when": "the user asks for a page of items by specifying how many to skip and how many to show"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [
+    "vague_quantifier",
+    "missing_error_path"
+   ],
+   "given": "a user requesting a page of items",
+   "human_judgement": false,
+   "id": "C-14",
+   "review_needed": true,
+   "routes": [
+    "GET /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L41-L41",
+     "quote": "Each response also tells me how many items I have in total."
+    }
+   ],
+   "status": "assumed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the response states how many items the user has in total",
+   "title": "Item list response includes total item count",
+   "when": "the response is returned"
+  },
+  {
+   "actor": "user",
+   "ambiguity": [
+    "vague_quantifier"
+   ],
+   "given": "a user requests a page of items without specifying a size",
+   "human_judgement": true,
+   "id": "C-15",
+   "resolution": "100 (current)",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "kind": "requirement",
+     "lines": "L42-L42",
+     "quote": "A page shows a reasonable number of items by default."
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": false,
+   "then": "the page shows a reasonable number of items",
+   "title": "Default page size is a reasonable number",
+   "when": "the page is returned"
+  },
+  {
+   "actor": "user",
+   "alternatives": [
+    "401 Unauthorized with a WWW-Authenticate header"
+   ],
+   "ambiguity": [],
+   "given": "a user holds an expired access token",
+   "human_judgement": false,
+   "id": "O-1",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/items/",
+    "GET /api/v1/users/me"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/deps.py",
+     "kind": "code",
+     "line": 36
+    },
+    {
+     "file": "backend/app/api/deps.py",
+     "kind": "code",
+     "line": 40
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 403,
+   "suspected_defect": false,
+   "then": "the request is refused with 403 and detail 'Could not validate credentials'",
+   "title": "Expired token is refused with 403",
+   "when": "the user calls an authenticated route"
+  },
+  {
+   "actor": "user",
+   "alternatives": [],
+   "ambiguity": [],
+   "given": "a user whose account was deleted still holds a valid token",
+   "human_judgement": false,
+   "id": "O-2",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/users/me"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/deps.py",
+     "kind": "code",
+     "line": 41
+    },
+    {
+     "file": "backend/app/api/deps.py",
+     "kind": "code",
+     "line": 43
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 404,
+   "suspected_defect": false,
+   "then": "the request is refused with 404 'User not found'",
+   "title": "Token for a deleted user is refused with 404",
+   "when": "the user calls an authenticated route"
+  },
+  {
+   "actor": "user",
+   "alternatives": [],
+   "ambiguity": [],
+   "given": "an account is deactivated after the user has logged in",
+   "human_judgement": false,
+   "id": "O-3",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/users/me",
+    "GET /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/deps.py",
+     "kind": "code",
+     "line": 44
+    },
+    {
+     "file": "backend/app/api/deps.py",
+     "kind": "code",
+     "line": 45
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 400,
+   "suspected_defect": false,
+   "then": "the request is refused with 400 'Inactive user'",
+   "title": "Token for a deactivated user is refused with 400",
+   "when": "the user calls an authenticated route with the existing token"
+  },
+  {
+   "actor": "user",
+   "alternatives": [
+    "Same generic message for both cases"
+   ],
+   "ambiguity": [],
+   "given": "a deactivated account",
+   "human_judgement": false,
+   "id": "O-4",
+   "resolution": "Same generic message for both cases",
+   "review_needed": false,
+   "routes": [
+    "POST /api/v1/login/access-token"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/routes/login.py",
+     "kind": "code",
+     "line": 33
+    },
+    {
+     "file": "backend/app/api/routes/login.py",
+     "kind": "code",
+     "line": 36
+    }
+   ],
+   "status": "confirmed",
+   "status_code": null,
+   "suspected_defect": true,
+   "then": "Same generic message for both cases",
+   "title": "Deactivated account login message depends on password correctness",
+   "when": "the user logs in with a wrong password, then with the correct password"
+  },
+  {
+   "actor": "user",
+   "alternatives": [
+    "422 validation error saying title may not be null",
+    "Title left unchanged"
+   ],
+   "ambiguity": [],
+   "given": "a user who owns an item",
+   "human_judgement": false,
+   "id": "O-5",
+   "resolution": "422 validation error saying title may not be null",
+   "review_needed": false,
+   "routes": [
+    "PUT /api/v1/items/{id}"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/models.py",
+     "kind": "code",
+     "line": 82
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 91
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 92
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 422,
+   "suspected_defect": true,
+   "then": "422 validation error saying title may not be null",
+   "title": "Updating an item title to null fails with a server error",
+   "when": "the user sends PUT with title set to null"
+  },
+  {
+   "actor": "user",
+   "alternatives": [
+    "422 validation error for negative skip or limit",
+    "Negative values treated as 0"
+   ],
+   "ambiguity": [
+    "unspecified_boundary"
+   ],
+   "given": "a user with items",
+   "human_judgement": false,
+   "id": "O-6",
+   "resolution": "422 validation error for negative skip or limit",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 15
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 25
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 39
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 40
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 422,
+   "suspected_defect": true,
+   "then": "422 validation error for negative skip or limit",
+   "title": "Negative skip or limit causes a server error",
+   "when": "the user requests the item list with skip or limit below zero"
+  },
+  {
+   "actor": "user",
+   "alternatives": [
+    "Cap limit at a maximum such as 100 and return 422 above it"
+   ],
+   "ambiguity": [
+    "vague_quantifier",
+    "missing_value",
+    "missing_error_path"
+   ],
+   "given": "a user with many items",
+   "human_judgement": false,
+   "id": "O-7",
+   "resolution": "Cap limit at a maximum such as 100 and return 422 above it",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 15
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 40
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 422,
+   "suspected_defect": true,
+   "then": "Cap limit at a maximum such as 100 and return 422 above it",
+   "title": "Item list accepts an unbounded limit",
+   "when": "the user requests the item list with a very large limit"
+  },
+  {
+   "actor": "user",
+   "alternatives": [
+    "404 'Item not found' for items the user cannot access"
+   ],
+   "ambiguity": [],
+   "given": "a logged-in user and an item owned by someone else",
+   "human_judgement": false,
+   "id": "O-8",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/items/{id}",
+    "PUT /api/v1/items/{id}",
+    "DELETE /api/v1/items/{id}"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 53
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 56
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 57
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 403,
+   "suspected_defect": false,
+   "then": "the request is refused with 403 'Not enough permissions', which confirms the item exists",
+   "title": "Other users' items return 403, missing items return 404",
+   "when": "the user requests, changes or deletes that item"
+  },
+  {
+   "actor": "user",
+   "alternatives": [],
+   "ambiguity": [
+    "unspecified_boundary"
+   ],
+   "given": "an item submitted with a description over 255 characters",
+   "human_judgement": false,
+   "id": "O-9",
+   "review_needed": false,
+   "routes": [
+    "POST /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/models.py",
+     "kind": "code",
+     "line": 72
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 422,
+   "suspected_defect": false,
+   "then": "the request is refused by validation with 422",
+   "title": "Description longer than 255 characters is rejected",
+   "when": "the user creates the item"
+  },
+  {
+   "actor": "user",
+   "alternatives": [],
+   "ambiguity": [
+    "missing_error_path"
+   ],
+   "given": "a user who already has an item titled X",
+   "human_judgement": false,
+   "id": "O-10",
+   "review_needed": false,
+   "routes": [
+    "POST /api/v1/items/"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/models.py",
+     "kind": "code",
+     "line": 71
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 68
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "kind": "code",
+     "line": 72
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 200,
+   "suspected_defect": false,
+   "then": "a second item is created with the same title",
+   "title": "Duplicate item titles are accepted",
+   "when": "the user creates another item titled X"
+  },
+  {
+   "actor": "user",
+   "alternatives": [
+    "403 'Could not validate credentials'"
+   ],
+   "ambiguity": [],
+   "given": "a password-reset token (subject is an email address)",
+   "human_judgement": false,
+   "id": "O-11",
+   "resolution": "403 'Could not validate credentials'",
+   "review_needed": false,
+   "routes": [
+    "GET /api/v1/users/me"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/deps.py",
+     "kind": "code",
+     "line": 35
+    },
+    {
+     "file": "backend/app/api/deps.py",
+     "kind": "code",
+     "line": 41
+    },
+    {
+     "file": "backend/app/utils.py",
+     "kind": "code",
+     "line": 111
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 403,
+   "suspected_defect": true,
+   "then": "403 'Could not validate credentials'",
+   "title": "Password-reset token accepted as an access token gives a server error",
+   "when": "the token is sent as a Bearer token on an authenticated route"
+  },
+  {
+   "actor": "developer",
+   "alternatives": [
+    "400 'user with this email already exists'"
+   ],
+   "ambiguity": [
+    "missing_actor"
+   ],
+   "given": "the service runs in development mode",
+   "human_judgement": false,
+   "id": "O-12",
+   "resolution": "400 'user with this email already exists'",
+   "review_needed": false,
+   "routes": [
+    "POST /api/v1/private/users/"
+   ],
+   "sources": [
+    {
+     "file": "backend/app/api/routes/private.py",
+     "kind": "code",
+     "line": 29
+    },
+    {
+     "file": "backend/app/api/routes/private.py",
+     "kind": "code",
+     "line": 36
+    }
+   ],
+   "status": "confirmed",
+   "status_code": 400,
+   "suspected_defect": true,
+   "then": "400 'user with this email already exists'",
+   "title": "Private user creation has no duplicate check or authentication",
+   "when": "a caller posts an email that already exists to the private users route"
+  }
+ ],
+ "decisions": [
+  {
+   "about": "intended behaviour",
+   "answer": "422 validation error saying title may not be null",
+   "assumed": false,
+   "key": "a7d6bdfd45bf416c"
+  },
+  {
+   "about": "intended behaviour",
+   "answer": "422 validation error for negative skip or limit",
+   "assumed": false,
+   "key": "e4c053edc65cb771"
+  },
+  {
+   "about": "intended behaviour",
+   "answer": "Cap limit at a maximum such as 100 and return 422 above it",
+   "assumed": false,
+   "key": "52bb8a64e5cb5064"
+  },
+  {
+   "about": "intended behaviour",
+   "answer": "403 'Could not validate credentials'",
+   "assumed": false,
+   "key": "60cfa0105e768182"
+  },
+  {
+   "about": "intended behaviour",
+   "answer": "400 'user with this email already exists'",
+   "assumed": false,
+   "key": "d725d8cbb074793a"
+  },
+  {
+   "about": "intended behaviour",
+   "answer": "Same generic message for both cases",
+   "assumed": false,
+   "key": "4dae96a5e4545c13"
+  },
+  {
+   "about": "token_lifetime",
+   "answer": "8 days (current config)",
+   "assumed": false,
+   "key": "a674f45404a38848"
+  },
+  {
+   "about": "expired_token_status",
+   "answer": "403 (current)",
+   "assumed": false,
+   "key": "06122940dfdaeaa0"
+  },
+  {
+   "about": "other_user_item_status",
+   "answer": "403 (current)",
+   "assumed": false,
+   "key": "b6a0b7baa843e92b"
+  },
+  {
+   "about": "default_page_size",
+   "answer": "100 (current)",
+   "assumed": false,
+   "key": "66fd0ce7332fa181"
+  }
+ ],
+ "findings": [
+  {
+   "criteria": [
+    "C-4"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/core/config.py",
+     "line": 25
+    }
+   ],
+   "kind": "story_code_conflict",
+   "summary": "Token lifetime is 8 days by default, while the story says about a week."
+  },
+  {
+   "criteria": [
+    "C-2",
+    "C-3"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 33
+    },
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 35
+    },
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 36
+    }
+   ],
+   "kind": "rule_interaction",
+   "summary": "Wrong password and unknown email are refused identically, but a deactivated account gets a different message ('Inactive user') once the correct password is given, so a correct password reveals account state. The story does not settle this."
+  },
+  {
+   "criteria": [
+    "C-13"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 15
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 25
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 39
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 40
+    }
+   ],
+   "kind": "suspected_defect",
+   "summary": "Negative skip or limit is passed straight to the database OFFSET/LIMIT with no validation, which will likely raise a database error and return 500."
+  },
+  {
+   "criteria": [
+    "C-13",
+    "C-15"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 15
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 40
+    }
+   ],
+   "kind": "suspected_defect",
+   "summary": "limit has no upper bound, so one request can return an unbounded number of items."
+  },
+  {
+   "criteria": [
+    "C-10",
+    "C-11"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/models.py",
+     "line": 82
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 91
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 92
+    }
+   ],
+   "kind": "suspected_defect",
+   "summary": "Sending title: null on update sets the title to None. The title column is non-nullable, so the commit will likely fail and return 500 instead of a 422."
+  },
+  {
+   "criteria": [
+    "C-8"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 55
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 56
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 57
+    }
+   ],
+   "kind": "missing_error_path",
+   "summary": "Other users' items return 403 while missing items return 404, so a caller can tell whether an item id exists. The story says only that the item cannot be seen, changed or deleted."
+  },
+  {
+   "criteria": [],
+   "evidence": [
+    {
+     "file": "backend/app/api/deps.py",
+     "line": 35
+    },
+    {
+     "file": "backend/app/api/deps.py",
+     "line": 41
+    },
+    {
+     "file": "backend/app/utils.py",
+     "line": 111
+    },
+    {
+     "file": "backend/app/utils.py",
+     "line": 123
+    }
+   ],
+   "kind": "suspected_defect",
+   "summary": "A password-reset token is signed with the same key and has a sub that is an email, not a user id. Presented as a Bearer token, it passes signature checks and then session.get with a non-UUID sub likely raises a database error (500) instead of a 403."
+  },
+  {
+   "criteria": [
+    "C-5"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/api/routes/users.py",
+     "line": 118
+    },
+    {
+     "file": "backend/app/api/routes/users.py",
+     "line": 121
+    },
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 92
+    },
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 97
+    }
+   ],
+   "kind": "missing_error_path",
+   "summary": "Access tokens are not invalidated by a password change or reset. Tokens issued before the change stay valid until they expire."
+  },
+  {
+   "criteria": [],
+   "evidence": [
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 82
+    },
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 97
+    },
+    {
+     "file": "backend/app/utils.py",
+     "line": 105
+    },
+    {
+     "file": "backend/app/utils.py",
+     "line": 118
+    }
+   ],
+   "kind": "missing_error_path",
+   "summary": "Password-reset tokens are not single-use. They stay valid for 48 hours and can be reused to set the password repeatedly."
+  },
+  {
+   "criteria": [
+    "C-5"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/api/deps.py",
+     "line": 36
+    },
+    {
+     "file": "backend/app/api/deps.py",
+     "line": 40
+    },
+    {
+     "file": "backend/app/api/deps.py",
+     "line": 43
+    },
+    {
+     "file": "backend/app/api/deps.py",
+     "line": 45
+    }
+   ],
+   "kind": "missing_error_path",
+   "summary": "Token failure statuses are not specified. An expired or malformed token returns 403, a token for a deleted user returns 404, and a token for an inactive user returns 400."
+  },
+  {
+   "criteria": [
+    "C-11"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/models.py",
+     "line": 72
+    }
+   ],
+   "kind": "missing_error_path",
+   "summary": "Item description has a 255-character limit that the story does not mention."
+  },
+  {
+   "criteria": [
+    "C-6"
+   ],
+   "evidence": [
+    {
+     "file": "backend/app/models.py",
+     "line": 71
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 68
+    },
+    {
+     "file": "backend/app/api/routes/items.py",
+     "line": 72
+    }
+   ],
+   "kind": "missing_error_path",
+   "summary": "Item titles are not unique per owner, so duplicate titles are accepted. The story does not say whether they should be."
+  },
+  {
+   "criteria": [],
+   "evidence": [
+    {
+     "file": "backend/app/api/routes/users.py",
+     "line": 32
+    },
+    {
+     "file": "backend/app/api/routes/users.py",
+     "line": 54
+    },
+    {
+     "file": "backend/app/api/routes/users.py",
+     "line": 182
+    },
+    {
+     "file": "backend/app/api/routes/users.py",
+     "line": 214
+    },
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 53
+    },
+    {
+     "file": "backend/app/api/routes/login.py",
+     "line": 77
+    }
+   ],
+   "kind": "no_requirement",
+   "summary": "Admin user-management routes (list, create, update, delete users) and password recovery and reset routes are not in the story."
+  },
+  {
+   "criteria": [],
+   "evidence": [
+    {
+     "file": "backend/app/api/routes/private.py",
+     "line": 23
+    },
+    {
+     "file": "backend/app/api/routes/private.py",
+     "line": 29
+    },
+    {
+     "file": "backend/app/api/routes/private.py",
+     "line": 36
+    }
+   ],
+   "kind": "suspected_defect",
+   "summary": "The development-only private create_user has no authentication and no duplicate-email check, so a duplicate email will likely raise an integrity error (500)."
+  }
+ ],
+ "history": [
+  {
+   "changes": [
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": 422,
+      "then": "422 validation error saying title may not be null"
+     },
+     "answer": "422 validation error saying title may not be null",
+     "before": {
+      "status": "observed",
+      "status_code": 500,
+      "then": "the title is set to None and the commit fails, giving a 500 error"
+     },
+     "criterion": "O-5"
+    },
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": 422,
+      "then": "422 validation error for negative skip or limit"
+     },
+     "answer": "422 validation error for negative skip or limit",
+     "before": {
+      "status": "observed",
+      "status_code": 500,
+      "then": "the database rejects the OFFSET or LIMIT and the request returns 500"
+     },
+     "criterion": "O-6"
+    },
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": 422,
+      "then": "Cap limit at a maximum such as 100 and return 422 above it"
+     },
+     "answer": "Cap limit at a maximum such as 100 and return 422 above it",
+     "before": {
+      "status": "observed",
+      "status_code": 200,
+      "then": "the server returns up to that many items in one response with no cap"
+     },
+     "criterion": "O-7"
+    },
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": 403,
+      "then": "403 'Could not validate credentials'"
+     },
+     "answer": "403 'Could not validate credentials'",
+     "before": {
+      "status": "observed",
+      "status_code": null,
+      "then": "the signature passes and the lookup by a non-UUID subject likely raises a database error, returning 500"
+     },
+     "criterion": "O-11"
+    },
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": 400,
+      "then": "400 'user with this email already exists'"
+     },
+     "answer": "400 'user with this email already exists'",
+     "before": {
+      "status": "observed",
+      "status_code": null,
+      "then": "the database rejects the duplicate and the request likely returns 500"
+     },
+     "criterion": "O-12"
+    }
+   ],
+   "version": 2
+  },
+  {
+   "changes": [
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": null,
+      "then": "Same generic message for both cases"
+     },
+     "answer": "Same generic message for both cases",
+     "before": {
+      "status": "observed",
+      "status_code": 400,
+      "then": "a wrong password gets 400 'Incorrect email or password'; the correct password gets 400 'Inactive user'"
+     },
+     "criterion": "O-4"
+    },
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": null,
+      "then": "the access token expires and stops being valid"
+     },
+     "answer": "8 days (current config)",
+     "before": {
+      "status": "confirmed",
+      "status_code": null,
+      "then": "the access token expires and stops being valid"
+     },
+     "criterion": "C-4"
+    },
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": 403,
+      "then": "the token is refused and the user has to log in again"
+     },
+     "answer": "403 (current)",
+     "before": {
+      "status": "confirmed",
+      "status_code": null,
+      "then": "the token is refused and the user has to log in again"
+     },
+     "criterion": "C-5"
+    },
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": 403,
+      "then": "the user is not able to see, change or delete the item"
+     },
+     "answer": "403 (current)",
+     "before": {
+      "status": "draft",
+      "status_code": null,
+      "then": "the user is not able to see, change or delete the item"
+     },
+     "criterion": "C-8"
+    },
+    {
+     "after": {
+      "status": "confirmed",
+      "status_code": null,
+      "then": "the page shows a reasonable number of items"
+     },
+     "answer": "100 (current)",
+     "before": {
+      "status": "confirmed",
+      "status_code": null,
+      "then": "the page shows a reasonable number of items"
+     },
+     "criterion": "C-15"
+    }
+   ],
+   "version": 3
+  }
+ ],
+ "index": {
+  "files": 19,
+  "routes": 23
+ },
+ "kind": "story",
+ "rejected": [],
+ "requirements": "sha256:d13c9ad239332fece4c8e9575f534f95697bc90f2840e59ec9aecbfa027257ae",
+ "sut": {
+  "name": "full-stack-fastapi-template",
+  "ref": "f4bcfaba7c85be3c6332cc74a20819f586dcdbc6"
+ },
+ "unmapped_routes": [
+  "POST /api/v1/password-recovery-html-content/{email}  (backend/app/api/routes/login.py:100)",
+  "POST /api/v1/password-recovery/{email}  (backend/app/api/routes/login.py:53)",
+  "POST /api/v1/reset-password/  (backend/app/api/routes/login.py:77)",
+  "GET /api/v1/users/  (backend/app/api/routes/users.py:32)",
+  "POST /api/v1/users/  (backend/app/api/routes/users.py:54)",
+  "DELETE /api/v1/users/me  (backend/app/api/routes/users.py:132)",
+  "PATCH /api/v1/users/me  (backend/app/api/routes/users.py:81)",
+  "PATCH /api/v1/users/me/password  (backend/app/api/routes/users.py:103)",
+  "POST /api/v1/users/signup  (backend/app/api/routes/users.py:146)",
+  "DELETE /api/v1/users/{user_id}  (backend/app/api/routes/users.py:214)",
+  "GET /api/v1/users/{user_id}  (backend/app/api/routes/users.py:162)",
+  "PATCH /api/v1/users/{user_id}  (backend/app/api/routes/users.py:182)",
+  "GET /api/v1/utils/health-check/  (backend/app/api/routes/utils.py:29)",
+  "POST /api/v1/utils/test-email/  (backend/app/api/routes/utils.py:11)"
+ ],
+ "version": 3
+}

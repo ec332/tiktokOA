@@ -1,0 +1,79 @@
+diff --git a/backend/app/main.py b/backend/app/main.py
+index f2352b7..48cf3c5 100644
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -1,7 +1,8 @@
++import logging
+ from pathlib import Path
+ 
+ import sentry_sdk
+-from fastapi import FastAPI
++from fastapi import FastAPI, Request
+ from fastapi.routing import APIRoute
+ from starlette.middleware.cors import CORSMiddleware
+ 
+@@ -32,5 +33,28 @@ app.add_middleware(
+     allow_headers=["*"],
+ )
+ 
++trace_log = logging.getLogger("app.trace")
++trace_log.setLevel(logging.INFO)  # the root handler prints it; the default level would hide it
++
++
++@app.middleware("http")
++async def log_trace(request: Request, call_next):  # type: ignore[no-untyped-def]
++    """Test platform: one log line per request carrying both trace headers."""
++    status = 500  # an unhandled error propagates from call_next
++    try:
++        response = await call_next(request)
++        status = response.status_code
++        return response
++    finally:
++        trace_log.info(
++            "%s %s %s traceparent=%s x-test-trace=%s",
++            request.method,
++            request.url.path,
++            status,
++            request.headers.get("traceparent", "-"),
++            request.headers.get("x-test-trace", "-"),
++        )
++
++
+ app.include_router(api_router, prefix=settings.API_V1_STR)
+ app.frontend("/", directory=FRONTEND_DIR)
+diff --git a/backend/tests/test_trace.py b/backend/tests/test_trace.py
+new file mode 100644
+index 0000000..dd4ea3a
+--- /dev/null
++++ b/backend/tests/test_trace.py
+@@ -0,0 +1,30 @@
++import logging
++
++import pytest
++from fastapi.testclient import TestClient
++
++from app.core.config import settings
++
++
++def test_log_line_carries_both_trace_headers(
++    client: TestClient, caplog: pytest.LogCaptureFixture
++) -> None:
++    tp = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
++    with caplog.at_level(logging.INFO, logger="app.trace"):
++        client.get(
++            f"{settings.API_V1_STR}/utils/health-check/",
++            headers={"traceparent": tp, "X-Test-Trace": "r-1/TC-1/1"},
++        )
++    line = next(r.getMessage() for r in caplog.records if r.name == "app.trace")
++    assert f"traceparent={tp}" in line
++    assert "x-test-trace=r-1/TC-1/1" in line
++    assert " 200 " in line
++
++
++def test_log_line_without_headers_uses_dashes(
++    client: TestClient, caplog: pytest.LogCaptureFixture
++) -> None:
++    with caplog.at_level(logging.INFO, logger="app.trace"):
++        client.get(f"{settings.API_V1_STR}/utils/health-check/")
++    line = next(r.getMessage() for r in caplog.records if r.name == "app.trace")
++    assert line.endswith("traceparent=- x-test-trace=-")

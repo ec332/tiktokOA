@@ -1,0 +1,1801 @@
+{
+ "attention": [
+  "C-4: dropped a drafted case: expected '4xx' is not traceable to C-4 (spec allows [])",
+  "C-8: decision table leaves out 7 combination(s), e.g. {'caller': 'anonymous', 'item owner': 'other user', 'operation': 'change'}",
+  "C-9: decision table leaves out 2 combination(s), e.g. {'caller': 'anonymous', 'item owner': 'other user', 'operation': 'change'}",
+  "C-15: skipped minimum template boundary: Default size is a resolved value, not a client input threshold; covered by the acceptance case via page_window.",
+  "O-8: decision table leaves out 2 combination(s), e.g. {'caller': 'logged-in user', 'item state': 'missing', 'operation': 'change'}",
+  "C-4: no acceptance case",
+  "C-9: criterion is assumed, not confirmed: check its cases",
+  "C-11: criterion is assumed, not confirmed: check its cases",
+  "C-12: criterion is assumed, not confirmed: check its cases",
+  "C-13: criterion is assumed, not confirmed: check its cases",
+  "C-14: criterion is assumed, not confirmed: check its cases"
+ ],
+ "cases": [
+  {
+   "ac": "O-5",
+   "data": {
+    "title": "null"
+   },
+   "defect_hypothesis": "Null title causes 500 server error on update",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O5-1",
+   "input_class": "null title",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Null title gets a validation error, not a server error",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as owner",
+    "PUT the item with title null"
+   ],
+   "technique": "error_guessing",
+   "template_refs": [
+    "error_guessing"
+   ]
+  },
+  {
+   "ac": "O-6",
+   "data": {
+    "skip": "-1000000000"
+   },
+   "defect_hypothesis": "Very large negative skip overflows and crashes",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O6-1",
+   "input_class": "skip -1000000000",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Huge negative skip handled as a validation error",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with skip -1000000000"
+   ],
+   "technique": "error_guessing",
+   "template_refs": [
+    "error_guessing"
+   ]
+  },
+  {
+   "ac": "O-7",
+   "data": {
+    "limit": "1000000000"
+   },
+   "defect_hypothesis": "Enormous limit causes 500 or memory exhaustion",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O7-1",
+   "input_class": "limit 1000000000",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Enormous limit handled as a validation error",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with limit 1000000000"
+   ],
+   "technique": "error_guessing",
+   "template_refs": [
+    "error_guessing"
+   ]
+  },
+  {
+   "ac": "O-6",
+   "boundary": {
+    "direction": "min",
+    "field": "skip",
+    "inclusive": true,
+    "inclusive_reason": "Skip of 0 is valid and the spec refuses negative values",
+    "limit": 0
+   },
+   "defect_hypothesis": "Skip boundary at zero misclassified",
+   "flow": "FLOW-items-crud",
+   "id": "TC-O6-2",
+   "input_class": "skip near zero",
+   "level": "api",
+   "notes": [],
+   "points": [
+    {
+     "data": {
+      "skip": -1
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "422"
+     },
+     "id": "TC-O6-2.a",
+     "value": -1
+    },
+    {
+     "data": {
+      "skip": 0
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-O6-2.b",
+     "value": 0
+    },
+    {
+     "data": {
+      "skip": 1
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-O6-2.c",
+     "value": 1
+    }
+   ],
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "skip at the 0 limit",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with skip at the tested value"
+   ],
+   "technique": "boundary",
+   "template_refs": [
+    "boundary"
+   ]
+  },
+  {
+   "ac": "O-6",
+   "boundary": {
+    "direction": "min",
+    "field": "limit",
+    "inclusive": true,
+    "inclusive_reason": "Limit of 0 is valid and the spec refuses negative values",
+    "limit": 0
+   },
+   "defect_hypothesis": "Limit boundary at zero misclassified",
+   "flow": "FLOW-items-crud",
+   "id": "TC-O6-3",
+   "input_class": "limit near zero",
+   "level": "api",
+   "notes": [],
+   "points": [
+    {
+     "data": {
+      "limit": -1
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "422"
+     },
+     "id": "TC-O6-3.a",
+     "value": -1
+    },
+    {
+     "data": {
+      "limit": 0
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-O6-3.b",
+     "value": 0
+    },
+    {
+     "data": {
+      "limit": 1
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-O6-3.c",
+     "value": 1
+    }
+   ],
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "limit at the 0 limit",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with limit at the tested value"
+   ],
+   "technique": "boundary",
+   "template_refs": [
+    "boundary"
+   ]
+  },
+  {
+   "ac": "O-7",
+   "boundary": {
+    "direction": "max",
+    "field": "limit",
+    "inclusive": true,
+    "inclusive_reason": "Spec's example cap is 100 and the cap value itself is allowed",
+    "limit": 100
+   },
+   "defect_hypothesis": "Cap off by one at 100 items",
+   "flow": "FLOW-items-crud",
+   "id": "TC-O7-2",
+   "input_class": "limit around 100",
+   "level": "api",
+   "notes": [],
+   "points": [
+    {
+     "data": {
+      "limit": 99
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-O7-2.a",
+     "value": 99
+    },
+    {
+     "data": {
+      "limit": 100
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-O7-2.b",
+     "value": 100
+    },
+    {
+     "data": {
+      "limit": 101
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "422"
+     },
+     "id": "TC-O7-2.c",
+     "value": 101
+    }
+   ],
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "limit at the 100 limit",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with limit at the tested value"
+   ],
+   "technique": "boundary",
+   "template_refs": [
+    "boundary"
+   ]
+  },
+  {
+   "ac": "O-5",
+   "data": {
+    "title": "null"
+   },
+   "defect_hypothesis": "Failed null-title update still changes stored title",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O5-2",
+   "input_class": "null title",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Failed update leaves stored title unchanged",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "PUT the item with title null",
+    "GET the item",
+    "Check the title is unchanged"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "O-6",
+   "data": {
+    "limit": "-1"
+   },
+   "defect_hypothesis": "Negative limit returns 500 instead of 422",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O6-4",
+   "input_class": "limit -1",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Negative limit refused with 422, not server error",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with limit -1"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "O-7",
+   "data": {
+    "limit": "101"
+   },
+   "defect_hypothesis": "Over-cap request returns 422 but still lists items",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O7-3",
+   "input_class": "limit 101",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Over-cap refusal returns no partial list",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with limit 101",
+    "Check the response contains no items"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "O-5",
+   "data": {
+    "title": "null"
+   },
+   "defect_hypothesis": "Null title accepted on update",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O5-3",
+   "input_class": "null title",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Null title on update is refused",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as owner",
+    "PUT the item with title null"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "O-6",
+   "data": {
+    "skip": "-1"
+   },
+   "defect_hypothesis": "Negative skip accepted with 2xx",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O6-5",
+   "input_class": "skip -1",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Negative skip refused with 422",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with skip -1"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "O-7",
+   "data": {
+    "limit": "101"
+   },
+   "defect_hypothesis": "No cap applied, over-cap limit accepted",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O7-4",
+   "input_class": "limit 101",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Limit above the cap is refused with 422",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET the item list with limit 101"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "O-8",
+   "conditions": [
+    "caller",
+    "item state",
+    "operation"
+   ],
+   "defect_hypothesis": "403 and 404 swapped or merged for other users' and missing items",
+   "flow": "FLOW-items-crud",
+   "id": "TC-O8-1",
+   "input_class": "caller, item state and operation",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "caller \u00d7 item state \u00d7 operation",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "rows": [
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "403"
+     },
+     "id": "TC-O8-1.1",
+     "when": {
+      "caller": "logged-in user",
+      "item state": "owned by other user",
+      "operation": "view"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "403"
+     },
+     "id": "TC-O8-1.2",
+     "when": {
+      "caller": "logged-in user",
+      "item state": "owned by other user",
+      "operation": "change"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "403"
+     },
+     "id": "TC-O8-1.3",
+     "when": {
+      "caller": "logged-in user",
+      "item state": "owned by other user",
+      "operation": "delete"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "404"
+     },
+     "id": "TC-O8-1.4",
+     "when": {
+      "caller": "logged-in user",
+      "item state": "missing",
+      "operation": "view"
+     }
+    }
+   ],
+   "steps": [
+    "Send view, change and delete requests for each item state as logged-in user"
+   ],
+   "technique": "decision_table",
+   "template_refs": [
+    "decision_table"
+   ]
+  },
+  {
+   "ac": "O-8",
+   "data": {
+    "item_id": "non-existent"
+   },
+   "defect_hypothesis": "Missing item request crashes with 500",
+   "expected": {
+    "oracle": "literal",
+    "value": "404"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O8-2",
+   "input_class": "non-existent item id",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P0",
+   "purpose": "Missing item returns 404 rather than a server error",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "GET an item id that does not exist"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "O-8",
+   "data": {},
+   "defect_hypothesis": "Refusal detail text differs from 'Not enough permissions'",
+   "expected": {
+    "oracle": "literal",
+    "value": "403"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O8-3",
+   "input_class": "other user's item",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P0",
+   "purpose": "Other user's item request refused with 403 detail",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as non-owner",
+    "GET the owner's item",
+    "Check detail is 'Not enough permissions'"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-6",
+   "conditions": [
+    "caller",
+    "action"
+   ],
+   "defect_hypothesis": "Anonymous caller can create items",
+   "flow": "FLOW-items-crud",
+   "id": "TC-C6-1",
+   "input_class": "caller and create action",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P1",
+   "purpose": "caller \u00d7 action",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "rows": [
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "2xx"
+     },
+     "id": "TC-C6-1.1",
+     "when": {
+      "action": "create item",
+      "caller": "logged-in user"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "4xx"
+     },
+     "id": "TC-C6-1.2",
+     "when": {
+      "action": "create item",
+      "caller": "anonymous"
+     }
+    }
+   ],
+   "steps": [
+    "Send a create-item request as each caller"
+   ],
+   "technique": "decision_table",
+   "template_refs": [
+    "decision_table"
+   ]
+  },
+  {
+   "ac": "C-8",
+   "conditions": [
+    "caller",
+    "item owner",
+    "operation"
+   ],
+   "defect_hypothesis": "Item authorisation applied to wrong actor or operation",
+   "flow": "FLOW-items-crud",
+   "id": "TC-C8-1",
+   "input_class": "caller, owner and operation",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P1",
+   "purpose": "caller \u00d7 item owner \u00d7 operation",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "rows": [
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "403"
+     },
+     "id": "TC-C8-1.1",
+     "when": {
+      "caller": "logged-in user",
+      "item owner": "other user",
+      "operation": "view"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "403"
+     },
+     "id": "TC-C8-1.2",
+     "when": {
+      "caller": "logged-in user",
+      "item owner": "other user",
+      "operation": "change"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "403"
+     },
+     "id": "TC-C8-1.3",
+     "when": {
+      "caller": "logged-in user",
+      "item owner": "other user",
+      "operation": "delete"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "2xx"
+     },
+     "id": "TC-C8-1.4",
+     "when": {
+      "caller": "logged-in user",
+      "item owner": "own item",
+      "operation": "view"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "4xx"
+     },
+     "id": "TC-C8-1.5",
+     "when": {
+      "caller": "anonymous",
+      "item owner": "other user",
+      "operation": "view"
+     }
+    }
+   ],
+   "steps": [
+    "Send view, change and delete requests as each caller"
+   ],
+   "technique": "decision_table",
+   "template_refs": [
+    "decision_table"
+   ]
+  },
+  {
+   "ac": "C-9",
+   "conditions": [
+    "caller",
+    "item owner",
+    "operation"
+   ],
+   "defect_hypothesis": "Administrator refused on change or delete of other users' items",
+   "flow": "FLOW-items-crud",
+   "id": "TC-C9-1",
+   "input_class": "superuser and other user's item",
+   "level": "api",
+   "preconditions": [
+    "superuser",
+    "item"
+   ],
+   "priority": "P1",
+   "purpose": "caller \u00d7 item owner \u00d7 operation",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "rows": [
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "2xx"
+     },
+     "id": "TC-C9-1.1",
+     "when": {
+      "caller": "superuser",
+      "item owner": "other user",
+      "operation": "view"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "2xx"
+     },
+     "id": "TC-C9-1.2",
+     "when": {
+      "caller": "superuser",
+      "item owner": "other user",
+      "operation": "change"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "2xx"
+     },
+     "id": "TC-C9-1.3",
+     "when": {
+      "caller": "superuser",
+      "item owner": "other user",
+      "operation": "delete"
+     }
+    },
+    {
+     "expected": {
+      "oracle": "literal",
+      "value": "4xx"
+     },
+     "id": "TC-C9-1.4",
+     "when": {
+      "caller": "anonymous",
+      "item owner": "other user",
+      "operation": "view"
+     }
+    }
+   ],
+   "steps": [
+    "Send view, change and delete requests as superuser on another user's item"
+   ],
+   "technique": "decision_table",
+   "template_refs": [
+    "decision_table"
+   ]
+  },
+  {
+   "ac": "C-8",
+   "data": {
+    "operation": "change"
+   },
+   "defect_hypothesis": "Refused change by non-owner still modifies the item",
+   "expected": {
+    "oracle": "literal",
+    "value": "403"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C8-2",
+   "input_class": "other user's item for change",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P1",
+   "purpose": "Refused change leaves item unchanged",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as a non-owner",
+    "PUT a change to the item",
+    "GET the item and check it is unchanged"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "C-8",
+   "data": {
+    "operation": "view"
+   },
+   "defect_hypothesis": "Other user can view someone else's item",
+   "expected": {
+    "oracle": "literal",
+    "value": "403"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C8-3",
+   "input_class": "other user's item",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P1",
+   "purpose": "Other user cannot view another user's item",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as a user who does not own the item",
+    "GET the item"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-9",
+   "data": {},
+   "defect_hypothesis": "Administrator list omits other users' items",
+   "expected": {
+    "oracle": "literal",
+    "value": "2xx"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C9-2",
+   "input_class": "items of several users",
+   "level": "api",
+   "preconditions": [
+    "superuser",
+    "item"
+   ],
+   "priority": "P1",
+   "purpose": "Administrator sees items of other users in the list",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in as superuser",
+    "GET the item list"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "O-9",
+   "boundary": {
+    "direction": "max",
+    "field": "description_length_chars",
+    "inclusive": true,
+    "inclusive_reason": "Spec rejects descriptions longer than 255, so 255 is allowed",
+    "limit": 255
+   },
+   "defect_hypothesis": "Description length limit off by one at 255 characters",
+   "flow": "FLOW-items-crud",
+   "id": "TC-O9-1",
+   "input_class": "description length around 255",
+   "level": "api",
+   "notes": [],
+   "points": [
+    {
+     "data": {
+      "description_length_chars": 254
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-O9-1.a",
+     "value": 254
+    },
+    {
+     "data": {
+      "description_length_chars": 255
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-O9-1.b",
+     "value": 255
+    },
+    {
+     "data": {
+      "description_length_chars": 256
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "422"
+     },
+     "id": "TC-O9-1.c",
+     "value": 256
+    }
+   ],
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P2",
+   "purpose": "description_length_chars at the 255 limit",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as user",
+    "POST an item with a description of the tested length"
+   ],
+   "technique": "boundary",
+   "template_refs": [
+    "boundary"
+   ]
+  },
+  {
+   "ac": "O-1",
+   "data": {
+    "token_state": "expired"
+   },
+   "defect_hypothesis": "Expired token refused with 401 instead of 403",
+   "expected": {
+    "oracle": "literal",
+    "value": "403"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O1-1",
+   "input_class": "expired token on authenticated route",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P2",
+   "purpose": "Expired token refused with 403, not 401",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Expire the user's token",
+    "Call an authenticated route with it"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "O-9",
+   "data": {
+    "description_length_chars": "256"
+   },
+   "defect_hypothesis": "Description validation failure returns 500 instead of 422",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O9-2",
+   "input_class": "description of 256 characters",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P2",
+   "purpose": "Validation failure is a 422 and stores no item",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "POST an item with a 256-character description",
+    "Check no item was stored"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "O-1",
+   "data": {
+    "token_state": "expired"
+   },
+   "defect_hypothesis": "Refusal detail text missing or wrong",
+   "expected": {
+    "oracle": "literal",
+    "value": "403"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O1-2",
+   "input_class": "expired token on authenticated route",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P2",
+   "purpose": "Refusal carries the detail 'Could not validate credentials'",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Expire the user's token",
+    "GET an authenticated route",
+    "Check detail is 'Could not validate credentials'"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "O-10",
+   "data": {
+    "title": "X"
+   },
+   "defect_hypothesis": "Duplicate title rejected instead of accepted",
+   "expected": {
+    "oracle": "literal",
+    "value": "200"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O10-1",
+   "input_class": "second item with existing title",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P2",
+   "purpose": "Second item with an existing title is created",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as user who already has an item titled X",
+    "POST another item titled X"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "O-9",
+   "data": {
+    "description_length_chars": "256"
+   },
+   "defect_hypothesis": "Over-length description accepted and item created",
+   "expected": {
+    "oracle": "literal",
+    "value": "422"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-O9-3",
+   "input_class": "description of 256 characters",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P2",
+   "purpose": "Over-length description is refused",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as user",
+    "POST an item with a 256-character description"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-11",
+   "boundary": {
+    "direction": "max",
+    "field": "title_length_chars",
+    "inclusive": true,
+    "inclusive_reason": "Spec says titles up to 255 characters are allowed",
+    "limit": 255
+   },
+   "defect_hypothesis": "Title length limit off by one at 255 characters",
+   "flow": "FLOW-items-crud",
+   "id": "TC-C11-1",
+   "input_class": "title length around 255",
+   "level": "api",
+   "notes": [],
+   "points": [
+    {
+     "data": {
+      "title_length_chars": 254
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-C11-1.a",
+     "value": 254
+    },
+    {
+     "data": {
+      "title_length_chars": 255
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-C11-1.b",
+     "value": 255
+    },
+    {
+     "data": {
+      "title_length_chars": 256
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "4xx"
+     },
+     "id": "TC-C11-1.c",
+     "value": 256
+    }
+   ],
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P3",
+   "purpose": "title_length_chars at the 255 limit",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in as user",
+    "POST an item with a title of the tested length"
+   ],
+   "technique": "boundary",
+   "template_refs": [
+    "boundary"
+   ]
+  },
+  {
+   "ac": "C-13",
+   "boundary": {
+    "direction": "min",
+    "field": "skip",
+    "inclusive": true,
+    "inclusive_reason": "Skip of 0 is the first page and is allowed",
+    "limit": 0
+   },
+   "defect_hypothesis": "Skip offset off by one at the start of the list",
+   "flow": "FLOW-items-crud",
+   "id": "TC-C13-1",
+   "input_class": "skip near zero",
+   "level": "api",
+   "notes": [],
+   "points": [
+    {
+     "data": {
+      "skip": -1
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "4xx"
+     },
+     "id": "TC-C13-1.a",
+     "value": -1
+    },
+    {
+     "data": {
+      "skip": 0
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-C13-1.b",
+     "value": 0
+    },
+    {
+     "data": {
+      "skip": 1
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-C13-1.c",
+     "value": 1
+    }
+   ],
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P3",
+   "purpose": "skip at the 0 limit",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in as user with items",
+    "GET items with skip at the tested value"
+   ],
+   "technique": "boundary",
+   "template_refs": [
+    "boundary"
+   ]
+  },
+  {
+   "ac": "C-4",
+   "boundary": {
+    "direction": "max",
+    "field": "token_age_days",
+    "inclusive": false,
+    "inclusive_reason": "Spec says the token expires at 8 days, so the limit itself is refused",
+    "limit": 8
+   },
+   "defect_hypothesis": "Expiry is off by one day at the lifetime edge",
+   "flow": "FLOW-items-crud",
+   "id": "TC-C4-1",
+   "input_class": "token age near lifetime",
+   "level": "api",
+   "notes": [],
+   "points": [
+    {
+     "data": {
+      "token_age_days": 7
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "2xx"
+     },
+     "id": "TC-C4-1.a",
+     "value": 7
+    },
+    {
+     "data": {
+      "token_age_days": 8
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "4xx"
+     },
+     "id": "TC-C4-1.b",
+     "value": 8
+    },
+    {
+     "data": {
+      "token_age_days": 9
+     },
+     "expected": {
+      "oracle": "calculator:boundary_expect",
+      "value": "4xx"
+     },
+     "id": "TC-C4-1.c",
+     "value": 9
+    }
+   ],
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P3",
+   "purpose": "token_age_days at the 8 limit",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in to obtain an access token",
+    "Age the token to the tested day",
+    "Call an authenticated route with the token"
+   ],
+   "technique": "boundary",
+   "template_refs": [
+    "boundary"
+   ]
+  },
+  {
+   "ac": "C-11",
+   "data": {
+    "title_length_chars": "256"
+   },
+   "defect_hypothesis": "Over-length title returns 500 instead of a client error",
+   "expected": {
+    "oracle": "literal",
+    "value": "4xx"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C11-2",
+   "input_class": "title of 256 characters",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P3",
+   "purpose": "Over-length title gets a client error and stores nothing",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in as user",
+    "POST an item with a 256-character title",
+    "Check no item was stored"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "C-5",
+   "data": {
+    "http_method": "POST"
+   },
+   "defect_hypothesis": "Expired token accepted for write requests",
+   "expected": {
+    "oracle": "literal",
+    "value": "403"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C5-1",
+   "input_class": "expired token on write",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P3",
+   "purpose": "Expired token cannot write and nothing is created",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in and obtain an access token",
+    "Expire the token",
+    "POST a new item with the expired token",
+    "Check the item count is unchanged after the refused call"
+   ],
+   "technique": "error_exception",
+   "template_refs": [
+    "error_exception"
+   ]
+  },
+  {
+   "ac": "C-10",
+   "data": {
+    "title": "absent"
+   },
+   "defect_hypothesis": "Item without a title is accepted and saved",
+   "expected": {
+    "oracle": "literal",
+    "value": "4xx"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C10-1",
+   "input_class": "item with no title",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P3",
+   "purpose": "Item without a title is not accepted",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as user",
+    "POST an item with no title field"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-11",
+   "data": {
+    "title_length_chars": "256"
+   },
+   "defect_hypothesis": "Over-length title saved without refusal",
+   "expected": {
+    "oracle": "literal",
+    "value": "4xx"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C11-3",
+   "input_class": "title of 256 characters",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P3",
+   "purpose": "Title of 256 characters is refused",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in as user",
+    "POST an item with a 256-character title"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-12",
+   "data": {
+    "created": "3"
+   },
+   "defect_hypothesis": "List returned oldest first",
+   "expected": {
+    "oracle": "calculator:newest_first",
+    "params": {
+     "created": "3"
+    },
+    "value": [
+     3,
+     2,
+     1
+    ]
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C12-1",
+   "input_class": "three items created in sequence",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P3",
+   "purpose": "Newest item appears first in the list",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in as user",
+    "Create three items one after another",
+    "GET the item list"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-13",
+   "data": {
+    "limit": "2",
+    "skip": "2",
+    "total": "5"
+   },
+   "defect_hypothesis": "Skip offset ignored so page starts at first item",
+   "expected": {
+    "oracle": "calculator:page_window",
+    "params": {
+     "limit": "2",
+     "skip": "2",
+     "total": "5"
+    },
+    "value": {
+     "count": 5,
+     "data_len": 2
+    }
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C13-2",
+   "input_class": "page with skip 2 of 5 items",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P3",
+   "purpose": "Skip and limit return the requested slice",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in as user with 5 items",
+    "GET items with skip 2 and limit 2"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-14",
+   "data": {
+    "limit": "2",
+    "total": "5"
+   },
+   "defect_hypothesis": "Total count missing from list response",
+   "expected": {
+    "oracle": "calculator:page_window",
+    "params": {
+     "limit": "2",
+     "skip": "0",
+     "total": "5"
+    },
+    "value": {
+     "count": 5,
+     "data_len": 2
+    }
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C14-1",
+   "input_class": "user with 5 items, page of 2",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P3",
+   "purpose": "Response states the total number of items",
+   "quality": "llm-drafted",
+   "review_needed": true,
+   "steps": [
+    "Log in as user with 5 items",
+    "GET items with limit 2"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-15",
+   "data": {
+    "total": "250"
+   },
+   "defect_hypothesis": "Default page returns all items unbounded",
+   "expected": {
+    "oracle": "calculator:page_window",
+    "params": {
+     "limit": "100",
+     "skip": "0",
+     "total": "250"
+    },
+    "value": {
+     "count": 250,
+     "data_len": 100
+    }
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C15-1",
+   "input_class": "user with 250 items, no size given",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P3",
+   "purpose": "Default page without a size returns 100 items",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as user with 250 items",
+    "GET items without a size parameter"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-5",
+   "data": {
+    "token_state": "expired"
+   },
+   "defect_hypothesis": "Expired token still accepted on read routes",
+   "expected": {
+    "oracle": "literal",
+    "value": "403"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C5-2",
+   "input_class": "expired token",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P3",
+   "purpose": "Expired token is refused on a read route",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in and obtain an access token",
+    "Expire the token",
+    "GET the item list with the expired token"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-6",
+   "data": {
+    "title": "valid"
+   },
+   "defect_hypothesis": "Created item not assigned to the creating user",
+   "expected": {
+    "oracle": "literal",
+    "value": "2xx"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C6-2",
+   "input_class": "valid item by logged-in user",
+   "level": "api",
+   "preconditions": [
+    "user"
+   ],
+   "priority": "P3",
+   "purpose": "Logged-in user creates an item that is theirs",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as user",
+    "POST a new item with a title"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  },
+  {
+   "ac": "C-7",
+   "data": {},
+   "defect_hypothesis": "Owner refused on one of view, change or delete for own item",
+   "expected": {
+    "oracle": "literal",
+    "value": "2xx"
+   },
+   "flow": "FLOW-items-crud",
+   "id": "TC-C7-1",
+   "input_class": "own item",
+   "level": "api",
+   "preconditions": [
+    "user",
+    "item"
+   ],
+   "priority": "P3",
+   "purpose": "Owner can view, change and delete own item",
+   "quality": "llm-drafted",
+   "review_needed": false,
+   "steps": [
+    "Log in as owner",
+    "GET own item",
+    "PUT a change to own item",
+    "DELETE own item"
+   ],
+   "technique": "acceptance",
+   "template_refs": []
+  }
+ ],
+ "deferred": [],
+ "flows": [
+  "FLOW-items-crud"
+ ],
+ "minimum": {
+  "C-10": [],
+  "C-11": [
+   "boundary",
+   "error_exception"
+  ],
+  "C-12": [],
+  "C-13": [
+   "boundary"
+  ],
+  "C-14": [],
+  "C-15": [
+   "boundary"
+  ],
+  "C-4": [
+   "boundary"
+  ],
+  "C-5": [
+   "error_exception"
+  ],
+  "C-6": [
+   "decision_table"
+  ],
+  "C-7": [],
+  "C-8": [
+   "decision_table",
+   "error_exception"
+  ],
+  "C-9": [
+   "decision_table"
+  ],
+  "O-1": [
+   "error_exception"
+  ],
+  "O-10": [],
+  "O-5": [
+   "error_exception",
+   "error_guessing"
+  ],
+  "O-6": [
+   "boundary",
+   "error_exception",
+   "error_guessing"
+  ],
+  "O-7": [
+   "boundary",
+   "error_exception",
+   "error_guessing"
+  ],
+  "O-8": [
+   "decision_table",
+   "error_exception"
+  ],
+  "O-9": [
+   "boundary",
+   "error_exception"
+  ]
+ },
+ "not_tested": [
+  {
+   "criterion": "C-1",
+   "reason": "flow FLOW-signup-login not in this run"
+  },
+  {
+   "criterion": "C-2",
+   "reason": "flow FLOW-signup-login not in this run"
+  },
+  {
+   "criterion": "C-3",
+   "reason": "flow FLOW-admin-users not in this run"
+  },
+  {
+   "criterion": "O-2",
+   "reason": "flow FLOW-admin-users not in this run"
+  },
+  {
+   "criterion": "O-3",
+   "reason": "flow FLOW-admin-users not in this run"
+  },
+  {
+   "criterion": "O-4",
+   "reason": "flow FLOW-signup-login not in this run"
+  },
+  {
+   "criterion": "O-11",
+   "reason": "flow FLOW-admin-users not in this run"
+  },
+  {
+   "criterion": "O-12",
+   "reason": "flow FLOW-admin-users not in this run"
+  }
+ ],
+ "signoff": {
+  "approved": 41,
+  "carried_forward": [],
+  "hash": "9e9815062625ca512be92248931710160b7259b834718d828b430f33e46d7d8f",
+  "lines": 41,
+  "signed": true
+ },
+ "spec": "sha256:22fa240fa78a8f3719939aad9c8efc9d4d46c2cc7d9d2979a698010258a60345",
+ "sut": {
+  "name": "full-stack-fastapi-template",
+  "ref": "f4bcfaba7c85be3c6332cc74a20819f586dcdbc6"
+ }
+}
