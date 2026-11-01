@@ -1,0 +1,6 @@
+- Every input with a size, length or count: check the minimum, the maximum, and just outside both.
+- Every route: check each kind of caller (anonymous, ordinary user, the resource's owner, superuser).
+- Every write: check what happens on conflict with existing data (duplicates, uniqueness).
+- Every list: check ordering, empty results, and how many items one request can return.
+- Every token or session: check expiry and what happens after it.
+- A server error (5xx) in response to client input is never expected behaviour.
