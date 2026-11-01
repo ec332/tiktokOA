@@ -35,14 +35,14 @@ class EnvDown(EnvError):
 
 
 def parse_variant(variant: str, known: list[str]) -> list[str]:
-    """`reference` -> no flags; `bug:A+B` -> the sorted flags A and B."""
-    if variant == "reference":
-        return []
+    """`reference`, `fixed:<patch>` -> no flags; `bug:A+B` -> the sorted flags A and B."""
     kind, _, rest = variant.partition(":")
+    if variant == "reference" or (kind == "fixed" and rest):
+        return []  # fixed:<patch> carries no flags; Stack checks the patch exists (retest D3)
     flags = rest.split("+") if kind == "bug" and rest else []
     if not flags or (unknown := set(flags) - set(known)):
         raise EnvError(
-            f"bad variant {variant!r}: use reference or bug:FLAG[+FLAG] with flags from {known}"
+            f"bad variant {variant!r}: use reference, fixed:<patch> or bug:FLAG[+FLAG] with flags from {known}"
             + (f" (unknown: {sorted(unknown)})" if flags else "")
         )
     return sorted(set(flags))
@@ -88,13 +88,17 @@ class Stack:
         self.root = root
         self.cfg = sut.load(root)
         self.variant = variant
+        # fixed:<patch> = no flags, plus that fix patch on top, in the image only (retest D3)
+        self.fix = variant.removeprefix("fixed:") if variant.startswith("fixed:") else None
+        if self.fix and not (root / "sut/patches" / f"{self.fix}.patch").is_file():
+            raise EnvError(f"bad variant {variant!r}: no sut/patches/{self.fix}.patch")
         self.flags = parse_variant(variant, self.cfg.get("flags", []))
         self.project = project_name(variant)
         self.dir = db.data_dir() / "env" / self.project
         self.src = sut.checkout(self.cfg, root)
         self.patch_hashes = {
             n: sha256((root / "sut/patches" / f"{n}.patch").read_text())
-            for n in self.cfg["patches"]
+            for n in [*self.cfg["patches"], *([self.fix] if self.fix else [])]
         }
         source = {"ref": self.cfg["ref"], "patches": self.patch_hashes}
         self.image = f"tp-sut-backend:{sha256(source)[:12]}"  # one image per patch set (D1)
@@ -166,12 +170,42 @@ class Stack:
     def build(self) -> str:
         """The patched backend image for this patch set, built once (D1). Returns its tag."""
         sut.verify(self.cfg, self.root)
+        if stray := self.stray_patches():  # else the reference image could bake in a fix
+            raise EnvError(
+                f"{stray} still applied to {self.src} (an interrupted fixed: build?); "
+                f"undo with: git -C {self.src} apply -R sut/patches/<name>.patch"
+            )
         self.write_override()
         if subprocess.run(
             ["docker", "image", "inspect", self.image], check=False, capture_output=True
         ).returncode:
-            self.compose("build", "backend", timeout=1800)
+            if not self.fix:
+                self.compose("build", "backend", timeout=1800)
+                return self.image
+            patch = str((self.root / "sut/patches" / f"{self.fix}.patch").resolve())
+            git = ["git", "-C", str(self.src), "apply"]
+            r = subprocess.run([*git, patch], check=False, capture_output=True, text=True)
+            if r.returncode:
+                raise EnvError(f"{self.fix} does not apply: {r.stderr.strip()}")
+            try:
+                self.compose("build", "backend", timeout=1800)
+            finally:  # the tree goes back to the sut.yaml patch set; only the image is fixed
+                subprocess.run([*git, "-R", patch], check=True, capture_output=True)
         return self.image
+
+    def stray_patches(self) -> list[str]:
+        """Patches in sut/patches/ that sut.yaml doesn't list but that are applied to the tree."""
+        listed = set(self.cfg["patches"])
+        git = ["git", "-C", str(self.src), "apply", "-R", "--check"]
+        return [
+            p.stem
+            for p in sorted((self.root / "sut/patches").glob("*.patch"))
+            if p.stem not in listed
+            and subprocess.run(
+                [*git, str(p.resolve())], check=False, capture_output=True
+            ).returncode
+            == 0
+        ]
 
     def up(self, expect: str | None = None) -> dict:
         """Fresh bring-up: sweep → patch → build (once per patch set) → db → migrate+seed →
@@ -328,8 +362,13 @@ class Stack:
                 check=False, capture_output=True, text=True,
             ).stdout.strip(),
         }  # fmt: skip
+        try:  # the runner carries platform_rt (expect helpers): part of what a verdict means
+            runner = published()["runner"]["digest"]
+        except EnvError:
+            runner = None  # no runner image published yet (before generate, M3)
         return {
             "services": {n: sha256(services[n]) for n in self.cfg["compose"]["services"]},
+            "runner": runner,
             "images": images,
             "sut": {"name": self.cfg["name"], "ref": self.cfg["ref"], "patches": self.patch_hashes},
             "flags": self.flags,
@@ -398,7 +437,7 @@ def run_pytest(
     stack.state()  # must be up
     stack.reset()  # every batch starts from the seed (a leak can't carry over)
     flags = parse_variant(variant, stack.cfg.get("flags", []))
-    runner = _runner_digest(stack)
+    runner = _runner_digest(Stack("reference"))  # sut.yaml's patch set; a fixed: image differs
     out.mkdir(parents=True, exist_ok=True)
     for f in ("results.jsonl", "junit.xml"):
         (out / f).unlink(missing_ok=True)
