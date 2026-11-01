@@ -40,7 +40,11 @@ def _function(source: str, line: int):
     best = None
     for node in ast.walk(ast.parse(source)):
         is_fn = isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        if is_fn and node.lineno <= line <= node.end_lineno and (best is None or node.lineno > best.lineno):
+        if (
+            is_fn
+            and node.lineno <= line <= node.end_lineno
+            and (best is None or node.lineno > best.lineno)
+        ):
             best = node
     return best
 
@@ -60,14 +64,26 @@ class Source:
                 basis: str) -> dict | None:  # fmt: skip
         got = self.get(rel)
         if not got:
-            return {"file": rel, "line": patched, "upstream_line": upstream, "text": None, "basis": basis}
+            return {
+                "file": rel,
+                "line": patched,
+                "upstream_line": upstream,
+                "text": None,
+                "basis": basis,
+            }
         pa_text, up_text = got
         to_up, to_pa = line_map(up_text, pa_text)
         patched = patched or to_pa.get(upstream)
         upstream = upstream or to_up.get(patched)
         lines = pa_text.splitlines()
         text = lines[patched - 1].strip() if patched and patched <= len(lines) else None
-        return {"file": rel, "line": patched, "upstream_line": upstream, "text": text, "basis": basis}
+        return {
+            "file": rel,
+            "line": patched,
+            "upstream_line": upstream,
+            "text": text,
+            "basis": basis,
+        }
 
 
 def handler(files: dict[str, str], method: str, path: str) -> tuple[str, int, str] | None:
@@ -83,7 +99,9 @@ def handler(files: dict[str, str], method: str, path: str) -> tuple[str, int, st
                 continue
             pattern = re.sub(r"\\\{[^}]*\\\}", "[^/]+", re.escape(prefix + d.group(1)))
             if re.fullmatch(rf".*{pattern}/?", path):
-                fn = _function(text, next(k for k in range(n, len(lines) + 1) if "def " in lines[k - 1]))
+                fn = _function(
+                    text, next(k for k in range(n, len(lines) + 1) if "def " in lines[k - 1])
+                )
                 return rel, fn.lineno, fn.name
     return None
 
@@ -105,7 +123,14 @@ def suspects(failing: dict, log: dict | None, criterion: dict | None, src: Sourc
         if fn and exchange:
             sig_lines = range(fn.lineno, (fn.body[0].lineno if fn.body else fn.lineno))
             for param, value in (exchange.get("query") or {}).items():
-                hit = next((n for n in sig_lines if re.search(rf"\b{re.escape(param)}\s*:", got[0].splitlines()[n - 1])), None)
+                hit = next(
+                    (
+                        n
+                        for n in sig_lines
+                        if re.search(rf"\b{re.escape(param)}\s*:", got[0].splitlines()[n - 1])
+                    ),
+                    None,
+                )
                 if hit:
                     out.append(src.suspect(rel, patched=hit, basis=(
                         f"request parameter {param}={value} reaches the signature of {fn.name}() "
@@ -155,7 +180,9 @@ def rank(suspects_: list[dict], sites: list[dict], files: dict[str, str]) -> int
     spans = []
     for t in sites:
         fn = _function(files[t["file"]], t["line"]) if t["file"] in files else None
-        spans.append((t["file"], fn.lineno, fn.end_lineno) if fn else (t["file"], t["line"], t["line"]))
+        spans.append(
+            (t["file"], fn.lineno, fn.end_lineno) if fn else (t["file"], t["line"], t["line"])
+        )
     for i, s in enumerate(suspects_, 1):
         if s["line"] and any(s["file"] == f and a <= s["line"] <= b for f, a, b in spans):
             return i

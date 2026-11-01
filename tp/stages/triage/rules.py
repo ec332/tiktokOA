@@ -17,7 +17,9 @@ def _origins(vd: dict, rows: dict) -> set:
 def classify(vd: dict, ref: dict | None, rows: dict) -> tuple[str, str]:
     """(class, rule) for one non-passing verdict. ref: the same test's verdict on reference."""
     v = vd["verdict"]
-    if v in ("SUSPECT_ENV", "NOT_RUN") and (v == "SUSPECT_ENV" or vd.get("reason", "").startswith("ENV")):
+    if v in ("SUSPECT_ENV", "NOT_RUN") and (
+        v == "SUSPECT_ENV" or vd.get("reason", "").startswith("ENV")
+    ):
         return "ENV", f"{v}: the environment was not healthy around this batch"
     if v == "NOT_RUN":
         return "TEST_DEFECT", f"NOT_RUN: {vd.get('reason')}"
@@ -30,7 +32,10 @@ def classify(vd: dict, ref: dict | None, rows: dict) -> tuple[str, str]:
         if origins and origins <= TEST_SIDE:
             return "FLAKY_TEST", "intermittent, failures raised in the test's own code"
         if origins <= PRODUCT_SIDE and vd.get("escalation", {}).get("escalated"):
-            return "INTERMITTENT_PRODUCT", "intermittent on the SUT's responses, stable on reference"
+            return (
+                "INTERMITTENT_PRODUCT",
+                "intermittent on the SUT's responses, stable on reference",
+            )
         return "INSUFFICIENT_EVIDENCE", "intermittent, not stable on reference"
     if v == "TIMEOUT":
         return "INSUFFICIENT_EVIDENCE", "every attempt timed out"

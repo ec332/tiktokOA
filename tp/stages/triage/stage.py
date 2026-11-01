@@ -71,8 +71,12 @@ def analyse(run_records: dict, rows: list, probes: list, logs: dict, spec: dict,
             r = localise.rank(d["suspects"], sites, app_files)
             scores.append({"defect": d["id"], "flag": d["flag"], "rank": r, "sites": sites,
                            **{f"top{k}": r is not None and r <= k for k in (1, 3, 5)}})  # fmt: skip
-    return {"findings": fs, "defects": ds, "scores": scores,
-            "evidence": {e: _excerpt(e, idx.resolve(e)) for e in sorted(cited)}}
+    return {
+        "findings": fs,
+        "defects": ds,
+        "scores": scores,
+        "evidence": {e: _excerpt(e, idx.resolve(e)) for e in sorted(cited)},
+    }
 
 
 def _excerpt(eid: str, ev: dict) -> dict:
@@ -103,7 +107,14 @@ class TriageStage:
             rows, probes, logs = _records(db.data_dir() / rr["folder"], rr["root"])
             src = Path(ctx.env.code_scope()["src"]) if ctx.env else None
             read = _git_source(src) if src else (lambda rel: None)
-            app = {str(p.relative_to(src)): p.read_text() for p in (src / "backend/app").rglob("*.py")} if src else {}
+            app = (
+                {
+                    str(p.relative_to(src)): p.read_text()
+                    for p in (src / "backend/app").rglob("*.py")
+                }
+                if src
+                else {}
+            )
             state = analyse(rr, rows, probes, logs, inputs["spec"].body, read, app)
             choices = [{"id": c, "text": c} for c in rules.CLASSES]
             for d in state["defects"]:
@@ -113,7 +124,9 @@ class TriageStage:
                         "observed": d["observed"], "suspects": d["suspects"][:3],
                         "evidence": d["evidence"], "choices": choices})  # fmt: skip
             state_path.write_text(json.dumps(state))
-            ctx.emit("triage_classified", findings=len(state["findings"]), defects=len(state["defects"]))
+            ctx.emit(
+                "triage_classified", findings=len(state["findings"]), defects=len(state["defects"])
+            )
         state = json.loads(state_path.read_text())
         items = {i["id"]: i for i in ctx.review.items()}
         if open_ := [i for i in items.values() if i["status"] == "open"]:
@@ -123,7 +136,11 @@ class TriageStage:
             item = items.get(d.get("review"))
             if not item:
                 continue
-            d["decision"] = {"by": item["decided_by"], "decision": item["decision"], "reason": item["reason"]}
+            d["decision"] = {
+                "by": item["decided_by"],
+                "decision": item["decision"],
+                "reason": item["reason"],
+            }
             if item["decision"] == "override":
                 new = item["detail"]["choice"]
                 overrides.append({"defect": d["id"], "from": d["class"], "to": new,
