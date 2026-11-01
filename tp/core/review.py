@@ -20,7 +20,11 @@ NEEDS_REASON = {("triage", "override")}
 LINE_OPTIONS: dict[str, list[str]] = {"signoff": ["approve", "reject"]}
 LINE_NEEDS_COMMENT = {"reject"}
 SKIPS_DETAIL = {"defer"}  # deciding the whole item at once, no per-line/choice detail
-UNATTENDED_DECISION = {"signoff": "defer", "question": "defer"}  # others fail unattended
+UNATTENDED_DECISION = {
+    "signoff": "defer",
+    "question": "defer",
+    "confirm_observed": "out_of_scope",  # unconfirmed code-derived behaviour never reaches cases
+}  # others fail unattended
 
 
 class ReviewHandle:

@@ -12,13 +12,23 @@ from tp.core.contract import StageContext
 
 PIPELINE = ["spec", "cases", "generate", "gate", "env", "execute", "triage", "report", "retest"]
 DONE = ("succeeded", "stale")
+RUN_INPUTS = {"requirements": 1}  # artifact types a run itself may be given -> schema version
 
 
 # ---- runs -------------------------------------------------------------------
 
 
-def start_run(mode: str = "live", stub: bool = False, unattended: bool = False) -> int:
+def start_run(
+    mode: str = "live",
+    stub: bool = False,
+    unattended: bool = False,
+    inputs: dict[str, str] | None = None,
+) -> int:
+    """inputs: artifact type -> id given to the run itself (e.g. requirements). They are the
+    outputs of an already-succeeded `input` execution, so heads() resolves them like any other."""
     llm.Gateway(mode)  # validates mode
+    if unknown := set(inputs or {}) - set(RUN_INPUTS):
+        raise ValueError(f"not a run input: {sorted(unknown)}")
     with db.connect() as c, c:
         c.execute("BEGIN")
         run_id = c.execute(
@@ -26,6 +36,12 @@ def start_run(mode: str = "live", stub: bool = False, unattended: bool = False) 
             "VALUES (?,?,?,?,?)",
             (mode, int(stub), int(unattended), db.now(), "pending"),
         ).lastrowid
+        if inputs:
+            c.execute(
+                "INSERT INTO stage_executions (run_id, stage, status, outputs, started, finished) "
+                "VALUES (?,?,?,?,?,?)",
+                (run_id, "input", "succeeded", json.dumps(inputs), db.now(), db.now()),
+            )
         for name in PIPELINE:
             c.execute(
                 "INSERT INTO stage_executions (run_id, stage, status) VALUES (?,?,?)",
@@ -138,9 +154,9 @@ def _execute(
         inputs=json.dumps({t: a.id for t, a in inputs.items()}),
     )
     events.emit(run_id, ex_id, "stage_running", stage=stage.name)
-    provider = llm.echo_provider if run["stub"] else llm._no_provider
+    provider = llm.echo_provider if run["stub"] else llm.anthropic_provider
     ctx = StageContext(
-        llm=llm.Gateway(run["mode"], provider),
+        llm=llm.Gateway(run["mode"], provider, budget_usd=llm.DEFAULT_BUDGET_USD),
         review=review.ReviewHandle(ex_id),
         env=contract.SERVICES.get("env"),
         emit=lambda kind, **p: events.emit(run_id, ex_id, kind, **p),

@@ -22,7 +22,7 @@ def test_dummy_stage_registers_and_runs(monkeypatch):
 
 
 def test_every_consumed_type_is_produced_upstream_at_that_version():
-    produced: dict[str, int] = {}
+    produced: dict[str, int] = dict(runner.RUN_INPUTS)  # given to the run, e.g. requirements
     for name in runner.PIPELINE:
         stage = contract.resolve(name)
         for t, v in stage.consumes.items():

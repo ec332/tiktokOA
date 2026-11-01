@@ -8,6 +8,7 @@ dependencies = [
     "typer",
     "pydantic",
     "pyyaml",
+    "anthropic>=2.3.0",
 ]
 
 [project.scripts]

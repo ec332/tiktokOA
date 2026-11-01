@@ -72,3 +72,14 @@ def test_from_run_reuses_another_runs_inputs():
     ex = runner.rerun(run_id, "gate", from_run=src)
     assert ex["status"] == "succeeded"
     assert ex["inputs"]["cases"] == runner.heads(src)["cases"]
+
+
+def test_run_inputs_are_heads_from_the_start():
+    req = artifacts.put("requirements", {"kind": "brief", "text": "test pagination"})
+    run_id = runner.start_run("live", stub=True, inputs={"requirements": req.id})
+    assert runner.heads(run_id)["requirements"] == req.id
+    assert runner.get_run(run_id)["executions"][0]["stage"] == "input"
+
+
+def test_unattended_never_confirms_observed_behaviour():
+    assert review.UNATTENDED_DECISION["confirm_observed"] == "out_of_scope"

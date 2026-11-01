@@ -864,6 +864,29 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "Requirements": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "story",
+              "brief"
+            ],
+            "title": "Kind"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "text"
+        ],
+        "title": "Requirements"
+      },
       "Rerun": {
         "properties": {
           "inputs": {
@@ -1100,6 +1123,16 @@
             "type": "boolean",
             "title": "Unattended",
             "default": false
+          },
+          "requirements": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Requirements"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

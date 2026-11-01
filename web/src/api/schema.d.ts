@@ -293,6 +293,16 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** Requirements */
+        Requirements: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "story" | "brief";
+            /** Text */
+            text: string;
+        };
         /** Rerun */
         Rerun: {
             /**
@@ -386,6 +396,7 @@ export interface components {
              * @default false
              */
             unattended: boolean;
+            requirements?: components["schemas"]["Requirements"] | null;
         };
         /** RunDetail */
         RunDetail: {

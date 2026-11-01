@@ -55,9 +55,21 @@ def run(
     replay: Annotated[bool, typer.Option(help="LLM calls from llm_cache/ only")] = False,
     mode: Annotated[str, typer.Option(help="live | record | replay")] = "live",
     unattended: Annotated[bool, typer.Option(help="Apply default review decisions")] = False,
+    story: Annotated[Path | None, typer.Option(help="A full user story (markdown file)")] = None,
+    brief: Annotated[str | None, typer.Option(help="A vague feature description")] = None,
 ):
     """Start a pipeline run and drive it until it finishes or needs a review."""
-    run_id = runner.start_run(_mode(mode, replay), stub, unattended)
+    if story and brief:
+        raise typer.BadParameter("give --story or --brief, not both")
+    inputs = {}
+    if story or brief:
+        req = (
+            {"kind": "story", "text": story.read_text()}
+            if story
+            else {"kind": "brief", "text": brief}
+        )
+        inputs["requirements"] = artifacts.put("requirements", req).id
+    run_id = runner.start_run(_mode(mode, replay), stub, unattended, inputs)
     result = runner.advance(run_id)
     _print_run(result)
     raise typer.Exit(1 if result["status"] == "failed" else 0)

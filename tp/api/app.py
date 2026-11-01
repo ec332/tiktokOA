@@ -4,11 +4,11 @@ import asyncio
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from tp.core import artifacts, contract, events, review, runner
 
@@ -56,10 +56,16 @@ class RunDetail(Run):
     executions: list[Execution]
 
 
+class Requirements(BaseModel):
+    kind: Literal["story", "brief"]
+    text: str = Field(min_length=1)
+
+
 class RunCreate(BaseModel):
     mode: str = "live"
     stub: bool = True
     unattended: bool = False
+    requirements: Requirements | None = None  # a full user story or a vague brief
 
 
 class Rerun(BaseModel):
@@ -147,7 +153,11 @@ def list_runs():
 @app.post("/runs", response_model=Run)
 def create_run(body: RunCreate):
     try:
-        run_id = runner.start_run(body.mode, body.stub, body.unattended)
+        inputs = {}
+        if body.requirements:
+            req = body.requirements.model_dump()
+            inputs["requirements"] = artifacts.put("requirements", req).id
+        run_id = runner.start_run(body.mode, body.stub, body.unattended, inputs)
     except ValueError as e:
         raise HTTPException(422, str(e))
     submit(runner.advance, run_id)
