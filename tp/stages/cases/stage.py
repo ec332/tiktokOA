@@ -84,7 +84,8 @@ class CasesStage:
             else:
                 scope.append(c | {"flow": flow})
         minimum = {c["id"]: signals.minimum_templates(c) for c in scope}
-        drafts = {d["criterion"]: d for d in ai.draft(ctx.llm, scope, minimum)}
+        # key by the criterion id the model echoes; it sometimes adds the title ("C-5 Expired …")
+        drafts = {d["criterion"].split()[0].rstrip(":"): d for d in ai.draft(ctx.llm, scope, minimum)}
         attention: list[str] = []
         units = []
         for c in scope:

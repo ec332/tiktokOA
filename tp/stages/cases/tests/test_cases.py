@@ -1,6 +1,7 @@
 """Cases stage with a scripted model (no API key): C1–C5 behaviour."""
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -120,6 +121,15 @@ def _approve_all(item, reject=None):
         lines[lid] = {"decision": "reject", "comment": comment}
     review.resolve(item["id"], None, "po", detail={"lines": lines})
     return runner.resume(item["id"])
+
+
+def test_a_criterion_key_with_its_title_still_matches(model, monkeypatch):
+    """Real run r-0031: Haiku answered "C-5 Expired token is refused" for "C-5" → 0 cases."""
+    titled = DRAFT | {"criteria": [d | {"criterion": f"{d['criterion']} some title"} for d in DRAFT["criteria"]]}
+    monkeypatch.setattr(sys.modules[__name__], "DRAFT", titled)
+    _run_id, ex = _run()
+    assert ex["status"] == "awaiting_review", ex["reason"]
+    assert not any("returned no cases" in a for a in _signoff()["payload"]["attention"])
 
 
 def test_minimum_template_sets_are_deterministic_for_the_fixture_spec():
