@@ -1,0 +1,20 @@
+# The only system-specific config the core reads (plan 3.1).
+name: full-stack-fastapi-template
+# A local path (patched in place) or a git URL (cloned once into data/sut/<name>/).
+repo: https://github.com/fastapi/full-stack-fastapi-template
+ref: f4bcfaba7c85be3c6332cc74a20819f586dcdbc6
+type: api            # api | ui | full-stack  (iteration 1: api)
+patches: [testinfo, flags]   # applied in this order from sut/patches/<name>.patch
+surfaces:
+  api: {openapi: /api/v1/openapi.json, base: /api/v1}
+compose: {files: [compose.yml, compose.override.yml], services: [db, backend, mailpit]}
+lifecycle:
+  migrate: "bash scripts/prestart.sh"          # no prestart service exists; run explicitly
+  health: /api/v1/utils/health-check/
+  db_probe: {sql: "SELECT version_num FROM alembic_version", expect: fe56fa70289e}
+env: {FASTAPI_ENV: development}
+auth: {superuser: {from_env: FIRST_SUPERUSER}, user: {factory: user}}
+flags: [BUG_OWNERSHIP_UPDATE, BUG_TITLE_MAX, BUG_INACTIVE_LOGIN, BUG_FLAKE_RACE]
+code_scope:
+  mutate: [backend/app/crud.py, backend/app/api/deps.py, backend/app/core/security.py]
+  exclude: [backend/app/alembic/**, frontend/src/client/**]

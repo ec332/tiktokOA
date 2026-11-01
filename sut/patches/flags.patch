@@ -1,0 +1,205 @@
+diff --git a/backend/app/api/routes/items.py b/backend/app/api/routes/items.py
+index f0eb30e..26b90be 100644
+--- a/backend/app/api/routes/items.py
++++ b/backend/app/api/routes/items.py
+@@ -1,13 +1,32 @@
++import random
++import threading
+ import uuid
+ from typing import Any
+ 
+ from fastapi import APIRouter, HTTPException
+-from sqlmodel import col, func, select
++from sqlmodel import Session, col, func, select
+ 
+ from app.api.deps import CurrentUser, SessionDep
++from app.core.config import settings
++from app.core.db import engine
+ from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+ 
+ router = APIRouter(prefix="/items", tags=["items"])
++RACE_MAX_DELAY = 0.3  # seconds; BUG_FLAKE_RACE commits up to this long after responding
++
++
++def _check_title(title: str | None) -> None:
++    if settings.BUG_TITLE_MAX and title is not None and len(title) >= 255:
++        raise HTTPException(status_code=422, detail="Title too long")
++
++
++def _commit_later(item: Item, delay: float) -> None:
++    def commit() -> None:
++        with Session(engine) as s:
++            s.add(item)
++            s.commit()
++
++    threading.Timer(delay, commit).start()
+ 
+ 
+ @router.get("/", response_model=ItemsPublic)
+@@ -65,7 +84,11 @@ def create_item(
+     """
+     Create new item.
+     """
++    _check_title(item_in.title)
+     item = Item.model_validate(item_in, update={"owner_id": current_user.id})
++    if settings.BUG_FLAKE_RACE:
++        _commit_later(item, random.uniform(0, RACE_MAX_DELAY))
++        return item
+     session.add(item)
+     session.commit()
+     session.refresh(item)
+@@ -86,8 +109,13 @@ def update_item(
+     item = session.get(Item, id)
+     if not item:
+         raise HTTPException(status_code=404, detail="Item not found")
+-    if not current_user.is_superuser and (item.owner_id != current_user.id):
++    if (
++        not current_user.is_superuser
++        and (item.owner_id != current_user.id)
++        and not settings.BUG_OWNERSHIP_UPDATE
++    ):
+         raise HTTPException(status_code=403, detail="Not enough permissions")
++    _check_title(item_in.title)
+     update_dict = item_in.model_dump(exclude_unset=True)
+     item.sqlmodel_update(update_dict)
+     session.add(item)
+diff --git a/backend/app/api/routes/login.py b/backend/app/api/routes/login.py
+index 58441e3..4bd4492 100644
+--- a/backend/app/api/routes/login.py
++++ b/backend/app/api/routes/login.py
+@@ -32,7 +32,7 @@ def login_access_token(
+     )
+     if not user:
+         raise HTTPException(status_code=400, detail="Incorrect email or password")
+-    elif not user.is_active:
++    elif not user.is_active and not settings.BUG_INACTIVE_LOGIN:
+         raise HTTPException(status_code=400, detail="Inactive user")
+     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+     return Token(
+diff --git a/backend/app/core/config.py b/backend/app/core/config.py
+index 095f72e..ddc0a93 100644
+--- a/backend/app/core/config.py
++++ b/backend/app/core/config.py
+@@ -25,6 +25,11 @@ class Settings(BaseSettings):
+     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+     FRONTEND_HOST: str = "http://localhost:5173"
+     FASTAPI_ENV: Literal["development"] | None = None
++    # Seeded defects for the test platform; all off by default.
++    BUG_OWNERSHIP_UPDATE: bool = False
++    BUG_TITLE_MAX: bool = False
++    BUG_INACTIVE_LOGIN: bool = False
++    BUG_FLAKE_RACE: bool = False
+ 
+     PROJECT_NAME: str
+     SENTRY_DSN: HttpUrl | None = None
+diff --git a/backend/tests/api/routes/test_flags.py b/backend/tests/api/routes/test_flags.py
+new file mode 100644
+index 0000000..1544072
+--- /dev/null
++++ b/backend/tests/api/routes/test_flags.py
+@@ -0,0 +1,90 @@
++"""Each seeded BUG_* flag changes behaviour only when it is on."""
++
++import time
++
++import pytest
++from fastapi.testclient import TestClient
++from pytest import MonkeyPatch
++from sqlmodel import Session
++
++from app import crud
++from app.api.routes import items
++from app.core.config import settings
++from app.models import UserCreate
++from tests.utils.item import create_random_item
++from tests.utils.utils import random_email, random_lower_string
++
++API = settings.API_V1_STR
++
++
++@pytest.mark.parametrize("on", [False, True])
++def test_bug_ownership_update(
++    client: TestClient,
++    normal_user_token_headers: dict[str, str],
++    db: Session,
++    monkeypatch: MonkeyPatch,
++    on: bool,
++) -> None:
++    monkeypatch.setattr(settings, "BUG_OWNERSHIP_UPDATE", on)
++    item = create_random_item(db)  # owned by a different, random user
++    r = client.put(
++        f"{API}/items/{item.id}", headers=normal_user_token_headers, json={"title": "x"}
++    )
++    assert r.status_code == (200 if on else 403)
++
++
++@pytest.mark.parametrize("on", [False, True])
++def test_bug_title_max(
++    client: TestClient,
++    superuser_token_headers: dict[str, str],
++    monkeypatch: MonkeyPatch,
++    on: bool,
++) -> None:
++    monkeypatch.setattr(settings, "BUG_TITLE_MAX", on)
++    r = client.post(
++        f"{API}/items/", headers=superuser_token_headers, json={"title": "t" * 255}
++    )
++    assert r.status_code == (422 if on else 200)
++
++
++@pytest.mark.parametrize("on", [False, True])
++def test_bug_inactive_login(
++    client: TestClient, db: Session, monkeypatch: MonkeyPatch, on: bool
++) -> None:
++    monkeypatch.setattr(settings, "BUG_INACTIVE_LOGIN", on)
++    email, password = random_email(), random_lower_string()
++    crud.create_user(
++        session=db,
++        user_create=UserCreate(email=email, password=password, is_active=False),
++    )
++    r = client.post(
++        f"{API}/login/access-token", data={"username": email, "password": password}
++    )
++    assert r.status_code == (200 if on else 400)
++
++
++def test_bug_flake_race_reads_before_commit(
++    client: TestClient, superuser_token_headers: dict[str, str], monkeypatch: MonkeyPatch
++) -> None:
++    """Forces the race: the commit lands 1s after the response."""
++    monkeypatch.setattr(settings, "BUG_FLAKE_RACE", True)
++    monkeypatch.setattr(items.random, "uniform", lambda _a, _b: 1.0)
++    r = client.post(
++        f"{API}/items/", headers=superuser_token_headers, json={"title": "race"}
++    )
++    assert r.status_code == 200
++    url = f"{API}/items/{r.json()['id']}"
++    assert client.get(url, headers=superuser_token_headers).status_code == 404
++    time.sleep(1.5)
++    assert client.get(url, headers=superuser_token_headers).status_code == 200
++
++
++def test_bug_flake_race_off_commits_before_responding(
++    client: TestClient, superuser_token_headers: dict[str, str], monkeypatch: MonkeyPatch
++) -> None:
++    monkeypatch.setattr(settings, "BUG_FLAKE_RACE", False)
++    r = client.post(
++        f"{API}/items/", headers=superuser_token_headers, json={"title": "ok"}
++    )
++    url = f"{API}/items/{r.json()['id']}"
++    assert client.get(url, headers=superuser_token_headers).status_code == 200
+diff --git a/compose.yml b/compose.yml
+index 75942c5..b26d2a4 100644
+--- a/compose.yml
++++ b/compose.yml
+@@ -64,6 +64,10 @@ services:
+       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app
+       SENTRY_DSN: ${SENTRY_DSN:-}
+       FASTAPI_ENV: ${FASTAPI_ENV:-}
++      BUG_OWNERSHIP_UPDATE: ${BUG_OWNERSHIP_UPDATE:-false}
++      BUG_TITLE_MAX: ${BUG_TITLE_MAX:-false}
++      BUG_INACTIVE_LOGIN: ${BUG_INACTIVE_LOGIN:-false}
++      BUG_FLAKE_RACE: ${BUG_FLAKE_RACE:-false}
+ 
+     healthcheck:
+       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
