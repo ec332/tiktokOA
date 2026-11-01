@@ -1,0 +1,1155 @@
+{
+ "admit": "v2",
+ "rows": [
+  {
+   "ac": "C-10",
+   "case_id": "TC-C10-1",
+   "kills": 7,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c10_1.py::test_tc_c10_1[TC-C10-1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C10-1"
+  },
+  {
+   "ac": "C-11",
+   "case_id": "TC-C11-1.a",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_c11_1.py::test_tc_c11_1[TC-C11-1.a]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_TITLE_MAX",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C11-1"
+  },
+  {
+   "ac": "C-11",
+   "case_id": "TC-C11-1.b",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c11_1.py::test_tc_c11_1[TC-C11-1.b]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_TITLE_MAX",
+    "in_process": "ASSERTION",
+    "killed": true,
+    "network": "ASSERTION"
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED",
+   "unique_kills": 0,
+   "unit": "TC-C11-1"
+  },
+  {
+   "ac": "C-11",
+   "case_id": "TC-C11-1.c",
+   "kills": 7,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_c11_1.py::test_tc_c11_1[TC-C11-1.c]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_TITLE_MAX",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C11-1"
+  },
+  {
+   "ac": "C-11",
+   "case_id": "TC-C11-2",
+   "kills": 7,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_c11_2.py::test_tc_c11_2[TC-C11-2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_TITLE_MAX",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C11-2"
+  },
+  {
+   "ac": "C-11",
+   "case_id": "TC-C11-3",
+   "kills": 7,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_c11_3.py::test_tc_c11_3[TC-C11-3]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_TITLE_MAX",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C11-3"
+  },
+  {
+   "ac": "C-12",
+   "case_id": "TC-C12-1",
+   "kills": 7,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c12_1.py::test_tc_c12_1[TC-C12-1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C12-1"
+  },
+  {
+   "ac": "C-13",
+   "case_id": "TC-C13-1.a",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_c13_1.py::test_tc_c13_1[TC-C13-1.a]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "SPEC_GAP",
+   "unique_kills": 0,
+   "unit": "TC-C13-1"
+  },
+  {
+   "ac": "C-13",
+   "case_id": "TC-C13-1.b",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c13_1.py::test_tc_c13_1[TC-C13-1.b]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C13-1"
+  },
+  {
+   "ac": "C-13",
+   "case_id": "TC-C13-1.c",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c13_1.py::test_tc_c13_1[TC-C13-1.c]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C13-1"
+  },
+  {
+   "ac": "C-13",
+   "case_id": "TC-C13-2",
+   "kills": 7,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c13_2.py::test_tc_c13_2[TC-C13-2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C13-2"
+  },
+  {
+   "ac": "C-14",
+   "case_id": "TC-C14-1",
+   "kills": 7,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c14_1.py::test_tc_c14_1[TC-C14-1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C14-1"
+  },
+  {
+   "ac": "C-15",
+   "case_id": "TC-C15-1",
+   "kills": 7,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c15_1.py::test_tc_c15_1[TC-C15-1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C15-1"
+  },
+  {
+   "ac": "C-6",
+   "case_id": "TC-C6-1.1",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c6_1.py::test_tc_c6_1[TC-C6-1.1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C6-1"
+  },
+  {
+   "ac": "C-6",
+   "case_id": "TC-C6-1.2",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_c6_1.py::test_tc_c6_1[TC-C6-1.2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "WEAK",
+   "unique_kills": 0,
+   "unit": "TC-C6-1"
+  },
+  {
+   "ac": "C-6",
+   "case_id": "TC-C6-2",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c6_2.py::test_tc_c6_2[TC-C6-2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C6-2"
+  },
+  {
+   "ac": "C-7",
+   "case_id": "TC-C7-1",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c7_1.py::test_tc_c7_1[TC-C7-1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C7-1"
+  },
+  {
+   "ac": "C-8",
+   "case_id": "TC-C8-1.1",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_c8_1.py::test_tc_c8_1[TC-C8-1.1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C8-1"
+  },
+  {
+   "ac": "C-8",
+   "case_id": "TC-C8-1.2",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c8_1.py::test_tc_c8_1[TC-C8-1.2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": "ASSERTION",
+    "killed": true,
+    "network": "ASSERTION"
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED",
+   "unique_kills": 0,
+   "unit": "TC-C8-1"
+  },
+  {
+   "ac": "C-8",
+   "case_id": "TC-C8-1.3",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_c8_1.py::test_tc_c8_1[TC-C8-1.3]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C8-1"
+  },
+  {
+   "ac": "C-8",
+   "case_id": "TC-C8-1.4",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_c8_1.py::test_tc_c8_1[TC-C8-1.4]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C8-1"
+  },
+  {
+   "ac": "C-8",
+   "case_id": "TC-C8-1.5",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": true,
+   "node": "test_tc_c8_1.py::test_tc_c8_1[TC-C8-1.5]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "WEAK",
+   "unique_kills": 0,
+   "unit": "TC-C8-1"
+  },
+  {
+   "ac": "C-8",
+   "case_id": "TC-C8-2",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c8_2.py::test_tc_c8_2[TC-C8-2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": "ASSERTION",
+    "killed": true,
+    "network": "ASSERTION"
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED",
+   "unique_kills": 0,
+   "unit": "TC-C8-2"
+  },
+  {
+   "ac": "C-8",
+   "case_id": "TC-C8-3",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_c8_3.py::test_tc_c8_3[TC-C8-3]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C8-3"
+  },
+  {
+   "ac": "C-9",
+   "case_id": "TC-C9-1.1",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c9_1.py::test_tc_c9_1[TC-C9-1.1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C9-1"
+  },
+  {
+   "ac": "C-9",
+   "case_id": "TC-C9-1.2",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c9_1.py::test_tc_c9_1[TC-C9-1.2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C9-1"
+  },
+  {
+   "ac": "C-9",
+   "case_id": "TC-C9-1.3",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c9_1.py::test_tc_c9_1[TC-C9-1.3]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C9-1"
+  },
+  {
+   "ac": "C-9",
+   "case_id": "TC-C9-1.4",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_c9_1.py::test_tc_c9_1[TC-C9-1.4]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "WEAK",
+   "unique_kills": 0,
+   "unit": "TC-C9-1"
+  },
+  {
+   "ac": "C-9",
+   "case_id": "TC-C9-2",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_c9_2.py::test_tc_c9_2[TC-C9-2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-C9-2"
+  },
+  {
+   "ac": "O-10",
+   "case_id": "TC-O10-1",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o10_1.py::test_tc_o10_1[TC-O10-1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O10-1"
+  },
+  {
+   "ac": "O-5",
+   "case_id": "TC-O5-1",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o5_1.py::test_tc_o5_1[TC-O5-1]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O5-1"
+  },
+  {
+   "ac": "O-5",
+   "case_id": "TC-O5-2",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o5_2.py::test_tc_o5_2[TC-O5-2]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O5-2"
+  },
+  {
+   "ac": "O-5",
+   "case_id": "TC-O5-3",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o5_3.py::test_tc_o5_3[TC-O5-3]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O5-3"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-1",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o6_1.py::test_tc_o6_1[TC-O6-1]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O6-1"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-2.a",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o6_2.py::test_tc_o6_2[TC-O6-2.a]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O6-2"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-2.b",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o6_2.py::test_tc_o6_2[TC-O6-2.b]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O6-2"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-2.c",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o6_2.py::test_tc_o6_2[TC-O6-2.c]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O6-2"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-3.a",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o6_3.py::test_tc_o6_3[TC-O6-3.a]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O6-3"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-3.b",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o6_3.py::test_tc_o6_3[TC-O6-3.b]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O6-3"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-3.c",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o6_3.py::test_tc_o6_3[TC-O6-3.c]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O6-3"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-4",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o6_4.py::test_tc_o6_4[TC-O6-4]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O6-4"
+  },
+  {
+   "ac": "O-6",
+   "case_id": "TC-O6-5",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o6_5.py::test_tc_o6_5[TC-O6-5]",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O6-5"
+  },
+  {
+   "ac": "O-7",
+   "case_id": "TC-O7-1",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o7_1.py::test_tc_o7_1[TC-O7-1]",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O7-1"
+  },
+  {
+   "ac": "O-7",
+   "case_id": "TC-O7-2.a",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o7_2.py::test_tc_o7_2[TC-O7-2.a]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O7-2"
+  },
+  {
+   "ac": "O-7",
+   "case_id": "TC-O7-2.b",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o7_2.py::test_tc_o7_2[TC-O7-2.b]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O7-2"
+  },
+  {
+   "ac": "O-7",
+   "case_id": "TC-O7-2.c",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o7_2.py::test_tc_o7_2[TC-O7-2.c]",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O7-2"
+  },
+  {
+   "ac": "O-7",
+   "case_id": "TC-O7-3",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o7_3.py::test_tc_o7_3[TC-O7-3]",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O7-3"
+  },
+  {
+   "ac": "O-7",
+   "case_id": "TC-O7-4",
+   "kills": 0,
+   "linked_mutants": 0,
+   "misses_target": false,
+   "node": "test_tc_o7_4.py::test_tc_o7_4[TC-O7-4]",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "CANDIDATE_DEFECT",
+   "unique_kills": 0,
+   "unit": "TC-O7-4"
+  },
+  {
+   "ac": "O-8",
+   "case_id": "TC-O8-1.1",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_o8_1.py::test_tc_o8_1[TC-O8-1.1]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O8-1"
+  },
+  {
+   "ac": "O-8",
+   "case_id": "TC-O8-1.2",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o8_1.py::test_tc_o8_1[TC-O8-1.2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": "ASSERTION",
+    "killed": true,
+    "network": "ASSERTION"
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED",
+   "unique_kills": 0,
+   "unit": "TC-O8-1"
+  },
+  {
+   "ac": "O-8",
+   "case_id": "TC-O8-1.3",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_o8_1.py::test_tc_o8_1[TC-O8-1.3]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O8-1"
+  },
+  {
+   "ac": "O-8",
+   "case_id": "TC-O8-1.4",
+   "kills": 12,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_o8_1.py::test_tc_o8_1[TC-O8-1.4]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O8-1"
+  },
+  {
+   "ac": "O-8",
+   "case_id": "TC-O8-2",
+   "kills": 12,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_o8_2.py::test_tc_o8_2[TC-O8-2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O8-2"
+  },
+  {
+   "ac": "O-8",
+   "case_id": "TC-O8-3",
+   "kills": 11,
+   "linked_mutants": 38,
+   "misses_target": true,
+   "node": "test_tc_o8_3.py::test_tc_o8_3[TC-O8-3]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": {
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "in_process": null,
+    "killed": false,
+    "network": null
+   },
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O8-3"
+  },
+  {
+   "ac": "O-9",
+   "case_id": "TC-O9-1.a",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o9_1.py::test_tc_o9_1[TC-O9-1.a]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O9-1"
+  },
+  {
+   "ac": "O-9",
+   "case_id": "TC-O9-1.b",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o9_1.py::test_tc_o9_1[TC-O9-1.b]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O9-1"
+  },
+  {
+   "ac": "O-9",
+   "case_id": "TC-O9-1.c",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o9_1.py::test_tc_o9_1[TC-O9-1.c]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O9-1"
+  },
+  {
+   "ac": "O-9",
+   "case_id": "TC-O9-2",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o9_2.py::test_tc_o9_2[TC-O9-2]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O9-2"
+  },
+  {
+   "ac": "O-9",
+   "case_id": "TC-O9-3",
+   "kills": 15,
+   "linked_mutants": 38,
+   "misses_target": false,
+   "node": "test_tc_o9_3.py::test_tc_o9_3[TC-O9-3]",
+   "origin": null,
+   "outcome": "passed",
+   "seeded": null,
+   "stability": "STABLE@K5",
+   "status": "ADMITTED_REDUNDANT",
+   "unique_kills": 0,
+   "unit": "TC-O9-3"
+  }
+ ],
+ "summary": {
+  "ADMITTED": 4,
+  "ADMITTED_REDUNDANT": 39,
+  "CANDIDATE_DEFECT": 12,
+  "SPEC_GAP": 1,
+  "WEAK": 3
+ },
+ "criteria": {
+  "C-10": {
+   "equivalent": 0,
+   "killed": 7,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 1
+   },
+   "strength": 0.184
+  },
+  "C-11": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED": 1,
+    "ADMITTED_REDUNDANT": 4
+   },
+   "strength": 0.395
+  },
+  "C-12": {
+   "equivalent": 0,
+   "killed": 7,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 1
+   },
+   "strength": 0.184
+  },
+  "C-13": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 3,
+    "SPEC_GAP": 1
+   },
+   "strength": 0.395
+  },
+  "C-14": {
+   "equivalent": 0,
+   "killed": 7,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 1
+   },
+   "strength": 0.184
+  },
+  "C-15": {
+   "equivalent": 0,
+   "killed": 7,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 1
+   },
+   "strength": 0.184
+  },
+  "C-6": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 2,
+    "WEAK": 1
+   },
+   "strength": 0.395
+  },
+  "C-7": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 1
+   },
+   "strength": 0.395
+  },
+  "C-8": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED": 2,
+    "ADMITTED_REDUNDANT": 4,
+    "WEAK": 1
+   },
+   "strength": 0.395
+  },
+  "C-9": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 4,
+    "WEAK": 1
+   },
+   "strength": 0.395
+  },
+  "O-10": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 1
+   },
+   "strength": 0.395
+  },
+  "O-5": {
+   "equivalent": 0,
+   "killed": 0,
+   "reached_mutants": 0,
+   "statuses": {
+    "CANDIDATE_DEFECT": 3
+   },
+   "strength": null
+  },
+  "O-6": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 4,
+    "CANDIDATE_DEFECT": 5
+   },
+   "strength": 0.395
+  },
+  "O-7": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 2,
+    "CANDIDATE_DEFECT": 4
+   },
+   "strength": 0.395
+  },
+  "O-8": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED": 1,
+    "ADMITTED_REDUNDANT": 5
+   },
+   "strength": 0.395
+  },
+  "O-9": {
+   "equivalent": 0,
+   "killed": 15,
+   "reached_mutants": 38,
+   "statuses": {
+    "ADMITTED_REDUNDANT": 5
+   },
+   "strength": 0.395
+  }
+ },
+ "mutants": {
+  "equivalent": 0,
+  "killed": 15,
+  "not_covered": 96,
+  "strength": 0.112,
+  "total": 134
+ },
+ "shuffle_seed": "73d0ff01",
+ "proposals_summary": {
+  "proposed": 119,
+  "equivalent": 0
+ },
+ "source": "sha256:e06c537d3d73b52a0c99ee93098d702a3e2133f9e4fa1f88c74f38d256ce7497"
+}
