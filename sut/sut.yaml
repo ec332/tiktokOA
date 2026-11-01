@@ -4,7 +4,7 @@ name: full-stack-fastapi-template
 repo: https://github.com/fastapi/full-stack-fastapi-template
 ref: f4bcfaba7c85be3c6332cc74a20819f586dcdbc6
 type: api            # api | ui | full-stack  (iteration 1: api)
-patches: [testinfo, flags]   # applied in this order from sut/patches/<name>.patch
+patches: [testinfo, flags, trace]   # applied in this order from sut/patches/<name>.patch
 surfaces:
   api: {openapi: /api/v1/openapi.json, base: /api/v1}
 # compose.override.yml is the template's hot-reload dev setup (fixed port 8000); the env
