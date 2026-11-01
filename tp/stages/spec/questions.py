@@ -10,7 +10,11 @@ ROUNDS = 2  # † plan: ≤2 rounds
 INTENDED = "The current behaviour is intended"
 HUMAN = "Leave to human judgement"
 OUT_OF_SCOPE = "Out of scope: don't test this"
-STATUS_IN_TEXT = re.compile(r"\b([1-5]\d\d)\b")
+# Only real HTTP statuses: "cap at 100" or "255 characters" are not status codes.
+HTTP_STATUSES = (
+    "200|201|202|204|301|302|304|400|401|403|404|405|409|410|413|415|422|429|500|502|503"
+)
+STATUS_IN_TEXT = re.compile(rf"\b({HTTP_STATUSES})\b")
 
 
 def key(criterion_title: str, about: str) -> str:

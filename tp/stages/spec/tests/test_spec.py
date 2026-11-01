@@ -332,3 +332,14 @@ def test_a_defect_found_only_as_a_finding_still_becomes_a_question(model, monkey
     assert len(defects) == 2  # O-1 from the model, plus one made from the finding
     made = next(d for d in defects if d["payload"]["criterion"] != "O-1")
     assert "Rejected with a 4xx client error" in [c["text"] for c in made["payload"]["choices"]]
+
+
+def test_numbers_in_answers_are_not_mistaken_for_status_codes():
+    c = {"id": "C-1", "then": "x", "status_code": None, "status": "draft"}
+    questions.apply_answer(
+        c, {"kind": "ambiguity", "changes": "expected_value"}, "100 (current)", False
+    )
+    assert c["status_code"] is None
+    questions.apply_answer(c, {"kind": "ambiguity", "changes": "expected_value"},
+                           "Reject titles over 255 characters with 422", False)  # fmt: skip
+    assert c["status_code"] == 422
