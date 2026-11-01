@@ -50,6 +50,11 @@ def _print_run(run: dict) -> None:
         outs = " ".join(f"{t}={i[:19]}" for t, i in e["outputs"].items())
         extra = f"  ({e['reason']})" if e["reason"] else ""
         typer.echo(f"  #{e['id']:<4} {e['stage']:<9} {e['status']:<16} {outs}{extra}")
+    report = next((e["outputs"]["report"] for e in reversed(run["executions"])
+                   if e["status"] == "succeeded" and "report" in e["outputs"]), None)  # fmt: skip
+    body = artifacts.get(report).body if report else {}
+    if "cli" in body:  # the real report stage (the stub has no worklist)
+        typer.echo(body["cli"] + f"\nreport: {body['path']}")
     for item in review.list_(status="open"):
         if any(item["stage_execution"] == e["id"] for e in run["executions"]):
             hint = (

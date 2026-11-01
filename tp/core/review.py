@@ -16,6 +16,7 @@ KINDS: dict[str, list[str]] = {
     "real_defect": ["confirm", "reject"],
 }
 NEEDS_REASON = {("triage", "override")}
+CHOICE_DECISIONS = {("question", "pick"), ("triage", "override")}  # detail.choice = a payload choice
 # Kinds whose payload may carry `lines`: each line is decided on its own (plan C5).
 LINE_OPTIONS: dict[str, list[str]] = {"signoff": ["approve", "reject"]}
 LINE_NEEDS_COMMENT = {"reject"}
@@ -26,6 +27,7 @@ UNATTENDED_DECISION = {
     "confirm_observed": "out_of_scope",  # unconfirmed code-derived behaviour never reaches cases
     "unbound": "accept_gap",  # an unbindable case is listed as a gap, never silently dropped
     "equivalent_mutant": "not_equivalent",  # unconfirmed: counts as a survivor (gate D11)
+    "triage": "accept",  # the rules' class stands; the report marks it decided by "unattended"
 }  # others fail unattended
 
 
@@ -165,10 +167,10 @@ def _check_detail(item: dict, decision: str | None, detail: dict) -> tuple[str, 
         if decision not in (None, derived):
             raise ValueError(f"decision {decision!r} contradicts the line decisions ({derived})")
         return derived, {"lines": given}
-    if kind == "question" and decision == "pick":
+    if (kind, decision) in CHOICE_DECISIONS:
         choice = detail.get("choice")
-        if choice not in {c["id"] for c in payload["choices"]}:
-            raise ValueError("pick needs detail.choice set to one of the choice ids")
+        if choice not in {c["id"] for c in payload.get("choices", [])}:
+            raise ValueError(f"{decision} needs detail.choice set to one of the choice ids")
         return decision, {"choice": choice}
     if decision is None:
         raise ValueError("a decision is required")
