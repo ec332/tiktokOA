@@ -11,3 +11,4 @@ web/dist/
 Testing platform build plan.md
 CLAUDE.md
 .claude/
+web/*.tsbuildinfo
