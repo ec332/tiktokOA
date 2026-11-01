@@ -6,6 +6,7 @@ from typing import Annotated
 
 import typer
 
+from tp.cli import sut as sut_cli
 from tp.core import artifacts, review, runner
 
 app = typer.Typer(no_args_is_help=True)
@@ -15,6 +16,7 @@ artifact_app = typer.Typer(no_args_is_help=True)
 app.add_typer(stage_app, name="stage")
 app.add_typer(review_app, name="review")
 app.add_typer(artifact_app, name="artifact")
+app.add_typer(sut_cli.app, name="sut")
 
 
 def _run_id(ref: str) -> int:

@@ -12,3 +12,7 @@ Testing platform build plan.md
 CLAUDE.md
 .claude/
 web/*.tsbuildinfo
+
+docs/*
+# macOS
+.DS_Store

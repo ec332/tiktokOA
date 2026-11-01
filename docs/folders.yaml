@@ -1,7 +1,7 @@
 # Folder ownership (plan 1.4). The most specific path wins.
 # Stage UI panels live in web/src/panels/<stage>/ and are owned by that stage.
 # Commits tagged "[<owner>] ..." may only touch that owner's paths.
-current: M0
+current: M1
 milestones: [M0, M1, M2, M3, M4, M5, M6, M7, M8]
 folders:
   # Skeleton (M0)
@@ -15,7 +15,10 @@ folders:
   - {path: docs, owner: skeleton, milestone: M0}
   - {path: .github, owner: skeleton, milestone: M0}
   # SUT workspace + env (M1)
-  - {path: sut/upstream, owner: sut, milestone: M1}
+  # No sut/upstream submodule: sut.yaml points at a repo path or URL (docs/status/sut/001 D1).
+  - {path: tp/core/sut.py, owner: sut, milestone: M1}
+  - {path: tp/cli/sut.py, owner: sut, milestone: M1}
+  - {path: tests/test_sut.py, owner: sut, milestone: M1}
   - {path: sut/sut.yaml, owner: sut, milestone: M1}
   - {path: sut/patches/testinfo.patch, owner: sut, milestone: M1}
   - {path: sut/patches/flags.patch, owner: sut, milestone: M1}
