@@ -1,0 +1,52 @@
+# Folder ownership (plan 1.4). The most specific path wins.
+# Stage UI panels live in web/src/panels/<stage>/ and are owned by that stage.
+# Commits tagged "[<owner>] ..." may only touch that owner's paths.
+current: M0
+milestones: [M0, M1, M2, M3, M4, M5, M6, M7, M8]
+folders:
+  # Skeleton (M0)
+  - {path: pyproject.toml, owner: skeleton, milestone: M0}
+  - {path: uv.lock, owner: skeleton, milestone: M0}
+  - {path: tp/core, owner: skeleton, milestone: M0}
+  - {path: tp/api, owner: skeleton, milestone: M0}
+  - {path: tp/cli, owner: skeleton, milestone: M0}
+  - {path: tests, owner: skeleton, milestone: M0}
+  - {path: web, owner: skeleton, milestone: M0}
+  - {path: docs, owner: skeleton, milestone: M0}
+  - {path: .github, owner: skeleton, milestone: M0}
+  # SUT workspace + env (M1)
+  - {path: sut/upstream, owner: sut, milestone: M1}
+  - {path: sut/sut.yaml, owner: sut, milestone: M1}
+  - {path: sut/patches/testinfo.patch, owner: sut, milestone: M1}
+  - {path: sut/patches/flags.patch, owner: sut, milestone: M1}
+  - {path: tp/stages/env, owner: env, milestone: M1}
+  - {path: web/src/panels/env, owner: env, milestone: M1}
+  # Specify (M2)
+  - {path: sut/requirements.md, owner: spec, milestone: M2}
+  - {path: tp/stages/spec, owner: spec, milestone: M2}
+  - {path: web/src/panels/spec, owner: spec, milestone: M2}
+  - {path: tp/stages/cases, owner: cases, milestone: M2}
+  - {path: web/src/panels/cases, owner: cases, milestone: M2}
+  # Build and prove (M3)
+  - {path: tp/stages/generate, owner: generate, milestone: M3}
+  - {path: web/src/panels/generate, owner: generate, milestone: M3}
+  - {path: platform_rt, owner: generate, milestone: M3}
+  - {path: images/runner, owner: generate, milestone: M3}
+  - {path: sut/patches/clock.patch, owner: generate, milestone: M3}
+  - {path: sut/patches/decode.patch, owner: generate, milestone: M3}
+  - {path: sut/patches/trace.patch, owner: generate, milestone: M3}
+  - {path: tp/stages/gate, owner: gate, milestone: M3}
+  - {path: web/src/panels/gate, owner: gate, milestone: M3}
+  # Run, judge, report (M4)
+  - {path: tp/stages/execute, owner: execute, milestone: M4}
+  - {path: web/src/panels/execute, owner: execute, milestone: M4}
+  - {path: tp/stages/triage, owner: triage, milestone: M4}
+  - {path: web/src/panels/triage, owner: triage, milestone: M4}
+  - {path: tp/stages/report, owner: report, milestone: M4}
+  - {path: web/src/panels/report, owner: report, milestone: M4}
+  # Retest (M5)
+  - {path: tp/stages/retest, owner: retest, milestone: M5}
+  - {path: web/src/panels/retest, owner: retest, milestone: M5}
+  - {path: sut/patches/fix-pagination.patch, owner: retest, milestone: M5}
+  # Baseline (M6)
+  - {path: tp/baseline, owner: baseline, milestone: M6}

@@ -1,0 +1,35 @@
+name: ci
+on: push
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff check . && uv run ruff format --check .
+      - run: uv run pytest -q  # unit + contract tests
+      - name: folder rule
+        env: {BEFORE: "${{ github.event.before }}"}
+        run: |
+          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE" 2>/dev/null; then
+            uv run tp check-folders --commits "$BEFORE..HEAD"
+          else
+            uv run tp check-folders  # first push: existence check only
+          fi
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with: {node-version: 23}
+      - run: uv sync --locked
+      - run: npm ci
+        working-directory: web
+      - name: generated client is up to date
+        run: npm run gen:client && git diff --exit-code src/api/schema.d.ts openapi.json
+        working-directory: web
+      - run: npm run typecheck
+        working-directory: web

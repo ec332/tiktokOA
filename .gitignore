@@ -1,0 +1,13 @@
+data/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+web/node_modules/
+web/dist/
+
+# planning docs and Claude config stay local
+Testing platform build plan.md
+CLAUDE.md
+.claude/
