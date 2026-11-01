@@ -12,7 +12,10 @@ def lane(gate_status: str) -> str:
 
 def signature(row: dict) -> tuple:
     """What a failure looked like: origin + the failed assertion ids."""
-    return (row.get("origin"), tuple(sorted(a["id"] for a in row.get("assertions", []) if not a["ok"])))
+    return (
+        row.get("origin"),
+        tuple(sorted(a["id"] for a in row.get("assertions", []) if not a["ok"])),
+    )
 
 
 def verdict(attempts: list[dict]) -> dict:

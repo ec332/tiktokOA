@@ -43,7 +43,10 @@ class ExecuteStage:
         variants = opts.get("variants") or ["reference", *(f"bug:{f}" for f in sut.load()["flags"])]
         variants = [variants] if isinstance(variants, str) else variants
         if variants[0] != "reference":
-            variants = ["reference", *[v for v in variants if v != "reference"]]  # escalation needs it
+            variants = [
+                "reference",
+                *[v for v in variants if v != "reference"],
+            ]  # escalation needs it
 
         shutil.rmtree(work, ignore_errors=True)
         tests = work / "tests"
@@ -60,7 +63,9 @@ class ExecuteStage:
             except Exception as e:  # noqa: BLE001 — a dead stack yields NOT_RUN, never verdicts
                 run.envs[variant] = {"up_error": f"{type(e).__name__}: {e}"[:300]}
                 for a in range(1, k + 1):
-                    run.not_run(variant, f"{variant}/a{a}", "main", list(rows), "ENV: bring-up failed")
+                    run.not_run(
+                        variant, f"{variant}/a{a}", "main", list(rows), "ENV: bring-up failed"
+                    )
                 continue
             mismatch = variant == "reference" and bool(ref_hash) and spec["spec_hash"] != ref_hash
             seed = random.randrange(10**8)
@@ -87,9 +92,16 @@ class ExecuteStage:
         files = {
             "results.jsonl": "".join(json.dumps(r) + "\n" for r in run.results),
             "probes.json": json.dumps(run.probes, indent=1),
-            "manifest.json": json.dumps({"execution": ex, "k": k, "variants": run.envs,
-                                         "gate_report": inputs["gate_report"].id,
-                                         "bound_tests": inputs["bound_tests"].id}, indent=1),
+            "manifest.json": json.dumps(
+                {
+                    "execution": ex,
+                    "k": k,
+                    "variants": run.envs,
+                    "gate_report": inputs["gate_report"].id,
+                    "bound_tests": inputs["bound_tests"].id,
+                },
+                indent=1,
+            ),
             **{f"logs/{_safe(v)}.log": text for v, text in run.logs.items()},
         }
         root = record.write(out, files)
@@ -163,7 +175,9 @@ class _Run:
             r = got.get(n)
             if r is None:
                 why = "ENV: post-probe failed" if not healthy else (error or "not collected")
-                self.results.append(self._row(n, variant, batch, lane, status="NOT_RUN", reason=why))
+                self.results.append(
+                    self._row(n, variant, batch, lane, status="NOT_RUN", reason=why)
+                )
                 continue
             status = "RAN" if healthy and trusted else "SUSPECT_ENV"
             self.results.append(self._row(n, variant, batch, lane, status=status, **r))

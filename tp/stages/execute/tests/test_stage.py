@@ -36,7 +36,12 @@ class FakeEnv:
             if variant == "bug:BUG_OWNERSHIP_UPDATE" and r["nodeid"] == OWN:
                 r |= {"outcome": "failed", "origin": "ASSERTION",
                       "assertions": [{"id": "TC-C8-2/status", "ok": False}]}  # fmt: skip
-            if self.flaky and variant == "bug:BUG_FLAKE_RACE" and r["nodeid"] == RACE and next(self._coin):
+            if (
+                self.flaky
+                and variant == "bug:BUG_FLAKE_RACE"
+                and r["nodeid"] == RACE
+                and next(self._coin)
+            ):
                 r |= {"outcome": "failed", "origin": "ASSERTION",
                       "assertions": [{"id": "TC-C10-1/status", "ok": False}]}  # fmt: skip
             out.append(r)

@@ -17,5 +17,7 @@ def fx():
     return {
         "gate_report": json.loads((FIXTURES / "gate_report.json").read_text()),
         "bound_tests": json.loads((FIXTURES / "bound_tests.json").read_text()),
-        "records": [json.loads(x) for x in (FIXTURES / "results_reference.jsonl").read_text().splitlines()],
+        "records": [
+            json.loads(x) for x in (FIXTURES / "results_reference.jsonl").read_text().splitlines()
+        ],
     }
