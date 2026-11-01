@@ -1,0 +1,21 @@
+diff --git a/backend/app/api/routes/items.py b/backend/app/api/routes/items.py
+--- a/backend/app/api/routes/items.py
++++ b/backend/app/api/routes/items.py
+@@ -3,7 +3,7 @@
+ import uuid
+ from typing import Any
+ 
+-from fastapi import APIRouter, HTTPException
++from fastapi import APIRouter, HTTPException, Query
+ from sqlmodel import Session, col, func, select
+ 
+ from app.api.deps import CurrentUser, SessionDep
+@@ -31,7 +31,7 @@
+ 
+ @router.get("/", response_model=ItemsPublic)
+ def read_items(
+-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
++    session: SessionDep, current_user: CurrentUser, skip: int = Query(0, ge=0), limit: int = Query(100, ge=0)
+ ) -> Any:
+     """
+     Retrieve items.
