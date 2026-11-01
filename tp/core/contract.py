@@ -33,7 +33,7 @@ class StageContext:
 
     llm: Any
     review: Any
-    env: Any  # shortcut: None until Stage 5 exists (M1)
+    env: Any  # the env stage's SERVICE, or None if tp/stages/env/ doesn't exist
     emit: Any
 
 
@@ -47,15 +47,36 @@ class Stage(Protocol):
 
 
 REGISTRY: dict[str, Stage] = {}  # real stages, registered from tp/stages/<name>/stage.py
+SERVICES: dict[str, Any] = {}  # stage name -> service other stages reach via ctx (e.g. env)
+CLIS: dict[str, Any] = {}  # stage name -> Typer app, mounted as `tp <name>`
 
 
-def register(stage: Stage) -> Stage:
+def register(stage: Stage, service: Any = None, cli: Any = None) -> Stage:
     REGISTRY[stage.name] = stage
+    if service is not None:
+        SERVICES[stage.name] = service
+    if cli is not None:
+        CLIS[stage.name] = cli
     return stage
+
+
+def load() -> None:
+    """Import every tp/stages/<name>/stage.py; each one calls register(). Idempotent."""
+    import importlib
+    import pkgutil
+
+    try:
+        import tp.stages as pkg
+    except ModuleNotFoundError:
+        return  # no stage folder exists yet
+    for m in pkgutil.iter_modules(pkg.__path__):
+        importlib.import_module(f"tp.stages.{m.name}.stage")
 
 
 def resolve(name: str, stub: bool = False) -> Stage:
     from tp.core.stubs import STUBS
+
+    load()
 
     if stub and name in STUBS:
         return STUBS[name]

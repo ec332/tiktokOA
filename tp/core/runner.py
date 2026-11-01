@@ -142,7 +142,7 @@ def _execute(
     ctx = StageContext(
         llm=llm.Gateway(run["mode"], provider),
         review=review.ReviewHandle(ex_id),
-        env=None,
+        env=contract.SERVICES.get("env"),
         emit=lambda kind, **p: events.emit(run_id, ex_id, kind, **p),
     )
     while True:

@@ -28,4 +28,5 @@ line-length = 100
 extend-exclude = ["*.md"]  # never reformat docs or the plan
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "tp/stages"]
+markers = ["docker: needs a running Docker daemon (skipped in CI)"]
