@@ -7,10 +7,13 @@ type: api            # api | ui | full-stack  (iteration 1: api)
 patches: [testinfo, flags]   # applied in this order from sut/patches/<name>.patch
 surfaces:
   api: {openapi: /api/v1/openapi.json, base: /api/v1}
-compose: {files: [compose.yml, compose.override.yml], services: [db, backend, mailpit]}
+# compose.override.yml is the template's hot-reload dev setup (fixed port 8000); the env
+# stage writes its own override per variant instead, which also defines mailpit.
+compose: {files: [compose.yml], services: [db, backend, mailpit]}
 lifecycle:
   migrate: "bash scripts/prestart.sh"          # no prestart service exists; run explicitly
   health: /api/v1/utils/health-check/
+  testinfo: /api/v1/utils/test-info/             # from the testinfo patch
   db_probe: {sql: "SELECT version_num FROM alembic_version", expect: fe56fa70289e}
 env: {FASTAPI_ENV: development}
 auth: {superuser: {from_env: FIRST_SUPERUSER}, user: {factory: user}}
