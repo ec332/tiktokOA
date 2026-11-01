@@ -74,10 +74,13 @@ DRAFT = {"criteria": [
 ]}  # fmt: skip
 
 
+PROMPTS: list[str] = []  # drafting prompts seen, newest last
+
+
 def fake_model(prompt, model, params):
     assert model == ai.MODEL
     if params["schema"] == ai.DRAFT_SCHEMA:
-        assert "Login returns a token" not in prompt  # out-of-scope flow never drafted
+        PROMPTS.append(prompt)
         return json.dumps(DRAFT), {"input_tokens": 3000, "output_tokens": 2000}
     rejected = json.loads(prompt.split("<rejected>")[1].split("</rejected>")[0])
     out = [
@@ -95,9 +98,9 @@ def model(monkeypatch):
     monkeypatch.setattr(llm, "anthropic_provider", fake_model)
 
 
-def _run(spec=SPEC):
+def _run(spec=SPEC, options=None):
     art = artifacts.put("spec", spec)
-    run_id = runner.start_run("record", stub=False)
+    run_id = runner.start_run("record", stub=False, options=options)
     ex = runner.rerun(run_id, "cases", overrides={"spec": art.id})
     return run_id, ex
 
@@ -134,13 +137,15 @@ def test_flows_by_route_prefix():
 
 
 def test_draft_builds_traced_ranked_cases(model):
-    _run_id, ex = _run()
+    run_id, ex = _run()
     assert ex["status"] == "awaiting_review", ex["reason"]
+    assert "Login returns a token" not in PROMPTS[-1]  # out-of-scope flow never drafted
     item = _signoff()
     lines = item["payload"]["lines"]
     attention = " ".join(item["payload"]["attention"])
-    state = json.loads(next((Path(review.db.data_dir()) / "runs").glob("cases-*.json")).read_text())
-    units = {u["id"]: u for u in state["units"]}
+    _approve_all(item)  # assertions below read the signed artifact, not the stage's scratch file
+    _, art = _cases(run_id)
+    units = {u["id"]: u for u in art.body["cases"]}
 
     # C2: one boundary group with 254/255/256, sides computed by the calculator
     (b,) = [u for u in units.values() if u["technique"] == "boundary"]
@@ -157,7 +162,7 @@ def test_draft_builds_traced_ranked_cases(model):
     assert "O-6: dropped a drafted case: expected '500' is not traceable" in attention
     assert "C-8: decision table leaves out 1 combination(s)" in attention
     # C4: duplicates and the over-budget extra are deferred, never silently dropped
-    reasons = [d["deferred"] for d in state["deferred"]]
+    reasons = [d["deferred"] for d in art.body["deferred"]]
     assert any(r.startswith("duplicate") for r in reasons)
     assert "over the extras budget for this criterion" in reasons
     hyps = [u["defect_hypothesis"].lower() for u in units.values()]
@@ -228,3 +233,23 @@ def test_prose_after_a_code_is_a_note_not_the_oracle():
     assert build.literal(c, "403 'Not enough permissions'") == (
         "403", "message 'Not enough permissions' stated by the spec")  # fmt: skip
     assert build.literal(c, "403: forbidden, go away")[1].endswith("not checked")
+
+
+def test_carry_forward_is_scoped_to_the_sut_ref_and_off_when_fresh(model):
+    _run()
+    _approve_all(_signoff())
+    other_ref = {**SPEC, "sut": {"name": "fake", "ref": "b" * 40}}
+    for spec, options in ((other_ref, None), (SPEC, {"fresh": True})):
+        _, ex = _run(spec, options)  # same lines, but another SUT ref / a fresh run
+        assert ex["status"] == "awaiting_review"  # asked again, not carried forward
+        review.resolve(_signoff()["id"], "defer", "po")
+
+
+def test_the_flows_option_changes_the_scope(model):
+    run_id, _ = _run(options={"flows": ["FLOW-signup-login"]})
+    assert "Login returns a token" in PROMPTS[-1] and "Title has a maximum" not in PROMPTS[-1]
+    _, art = _cases(run_id)  # the scripted draft has no login cases: nothing to sign
+    assert art.body["flows"] == ["FLOW-signup-login"]
+    assert "unsigned" in art.labels and not art.body["signoff"]["signed"]
+    reasons = {n["criterion"]: n["reason"] for n in art.body["not_tested"]}
+    assert reasons["C-11"] == "flow FLOW-items-crud not in this run"

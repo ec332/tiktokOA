@@ -17,11 +17,14 @@ def _scratch(ctx) -> Path:
     return db.data_dir() / "runs" / f"cases-exec-{ctx.review.execution_id}.json"
 
 
-def approved_hashes() -> set[str]:
-    """Line hashes approved in any earlier sign-off: carried forward, not asked again (D4)."""
-    out = set()
+def approved_hashes(scope: dict | None) -> set[str]:
+    """Line hashes approved in an earlier sign-off for the same SUT ref: carried forward, not
+    asked again (D4). scope None (a `fresh` run) carries nothing."""
+    out: set[str] = set()
+    if scope is None:
+        return out
     for item in review.list_(status="resolved"):
-        if item["kind"] != "signoff" or not item["detail"]:
+        if item["kind"] != "signoff" or not item["detail"] or item["payload"].get("scope") != scope:
             continue
         for ln in item["payload"].get("lines", []):
             if (
@@ -35,15 +38,17 @@ def approved_hashes() -> set[str]:
 class CasesStage:
     name = "cases"
     version = f"1.0.0+p{ai.version_hash()}"
-    consumes: dict[str, int] = {"spec": 1}  # noqa: RUF012 — contract shape
+    consumes: dict[str, int] = {"spec": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"cases": 1, "signoff_md": 1}  # noqa: RUF012
-    flows = ("FLOW-items-crud",)  # design D2: the thin slice for M2
+    flows = ("FLOW-items-crud",)  # default scope (design D2); run option `flows` overrides
 
     def run(self, ctx, inputs):
         path = _scratch(ctx)
         state = json.loads(path.read_text()) if path.exists() else None
         if state is None:
-            state = self._draft(ctx, inputs["spec"])
+            opts = inputs["run_options"].body
+            state = self._draft(ctx, inputs["spec"], tuple(opts.get("flows") or self.flows))
+            state["scope"] = None if opts.get("fresh") else {"sut_ref": state["sut"]["ref"]}
             return self._ask(ctx, state, path, [u["id"] for u in state["units"]])
         items = ctx.review.items()
         if open_ := [i["id"] for i in items if i["status"] == "open"]:
@@ -66,7 +71,7 @@ class CasesStage:
 
     # ---- drafting ----------------------------------------------------------------------
 
-    def _draft(self, ctx, spec_art) -> dict:
+    def _draft(self, ctx, spec_art, flows: tuple[str, ...]) -> dict:
         spec = spec_art.body
         crit = {c["id"]: c for c in spec["criteria"]}
         scope, not_tested = [], []
@@ -74,7 +79,7 @@ class CasesStage:
             flow = signals.flow_of(c)
             if c["status"] == "out_of_scope":
                 not_tested.append({"criterion": c["id"], "reason": "out of scope in the spec"})
-            elif flow not in self.flows:
+            elif flow not in flows:
                 not_tested.append({"criterion": c["id"], "reason": f"flow {flow} not in this run"})
             else:
                 scope.append(c | {"flow": flow})
@@ -100,7 +105,7 @@ class CasesStage:
         ctx.emit(
             "cases_drafted", units=len(units), deferred=len(deferred), attention=len(attention)
         )
-        return {"spec": spec_art.id, "sut": spec["sut"], "flows": list(self.flows),
+        return {"spec": spec_art.id, "sut": spec["sut"], "flows": list(flows),
                 "criteria": {c["id"]: c for c in scope},
                 "minimum": minimum, "drafts": drafts, "units": units, "deferred": deferred,
                 "attention": attention, "not_tested": not_tested, "approved": [], "carried": [],
@@ -130,7 +135,7 @@ class CasesStage:
     # ---- sign-off ----------------------------------------------------------------------
 
     def _ask(self, ctx, state, path, ids: list[str]) -> StageResult:
-        prior = approved_hashes()
+        prior = approved_hashes(state.get("scope"))
         lines = []
         for u in state["units"]:
             if u["id"] not in ids:
@@ -151,13 +156,16 @@ class CasesStage:
                                 for u in state["units"] if "points" in u and u["id"] in ids],
             "not_tested": state["not_tested"] if state["round"] == 1 else [],
             "round": state["round"],
+            "scope": state.get("scope"),
         }  # fmt: skip
         return StageResult.awaiting_review([ctx.review.create("signoff", payload)])
 
     def _finish(self, ctx, state, path, signed: bool) -> StageResult:
         hashes = {build.line(u)["hash"]: u["id"] for u in state["units"]}
         approved = [h for h in hashes if h in set(state["approved"])]
-        signed = signed and len(approved) == len(hashes)
+        signed = (
+            signed and bool(hashes) and len(approved) == len(hashes)
+        )  # nothing to sign != signed
         signoff = {"signed": signed, "hash": sha256(sorted(approved)) if signed else None,
                    "lines": len(hashes), "approved": len(approved),
                    "carried_forward": sorted(state["carried"])}  # fmt: skip
