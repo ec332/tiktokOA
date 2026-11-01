@@ -1,0 +1,7 @@
+# Which criteria each seeded flag was planted against (gate design D9).
+# shortcut: criterion ids are the frozen spec's (tp/stages/gate/fixtures/spec.json); move the
+# targets into sut.yaml when specs vary between runs.
+BUG_TITLE_MAX: {criteria: [C-11], why: "titles of 255 characters are refused (off by one)"}
+BUG_OWNERSHIP_UPDATE: {criteria: [C-8, O-8], why: "a user can change another user's item"}
+BUG_INACTIVE_LOGIN: {criteria: [], why: "login flow is not in this run's scope"}
+BUG_FLAKE_RACE: {criteria: [], why: "a stability target, checked over the network only (D7)"}
