@@ -1,0 +1,2584 @@
+{
+ "ai_decisions": {
+  "cases_llm_drafted": {
+   "d": 41,
+   "ids": [
+    "TC-C10-1",
+    "TC-C11-1",
+    "TC-C11-2",
+    "TC-C11-3",
+    "TC-C12-1",
+    "TC-C13-1",
+    "TC-C13-2",
+    "TC-C14-1",
+    "TC-C15-1",
+    "TC-C4-1",
+    "TC-C5-1",
+    "TC-C5-2",
+    "TC-C6-1",
+    "TC-C6-2",
+    "TC-C7-1",
+    "TC-C8-1",
+    "TC-C8-2",
+    "TC-C8-3",
+    "TC-C9-1",
+    "TC-C9-2",
+    "TC-O1-1",
+    "TC-O1-2",
+    "TC-O10-1",
+    "TC-O5-1",
+    "TC-O5-2",
+    "TC-O5-3",
+    "TC-O6-1",
+    "TC-O6-2",
+    "TC-O6-3",
+    "TC-O6-4",
+    "TC-O6-5",
+    "TC-O7-1",
+    "TC-O7-2",
+    "TC-O7-3",
+    "TC-O7-4",
+    "TC-O8-1",
+    "TC-O8-2",
+    "TC-O8-3",
+    "TC-O9-1",
+    "TC-O9-2",
+    "TC-O9-3"
+   ],
+   "n": 41
+  },
+  "cases_signoff": {
+   "approved": {
+    "d": 41,
+    "ids": [],
+    "n": 41
+   },
+   "signed": true
+  },
+  "gate_equivalence": {
+   "equivalent": {
+    "d": 119,
+    "ids": [],
+    "n": 0
+   },
+   "resolution": "not confirmed by a person; counted as survivors"
+  },
+  "overrides": [],
+  "review_decisions": [],
+  "spec_answers": {
+   "d": null,
+   "ids": [
+    "06122940dfdaeaa0",
+    "4dae96a5e4545c13",
+    "52bb8a64e5cb5064",
+    "60cfa0105e768182",
+    "66fd0ce7332fa181",
+    "a674f45404a38848",
+    "a7d6bdfd45bf416c",
+    "b6a0b7baa843e92b",
+    "d725d8cbb074793a",
+    "e4c053edc65cb771"
+   ],
+   "n": 10
+  },
+  "spec_assumed": {
+   "d": 10,
+   "ids": [],
+   "n": 0
+  },
+  "triage": "no AI in M4 (rules only; the AI judge is M7)"
+ },
+ "coverage": {
+  "boundary": {
+   "d": 59,
+   "ids": [
+    "TC-C11-1.a",
+    "TC-C11-1.b",
+    "TC-C11-1.c",
+    "TC-C13-1.a",
+    "TC-C13-1.b",
+    "TC-C13-1.c",
+    "TC-O6-2.a",
+    "TC-O6-2.b",
+    "TC-O6-2.c",
+    "TC-O6-3.a",
+    "TC-O6-3.b",
+    "TC-O6-3.c",
+    "TC-O7-2.a",
+    "TC-O7-2.b",
+    "TC-O7-2.c",
+    "TC-O9-1.a",
+    "TC-O9-1.b",
+    "TC-O9-1.c"
+   ],
+   "n": 18
+  },
+  "by": "case technique (boundary \u2192 boundary; error_exception/error_guessing \u2192 exception; rest \u2192 normal)",
+  "exception": {
+   "d": 59,
+   "ids": [
+    "TC-C11-2",
+    "TC-C8-2",
+    "TC-O5-1",
+    "TC-O5-2",
+    "TC-O6-1",
+    "TC-O6-4",
+    "TC-O7-1",
+    "TC-O7-3",
+    "TC-O8-2",
+    "TC-O9-2"
+   ],
+   "n": 10
+  },
+  "normal": {
+   "d": 59,
+   "ids": [
+    "TC-C10-1",
+    "TC-C11-3",
+    "TC-C12-1",
+    "TC-C13-2",
+    "TC-C14-1",
+    "TC-C15-1",
+    "TC-C6-1.1",
+    "TC-C6-1.2",
+    "TC-C6-2",
+    "TC-C7-1",
+    "TC-C8-1.1",
+    "TC-C8-1.2",
+    "TC-C8-1.3",
+    "TC-C8-1.4",
+    "TC-C8-1.5",
+    "TC-C8-3",
+    "TC-C9-1.1",
+    "TC-C9-1.2",
+    "TC-C9-1.3",
+    "TC-C9-1.4",
+    "TC-C9-2",
+    "TC-O10-1",
+    "TC-O5-3",
+    "TC-O6-5",
+    "TC-O7-4",
+    "TC-O8-1.1",
+    "TC-O8-1.2",
+    "TC-O8-1.3",
+    "TC-O8-1.4",
+    "TC-O8-3",
+    "TC-O9-3"
+   ],
+   "n": 31
+  }
+ },
+ "defects": [
+  {
+   "ac": "C-8",
+   "cases": [
+    "TC-C8-1.2",
+    "TC-C8-2"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-C8-1.2",
+    "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-C8-1.2#12",
+    "log:x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-C8-1.2/12"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 200,
+     "expected": "403",
+     "id": "TC-C8-1.2/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-bug:BUG_OWNERSHIP_UPDATE/TC-C8-1.2",
+    "F-bug:BUG_OWNERSHIP_UPDATE/TC-C8-2"
+   ],
+   "flag": "BUG_OWNERSHIP_UPDATE",
+   "id": "D-bug:BUG_OWNERSHIP_UPDATE/C-8",
+   "kind": "seeded",
+   "observed": {
+    "json": {
+     "title": "Updated title"
+    },
+    "method": "PUT",
+    "path": "/api/v1/items/fcf35b75-3908-4574-9cfb-dc55c1226f3b",
+    "query": {},
+    "status": 200
+   },
+   "root_cause": null,
+   "suspects": [
+    {
+     "basis": "handler of the failing request PUT /api/v1/items/fcf35b75-3908-4574-9cfb-dc55c1226f3b (update_item), which answered 200",
+     "file": "backend/app/api/routes/items.py",
+     "line": 99,
+     "text": "def update_item(",
+     "upstream_line": 76
+    }
+   ],
+   "variant": "bug:BUG_OWNERSHIP_UPDATE"
+  },
+  {
+   "ac": "O-8",
+   "cases": [
+    "TC-O8-1.2"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-O8-1.2",
+    "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-O8-1.2#12",
+    "log:x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-O8-1.2/12"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 200,
+     "expected": "403",
+     "id": "TC-O8-1.2/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-bug:BUG_OWNERSHIP_UPDATE/TC-O8-1.2"
+   ],
+   "flag": "BUG_OWNERSHIP_UPDATE",
+   "id": "D-bug:BUG_OWNERSHIP_UPDATE/O-8",
+   "kind": "seeded",
+   "observed": {
+    "json": {},
+    "method": "PUT",
+    "path": "/api/v1/items/25529176-f2fc-4498-a3c8-89d8844ff10e",
+    "query": {},
+    "status": 200
+   },
+   "root_cause": null,
+   "suspects": [
+    {
+     "basis": "handler of the failing request PUT /api/v1/items/25529176-f2fc-4498-a3c8-89d8844ff10e (update_item), which answered 200",
+     "file": "backend/app/api/routes/items.py",
+     "line": 99,
+     "text": "def update_item(",
+     "upstream_line": 76
+    },
+    {
+     "basis": "code_ref of O-8 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 72,
+     "text": "item = session.get(Item, id)",
+     "upstream_line": 53
+    },
+    {
+     "basis": "code_ref of O-8 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 75,
+     "text": "if not current_user.is_superuser and (item.owner_id != current_user.id):",
+     "upstream_line": 56
+    },
+    {
+     "basis": "code_ref of O-8 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 76,
+     "text": "raise HTTPException(status_code=403, detail=\"Not enough permissions\")",
+     "upstream_line": 57
+    }
+   ],
+   "variant": "bug:BUG_OWNERSHIP_UPDATE"
+  },
+  {
+   "ac": "C-11",
+   "cases": [
+    "TC-C11-1.b"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:bug:BUG_TITLE_MAX/a1/TC-C11-1.b",
+    "ex:bug:BUG_TITLE_MAX/a1/TC-C11-1.b#5",
+    "log:x252.bug:BUG_TITLE_MAX.a1/TC-C11-1.b/5"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 422,
+     "expected": "2xx",
+     "id": "TC-C11-1.b/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-bug:BUG_TITLE_MAX/TC-C11-1.b"
+   ],
+   "flag": "BUG_TITLE_MAX",
+   "id": "D-bug:BUG_TITLE_MAX/C-11",
+   "kind": "seeded",
+   "observed": {
+    "json": {
+     "title": "c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc"
+    },
+    "method": "POST",
+    "path": "/api/v1/items/",
+    "query": {},
+    "status": 422
+   },
+   "root_cause": null,
+   "suspects": [
+    {
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 422",
+     "file": "backend/app/api/routes/items.py",
+     "line": 81,
+     "text": "def create_item(",
+     "upstream_line": 62
+    }
+   ],
+   "variant": "bug:BUG_TITLE_MAX"
+  },
+  {
+   "ac": "O-5",
+   "cases": [
+    "TC-O5-1",
+    "TC-O5-2",
+    "TC-O5-3"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:reference/a1/TC-O5-1",
+    "ex:reference/a1/TC-O5-1#7",
+    "log:x252.reference.a1/TC-O5-1/7"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 500,
+     "expected": "422",
+     "id": "TC-O5-1/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O5-1",
+    "F-reference/TC-O5-2",
+    "F-reference/TC-O5-3"
+   ],
+   "flag": null,
+   "id": "D-reference/O-5",
+   "kind": "real",
+   "observed": {
+    "json": {
+     "title": null
+    },
+    "method": "PUT",
+    "path": "/api/v1/items/e0458ccf-6f79-47e5-a1d3-61b9d09d8736",
+    "query": {},
+    "status": 500
+   },
+   "review": 32,
+   "root_cause": {
+    "cls": "psycopg.errors.NotNullViolation",
+    "msg": "null value in column \"title\" of relation \"item\" violates not-null constraint"
+   },
+   "suspects": [
+    {
+     "basis": "innermost app frame of the traceback (update_item), psycopg.errors.NotNullViolation raised here",
+     "file": "backend/app/api/routes/items.py",
+     "line": 122,
+     "text": "session.commit()",
+     "upstream_line": 94
+    },
+    {
+     "basis": "handler of the failing request PUT /api/v1/items/e0458ccf-6f79-47e5-a1d3-61b9d09d8736 (update_item), which answered 500",
+     "file": "backend/app/api/routes/items.py",
+     "line": 99,
+     "text": "def update_item(",
+     "upstream_line": 76
+    },
+    {
+     "basis": "code_ref of O-5",
+     "file": "backend/app/models.py",
+     "line": 82,
+     "text": "title: str | None = Field(default=None, min_length=1, max_length=255)",
+     "upstream_line": 82
+    },
+    {
+     "basis": "code_ref of O-5",
+     "file": "backend/app/api/routes/items.py",
+     "line": 119,
+     "text": "update_dict = item_in.model_dump(exclude_unset=True)",
+     "upstream_line": 91
+    },
+    {
+     "basis": "code_ref of O-5",
+     "file": "backend/app/api/routes/items.py",
+     "line": 120,
+     "text": "item.sqlmodel_update(update_dict)",
+     "upstream_line": 92
+    }
+   ],
+   "variant": "reference"
+  },
+  {
+   "ac": "O-6",
+   "cases": [
+    "TC-O6-1",
+    "TC-O6-2.a",
+    "TC-O6-3.a",
+    "TC-O6-4",
+    "TC-O6-5"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:reference/a1/TC-O6-1",
+    "ex:reference/a1/TC-O6-1#7",
+    "log:x252.reference.a1/TC-O6-1/7"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 500,
+     "expected": "422",
+     "id": "TC-O6-1/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O6-1",
+    "F-reference/TC-O6-2.a",
+    "F-reference/TC-O6-3.a",
+    "F-reference/TC-O6-4",
+    "F-reference/TC-O6-5"
+   ],
+   "flag": null,
+   "id": "D-reference/O-6",
+   "kind": "real",
+   "observed": {
+    "json": null,
+    "method": "GET",
+    "path": "/api/v1/items/",
+    "query": {
+     "skip": "-1000000000"
+    },
+    "status": 500
+   },
+   "review": 33,
+   "root_cause": {
+    "cls": "psycopg.errors.InvalidRowCountInResultOffsetClause",
+    "msg": "OFFSET must not be negative"
+   },
+   "suspects": [
+    {
+     "basis": "request parameter skip=-1000000000 reaches the signature of read_items() with no bound; traceback ends in psycopg.errors.InvalidRowCountInResultOffsetClause",
+     "file": "backend/app/api/routes/items.py",
+     "line": 34,
+     "text": "session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100",
+     "upstream_line": 15
+    },
+    {
+     "basis": "psycopg.errors.InvalidRowCountInResultOffsetClause (SQLSTATE 2201X): \"OFFSET must not be negative\" names this clause",
+     "file": "backend/app/api/routes/items.py",
+     "line": 58,
+     "text": ".offset(skip)",
+     "upstream_line": 39
+    },
+    {
+     "basis": "innermost app frame of the traceback (read_items), psycopg.errors.InvalidRowCountInResultOffsetClause raised here",
+     "file": "backend/app/api/routes/items.py",
+     "line": 61,
+     "text": "items = session.exec(statement).all()",
+     "upstream_line": 42
+    },
+    {
+     "basis": "handler of the failing request GET /api/v1/items/ (read_items), which answered 500",
+     "file": "backend/app/api/routes/items.py",
+     "line": 33,
+     "text": "def read_items(",
+     "upstream_line": 14
+    },
+    {
+     "basis": "code_ref of O-6",
+     "file": "backend/app/api/routes/items.py",
+     "line": 44,
+     "text": "select(Item).order_by(col(Item.created_at).desc()).offset(skip).limit(limit)",
+     "upstream_line": 25
+    }
+   ],
+   "variant": "reference"
+  },
+  {
+   "ac": "O-7",
+   "cases": [
+    "TC-O7-1",
+    "TC-O7-2.c",
+    "TC-O7-3",
+    "TC-O7-4"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:reference/a1/TC-O7-1",
+    "ex:reference/a1/TC-O7-1#7",
+    "log:x252.reference.a1/TC-O7-1/7"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 200,
+     "expected": "422",
+     "id": "TC-O7-1/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O7-1",
+    "F-reference/TC-O7-2.c",
+    "F-reference/TC-O7-3",
+    "F-reference/TC-O7-4"
+   ],
+   "flag": null,
+   "id": "D-reference/O-7",
+   "kind": "real",
+   "observed": {
+    "json": null,
+    "method": "GET",
+    "path": "/api/v1/items/",
+    "query": {
+     "limit": "1000000000"
+    },
+    "status": 200
+   },
+   "review": 34,
+   "root_cause": null,
+   "suspects": [
+    {
+     "basis": "handler of the failing request GET /api/v1/items/ (read_items), which answered 200",
+     "file": "backend/app/api/routes/items.py",
+     "line": 33,
+     "text": "def read_items(",
+     "upstream_line": 14
+    },
+    {
+     "basis": "code_ref of O-7 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 34,
+     "text": "session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100",
+     "upstream_line": 15
+    },
+    {
+     "basis": "code_ref of O-7 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 59,
+     "text": ".limit(limit)",
+     "upstream_line": 40
+    }
+   ],
+   "variant": "reference"
+  }
+ ],
+ "evidence": {
+  "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-C8-1.2": {
+   "batch": "bug:BUG_OWNERSHIP_UPDATE/a1",
+   "case_id": "TC-C8-1.2",
+   "error": "ExpectationFailed: [TC-C8-1.2/status] expected '403', got 200",
+   "failed": [
+    {
+     "actual": 200,
+     "expected": "403",
+     "id": "TC-C8-1.2/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "bug:BUG_OWNERSHIP_UPDATE"
+  },
+  "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-C8-1.2#12": {
+   "body": "{\"title\": \"Updated title\", \"description\": \"Description 6af291d409-4\", \"id\": \"fcf35b75-3908-4574-9cfb-dc55c1226f3b\", \"owner_id\": \"5bf99e25-0fdd-42b1-b72e-8628585ff4ad\", \"created_at\": \"2026-11-01T10:05:42.031152Z\"}",
+   "json": {
+    "title": "Updated title"
+   },
+   "kind": "exchange",
+   "method": "PUT",
+   "path": "/api/v1/items/fcf35b75-3908-4574-9cfb-dc55c1226f3b",
+   "query": {},
+   "status": 200,
+   "traceparent": "00-cae00f95a384d2d40575d0bc114e96eb-8fe9ca60de03162d-01",
+   "x_test_trace": "x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-C8-1.2/12"
+  },
+  "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-O8-1.2": {
+   "batch": "bug:BUG_OWNERSHIP_UPDATE/a1",
+   "case_id": "TC-O8-1.2",
+   "error": "ExpectationFailed: [TC-O8-1.2/status] expected '403', got 200",
+   "failed": [
+    {
+     "actual": 200,
+     "expected": "403",
+     "id": "TC-O8-1.2/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "bug:BUG_OWNERSHIP_UPDATE"
+  },
+  "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-O8-1.2#12": {
+   "body": "{\"title\": \"Item de5ed84936-4\", \"description\": \"Description de5ed84936-4\", \"id\": \"25529176-f2fc-4498-a3c8-89d8844ff10e\", \"owner_id\": \"8c208928-0dd8-4e50-b4cc-e107bcbb473d\", \"created_at\": \"2026-11-01T10:05:47.929754Z\"}",
+   "json": {},
+   "kind": "exchange",
+   "method": "PUT",
+   "path": "/api/v1/items/25529176-f2fc-4498-a3c8-89d8844ff10e",
+   "query": {},
+   "status": 200,
+   "traceparent": "00-05b925337c635fc4dccf295850e0cb39-2b90f30a2b535475-01",
+   "x_test_trace": "x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-O8-1.2/12"
+  },
+  "ex:bug:BUG_TITLE_MAX/a1/TC-C11-1.b": {
+   "batch": "bug:BUG_TITLE_MAX/a1",
+   "case_id": "TC-C11-1.b",
+   "error": "ExpectationFailed: [TC-C11-1.b/status] expected '2xx', got 422",
+   "failed": [
+    {
+     "actual": 422,
+     "expected": "2xx",
+     "id": "TC-C11-1.b/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "bug:BUG_TITLE_MAX"
+  },
+  "ex:bug:BUG_TITLE_MAX/a1/TC-C11-1.b#5": {
+   "body": "{\"detail\": \"Title too long\"}",
+   "json": {
+    "title": "c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc"
+   },
+   "kind": "exchange",
+   "method": "POST",
+   "path": "/api/v1/items/",
+   "query": {},
+   "status": 422,
+   "traceparent": "00-049320ba4d1029f37384181664c24632-cb95956b6664ce3a-01",
+   "x_test_trace": "x252.bug:BUG_TITLE_MAX.a1/TC-C11-1.b/5"
+  },
+  "ex:reference/a1/TC-O5-1": {
+   "batch": "reference/a1",
+   "case_id": "TC-O5-1",
+   "error": "ExpectationFailed: [TC-O5-1/status] expected '422', got 500",
+   "failed": [
+    {
+     "actual": 500,
+     "expected": "422",
+     "id": "TC-O5-1/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O5-1#7": {
+   "body": "\"Internal Server Error\"",
+   "json": {
+    "title": null
+   },
+   "kind": "exchange",
+   "method": "PUT",
+   "path": "/api/v1/items/e0458ccf-6f79-47e5-a1d3-61b9d09d8736",
+   "query": {},
+   "status": 500,
+   "traceparent": "00-38205cdaf1bc9d15c65eae504fcd0fb7-0d3ad83fc3a41aa4-01",
+   "x_test_trace": "x252.reference.a1/TC-O5-1/7"
+  },
+  "ex:reference/a1/TC-O6-1": {
+   "batch": "reference/a1",
+   "case_id": "TC-O6-1",
+   "error": "ExpectationFailed: [TC-O6-1/status] expected '422', got 500",
+   "failed": [
+    {
+     "actual": 500,
+     "expected": "422",
+     "id": "TC-O6-1/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O6-1#7": {
+   "body": "\"Internal Server Error\"",
+   "json": null,
+   "kind": "exchange",
+   "method": "GET",
+   "path": "/api/v1/items/",
+   "query": {
+    "skip": "-1000000000"
+   },
+   "status": 500,
+   "traceparent": "00-5e77fdd4f1a78fa6ffa66e953720aeb9-13deced790fee7ae-01",
+   "x_test_trace": "x252.reference.a1/TC-O6-1/7"
+  },
+  "ex:reference/a1/TC-O7-1": {
+   "batch": "reference/a1",
+   "case_id": "TC-O7-1",
+   "error": "ExpectationFailed: [TC-O7-1/status] expected '422', got 200",
+   "failed": [
+    {
+     "actual": 200,
+     "expected": "422",
+     "id": "TC-O7-1/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O7-1#7": {
+   "body": "{\"data\": [{\"title\": \"Item 15f41d2af0-2\", \"description\": \"Description 15f41d2af0-2\", \"id\": \"ceeaeac3-c738-4493-ac68-b1fe270b992b\", \"owner_id\": \"233b4bce-7f10-4e83-bbd3-6732f032484c\", \"created_at\": \"2026-11-01T10:04:50.490284Z\"}], \"count\": 1}",
+   "json": null,
+   "kind": "exchange",
+   "method": "GET",
+   "path": "/api/v1/items/",
+   "query": {
+    "limit": "1000000000"
+   },
+   "status": 200,
+   "traceparent": "00-9229e07af2ccabf7709dd0b20b330910-0f9c4ddde917e0f2-01",
+   "x_test_trace": "x252.reference.a1/TC-O7-1/7"
+  },
+  "log:x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-C8-1.2/12": {
+   "kind": "log",
+   "line": "INFO:app.trace:PUT /api/v1/items/fcf35b75-3908-4574-9cfb-dc55c1226f3b 200 traceparent=00-cae00f95a384d2d40575d0bc114e96eb-8fe9ca60de03162d-01 x-test-trace=x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-C8-1.2/12",
+   "line_no": 1575,
+   "traceback": "",
+   "variant": "bug_BUG_OWNERSHIP_UPDATE"
+  },
+  "log:x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-O8-1.2/12": {
+   "kind": "log",
+   "line": "INFO:app.trace:PUT /api/v1/items/25529176-f2fc-4498-a3c8-89d8844ff10e 200 traceparent=00-05b925337c635fc4dccf295850e0cb39-2b90f30a2b535475-01 x-test-trace=x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-O8-1.2/12",
+   "line_no": 3709,
+   "traceback": "",
+   "variant": "bug_BUG_OWNERSHIP_UPDATE"
+  },
+  "log:x252.bug:BUG_TITLE_MAX.a1/TC-C11-1.b/5": {
+   "kind": "log",
+   "line": "INFO:app.trace:POST /api/v1/items/ 422 traceparent=00-049320ba4d1029f37384181664c24632-cb95956b6664ce3a-01 x-test-trace=x252.bug:BUG_TITLE_MAX.a1/TC-C11-1.b/5",
+   "line_no": 105,
+   "traceback": "",
+   "variant": "bug_BUG_TITLE_MAX"
+  },
+  "log:x252.reference.a1/TC-O5-1/7": {
+   "kind": "log",
+   "line": "INFO:app.trace:PUT /api/v1/items/e0458ccf-6f79-47e5-a1d3-61b9d09d8736 500 traceparent=00-38205cdaf1bc9d15c65eae504fcd0fb7-0d3ad83fc3a41aa4-01 x-test-trace=x252.reference.a1/TC-O5-1/7",
+   "line_no": 1784,
+   "traceback": ".to_thread.run_sync(func)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/to_thread.py\", line 65, in run_sync\n    return await get_async_backend().run_sync_in_worker_thread(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py\", line 2641, in run_sync_in_worker_thread\n    return await future\n           ^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py\", line 1033, in run\n    result = context.run(func, *args)\n  File \"/app/backend/app/api/routes/items.py\", line 122, in update_item\n    session.commit()\n    ~~~~~~~~~~~~~~^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 2035, in commit\n    trans.commit(_to_root=True)\n    ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"<string>\", line 2, in commit\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state_changes.py\", line 137, in _go\n    ret_value = fn(self, *arg, **kw)\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 1316, in commit\n    self._prepare_impl()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"<string>\", line 2, in _prepare_impl\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state_changes.py\", line 137, in _go\n    ret_value = fn(self, *arg, **kw)\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 1290, in _prepare_impl\n    self.session.flush()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 4353, in flush\n    self._flush(objects)\n    ~~~~~~~~~~~^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 4488, in _flush\n    with util.safe_reraise():\n         ~~~~~~~~~~~~~~~~~^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py\", line 122, in __exit__\n    raise exc_value.with_traceback(exc_tb)\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 4449, in _flush\n    flush_context.execute()\n    ~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/unitofwork.py\", line 465, in execute\n    rec.execute(self)\n    ~~~~~~~~~~~^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/unitofwork.py\", line 641, in execute\n    util.preloaded.orm_persistence.save_obj(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self.mapper,\n        ^^^^^^^^^^^^\n        uow.states_for_mapper_hierarchy(self.mapper, False, False),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        uow,\n        ^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/persistence.py\", line 86, in save_obj\n    _emit_update_statements(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        base_mapper,\n        ^^^^^^^^^^^^\n    ...<3 lines>...\n        update,\n        ^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/persistence.py\", line 913, in _emit_update_statements\n    c = connection.execute(\n        statement, multiparams, execution_options=execution_options\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1421, in execute\n    return meth(\n        self,\n        distilled_parameters,\n        execution_options or NO_OPTIONS,\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/sql/elements.py\", line 526, in _execute_on_connection\n    return connection._execute_clauseelement(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self, distilled_params, execution_options\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1643, in _execute_clauseelement\n    ret = self._execute_context(\n        dialect,\n    ...<8 lines>...\n        cache_hit=cache_hit,\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1848, in _execute_context\n    return self._exec_single_context(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^\n        dialect, context, statement, parameters\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1988, in _exec_single_context\n    self._handle_dbapi_exception(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        e, str_statement, effective_parameters, cursor, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 2365, in _handle_dbapi_exception\n    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1969, in _exec_single_context\n    self.dialect.do_execute(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor, str_statement, effective_parameters, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py\", line 952, in do_execute\n    cursor.execute(statement, parameters)\n    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/psycopg/cursor.py\", line 117, in execute\n    raise ex.with_traceback(None)\nsqlalchemy.exc.IntegrityError: (psycopg.errors.NotNullViolation) null value in column \"title\" of relation \"item\" violates not-null constraint\nDETAIL:  Failing row contains (Description 7d77ed5468-2, null, e0458ccf-6f79-47e5-a1d3-61b9d09d8736, 53594293-0eb4-4301-8c43-c5f0e68af107, 2026-11-01 10:04:48.351026+00).\n[SQL: UPDATE item SET title=%(title)s::VARCHAR WHERE item.id = %(item_id)s::UUID]\n[parameters: {'title': None, 'item_id': UUID('e0458ccf-6f79-47e5-a1d3-61b9d09d8736')}]\n(Background on this error at: https://sqlalche.me/e/20/gkpj)",
+   "variant": "reference"
+  },
+  "log:x252.reference.a1/TC-O6-1/7": {
+   "kind": "log",
+   "line": "INFO:app.trace:GET /api/v1/items/ 500 traceparent=00-5e77fdd4f1a78fa6ffa66e953720aeb9-13deced790fee7ae-01 x-test-trace=x252.reference.a1/TC-O6-1/7",
+   "line_no": 2486,
+   "traceback": ".venv/lib/python3.14/site-packages/fastapi/routing.py\", line 1800, in _handle_selected\n    await original_route.handle(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 1279, in handle\n    await app(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 158, in app\n    await wrap_app_handling_exceptions(app, request)(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    raise exc\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 42, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 144, in app\n    response = await f(request)\n               ^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 706, in app\n    raw_response = await run_endpoint_function(\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 354, in run_endpoint_function\n    return await run_in_threadpool(dependant.call, **values)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/concurrency.py\", line 34, in run_in_threadpool\n    return await anyio.to_thread.run_sync(func)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/to_thread.py\", line 65, in run_sync\n    return await get_async_backend().run_sync_in_worker_thread(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py\", line 2641, in run_sync_in_worker_thread\n    return await future\n           ^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py\", line 1033, in run\n    result = context.run(func, *args)\n  File \"/app/backend/app/api/routes/items.py\", line 61, in read_items\n    items = session.exec(statement).all()\n            ~~~~~~~~~~~~^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlmodel/orm/session.py\", line 75, in exec\n    results = super().execute(\n        statement,\n    ...<4 lines>...\n        _add_event=_add_event,\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 2373, in execute\n    return self._execute_internal(\n           ~~~~~~~~~~~~~~~~~~~~~~^\n        statement,\n        ^^^^^^^^^^\n    ...<4 lines>...\n        _add_event=_add_event,\n        ^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 2271, in _execute_internal\n    result: Result[Any] = compile_state_cls.orm_execute_statement(\n                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self,\n        ^^^^^\n    ...<4 lines>...\n        conn,\n        ^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/context.py\", line 306, in orm_execute_statement\n    result = conn.execute(\n        statement, params or {}, execution_options=execution_options\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1421, in execute\n    return meth(\n        self,\n        distilled_parameters,\n        execution_options or NO_OPTIONS,\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/sql/elements.py\", line 526, in _execute_on_connection\n    return connection._execute_clauseelement(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self, distilled_params, execution_options\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1643, in _execute_clauseelement\n    ret = self._execute_context(\n        dialect,\n    ...<8 lines>...\n        cache_hit=cache_hit,\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1848, in _execute_context\n    return self._exec_single_context(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^\n        dialect, context, statement, parameters\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1988, in _exec_single_context\n    self._handle_dbapi_exception(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        e, str_statement, effective_parameters, cursor, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 2365, in _handle_dbapi_exception\n    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1969, in _exec_single_context\n    self.dialect.do_execute(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor, str_statement, effective_parameters, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py\", line 952, in do_execute\n    cursor.execute(statement, parameters)\n    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/psycopg/cursor.py\", line 117, in execute\n    raise ex.with_traceback(None)\nsqlalchemy.exc.DataError: (psycopg.errors.InvalidRowCountInResultOffsetClause) OFFSET must not be negative\n[SQL: SELECT item.title, item.description, item.id, item.created_at, item.owner_id \nFROM item \nWHERE item.owner_id = %(owner_id_1)s::UUID ORDER BY item.created_at DESC \n LIMIT %(param_1)s::INTEGER OFFSET %(param_2)s::INTEGER]\n[parameters: {'owner_id_1': UUID('2982d95f-8800-4133-9026-977eb224b2b5'), 'param_1': 100, 'param_2': -1000000000}]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+   "variant": "reference"
+  },
+  "log:x252.reference.a1/TC-O7-1/7": {
+   "kind": "log",
+   "line": "INFO:app.trace:GET /api/v1/items/ 200 traceparent=00-9229e07af2ccabf7709dd0b20b330910-0f9c4ddde917e0f2-01 x-test-trace=x252.reference.a1/TC-O7-1/7",
+   "line_no": 3587,
+   "traceback": "",
+   "variant": "reference"
+  }
+ },
+ "header": {
+  "cases_signed": true,
+  "execution": 252,
+  "k": 3,
+  "labels": [
+   "real"
+  ],
+  "run_records": "sha256:dfb6c25a8cf6f37254e682f70dbae61826df818b3fca48c8acafd83c4176df01",
+  "sut": {
+   "name": "full-stack-fastapi-template",
+   "ref": "f4bcfaba7c85be3c6332cc74a20819f586dcdbc6"
+  },
+  "unattended_decisions": {
+   "d": 0,
+   "ids": [],
+   "n": 0
+  },
+  "variants": {
+   "bug:BUG_FLAKE_RACE": {
+    "fingerprint_mismatch": false,
+    "flags": [
+     "BUG_FLAKE_RACE"
+    ],
+    "reproduce": "tp env up bug:BUG_FLAKE_RACE --expect 0d3a058910c484ffea46101a4af1aebd5deef55c3c4a0e75ec5c1d83f90edbb2",
+    "shuffle_seed": 89691788,
+    "spec_hash": "0d3a058910c484ffea46101a4af1aebd5deef55c3c4a0e75ec5c1d83f90edbb2"
+   },
+   "bug:BUG_INACTIVE_LOGIN": {
+    "fingerprint_mismatch": false,
+    "flags": [
+     "BUG_INACTIVE_LOGIN"
+    ],
+    "reproduce": "tp env up bug:BUG_INACTIVE_LOGIN --expect 4ca69a22ca4f38f2a8c08634296d05b2e9a2b0a71e8b4ce798b07cb39b71695f",
+    "shuffle_seed": 55419855,
+    "spec_hash": "4ca69a22ca4f38f2a8c08634296d05b2e9a2b0a71e8b4ce798b07cb39b71695f"
+   },
+   "bug:BUG_OWNERSHIP_UPDATE": {
+    "fingerprint_mismatch": false,
+    "flags": [
+     "BUG_OWNERSHIP_UPDATE"
+    ],
+    "reproduce": "tp env up bug:BUG_OWNERSHIP_UPDATE --expect d704fd2c5f11bbc1358d379c2c8f6d7b0b5d5ea2aaa2fd74ba4b236b2cea855a",
+    "shuffle_seed": 18646961,
+    "spec_hash": "d704fd2c5f11bbc1358d379c2c8f6d7b0b5d5ea2aaa2fd74ba4b236b2cea855a"
+   },
+   "bug:BUG_TITLE_MAX": {
+    "fingerprint_mismatch": false,
+    "flags": [
+     "BUG_TITLE_MAX"
+    ],
+    "reproduce": "tp env up bug:BUG_TITLE_MAX --expect 2d9475872ac1ded1e3e2755b50d15d61595545c6149afc9aa6f7963d37b0cec8",
+    "shuffle_seed": 68517685,
+    "spec_hash": "2d9475872ac1ded1e3e2755b50d15d61595545c6149afc9aa6f7963d37b0cec8"
+   },
+   "reference": {
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "tp env up reference --expect b67bcb34a1cae273c7cb52ff6cee28beaa384c5a732688d4a6144ed581175046",
+    "shuffle_seed": 43376470,
+    "spec_hash": "b67bcb34a1cae273c7cb52ff6cee28beaa384c5a732688d4a6144ed581175046"
+   }
+  }
+ },
+ "scorecard": {
+  "criteria_without_admitted_test": {
+   "d": 19,
+   "ids": [
+    "C-4",
+    "C-5",
+    "O-1",
+    "O-5"
+   ],
+   "n": 4
+  },
+  "fail_before_pass_after": "not run (M5)",
+  "localisation": {
+   "top1": {
+    "d": 3,
+    "ids": [
+     "D-bug:BUG_OWNERSHIP_UPDATE/C-8",
+     "D-bug:BUG_OWNERSHIP_UPDATE/O-8"
+    ],
+    "n": 2
+   },
+   "top3": {
+    "d": 3,
+    "ids": [
+     "D-bug:BUG_OWNERSHIP_UPDATE/C-8",
+     "D-bug:BUG_OWNERSHIP_UPDATE/O-8"
+    ],
+    "n": 2
+   },
+   "top5": {
+    "d": 3,
+    "ids": [
+     "D-bug:BUG_OWNERSHIP_UPDATE/C-8",
+     "D-bug:BUG_OWNERSHIP_UPDATE/O-8"
+    ],
+    "n": 2
+   }
+  },
+  "mutation_per_criterion": {
+   "C-10": {
+    "d": 38,
+    "ids": [],
+    "n": 7
+   },
+   "C-11": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "C-12": {
+    "d": 38,
+    "ids": [],
+    "n": 7
+   },
+   "C-13": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "C-14": {
+    "d": 38,
+    "ids": [],
+    "n": 7
+   },
+   "C-15": {
+    "d": 38,
+    "ids": [],
+    "n": 7
+   },
+   "C-6": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "C-7": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "C-8": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "C-9": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "O-10": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "O-5": {
+    "d": 0,
+    "ids": [],
+    "n": 0
+   },
+   "O-6": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "O-7": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "O-8": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   },
+   "O-9": {
+    "d": 38,
+    "ids": [],
+    "n": 15
+   }
+  },
+  "mutation_strength": {
+   "d": 134,
+   "ids": [],
+   "n": 15
+  },
+  "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits mostly under the test data, so this measures authentication more than the item rules",
+  "real_defects": {
+   "d": 3,
+   "ids": [
+    "D-reference/O-5",
+    "D-reference/O-6",
+    "D-reference/O-7"
+   ],
+   "n": 3
+  },
+  "seeded_authored": {
+   "d": 4,
+   "ids": [
+    "BUG_OWNERSHIP_UPDATE",
+    "BUG_TITLE_MAX"
+   ],
+   "n": 2
+  },
+  "seeded_blind": "not run (M7)",
+  "seeded_per_flag": [
+   {
+    "caught_by": [],
+    "detected": false,
+    "flag": "BUG_FLAKE_RACE",
+    "rank": null,
+    "targeted": {
+     "d": 0,
+     "ids": [],
+     "n": 0
+    }
+   },
+   {
+    "caught_by": [],
+    "detected": false,
+    "flag": "BUG_INACTIVE_LOGIN",
+    "rank": null,
+    "targeted": {
+     "d": 0,
+     "ids": [],
+     "n": 0
+    }
+   },
+   {
+    "caught_by": [
+     "TC-C8-1.2",
+     "TC-C8-2",
+     "TC-O8-1.2"
+    ],
+    "detected": true,
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "rank": 1,
+    "targeted": {
+     "d": 13,
+     "ids": [
+      "TC-C8-1.1",
+      "TC-C8-1.2",
+      "TC-C8-1.3",
+      "TC-C8-1.4",
+      "TC-C8-1.5",
+      "TC-C8-2",
+      "TC-C8-3",
+      "TC-O8-1.1",
+      "TC-O8-1.2",
+      "TC-O8-1.3",
+      "TC-O8-1.4",
+      "TC-O8-2",
+      "TC-O8-3"
+     ],
+     "n": 3
+    }
+   },
+   {
+    "caught_by": [
+     "TC-C11-1.b"
+    ],
+    "detected": true,
+    "flag": "BUG_TITLE_MAX",
+    "rank": null,
+    "targeted": {
+     "d": 5,
+     "ids": [
+      "TC-C11-1.a",
+      "TC-C11-1.b",
+      "TC-C11-1.c",
+      "TC-C11-2",
+      "TC-C11-3"
+     ],
+     "n": 1
+    }
+   }
+  ],
+  "triage_correct_seeded": {
+   "d": 4,
+   "ids": [
+    "TC-C11-1.b@bug:BUG_TITLE_MAX",
+    "TC-C8-1.2@bug:BUG_OWNERSHIP_UPDATE",
+    "TC-C8-2@bug:BUG_OWNERSHIP_UPDATE",
+    "TC-O8-1.2@bug:BUG_OWNERSHIP_UPDATE"
+   ],
+   "n": 4
+  }
+ },
+ "traceability": [
+  {
+   "ac": "C-10",
+   "assertions": [
+    "TC-C10-1/*"
+   ],
+   "case": "TC-C10-1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C10-1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L32-L32"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-11",
+   "assertions": [
+    "TC-C11-1.a/*"
+   ],
+   "case": "TC-C11-1.a",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C11-1.a",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L33-L33"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-11",
+   "assertions": [
+    "TC-C11-1.b/*"
+   ],
+   "case": "TC-C11-1.b",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C11-1.b",
+   "gate": "ADMITTED",
+   "req": [
+    "L33-L33"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-11",
+   "assertions": [
+    "TC-C11-1.c/*"
+   ],
+   "case": "TC-C11-1.c",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C11-1.c",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L33-L33"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-11",
+   "assertions": [
+    "TC-C11-2/*"
+   ],
+   "case": "TC-C11-2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C11-2",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L33-L33"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-11",
+   "assertions": [
+    "TC-C11-3/*"
+   ],
+   "case": "TC-C11-3",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C11-3",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L33-L33"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-12",
+   "assertions": [
+    "TC-C12-1/*"
+   ],
+   "case": "TC-C12-1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C12-1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L39-L39"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-13",
+   "assertions": [
+    "TC-C13-1.a/status"
+   ],
+   "case": "TC-C13-1.a",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-C13-1.a",
+   "gate": "SPEC_GAP",
+   "req": [
+    "L40-L40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "C-13",
+   "assertions": [
+    "TC-C13-1.b/*"
+   ],
+   "case": "TC-C13-1.b",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C13-1.b",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L40-L40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-13",
+   "assertions": [
+    "TC-C13-1.c/*"
+   ],
+   "case": "TC-C13-1.c",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C13-1.c",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L40-L40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-13",
+   "assertions": [
+    "TC-C13-2/*"
+   ],
+   "case": "TC-C13-2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C13-2",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L40-L40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-14",
+   "assertions": [
+    "TC-C14-1/*"
+   ],
+   "case": "TC-C14-1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C14-1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L41-L41"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-15",
+   "assertions": [
+    "TC-C15-1/*"
+   ],
+   "case": "TC-C15-1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C15-1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L42-L42"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-6",
+   "assertions": [
+    "TC-C6-1.1/*"
+   ],
+   "case": "TC-C6-1.1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C6-1.1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L25-L25"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-6",
+   "assertions": [
+    "TC-C6-1.2/*"
+   ],
+   "case": "TC-C6-1.2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C6-1.2",
+   "gate": "WEAK",
+   "req": [
+    "L25-L25"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-6",
+   "assertions": [
+    "TC-C6-2/*"
+   ],
+   "case": "TC-C6-2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C6-2",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L25-L25"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-7",
+   "assertions": [
+    "TC-C7-1/*"
+   ],
+   "case": "TC-C7-1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C7-1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L26-L26"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-8",
+   "assertions": [
+    "TC-C8-1.1/*"
+   ],
+   "case": "TC-C8-1.1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C8-1.1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L27-L27"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-8",
+   "assertions": [
+    "TC-C8-1.2/*"
+   ],
+   "case": "TC-C8-1.2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C8-1.2",
+   "gate": "ADMITTED",
+   "req": [
+    "L27-L27"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-8",
+   "assertions": [
+    "TC-C8-1.3/*"
+   ],
+   "case": "TC-C8-1.3",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C8-1.3",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L27-L27"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-8",
+   "assertions": [
+    "TC-C8-1.4/*"
+   ],
+   "case": "TC-C8-1.4",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C8-1.4",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L27-L27"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-8",
+   "assertions": [
+    "TC-C8-1.5/*"
+   ],
+   "case": "TC-C8-1.5",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C8-1.5",
+   "gate": "WEAK",
+   "req": [
+    "L27-L27"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-8",
+   "assertions": [
+    "TC-C8-2/*"
+   ],
+   "case": "TC-C8-2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C8-2",
+   "gate": "ADMITTED",
+   "req": [
+    "L27-L27"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-8",
+   "assertions": [
+    "TC-C8-3/*"
+   ],
+   "case": "TC-C8-3",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C8-3",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L27-L27"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-9",
+   "assertions": [
+    "TC-C9-1.1/*"
+   ],
+   "case": "TC-C9-1.1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C9-1.1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L28-L28"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-9",
+   "assertions": [
+    "TC-C9-1.2/*"
+   ],
+   "case": "TC-C9-1.2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C9-1.2",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L28-L28"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-9",
+   "assertions": [
+    "TC-C9-1.3/*"
+   ],
+   "case": "TC-C9-1.3",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C9-1.3",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L28-L28"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-9",
+   "assertions": [
+    "TC-C9-1.4/*"
+   ],
+   "case": "TC-C9-1.4",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C9-1.4",
+   "gate": "WEAK",
+   "req": [
+    "L28-L28"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "C-9",
+   "assertions": [
+    "TC-C9-2/*"
+   ],
+   "case": "TC-C9-2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C9-2",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "L28-L28"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-10",
+   "assertions": [
+    "TC-O10-1/*"
+   ],
+   "case": "TC-O10-1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O10-1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/models.py:71",
+    "backend/app/api/routes/items.py:68",
+    "backend/app/api/routes/items.py:72"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-5",
+   "assertions": [
+    "TC-O5-1/status"
+   ],
+   "case": "TC-O5-1",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O5-1",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/models.py:82",
+    "backend/app/api/routes/items.py:91",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-5",
+   "assertions": [
+    "TC-O5-2/status"
+   ],
+   "case": "TC-O5-2",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O5-2",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/models.py:82",
+    "backend/app/api/routes/items.py:91",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-5",
+   "assertions": [
+    "TC-O5-3/status"
+   ],
+   "case": "TC-O5-3",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O5-3",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/models.py:82",
+    "backend/app/api/routes/items.py:91",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-1/status"
+   ],
+   "case": "TC-O6-1",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O6-1",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-2.a/status"
+   ],
+   "case": "TC-O6-2.a",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O6-2.a",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-2.b/*"
+   ],
+   "case": "TC-O6-2.b",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O6-2.b",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-2.c/*"
+   ],
+   "case": "TC-O6-2.c",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O6-2.c",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-3.a/status"
+   ],
+   "case": "TC-O6-3.a",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O6-3.a",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-3.b/*"
+   ],
+   "case": "TC-O6-3.b",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O6-3.b",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-3.c/*"
+   ],
+   "case": "TC-O6-3.c",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O6-3.c",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-4/status"
+   ],
+   "case": "TC-O6-4",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O6-4",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-6",
+   "assertions": [
+    "TC-O6-5/status"
+   ],
+   "case": "TC-O6-5",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O6-5",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:25",
+    "backend/app/api/routes/items.py:39",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-7",
+   "assertions": [
+    "TC-O7-1/status"
+   ],
+   "case": "TC-O7-1",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O7-1",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-7",
+   "assertions": [
+    "TC-O7-2.a/*"
+   ],
+   "case": "TC-O7-2.a",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O7-2.a",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-7",
+   "assertions": [
+    "TC-O7-2.b/*"
+   ],
+   "case": "TC-O7-2.b",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O7-2.b",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-7",
+   "assertions": [
+    "TC-O7-2.c/status"
+   ],
+   "case": "TC-O7-2.c",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O7-2.c",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-7",
+   "assertions": [
+    "TC-O7-3/status"
+   ],
+   "case": "TC-O7-3",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O7-3",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-7",
+   "assertions": [
+    "TC-O7-4/status"
+   ],
+   "case": "TC-O7-4",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O7-4",
+   "gate": "CANDIDATE_DEFECT",
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "verdict": "CONSISTENT_FAIL"
+  },
+  {
+   "ac": "O-8",
+   "assertions": [
+    "TC-O8-1.1/*"
+   ],
+   "case": "TC-O8-1.1",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O8-1.1",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-8",
+   "assertions": [
+    "TC-O8-1.2/*"
+   ],
+   "case": "TC-O8-1.2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O8-1.2",
+   "gate": "ADMITTED",
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-8",
+   "assertions": [
+    "TC-O8-1.3/*"
+   ],
+   "case": "TC-O8-1.3",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O8-1.3",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-8",
+   "assertions": [
+    "TC-O8-1.4/*"
+   ],
+   "case": "TC-O8-1.4",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O8-1.4",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-8",
+   "assertions": [
+    "TC-O8-2/*"
+   ],
+   "case": "TC-O8-2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O8-2",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-8",
+   "assertions": [
+    "TC-O8-3/*"
+   ],
+   "case": "TC-O8-3",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O8-3",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-9",
+   "assertions": [
+    "TC-O9-1.a/*"
+   ],
+   "case": "TC-O9-1.a",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O9-1.a",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/models.py:72"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-9",
+   "assertions": [
+    "TC-O9-1.b/*"
+   ],
+   "case": "TC-O9-1.b",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O9-1.b",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/models.py:72"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-9",
+   "assertions": [
+    "TC-O9-1.c/*"
+   ],
+   "case": "TC-O9-1.c",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O9-1.c",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/models.py:72"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-9",
+   "assertions": [
+    "TC-O9-2/*"
+   ],
+   "case": "TC-O9-2",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O9-2",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/models.py:72"
+   ],
+   "verdict": "PASS"
+  },
+  {
+   "ac": "O-9",
+   "assertions": [
+    "TC-O9-3/*"
+   ],
+   "case": "TC-O9-3",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O9-3",
+   "gate": "ADMITTED_REDUNDANT",
+   "req": [
+    "backend/app/models.py:72"
+   ],
+   "verdict": "PASS"
+  }
+ ],
+ "uncovered": {
+  "assumed": [
+   "C-9",
+   "C-11",
+   "C-12",
+   "C-13",
+   "C-14"
+  ],
+  "behaviour_with_no_requirement": [
+   "POST /api/v1/password-recovery-html-content/{email}  (backend/app/api/routes/login.py:100)",
+   "POST /api/v1/password-recovery/{email}  (backend/app/api/routes/login.py:53)",
+   "POST /api/v1/reset-password/  (backend/app/api/routes/login.py:77)",
+   "GET /api/v1/users/  (backend/app/api/routes/users.py:32)",
+   "POST /api/v1/users/  (backend/app/api/routes/users.py:54)",
+   "DELETE /api/v1/users/me  (backend/app/api/routes/users.py:132)",
+   "PATCH /api/v1/users/me  (backend/app/api/routes/users.py:81)",
+   "PATCH /api/v1/users/me/password  (backend/app/api/routes/users.py:103)",
+   "POST /api/v1/users/signup  (backend/app/api/routes/users.py:146)",
+   "DELETE /api/v1/users/{user_id}  (backend/app/api/routes/users.py:214)",
+   "GET /api/v1/users/{user_id}  (backend/app/api/routes/users.py:162)",
+   "PATCH /api/v1/users/{user_id}  (backend/app/api/routes/users.py:182)",
+   "GET /api/v1/utils/health-check/  (backend/app/api/routes/utils.py:29)",
+   "POST /api/v1/utils/test-email/  (backend/app/api/routes/utils.py:11)"
+  ],
+  "criteria_out_of_scope": [
+   {
+    "criterion": "C-1",
+    "reason": "flow FLOW-signup-login not in this run"
+   },
+   {
+    "criterion": "C-2",
+    "reason": "flow FLOW-signup-login not in this run"
+   },
+   {
+    "criterion": "C-3",
+    "reason": "flow FLOW-admin-users not in this run"
+   },
+   {
+    "criterion": "O-2",
+    "reason": "flow FLOW-admin-users not in this run"
+   },
+   {
+    "criterion": "O-3",
+    "reason": "flow FLOW-admin-users not in this run"
+   },
+   {
+    "criterion": "O-4",
+    "reason": "flow FLOW-signup-login not in this run"
+   },
+   {
+    "criterion": "O-11",
+    "reason": "flow FLOW-admin-users not in this run"
+   },
+   {
+    "criterion": "O-12",
+    "reason": "flow FLOW-admin-users not in this run"
+   }
+  ],
+  "deferred": [],
+  "seeded_race": "BUG_FLAKE_RACE: no signed case reads an item right after creating it, so the suite cannot observe the late commit",
+  "skipped_templates": [
+   "C-4: dropped a drafted case: expected '4xx' is not traceable to C-4 (spec allows [])",
+   "C-8: decision table leaves out 7 combination(s), e.g. {'caller': 'anonymous', 'item owner': 'other user', 'operation': 'change'}",
+   "C-9: decision table leaves out 2 combination(s), e.g. {'caller': 'anonymous', 'item owner': 'other user', 'operation': 'change'}",
+   "C-15: skipped minimum template boundary: Default size is a resolved value, not a client input threshold; covered by the acceptance case via page_window.",
+   "O-8: decision table leaves out 2 combination(s), e.g. {'caller': 'logged-in user', 'item state': 'missing', 'operation': 'change'}",
+   "C-4: no acceptance case",
+   "C-9: criterion is assumed, not confirmed: check its cases",
+   "C-11: criterion is assumed, not confirmed: check its cases",
+   "C-12: criterion is assumed, not confirmed: check its cases",
+   "C-13: criterion is assumed, not confirmed: check its cases",
+   "C-14: criterion is assumed, not confirmed: check its cases"
+  ],
+  "unbound_cases": [
+   "TC-C4-1",
+   "TC-C5-1",
+   "TC-C5-2",
+   "TC-O1-1",
+   "TC-O1-2"
+  ]
+ },
+ "worklist": {
+  "P0": [
+   {
+    "ac": "O-5",
+    "cases": {
+     "d": null,
+     "ids": [
+      "TC-O5-1",
+      "TC-O5-2",
+      "TC-O5-3"
+     ],
+     "n": 3
+    },
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "defect": "D-reference/O-5",
+    "evidence": [
+     "ex:reference/a1/TC-O5-1",
+     "ex:reference/a1/TC-O5-1#7",
+     "log:x252.reference.a1/TC-O5-1/7"
+    ],
+    "expected": "422 validation error saying title may not be null",
+    "flag": null,
+    "kind": "real",
+    "observed": {
+     "json": {
+      "title": null
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/e0458ccf-6f79-47e5-a1d3-61b9d09d8736",
+     "query": {},
+     "status": 500
+    },
+    "retest": "not retested (M5)",
+    "root_cause": {
+     "cls": "psycopg.errors.NotNullViolation",
+     "msg": "null value in column \"title\" of relation \"item\" violates not-null constraint"
+    },
+    "suspects": [
+     {
+      "basis": "innermost app frame of the traceback (update_item), psycopg.errors.NotNullViolation raised here",
+      "file": "backend/app/api/routes/items.py",
+      "line": 122,
+      "text": "session.commit()",
+      "upstream_line": 94
+     },
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/e0458ccf-6f79-47e5-a1d3-61b9d09d8736 (update_item), which answered 500",
+      "file": "backend/app/api/routes/items.py",
+      "line": 99,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-5",
+      "file": "backend/app/models.py",
+      "line": 82,
+      "text": "title: str | None = Field(default=None, min_length=1, max_length=255)",
+      "upstream_line": 82
+     },
+     {
+      "basis": "code_ref of O-5",
+      "file": "backend/app/api/routes/items.py",
+      "line": 119,
+      "text": "update_dict = item_in.model_dump(exclude_unset=True)",
+      "upstream_line": 91
+     },
+     {
+      "basis": "code_ref of O-5",
+      "file": "backend/app/api/routes/items.py",
+      "line": 120,
+      "text": "item.sqlmodel_update(update_dict)",
+      "upstream_line": 92
+     }
+    ],
+    "title": "Updating an item title to null fails with a server error"
+   },
+   {
+    "ac": "O-6",
+    "cases": {
+     "d": null,
+     "ids": [
+      "TC-O6-1",
+      "TC-O6-2.a",
+      "TC-O6-3.a",
+      "TC-O6-4",
+      "TC-O6-5"
+     ],
+     "n": 5
+    },
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "defect": "D-reference/O-6",
+    "evidence": [
+     "ex:reference/a1/TC-O6-1",
+     "ex:reference/a1/TC-O6-1#7",
+     "log:x252.reference.a1/TC-O6-1/7"
+    ],
+    "expected": "422 validation error for negative skip or limit",
+    "flag": null,
+    "kind": "real",
+    "observed": {
+     "json": null,
+     "method": "GET",
+     "path": "/api/v1/items/",
+     "query": {
+      "skip": "-1000000000"
+     },
+     "status": 500
+    },
+    "retest": "not retested (M5)",
+    "root_cause": {
+     "cls": "psycopg.errors.InvalidRowCountInResultOffsetClause",
+     "msg": "OFFSET must not be negative"
+    },
+    "suspects": [
+     {
+      "basis": "request parameter skip=-1000000000 reaches the signature of read_items() with no bound; traceback ends in psycopg.errors.InvalidRowCountInResultOffsetClause",
+      "file": "backend/app/api/routes/items.py",
+      "line": 34,
+      "text": "session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100",
+      "upstream_line": 15
+     },
+     {
+      "basis": "psycopg.errors.InvalidRowCountInResultOffsetClause (SQLSTATE 2201X): \"OFFSET must not be negative\" names this clause",
+      "file": "backend/app/api/routes/items.py",
+      "line": 58,
+      "text": ".offset(skip)",
+      "upstream_line": 39
+     },
+     {
+      "basis": "innermost app frame of the traceback (read_items), psycopg.errors.InvalidRowCountInResultOffsetClause raised here",
+      "file": "backend/app/api/routes/items.py",
+      "line": 61,
+      "text": "items = session.exec(statement).all()",
+      "upstream_line": 42
+     },
+     {
+      "basis": "handler of the failing request GET /api/v1/items/ (read_items), which answered 500",
+      "file": "backend/app/api/routes/items.py",
+      "line": 33,
+      "text": "def read_items(",
+      "upstream_line": 14
+     },
+     {
+      "basis": "code_ref of O-6",
+      "file": "backend/app/api/routes/items.py",
+      "line": 44,
+      "text": "select(Item).order_by(col(Item.created_at).desc()).offset(skip).limit(limit)",
+      "upstream_line": 25
+     }
+    ],
+    "title": "Negative skip or limit causes a server error"
+   },
+   {
+    "ac": "O-7",
+    "cases": {
+     "d": null,
+     "ids": [
+      "TC-O7-1",
+      "TC-O7-2.c",
+      "TC-O7-3",
+      "TC-O7-4"
+     ],
+     "n": 4
+    },
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "defect": "D-reference/O-7",
+    "evidence": [
+     "ex:reference/a1/TC-O7-1",
+     "ex:reference/a1/TC-O7-1#7",
+     "log:x252.reference.a1/TC-O7-1/7"
+    ],
+    "expected": "Cap limit at a maximum such as 100 and return 422 above it",
+    "flag": null,
+    "kind": "real",
+    "observed": {
+     "json": null,
+     "method": "GET",
+     "path": "/api/v1/items/",
+     "query": {
+      "limit": "1000000000"
+     },
+     "status": 200
+    },
+    "retest": "not retested (M5)",
+    "root_cause": null,
+    "suspects": [
+     {
+      "basis": "handler of the failing request GET /api/v1/items/ (read_items), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 33,
+      "text": "def read_items(",
+      "upstream_line": 14
+     },
+     {
+      "basis": "code_ref of O-7 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 34,
+      "text": "session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100",
+      "upstream_line": 15
+     },
+     {
+      "basis": "code_ref of O-7 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 59,
+      "text": ".limit(limit)",
+      "upstream_line": 40
+     }
+    ],
+    "title": "Item list accepts an unbounded limit"
+   },
+   {
+    "ac": "C-8",
+    "cases": {
+     "d": null,
+     "ids": [
+      "TC-C8-1.2",
+      "TC-C8-2"
+     ],
+     "n": 2
+    },
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "defect": "D-bug:BUG_OWNERSHIP_UPDATE/C-8",
+    "evidence": [
+     "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-C8-1.2",
+     "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-C8-1.2#12",
+     "log:x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-C8-1.2/12"
+    ],
+    "expected": "403 (current)",
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "kind": "seeded",
+    "observed": {
+     "json": {
+      "title": "Updated title"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/fcf35b75-3908-4574-9cfb-dc55c1226f3b",
+     "query": {},
+     "status": 200
+    },
+    "retest": "not retested (M5)",
+    "root_cause": null,
+    "suspects": [
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/fcf35b75-3908-4574-9cfb-dc55c1226f3b (update_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 99,
+      "text": "def update_item(",
+      "upstream_line": 76
+     }
+    ],
+    "title": "User cannot see, change or delete other users' items"
+   },
+   {
+    "ac": "O-8",
+    "cases": {
+     "d": null,
+     "ids": [
+      "TC-O8-1.2"
+     ],
+     "n": 1
+    },
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "defect": "D-bug:BUG_OWNERSHIP_UPDATE/O-8",
+    "evidence": [
+     "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-O8-1.2",
+     "ex:bug:BUG_OWNERSHIP_UPDATE/a1/TC-O8-1.2#12",
+     "log:x252.bug:BUG_OWNERSHIP_UPDATE.a1/TC-O8-1.2/12"
+    ],
+    "expected": "the request is refused with 403 'Not enough permissions', which confirms the item exists",
+    "flag": "BUG_OWNERSHIP_UPDATE",
+    "kind": "seeded",
+    "observed": {
+     "json": {},
+     "method": "PUT",
+     "path": "/api/v1/items/25529176-f2fc-4498-a3c8-89d8844ff10e",
+     "query": {},
+     "status": 200
+    },
+    "retest": "not retested (M5)",
+    "root_cause": null,
+    "suspects": [
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/25529176-f2fc-4498-a3c8-89d8844ff10e (update_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 99,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-8 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 72,
+      "text": "item = session.get(Item, id)",
+      "upstream_line": 53
+     },
+     {
+      "basis": "code_ref of O-8 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 75,
+      "text": "if not current_user.is_superuser and (item.owner_id != current_user.id):",
+      "upstream_line": 56
+     },
+     {
+      "basis": "code_ref of O-8 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "raise HTTPException(status_code=403, detail=\"Not enough permissions\")",
+      "upstream_line": 57
+     }
+    ],
+    "title": "Other users' items return 403, missing items return 404"
+   },
+   {
+    "ac": "C-11",
+    "cases": {
+     "d": null,
+     "ids": [
+      "TC-C11-1.b"
+     ],
+     "n": 1
+    },
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "defect": "D-bug:BUG_TITLE_MAX/C-11",
+    "evidence": [
+     "ex:bug:BUG_TITLE_MAX/a1/TC-C11-1.b",
+     "ex:bug:BUG_TITLE_MAX/a1/TC-C11-1.b#5",
+     "log:x252.bug:BUG_TITLE_MAX.a1/TC-C11-1.b/5"
+    ],
+    "expected": "the title is refused; titles up to 255 characters are allowed",
+    "flag": "BUG_TITLE_MAX",
+    "kind": "seeded",
+    "observed": {
+     "json": {
+      "title": "c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc5c32cc70f16c3d0a7d99ffd09ea54c406dcb4ef45625fa8e1703443b7fb8fddc"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 422
+    },
+    "retest": "not retested (M5)",
+    "root_cause": null,
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 422",
+      "file": "backend/app/api/routes/items.py",
+      "line": 81,
+      "text": "def create_item(",
+      "upstream_line": 62
+     }
+    ],
+    "title": "Item title has a maximum length of 255 characters"
+   }
+  ],
+  "P1": [
+   {
+    "ac": "C-6",
+    "case": "TC-C6-1.2",
+    "closes_it": "a row of C-6 whose request reaches the item rules (the anonymous row stops at auth)",
+    "what": "weak test (cannot fail on any mutant)"
+   },
+   {
+    "ac": "C-8",
+    "case": "TC-C8-1.5",
+    "closes_it": "a row of C-8 whose request reaches the item rules (the anonymous row stops at auth)",
+    "what": "weak test (cannot fail on any mutant)"
+   },
+   {
+    "ac": "C-9",
+    "case": "TC-C9-1.4",
+    "closes_it": "a row of C-9 whose request reaches the item rules (the anonymous row stops at auth)",
+    "what": "weak test (cannot fail on any mutant)"
+   },
+   {
+    "ac": "C-4",
+    "case": "TC-C4-1",
+    "closes_it": "bind TC-C4-1 (needs the clock/decode patches)",
+    "what": "signed case not bound to a test"
+   },
+   {
+    "ac": "C-5",
+    "case": "TC-C5-1",
+    "closes_it": "bind TC-C5-1 (needs the clock/decode patches)",
+    "what": "signed case not bound to a test"
+   },
+   {
+    "ac": "C-5",
+    "case": "TC-C5-2",
+    "closes_it": "bind TC-C5-2 (needs the clock/decode patches)",
+    "what": "signed case not bound to a test"
+   },
+   {
+    "ac": "O-1",
+    "case": "TC-O1-1",
+    "closes_it": "bind TC-O1-1 (needs the clock/decode patches)",
+    "what": "signed case not bound to a test"
+   },
+   {
+    "ac": "O-1",
+    "case": "TC-O1-2",
+    "closes_it": "bind TC-O1-2 (needs the clock/decode patches)",
+    "what": "signed case not bound to a test"
+   },
+   {
+    "ac": "C-4",
+    "case": null,
+    "closes_it": "TC-C4-1",
+    "what": "criterion with no admitted test"
+   },
+   {
+    "ac": "C-5",
+    "case": null,
+    "closes_it": "TC-C5-1, TC-C5-2",
+    "what": "criterion with no admitted test"
+   },
+   {
+    "ac": "O-1",
+    "case": null,
+    "closes_it": "TC-O1-1, TC-O1-2",
+    "what": "criterion with no admitted test"
+   },
+   {
+    "ac": "O-5",
+    "case": null,
+    "closes_it": "TC-O5-1, TC-O5-2, TC-O5-3",
+    "what": "criterion with no admitted test"
+   }
+  ],
+  "P2": {
+   "findings": [],
+   "mutation_strength": {
+    "d": 134,
+    "ids": [],
+    "n": 15
+   },
+   "quarantine": [],
+   "redundant": {
+    "d": 59,
+    "ids": [
+     "TC-C10-1",
+     "TC-C11-1.a",
+     "TC-C11-1.c",
+     "TC-C11-2",
+     "TC-C11-3",
+     "TC-C12-1",
+     "TC-C13-1.b",
+     "TC-C13-1.c",
+     "TC-C13-2",
+     "TC-C14-1",
+     "TC-C15-1",
+     "TC-C6-1.1",
+     "TC-C6-2",
+     "TC-C7-1",
+     "TC-C8-1.1",
+     "TC-C8-1.3",
+     "TC-C8-1.4",
+     "TC-C8-3",
+     "TC-C9-1.1",
+     "TC-C9-1.2",
+     "TC-C9-1.3",
+     "TC-C9-2",
+     "TC-O10-1",
+     "TC-O6-2.b",
+     "TC-O6-2.c",
+     "TC-O6-3.b",
+     "TC-O6-3.c",
+     "TC-O7-2.a",
+     "TC-O7-2.b",
+     "TC-O8-1.1",
+     "TC-O8-1.3",
+     "TC-O8-1.4",
+     "TC-O8-2",
+     "TC-O8-3",
+     "TC-O9-1.a",
+     "TC-O9-1.b",
+     "TC-O9-1.c",
+     "TC-O9-2",
+     "TC-O9-3"
+    ],
+    "n": 39
+   }
+  },
+  "P3": [
+   {
+    "ac": "C-13",
+    "case": "TC-C13-1.a",
+    "evidence": [
+     "ex:reference/a1/TC-C13-1.a"
+    ],
+    "overridden": null,
+    "what": "spec gap",
+    "why": "the criterion is only assumed (gate SPEC_GAP)"
+   },
+   {
+    "ac": "C-9",
+    "case": null,
+    "what": "assumed criterion (never confirmed by a person)",
+    "why": "Administrator can see and manage every item"
+   },
+   {
+    "ac": "C-11",
+    "case": null,
+    "what": "assumed criterion (never confirmed by a person)",
+    "why": "Item title has a maximum length of 255 characters"
+   },
+   {
+    "ac": "C-12",
+    "case": null,
+    "what": "assumed criterion (never confirmed by a person)",
+    "why": "Item list shows newest items first"
+   },
+   {
+    "ac": "C-13",
+    "case": null,
+    "what": "assumed criterion (never confirmed by a person)",
+    "why": "User can page through items by skip and show counts"
+   },
+   {
+    "ac": "C-14",
+    "case": null,
+    "what": "assumed criterion (never confirmed by a person)",
+    "why": "Item list response includes total item count"
+   }
+  ]
+ }
+}
