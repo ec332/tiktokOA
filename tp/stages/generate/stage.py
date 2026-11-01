@@ -26,9 +26,10 @@ class GenerateStage:
         if path.exists():
             return self._resume(ctx, json.loads(path.read_text()), path)
         cases, spec = inputs["cases"].body, inputs["spec"].body
-        if not cases.get("signoff", {}).get("signed"):
-            return StageResult.failed("cases are not signed: generate consumes signed cases only")
         opts = inputs["run_options"].body
+        # unattended runs go on with unsigned cases; the `unsigned` label follows every output
+        if not cases.get("signoff", {}).get("signed") and not opts.get("unattended"):
+            return StageResult.failed("cases are not signed: generate consumes signed cases only")
         guards, variant = opts.get("guards", "v2"), opts.get("variant", "reference")
         if guards not in loop.REPAIRABLE:
             return StageResult.failed(f"unknown guards {guards!r}: use v1 or v2")

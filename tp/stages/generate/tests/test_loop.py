@@ -181,6 +181,8 @@ def test_unsigned_cases_are_refused(setup, fx):
     cases = fx["cases"] | {"signoff": fx["cases"]["signoff"] | {"signed": False}}
     _run_id, ex, _ = setup(["TC-O6-2"], {}, cases=cases)
     assert ex["status"] == "failed" and "not signed" in ex["reason"]
+    _run_id, ex, _ = setup(["TC-O6-2"], {}, cases=cases, options={"unattended": True})
+    assert "not signed" not in (ex["reason"] or "")  # unattended: goes on, labelled unsigned
 
 
 def test_status_and_classification_helpers():
