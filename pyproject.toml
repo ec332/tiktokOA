@@ -29,5 +29,6 @@ line-length = 100
 extend-exclude = ["*.md"]  # never reformat docs or the plan
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "tp/stages"]
+testpaths = ["tests", "tp/stages", "platform_rt/tests"]
+pythonpath = ["platform_rt"]  # host tests import the runtime from source; the runner gets the wheel
 markers = ["docker: needs a running Docker daemon (skipped in CI)"]

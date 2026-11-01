@@ -24,6 +24,8 @@ UNATTENDED_DECISION = {
     "signoff": "defer",
     "question": "defer",
     "confirm_observed": "out_of_scope",  # unconfirmed code-derived behaviour never reaches cases
+    "unbound": "accept_gap",  # an unbindable case is listed as a gap, never silently dropped
+    "equivalent_mutant": "not_equivalent",  # unconfirmed: counts as a survivor (gate D11)
 }  # others fail unattended
 
 

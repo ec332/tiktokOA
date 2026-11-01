@@ -26,11 +26,17 @@ def _run_id(ref: str) -> int:
     return int(ref.removeprefix("r-"))
 
 
-def _options(flows: str | None, fresh: bool) -> dict:
-    """Run options for the stages that read them (spec: fresh; cases: flows, fresh)."""
+def _options(flows: str | None, fresh: bool, opt: list[str] | None = None) -> dict:
+    """Run options for the stages that read them (spec: fresh; cases: flows, fresh;
+    generate: guards, variant, units, max_repairs via --opt key=value, a,b for lists)."""
     opts: dict = {"fresh": True} if fresh else {}
     if flows:
         opts["flows"] = [f.strip() for f in flows.split(",") if f.strip()]
+    for pair in opt or []:
+        k, _, v = pair.partition("=")
+        if not k or not v:
+            raise typer.BadParameter(f"expected key=value, got {pair!r}")
+        opts[k] = [x.strip() for x in v.split(",") if x.strip()] if "," in v or k == "units" else v
     return opts
 
 
@@ -67,6 +73,9 @@ def run(
     brief: Annotated[str | None, typer.Option(help="A vague feature description")] = None,
     flows: Annotated[str | None, typer.Option(help="Cases scope, e.g. FLOW-items-crud,…")] = None,
     fresh: Annotated[bool, typer.Option(help="Reuse no earlier answers or sign-offs")] = False,
+    opt: Annotated[
+        list[str] | None, typer.Option("--opt", help="Stage option key=value (e.g. guards=v1)")
+    ] = None,
 ):
     """Start a pipeline run and drive it until it finishes or needs a review."""
     if story and brief:
@@ -79,7 +88,9 @@ def run(
             else {"kind": "brief", "text": brief}
         )
         inputs["requirements"] = artifacts.put("requirements", req).id
-    run_id = runner.start_run(_mode(mode, replay), stub, unattended, inputs, _options(flows, fresh))
+    run_id = runner.start_run(
+        _mode(mode, replay), stub, unattended, inputs, _options(flows, fresh, opt)
+    )
     result = runner.advance(run_id)
     _print_run(result)
     raise typer.Exit(1 if result["status"] == "failed" else 0)
@@ -113,6 +124,9 @@ def stage_run(
     mode: str = "live",
     flows: Annotated[str | None, typer.Option(help="Cases scope, e.g. FLOW-items-crud,…")] = None,
     fresh: Annotated[bool, typer.Option(help="Reuse no earlier answers or sign-offs")] = False,
+    opt: Annotated[
+        list[str] | None, typer.Option("--opt", help="Stage option key=value (e.g. guards=v1)")
+    ] = None,
 ):
     """Run one stage against saved, hand-written or another run's inputs."""
     if name not in runner.PIPELINE:
@@ -120,7 +134,7 @@ def stage_run(
     run_id = (
         _run_id(run_ref)
         if run_ref
-        else runner.start_run(_mode(mode, replay), stub, options=_options(flows, fresh))
+        else runner.start_run(_mode(mode, replay), stub, options=_options(flows, fresh, opt))
     )
     ex = runner.rerun(
         run_id, name, _parse_inputs(input or []), _run_id(from_run) if from_run else None
