@@ -24,7 +24,7 @@ def folder(execution_id: int) -> Path:
 
 class ExecuteStage:
     name = "execute"
-    version = "1.0.0"
+    version = "1.1.0"  # 1.1: full fingerprint per variant (retest D5)
     consumes: dict[str, int] = {"gate_report": 1, "bound_tests": 1, "env_spec": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"run_records": 1}  # noqa: RUF012
 
@@ -69,9 +69,11 @@ class ExecuteStage:
                 continue
             mismatch = variant == "reference" and bool(ref_hash) and spec["spec_hash"] != ref_hash
             seed = random.randrange(10**8)
+            # the full fingerprint is kept for retest's env diff (retest D5)
             run.envs[variant] = {"spec_hash": spec["spec_hash"], "flags": spec["flags"],
                                  "reproduce": spec["reproduce"], "shuffle_seed": seed,
-                                 "fingerprint_mismatch": mismatch}  # fmt: skip
+                                 "fingerprint_mismatch": mismatch,
+                                 "fingerprint": spec.get("fingerprint")}  # fmt: skip
             for a in range(1, k + 1):
                 env = {"TP_RUN": f"x{ex}.{variant}.a{a}"}
                 if a == k and k >= 3:
