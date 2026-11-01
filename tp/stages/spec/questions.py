@@ -22,11 +22,19 @@ def key(criterion_title: str, about: str) -> str:
     return hashlib.sha256(norm.encode()).hexdigest()[:16]
 
 
-def earlier_answer(k: str) -> dict | None:
-    """A question with this key already answered by a human in any run (the decision log)."""
+def earlier_answer(k: str, scope: dict | None) -> dict | None:
+    """A question with this key a human already answered for the same scope (SUT ref and
+    requirements text) in any run. scope None (a `fresh` run) reuses nothing."""
+    if scope is None:
+        return None
     for item in reversed(review.list_(status="resolved")):
         p = item["payload"]
-        if item["kind"] == "question" and p.get("key") == k and item["decision"] == "pick":
+        if (
+            item["kind"] == "question"
+            and p.get("key") == k
+            and p.get("scope") == scope
+            and item["decision"] == "pick"
+        ):
             choice = next(c for c in p["choices"] if c["id"] == item["detail"]["choice"])
             return {"item": item["id"], "text": choice["text"], "by": item["decided_by"]}
     return None
@@ -46,7 +54,7 @@ def candidates(investigated: list[dict], criteria: dict[str, dict]) -> list[dict
     return out
 
 
-def filter_(cands: list[dict], criteria: dict[str, dict], asked: set[str]) -> tuple:
+def filter_(cands: list[dict], criteria: dict[str, dict], asked: set[str], scope=None) -> tuple:
     """-> (to ask, reused, overflow). Ask only if ≥2 distinct options change an expected value or a
     pass/fail; skip keys asked before in this spec; reuse answers from the decision log."""
     ask, reused, seen = [], [], set(asked)
@@ -60,7 +68,7 @@ def filter_(cands: list[dict], criteria: dict[str, dict], asked: set[str]) -> tu
             continue
         seen.add(k)
         q = {**q, "key": k, "options": options, "criterion_text": _describe(c)}
-        if prior := earlier_answer(k):
+        if prior := earlier_answer(k, scope):
             reused.append({**q, "answer": prior})
         else:
             ask.append(q)

@@ -29,7 +29,7 @@ def _scratch(ctx) -> Path:
 class SpecStage:
     name = "spec"
     version = f"1.0.0+p{ai.prompt_hash()}"  # prompt changes bump the version (design D8)
-    consumes: dict[str, int] = {"requirements": 1}  # noqa: RUF012 — contract shape
+    consumes: dict[str, int] = {"requirements": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"spec": 1, "spec_md": 1}  # noqa: RUF012
 
     def run(self, ctx, inputs):
@@ -37,6 +37,10 @@ class SpecStage:
         state = json.loads(path.read_text()) if path.exists() else None
         if state is None:
             state = self._round1(ctx, inputs["requirements"])
+            fresh = inputs["run_options"].body.get("fresh", False)
+            # Earlier answers are reused only for the same SUT ref and requirements text.
+            state["scope"] = None if fresh else {"sut_ref": state["sut"]["ref"],
+                                                 "requirements": state["requirements"]}  # fmt: skip
             return self._ask(ctx, state, path)
         items = ctx.review.items()
         if open_ := [i["id"] for i in items if i["status"] == "open"]:
@@ -115,7 +119,8 @@ class SpecStage:
     def _ask(self, ctx, state, path, cands=None) -> StageResult:
         crit = {c["id"]: c for c in state["criteria"]}
         cands = state.pop("candidates", []) if cands is None else cands
-        asked, reused, overflow = questions.filter_(cands, crit, set(state["asked"]))
+        scope = state.get("scope")
+        asked, reused, overflow = questions.filter_(cands, crit, set(state["asked"]), scope)
         state["followups"] += overflow
         for q in reused:  # answered before, in any run: apply, don't ask again
             ch = questions.apply_answer(crit.get(q["criterion"]), q, q["answer"]["text"], False)
@@ -131,9 +136,8 @@ class SpecStage:
             state["asked"].append(q["key"])
             payload = {k: q[k] for k in ("key", "criterion", "kind", "about", "changes", "text",
                                          "choices", "recommended")}  # fmt: skip
-            state["pending"].append(
-                ctx.review.create("question", payload | {"round": state["round"]})
-            )
+            payload |= {"round": state["round"], "scope": scope}
+            state["pending"].append(ctx.review.create("question", payload))
         for c in state["criteria"]:
             if c["status"] == "observed" and not c.get("suspected_defect") and not c.get("asked"):
                 c["asked"] = True

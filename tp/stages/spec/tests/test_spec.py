@@ -185,10 +185,10 @@ def model(monkeypatch):
         code_index.build(FILES, "/api/v1") | {"sut": {"name": "fake", "ref": "a" * 40}}, FILES))  # fmt: skip
 
 
-def _start(mode="record", unattended=False, text=STORY, kind="story"):
+def _start(mode="record", unattended=False, text=STORY, kind="story", options=None):
     req = artifacts.put("requirements", {"kind": kind, "text": text})
     run_id = runner.start_run(
-        mode, stub=False, unattended=unattended, inputs={"requirements": req.id}
+        mode, stub=False, unattended=unattended, inputs={"requirements": req.id}, options=options
     )
     runner.advance(run_id)
     return run_id
@@ -276,12 +276,30 @@ def test_same_answers_in_replay_give_the_same_spec_hash(model, tmp_path, monkeyp
     assert replays[0] == replays[1]  # replay twice -> the identical artifact
 
 
+def _open_questions():
+    return [i["payload"]["about"] for i in review.list_(status="open") if i["kind"] == "question"]
+
+
 def test_an_answer_from_an_earlier_run_is_reused_not_asked_again(model):
-    _answer_all(_start())
+    _answer_all(_start())  # picks "20 items" for the default page size
     run_id = _start()
-    asked = [i["payload"]["about"] for i in review.list_(status="open") if i["kind"] == "question"]
-    assert asked == []  # both questions were answered in the first run
-    _, _ = _spec(run_id)
+    assert _open_questions() == []  # both questions were answered in the first run
+    _answer_all(run_id)  # only the code-derived confirmations are asked again
+    ex, spec = _spec(run_id)
+    assert ex["status"] == "succeeded", ex["reason"]
+    c2 = next(c for c in spec["criteria"] if c["id"] == "C-2")
+    assert c2["resolution"] == "20 items" and c2["status"] == "confirmed"
+    reused = [d for d in spec["decisions"] if d.get("reused")]
+    assert {d["about"] for d in reused} == {"default page size", "intended behaviour"}
+
+
+def test_reuse_is_scoped_to_the_same_requirements_and_off_when_fresh(model):
+    _answer_all(_start())
+    for run in ({"text": STORY + "\n- Items can be starred.\n"}, {"options": {"fresh": True}}):
+        _start(**run)  # edited story, or a fresh run: everything is asked again
+        assert sorted(_open_questions()) == ["default page size", "intended behaviour"]
+        for item in review.list_(status="open"):
+            review.resolve(item["id"], "defer" if item["kind"] == "question" else "confirm", "po")
 
 
 def test_brief_path_and_rejecting_observed_behaviour_asks_what_should_happen(model):
