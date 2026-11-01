@@ -2,7 +2,6 @@
 
 import pytest
 
-from tp.stages.env.factories import Factories
 from tp.stages.env.service import EnvDown, Stack, _http
 
 pytestmark = pytest.mark.docker
@@ -25,7 +24,7 @@ def test_factories_create_identical_data_on_rerun(reference):  # E5
     runs = []
     for _ in range(2):
         stack.reset()
-        f = Factories(stack, "TC-7")
+        f = stack.factories("TC-7")
         owner = f.user()
         runs.append([_strip(owner), _strip(f.inactive_user()), _strip(f.item(owner))])
     assert runs[0] == runs[1]
@@ -35,13 +34,13 @@ def test_factories_create_identical_data_on_rerun(reference):  # E5
 def test_factories_differ_per_test_case(reference):
     stack, _ = reference
     stack.reset()
-    assert Factories(stack, "TC-1").user()["email"] != Factories(stack, "TC-2").user()["email"]
+    assert stack.factories("TC-1").user()["email"] != stack.factories("TC-2").user()["email"]
 
 
 def test_inactive_user_cannot_log_in_on_reference(reference):
     stack, _ = reference
     stack.reset()
-    u = Factories(stack, "TC-inactive").inactive_user()
+    u = stack.factories("TC-inactive").inactive_user()
     status, _ = _http(
         "POST",
         stack.api("/login/access-token"),
@@ -55,7 +54,7 @@ def test_db_down_mid_batch_gives_zero_verdicts(reference):  # E7
     no PASS or FAIL is recorded for anything once the env is down."""
     stack, _ = reference
     stack.reset()
-    token = Factories(stack, "TC-batch").superuser()["token"]
+    token = stack.factories("TC-batch").superuser()["token"]
 
     def check(i: int) -> bool:
         if i == 3:
@@ -93,8 +92,62 @@ def test_bug_variant_reports_its_flag_and_shares_the_image(reference):  # E8
             spec["fingerprint"]["images"]["backend"] == ref_spec["fingerprint"]["images"]["backend"]
         )
         assert spec["spec_hash"] != ref_spec["spec_hash"]
-        token = Factories(stack, "TC-title").superuser()["token"]
+        token = stack.factories("TC-title").superuser()["token"]
         status, _ = _http("POST", stack.api("/items/"), token=token, json_body={"title": "t" * 255})
         assert status == 422  # the seeded off-by-one is live in this variant only
     finally:
         stack.down()
+
+
+HARNESS_TESTS = """
+import pytest
+from platform_rt import api, expect
+
+
+@pytest.mark.parametrize("n", range(100))
+def test_create_item(make, n):
+    owner = make.user()
+    r = api.post("/api/v1/items/", token=owner["token"], json={"title": f"item {n}"})
+    expect.status(api.under_test({"title": f"item {n}"}), 200, id=f"create/{n}")
+    assert api.get(f"/api/v1/items/{r.json()['id']}", token=owner["token"]).status_code == 200
+
+
+def test_commit_outside_the_session_is_caught():
+    from sqlmodel import Session
+
+    from app.core.db import engine
+    from app.models import Item, User
+
+    with Session(engine) as s:  # bypasses the harness's savepoint session
+        s.add(Item(title="leak", owner_id=s.query(User).first().id))
+        s.commit()
+
+
+def test_after_a_leak():
+    pass
+"""
+
+
+def test_in_process_harness_rolls_back_every_test(reference, tmp_path):  # E6
+    stack, _ = reference
+    from tp.stages.env.service import SERVICE
+
+    def counts():
+        return {t: stack.psql(f'SELECT count(*) FROM "{t}"') for t in ("user", "item")}
+
+    tests = tmp_path / "tests"
+    tests.mkdir()
+    (tests / "test_harness.py").write_text(HARNESS_TESTS)
+    stack.reset()
+    before = counts()
+    out = SERVICE.pytest(tests, tmp_path / "out")
+    by_name = {r["nodeid"].split("::")[-1]: r for r in out["results"]}
+    creates = [r for n, r in by_name.items() if n.startswith("test_create_item")]
+    assert len(creates) == 100 and all(r["outcome"] == "passed" for r in creates), out["output"]
+    leak = by_name["test_commit_outside_the_session_is_caught"]
+    assert (leak["outcome"], leak["origin"]) == ("failed", "DATA")
+    assert "leak guard" in leak["failure"]["error"]
+    assert by_name["test_after_a_leak"]["outcome"] == "passed"  # reported once, not forever
+    after = counts()  # 100 users + 100 items created and rolled back; only the leak remains
+    assert after == {"user": before["user"], "item": str(int(before["item"]) + 1)}, (before, after)
+    stack.reset()

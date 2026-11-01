@@ -5,6 +5,7 @@ Reached by other stages only through `ctx.env` (the SERVICE at the bottom).
 
 import json
 import re
+import shutil
 import subprocess
 import time
 import urllib.error
@@ -21,6 +22,8 @@ from tp.core.hashing import sha256
 HEALTH = {"interval": "2s", "start_interval": "1s", "retries": 5, "timeout": "5s"}
 TEARDOWN_TIMEOUT = 60  # seconds
 BACKEND_PORT = 8000  # inside the container
+RUN_TIMEOUT = 1800  # seconds for one runner pytest call
+HARNESS_FILES = ("harness.py", "factories.py")  # bind-mounted into the runner (design D14)
 
 
 class EnvError(Exception):
@@ -127,15 +130,18 @@ class Stack:
         env |= {"SMTP_HOST": "mailpit", "SMTP_PORT": "1025", "SMTP_TLS": "false"}
         override = {
             "services": {
-                "db": {"healthcheck": HEALTH},
+                "db": {"healthcheck": HEALTH, "networks": ["default", "internal"]},
                 "backend": {
                     "image": self.image,
+                    "networks": ["default", "internal"],
                     "ports": [f"127.0.0.1::{BACKEND_PORT}"],  # a free host port (D3)
                     "environment": env,
                     "healthcheck": HEALTH,
                 },
                 "mailpit": {"image": "axllent/mailpit"},
-            }
+            },
+            # the runner joins only this one: no outbound network (design D16)
+            "networks": {"internal": {"internal": True}},
         }
         self.dir.mkdir(parents=True, exist_ok=True)
         self.override.write_text(yaml.safe_dump(override, sort_keys=True))
@@ -157,16 +163,23 @@ class Stack:
 
     # ---- lifecycle ---------------------------------------------------------
 
+    def build(self) -> str:
+        """The patched backend image for this patch set, built once (D1). Returns its tag."""
+        sut.verify(self.cfg, self.root)
+        self.write_override()
+        if subprocess.run(
+            ["docker", "image", "inspect", self.image], check=False, capture_output=True
+        ).returncode:
+            self.compose("build", "backend", timeout=1800)
+        return self.image
+
     def up(self, expect: str | None = None) -> dict:
         """Fresh bring-up: sweep → patch → build (once per patch set) → db → migrate+seed →
         template DB → backend + mailpit → probes → fingerprint."""
         sut.verify(self.cfg, self.root)
         self.write_override()
         self.down()  # orphan sweep: every bring-up starts from nothing
-        if subprocess.run(
-            ["docker", "image", "inspect", self.image], check=False, capture_output=True
-        ).returncode:
-            self.compose("build", "backend", timeout=1800)
+        self.build()
         self.compose("up", "-d", "--wait", "db")
         self.compose("run", "--rm", "-T", "backend", "bash", "-c", self.cfg["lifecycle"]["migrate"])
         seed = self.seed_hash()
@@ -214,6 +227,21 @@ class Stack:
         self.psql("DROP DATABASE app WITH (FORCE)", database="postgres")
         self.psql(f"CREATE DATABASE app TEMPLATE {template}", database="postgres")
         return time.perf_counter() - t0
+
+    def factories(self, tc_id: str):
+        from tp.stages.env.factories import Factories
+
+        st = self.state()
+        return Factories(
+            lambda method, path, **kw: _http(method, self.api(path), **kw),
+            (st["FIRST_SUPERUSER"], st["FIRST_SUPERUSER_PASSWORD"]),
+            tc_id,
+        )
+
+    def backend_env(self) -> dict[str, str]:
+        """The backend service's environment as compose resolves it (DB URL, secrets, flags)."""
+        config = json.loads(self.compose("config", "--format", "json").stdout)
+        return {k: str(v) for k, v in config["services"]["backend"]["environment"].items()}
 
     # ---- probes ------------------------------------------------------------
 
@@ -312,11 +340,163 @@ class Stack:
         }
 
 
+def published() -> dict:
+    """data/published.json: the runner image digest, written by generate (plan 1.4)."""
+    path = db.data_dir() / "published.json"
+    if not path.exists():
+        raise EnvError("no runner image published: run `tp generate image`")
+    return json.loads(path.read_text())
+
+
+def _runner_digest(stack: Stack) -> str:
+    pub = published()["runner"]
+    if pub.get("base") != stack.image:  # the in-process SUT code lives in the runner image
+        raise EnvError(f"runner image was built on {pub.get('base')}, but the current patch set "
+                       f"is {stack.image}: run `tp generate image`")  # fmt: skip
+    return pub["digest"]
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    return [json.loads(ln) for ln in path.read_text().splitlines()] if path.exists() else []
+
+
+# One pytest process per job inside one container (gate design D5): each child gets its own
+# interpreter, so its own SUT engine and its own MUTANT_UNDER_TEST.
+MATRIX_DRIVER = """
+import json, os, subprocess, sys
+plan = json.load(open("/work/out/matrix.json"))
+os.makedirs("/work/out/m", exist_ok=True)
+for job in plan["jobs"]:
+    out = "/work/out/m/" + job["key"]
+    env = {**os.environ, **job["env"], "TP_RESULTS": out + ".jsonl"}
+    subprocess.run([sys.executable, "-m", "pytest", *plan["base"], "--junitxml=" + out + ".xml",
+                    *job["args"]], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+"""
+
+
+def run_pytest(
+    tests: Path,
+    out: Path,
+    variant: str = "reference",
+    mode: str = "in_process",
+    env: dict[str, str] | None = None,
+    args: tuple[str, ...] = (),
+    mounts: dict[str, Path] | None = None,
+    matrix: list[dict] | None = None,
+) -> dict:
+    """Run pytest over `tests` in the runner image (design D14).
+
+    in_process: the SUT app in the runner, on the reference stack's DB, with the variant's
+    flags as settings; every test rolls back (harness.py). network: against the variant's
+    running backend. Every batch starts from a freshly reset DB (gate design D6).
+    mounts: extra read-only files, container path -> host path (e.g. mutated SUT files).
+    matrix: [{key, env, args}] runs pytest once per job in one container; results per key.
+    Results: platform_rt's JSONL records + junit XML, written to `out`."""
+    if mode not in ("in_process", "network"):
+        raise EnvError(f"unknown mode {mode!r}")
+    stack = Stack("reference" if mode == "in_process" else variant)
+    stack.state()  # must be up
+    stack.reset()  # every batch starts from the seed (a leak can't carry over)
+    flags = parse_variant(variant, stack.cfg.get("flags", []))
+    runner = _runner_digest(stack)
+    out.mkdir(parents=True, exist_ok=True)
+    for f in ("results.jsonl", "junit.xml"):
+        (out / f).unlink(missing_ok=True)
+    shutil.rmtree(out / "m", ignore_errors=True)
+    tp_env = {
+        **stack.backend_env(),
+        **{f: ("true" if f in flags else "false") for f in stack.cfg.get("flags", [])},
+        "PYTHONPATH": "/tp_env",
+        "TP_MODE": mode,
+        "TP_RESULTS": "/work/out/results.jsonl",
+        "TP_API_BASE": stack.cfg["surfaces"]["api"]["base"],
+        "TP_BASE_URL": f"http://backend:{BACKEND_PORT}",
+        **(env or {}),
+    }
+    here = Path(__file__).parent
+    vols = [f"{tests.resolve()}:/work/tests:ro", f"{out.resolve()}:/work/out"]
+    vols += [f"{here / f}:/tp_env/{f}:ro" for f in HARNESS_FILES]
+    vols += [f"{Path(h).resolve()}:{c}:ro" for c, h in sorted((mounts or {}).items())]
+    base = ["-p", "harness", "-p", "no:cacheprovider", "-q", "--continue-on-collection-errors",
+            "--rootdir=/work/tests"]  # fmt: skip
+    cmd = ["docker", "run", "--rm", "--network", f"{stack.project}_internal"]
+    cmd += [a for v in vols for a in ("-v", v)]
+    cmd += [a for k, v in sorted(tp_env.items()) for a in ("-e", f"{k}={v}")]
+    timeout = RUN_TIMEOUT
+    if matrix is None:
+        cmd += [runner, "python", "-m", "pytest", *base, "--junitxml=/work/out/junit.xml",
+                "/work/tests", *args]  # fmt: skip
+    else:
+        (out / "matrix.json").write_text(json.dumps({"base": base, "jobs": matrix}))
+        cmd += [runner, "python", "-c", MATRIX_DRIVER]
+        timeout = RUN_TIMEOUT + 120 * len(matrix)
+    r = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=timeout)
+    log = (r.stdout + r.stderr)[-4000:]
+    if matrix is not None:
+        if r.returncode:
+            raise EnvError(f"runner matrix exited {r.returncode}: {log[-1500:]}")
+        return {"matrix": {j["key"]: _read_jsonl(out / "m" / f"{j['key']}.jsonl") for j in matrix},
+                "output": log}  # fmt: skip
+    results = _read_jsonl(out / "results.jsonl")
+    if r.returncode not in (0, 1) and not results:  # 0 pass, 1 failures; others: pytest broke
+        raise EnvError(f"runner pytest exited {r.returncode}: {log[-1500:]}")
+    return {"returncode": r.returncode, "results": results, "junit": str(out / "junit.xml"),
+            "output": log}  # fmt: skip
+
+
+def run_in_runner(
+    cmd: list[str],
+    mounts: dict[str, Path] | None = None,
+    writable: dict[str, Path] | None = None,
+    timeout: int = 600,
+) -> str:
+    """Run a command in the runner image with no network (e.g. mutant generation). Returns
+    stdout. mounts are read-only; writable mounts are for its output."""
+    runner = _runner_digest(Stack("reference"))
+    vols = [f"{Path(h).resolve()}:{c}:ro" for c, h in sorted((mounts or {}).items())]
+    vols += [f"{Path(h).resolve()}:{c}" for c, h in sorted((writable or {}).items())]
+    r = subprocess.run(["docker", "run", "--rm", "--network", "none",
+                        *[a for v in vols for a in ("-v", v)], runner, *cmd],
+                       check=False, capture_output=True, text=True, timeout=timeout)  # fmt: skip
+    if r.returncode:
+        raise EnvError(f"runner command failed ({r.returncode}): {(r.stderr or r.stdout)[-1500:]}")
+    return r.stdout
+
+
 class EnvService:
     """What `ctx.env` is. Every method takes the variant name."""
 
     def up(self, variant: str, expect: str | None = None) -> dict:
         return Stack(variant).up(expect)
+
+    def ensure(self, variant: str) -> None:
+        """Bring the variant up only if it isn't already up and healthy (D17)."""
+        stack = Stack(variant)
+        try:
+            stack.guard()
+        except EnvError:
+            stack.up()
+
+    def openapi(self, variant: str) -> dict:
+        stack = Stack(variant)
+        status, body = _http("GET", stack.base_url + stack.cfg["surfaces"]["api"]["openapi"])
+        if status != 200:
+            raise EnvError(f"openapi: {status}")
+        return body
+
+    def backend_image(self, variant: str = "reference") -> str:
+        return Stack(variant).build()
+
+    def pytest(self, tests: Path, out: Path, variant: str = "reference", **kw) -> dict:
+        return run_pytest(tests, out, variant, **kw)
+
+    def runner(self, cmd: list[str], **kw) -> str:
+        return run_in_runner(cmd, **kw)
+
+    def code_scope(self) -> dict:
+        """The SUT manifest's mutation scope and where the patched source is on the host."""
+        stack = Stack("reference")
+        return {"mutate": stack.cfg.get("code_scope", {}).get("mutate", []), "src": stack.src}
 
     def probe(self, variant: str) -> list[dict]:
         return Stack(variant).probe()
@@ -331,9 +511,7 @@ class EnvService:
         Stack(variant).down()
 
     def factories(self, variant: str, tc_id: str):
-        from tp.stages.env.factories import Factories
-
-        return Factories(Stack(variant), tc_id)
+        return Stack(variant).factories(tc_id)
 
 
 SERVICE = EnvService()

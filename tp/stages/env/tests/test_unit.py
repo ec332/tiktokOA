@@ -42,9 +42,48 @@ def test_override_sets_every_flag_explicitly_and_a_free_port(tmp_path):
     assert backend["environment"]["FASTAPI_ENV"] == "development"
 
 
+def test_override_puts_db_and_backend_on_an_internal_network(tmp_path):  # design D16
+    stack = Stack.__new__(Stack)
+    stack.cfg, stack.flags, stack.image, stack.dir = {"flags": []}, [], "x", tmp_path
+    stack.write_override()
+    override = yaml.safe_load(stack.override.read_text())
+    assert override["networks"] == {"internal": {"internal": True}}
+    for svc in ("db", "backend"):
+        assert override["services"][svc]["networks"] == ["default", "internal"]
+    assert "networks" not in override["services"]["mailpit"]
+
+
 def test_env_stage_registers_service_and_cli():
     contract.load()
-    assert contract.resolve("env").version == "1.0.0"
+    assert contract.resolve("env").version == "1.1.0"
     assert contract.resolve("env", stub=True).version == "0.0.0-stub"  # stub kept (D11)
     assert contract.SERVICES["env"] is service.SERVICE
     assert "env" in contract.CLIS
+
+
+def test_runner_built_on_another_patch_set_is_refused(tmp_path, monkeypatch):  # review gap 5
+    import json
+
+    import pytest
+
+    from tp.stages.env import service
+
+    class FakeStack:
+        cfg, image, project = {"flags": []}, "tp-sut-backend:new", "tp_reference"
+
+        def __init__(self, variant):
+            pass
+
+        def state(self):
+            return {}
+
+        def reset(self):
+            return 0.0
+
+    monkeypatch.setenv("TP_DATA", str(tmp_path))
+    monkeypatch.setattr(service, "Stack", FakeStack)
+    (tmp_path / "published.json").write_text(
+        json.dumps({"runner": {"digest": "sha256:x", "base": "tp-sut-backend:old"}})
+    )
+    with pytest.raises(service.EnvError, match="tp generate image"):
+        service.run_pytest(tmp_path / "tests", tmp_path / "out")
