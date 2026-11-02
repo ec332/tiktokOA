@@ -293,3 +293,24 @@ def test_analyse_cites_only_evidence_that_exists(spec):
         f"log:{PAGINATION_TRACE}",
     ]
     assert o6["suspects"][0]["upstream_line"] == 15
+
+
+def test_fix_patch_is_built_by_code_and_checked():
+    """M8 triage D14: find must occur once; result must parse; the diff is git-style."""
+    from tp.stages.triage import propose
+
+    files = {"backend/app/models.py": "x = Field(le=99)\ny = 1\n"}
+    diff, problems = propose.build_patch(
+        [{"file": "backend/app/models.py", "find": "le=99", "replace": "le=100"}], files
+    )
+    assert not problems and "--- a/backend/app/models.py" in diff and "+x = Field(le=100)" in diff
+    _, problems = propose.build_patch(
+        [{"file": "backend/app/models.py", "find": "= ", "replace": "="}], files
+    )
+    assert problems == ["backend/app/models.py: find text occurs 2 times, needs exactly 1"]
+    _, problems = propose.build_patch(
+        [{"file": "backend/app/models.py", "find": "y = 1", "replace": "y = ("}], files
+    )
+    assert "does not parse" in problems[0]
+    _, problems = propose.build_patch([{"file": "other.py", "find": "a", "replace": "b"}], files)
+    assert problems == ["other.py: not one of the suspect files"]

@@ -8,7 +8,7 @@ from pathlib import Path
 
 from tp.core import db
 from tp.core.contract import StageResult, register
-from tp.stages.triage import localise, rules
+from tp.stages.triage import localise, propose, rules
 from tp.stages.triage.evidence import EvidenceIndex
 
 
@@ -96,7 +96,7 @@ def _excerpt(eid: str, ev: dict) -> dict:
 
 class TriageStage:
     name = "triage"
-    version = "1.0.0"
+    version = f"1.1.0+p{propose.prompt_hash()}"  # 1.1: fix suggestions (M8 D14)
     consumes: dict[str, int] = {"run_records": 1, "gate_report": 1, "cases": 1, "spec": 1}  # noqa: RUF012
     produces: dict[str, int] = {"triage": 1}  # noqa: RUF012
 
@@ -116,6 +116,16 @@ class TriageStage:
                 else {}
             )
             state = analyse(rr, rows, probes, logs, inputs["spec"].body, read, app)
+            crit = {c["id"]: c for c in inputs["spec"].body["criteria"]}
+            for d in state["defects"]:
+                if d["kind"] != "real" or not src:
+                    continue
+                files = {s["file"]: got[1] for s in d["suspects"][:5]
+                         if (got := read(s["file"])) and got[1]}  # fmt: skip
+                if files:
+                    d["suggestion"] = propose.suggest(ctx.llm, d, crit.get(d["ac"]), files)
+                    ctx.emit("triage_fix_suggested", defect=d["id"],
+                             applies=d["suggestion"]["applies"])  # fmt: skip
             choices = [{"id": c, "text": c} for c in rules.CLASSES]
             for d in state["defects"]:
                 if d["kind"] == "real":
