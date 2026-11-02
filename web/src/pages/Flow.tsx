@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { api, ok, type Event, type Execution, type ReviewItem, type RunDetail } from "../api/client";
+import { api, ok, type Execution, type ReviewItem, type RunDetail } from "../api/client";
 import { Approve } from "../panels/cases/Approve";
 import { ProductReport, type Product } from "../panels/report/Product";
 import { Clarify } from "../panels/spec/Clarify";
 import { resolveItem } from "../flow/resolve";
 import { ApprovedTests, BuildResults, ClarifyHistory, Requirements, type CasesBody, type Criterion, type GateRow, type Verdict } from "../flow/Details";
 import { NavProvider, STEP, type Target } from "../flow/nav";
+import { Activity, say } from "../flow/Activity";
 
 function OtherDecision({ item, onDone }: { item: ReviewItem; onDone: () => void }) {
   const go = useMutation({ mutationFn: (d: string) => resolveItem(item.id, { decision: d, reason: "decided on the run page" }), onSuccess: onDone });
@@ -30,35 +31,6 @@ const STEPS: { name: string; stages: string[] }[] = [
   { name: "Build and check", stages: ["generate", "gate", "env", "execute"] },
   { name: "Report", stages: ["triage", "report"] },
 ];
-
-/** One plain line per progress event; unknown kinds are skipped. */
-function say(e: Event): string | null {
-  const p = e.payload as Record<string, number | string | Record<string, number>>;
-  switch (e.kind) {
-    case "spec_focused": return `Focused on ${p.routes} routes in ${p.files} files`;
-    case "spec_investigated": return `Read the code: ${p.observed} behaviours, ${p.findings} findings`;
-    case "spec_frozen": return `${p.criteria} requirements written down`;
-    case "cases_drafted": return `${p.units} tests designed`;
-    case "cases_signed": case "cases_unsigned": return `${p.approved} of ${p.lines} tests approved`;
-    case "runner_rebuilding": return "Rebuilding the test runner for your branch (about a minute)";
-    case "runner_rebuilt": return "Test runner ready";
-    case "stage_retried": return `Retrying ${p.stage}`;
-    case "bindings_written": return `Writing test code for ${p.units} tests`;
-    case "dry_run": return `Checking the test code (round ${p.round})`;
-    case "tests_bound": return `Test code ready: ${Object.entries(p).map(([k, v]) => `${v} ${k.toLowerCase()}`).join(", ")}`;
-    case "env_up": return "Stack is up";
-    case "gate_stability": return `${p.stable_passing} of ${p.nodes} tests pass every time on your branch`;
-    case "gate_matrix": return `Mutation check: ${p.mutants} code changes, ${p.jobs} runs`;
-    case "gate_done": return `Gate: ${Object.entries(p).map(([k, v]) => `${v} ${k.toLowerCase().replace(/_/g, " ")}`).join(", ")}`;
-    case "execute_variant": return `Running the admitted tests on ${p.variant === "reference" ? "your branch" : p.variant}`;
-    case "execute_sealed": return "Results recorded and sealed";
-    case "triage_classified": return `${p.defects} defects among ${p.findings} failing results`;
-    case "triage_fix_suggested": return `Fix suggested for ${p.defect}`;
-    case "report_written": return "Report ready";
-    case "stage_failed": return `Failed: ${p.reason}`;
-    default: return null;
-  }
-}
 
 function elapsed(from?: string | null) {
   if (!from) return "";
@@ -171,6 +143,7 @@ export function Flow({ run }: { run: RunDetail }) {
 
   return (
     <NavProvider value={go}>
+    <div className="flow-layout">
     <div className="page">
       <div className="row">
         <span className="muted grow" style={{ fontSize: 13 }}>
@@ -217,6 +190,8 @@ export function Flow({ run }: { run: RunDetail }) {
         </div>
       )}
       {other.map((i) => <OtherDecision key={i.id} item={i as ReviewItem} onDone={refresh} />)}
+    </div>
+    <Activity events={events.data ?? []} executions={run.executions} />
     </div>
     </NavProvider>
   );

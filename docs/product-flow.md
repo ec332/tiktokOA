@@ -72,9 +72,9 @@ Rules apply to **this run only** and are **added after** the defaults. The defau
 
 | Section | Default | What you can add |
 |---|---|---|
-| **Clarifications** | 6 standing rules, e.g. "Every input with a size, length or count: check the minimum, the maximum, and just outside both." | Your own lines, and **Suggest rules for this feature**: the agent proposes general rules ("Money fields: ask how amounts are rounded…"). They start unticked, and they never state facts about your code, so they can't give away the bugs. |
-| **Test cases** | The drafter's own rules | Your own lines, e.g. "Every price test includes 0 and 0.01", plus switches for the four test-design templates: boundary values, decision table (including authorisation), error and exception paths, error guessing. |
-| **Gate** | Stability runs 5 · min. mutants killed 1 · gap distance 3 lines · every requirement needs a test | Numbers within fixed limits. The gate is fixed code, so its rules are settings rather than text. |
+| **Clarifications** | 6 standing rules: points the requirements must settle, e.g. "Every input with a size, length or count: settle its minimum and maximum, and what happens just outside them." The platform settles each from your text or the code, and asks you only when neither does. | Your own lines, and **Suggest rules for this feature**: the agent proposes general rules ("Money fields: ask how amounts are rounded…"). They start unticked, and they never state facts about your code, so they can't give away the bugs. |
+| **Test cases** | The drafter's own rules | How to test once the requirements are settled (it adds no requirements). Your own lines, e.g. "Every price test includes 0 and 0.01", plus switches for the four test-design templates: boundary values, decision table (including authorisation), error and exception paths, error guessing. |
+| **Gate** | Runs per test 5 · planted bugs a test must catch 1 · link missed changes within 3 lines · list requirements with no admitted test | Numbers within fixed limits. The gate is fixed code, so its rules are settings rather than text. The last switch only lists uncovered requirements under Areas to improve; it blocks nothing. |
 
 **Start run** opens the run page.
 
@@ -102,7 +102,7 @@ There can be a second round of follow-ups. **Expanded:** every question and its 
 
 ### 3. Design and approve tests (agent, then you)
 The agent designs test cases from the requirements, the templates and your rules. A requirement that has no normal-case ("acceptance") test gets one automatic re-draft.
-**Approve** shows each test as a title plus "catches …" (the bug it is meant to find), grouped by requirement. **Untick** to leave a test out. It is not generated, and nothing is rewritten. Notes from the design check, such as a requirement still lacking a case, appear at the top. **Generate N tests** signs the cases. Only signed cases become code.
+**Approve** shows each test as a title plus "catches …" (the bug it is meant to find), grouped by priority and then by requirement. Priority is fixed code: **P0 · likely defects** (a suspected defect), **P1 · the feature** (your own requirements, or ones citing lines your branch changed), **P2 · other checks** (code your branch didn't change; collapsed by default). **Untick** to leave a test out. It is not generated, and nothing is rewritten. Notes from the design check, such as a requirement still lacking a case, appear at the top. **Generate N tests** signs the cases. Only signed cases become code.
 **Expanded:** the approved tests, each with a link to its results.
 
 ### 4. Build and check (agent + fixed code)
@@ -126,6 +126,11 @@ The agent designs test cases from the requirements, the templates and your rules
 | **Rules used in this run** | The routes, rules, templates and gate settings the run actually used. |
 
 **Every reference is a link.** A requirement id opens step 1 at that requirement. A test in "Found by" opens step 3 at that test. A test in "Problematic tests" opens step 4 at its result. The item is highlighted.
+
+### Keep the tests (Export)
+**Export tests…** lists every generated test file by priority. Stable tests that the gate admitted or that found a defect are pre-ticked; the others show why not (weak, flaky, the test is wrong). **Create branch tp/tests-r-NNNN** writes the ticked tests to a **new branch** of your repo, starting at the commit the run tested, in one commit under `backend/tests/generated/` (tests, a `conftest.py`, the runtime in `_support/`, and a README). Your checkout and current branch are not touched, and an existing branch is never overwritten. Run them with `cd backend && pytest tests/generated` (database up). Tests that found a defect fail until it is fixed. Fixes are not exported.
+
+In the report, weak tests and "Unnoticed change" items are collapsed by default.
 
 ### Defect actions
 | Button | What happens |

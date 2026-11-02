@@ -107,8 +107,8 @@ function RepoCard({ sut, onChanged }: { sut: SutInfo; onChanged: () => void }) {
   );
 }
 
-function RuleList({ title, defaults, mine, setMine, suggestions, picked, setPicked, onSuggest, suggesting, suggestError }: {
-  title: string; defaults: string[]; mine: string[]; setMine: (r: string[]) => void;
+function RuleList({ title, hint, placeholder, defaults, mine, setMine, suggestions, picked, setPicked, onSuggest, suggesting, suggestError }: {
+  title: string; hint: string; placeholder: string; defaults: string[]; mine: string[]; setMine: (r: string[]) => void;
   suggestions?: Suggestion[]; picked?: Set<string>; setPicked?: (s: Set<string>) => void;
   onSuggest?: () => void; suggesting?: boolean; suggestError?: string;
 }) {
@@ -116,7 +116,8 @@ function RuleList({ title, defaults, mine, setMine, suggestions, picked, setPick
   const add = () => { if (draft.trim()) { setMine([...mine, draft.trim()]); setDraft(""); } };
   return (
     <div>
-      <h2 style={{ marginTop: 0 }}>{title}</h2>
+      <h2 style={{ marginTop: 0, marginBottom: 2 }}>{title}</h2>
+      <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>{hint}</p>
       {defaults.map((r) => <div key={r} className="rule default">✓ <span>{r}</span></div>)}
       {defaults.length > 0 && <div className="muted" style={{ fontSize: 12 }}>Default rules always apply.</div>}
       {onSuggest && (
@@ -139,7 +140,7 @@ function RuleList({ title, defaults, mine, setMine, suggestions, picked, setPick
         </div>
       ))}
       <div className="row" style={{ marginTop: 6 }}>
-        <input type="text" className="grow" placeholder="Add your own rule for this run" value={draft}
+        <input type="text" className="grow" placeholder={placeholder} value={draft}
           onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
         <button onClick={add} disabled={!draft.trim()}>Add</button>
       </div>
@@ -248,12 +249,16 @@ export function NewRunPage() {
         <summary>Rules for this run <span className="muted" style={{ fontWeight: 400 }}>(optional · {clarify.length + picked.size + caseRules.length} added)</span></summary>
         {defaults.data && g && (
           <div className="rules-grid">
-            <RuleList title="Clarifications" defaults={defaults.data.clarify} mine={clarify} setMine={setClarify}
+            <RuleList title="Clarifications"
+              hint="What the requirements must settle before tests are designed. The platform settles each point from your text or the code, and asks you when neither does."
+              placeholder="e.g. Money fields: settle how amounts are rounded" defaults={defaults.data.clarify} mine={clarify} setMine={setClarify}
               suggestions={suggestions} picked={picked} setPicked={setPicked}
               onSuggest={overview.trim() || (mode === "endpoint" && chosen.size) ? () => suggest.mutate() : undefined} suggesting={suggest.isPending}
               suggestError={suggest.error ? (suggest.error as Error).message : undefined} />
             <div>
-              <RuleList title="Test cases" defaults={[]} mine={caseRules} setMine={setCaseRules} />
+              <RuleList title="Test cases"
+              hint="How to test once the requirements are settled: which inputs and scenarios every test set must include. Doesn't add requirements."
+              placeholder="e.g. Every price test includes 0 and 0.01" defaults={[]} mine={caseRules} setMine={setCaseRules} />
               <div className="chips" style={{ marginTop: 8 }}>
                 {allTemplates.map((t) => (
                   <label key={t} className={`chip ${tpl.has(t) ? "on" : ""}`}>
@@ -266,18 +271,26 @@ export function NewRunPage() {
               </div>
             </div>
             <div>
-              <h2 style={{ marginTop: 0 }}>Gate</h2>
+              <h2 style={{ marginTop: 0, marginBottom: 2 }}>Gate</h2>
+              <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>
+                When a generated test's result is trusted. Fixed code, no AI. A failure counts as a defect only from a stable test on a confirmed requirement.
+              </p>
               <div className="row">
-                {([["k", "Stability runs"], ["min_kills", "Min. mutants killed to admit"], ["near", "Gap distance (lines)"]] as const).map(([k, label]) => (
-                  <label key={k} className="field"><span>{label}</span>
+                {([
+                  ["k", "Runs per test", "A test must give the same result on every run plus one shuffled run, or it is FLAKY."],
+                  ["min_kills", "Planted bugs a test must catch", "The gate plants small changes in the feature's code. A test that catches fewer is WEAK."],
+                  ["near", "Link missed changes within N lines", "A planted change no test caught, this close to a line a requirement cites, is listed under that requirement as an unnoticed change."],
+                ] as const).map(([k, label, help]) => (
+                  <label key={k} className="field" title={help}><span>{label}</span>
                     <input type="number" style={{ width: 90 }} value={g[k]}
                       min={defaults.data.gate.limits[k][0]} max={defaults.data.gate.limits[k][1]}
                       onChange={(e) => setGate({ ...g, [k]: Number(e.target.value) })} />
+                    <small className="muted" style={{ maxWidth: 220 }}>{help}</small>
                   </label>
                 ))}
                 <label className="row" style={{ fontSize: 13 }}>
                   <input type="checkbox" checked={g.every_criterion} onChange={(e) => setGate({ ...g, every_criterion: e.target.checked })} />
-                  Every requirement needs an admitted test
+                  List requirements with no admitted test (under Areas to improve)
                 </label>
               </div>
             </div>

@@ -3,7 +3,9 @@
 import asyncio
 import json
 import logging
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Request
@@ -104,6 +106,10 @@ class SuggestRules(BaseModel):
 class RetestRequest(BaseModel):
     defect: str
     mode: Literal["suggested", "mine"]
+
+
+class ExportRequest(BaseModel):
+    tests: list[str]  # case units (test files) to export
 
 
 class DefectDecision(BaseModel):
@@ -289,6 +295,60 @@ def retest(run_id: int, body: RetestRequest):
                                          "defect": d["id"], "after": after})  # fmt: skip
     submit(runner.rerun, run_id, "retest", {"run_options": opts.id})
     return runner.get_run(run_id)
+
+
+def _export_inputs(run_id: int) -> tuple[dict, dict, list[dict], dict]:
+    """(run, target, candidates, bound tests) for a run's export (M8 report/009)."""
+    run, heads = get_run(run_id), runner.heads(run_id)
+    if missing := [k for k in ("bound_tests", "gate_report", "cases", "spec") if k not in heads]:
+        raise HTTPException(409, f"nothing to export yet (missing {', '.join(missing)})")
+    t = sut.target()
+    if not t:
+        raise HTTPException(409, "no repo target is set")
+    body = {
+        k: artifacts.get(heads[k]).body for k in ("bound_tests", "gate_report", "cases", "spec")
+    }
+    tri = artifacts.get(heads["triage"]).body if "triage" in heads else None
+    cands = contract.resolve("report").export_candidates(
+        body["bound_tests"], body["gate_report"], body["cases"], tri
+    )
+    return run, t | {"tested": body["spec"]["sut"]["ref"]}, cands, body["bound_tests"]
+
+
+def _exports(run_id: int) -> list[dict]:
+    """Earlier exports of this run, newest first."""
+    bodies = (artifacts.get(a["id"]).body for a in artifacts.list_("test_export"))
+    return [b for b in bodies if b.get("run_id") == run_id]
+
+
+@app.get("/runs/{run_id}/export")
+def export_preview(run_id: int):
+    """What an export would write: the tests (pre-ticked = trusted) and the branch name."""
+    run, t, cands, _ = _export_inputs(run_id)
+    branch = contract.resolve("report").export_branch(run["name"])
+    exists = bool(subprocess.run(["git", "-C", t["repo"], "branch", "--list", branch],
+                                 capture_output=True, text=True, check=False).stdout.strip())  # fmt: skip
+    return {"repo": t["repo"], "branch": branch, "branch_exists": exists, "ref": t["tested"],
+            "from_branch": t["branch"], "tests": cands, "exports": _exports(run_id)}  # fmt: skip
+
+
+@app.post("/runs/{run_id}/export")
+def export_tests(run_id: int, body: ExportRequest):
+    """Write the chosen tests to a new branch of the user's repo, in one commit."""
+    rep = contract.resolve("report")
+    run, t, cands, bound = _export_inputs(run_id)
+    chosen = [c for c in cands if c["unit"] in set(body.tests)]
+    if unknown := set(body.tests) - {c["unit"] for c in chosen}:
+        raise HTTPException(404, f"no such tests in this run: {sorted(unknown)}")
+    sources = {b["file"]: b["source"] for b in bound["tests"]}
+    try:
+        res = rep.export_tests(Path(t["repo"]), t["tested"], rep.export_branch(run["name"]),
+                            run["name"], chosen, sources,
+                            contract.SERVICES["env"].harness_files())  # fmt: skip
+    except rep.ExportError as e:
+        raise HTTPException(409, str(e))
+    artifacts.put("test_export", {**res, "run_id": run_id, "ref": t["tested"]})
+    return res
 
 
 @app.post("/runs/{run_id}/defects/{defect:path}", response_model=ReviewItem)
