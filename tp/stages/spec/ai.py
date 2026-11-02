@@ -136,14 +136,39 @@ def extract(llm, kind: str, requirements: str) -> list[dict]:
     return _call(llm, p, EXTRACT_MODEL, EXTRACT_SCHEMA, EXTRACT_EFFORT)["criteria"]
 
 
-def investigate(llm, kind: str, requirements: str, criteria, index, source, flagged) -> dict:
+def rules_text(extra: list[str] | None = None) -> str:
+    """rules.md, then this run's added rules (M8 spec D13). The defaults always apply."""
+    base = (PROMPTS / "rules.md").read_text().rstrip()
+    if not extra:
+        return base
+    return base + "\n\nRules added for this run:\n" + "\n".join(f"- {r}" for r in extra)
+
+
+def default_rules() -> list[str]:
+    return [ln[2:].strip() for ln in (PROMPTS / "rules.md").read_text().splitlines()
+            if ln.startswith("- ")]  # fmt: skip
+
+
+SUGGEST_SCHEMA = _obj({"rules": {"type": "array", "items": _obj(
+    {"rule": {"type": "string"}, "why": {"type": "string"}})}})  # fmt: skip
+
+
+def suggest_rules(llm, overview: str, routes: list[str], source: str) -> list[dict]:
+    """M8 spec D14: feature-specific rule suggestions. Shown unticked; never applied by itself."""
+    p = _prompt("rule_suggester", RULES=rules_text(), OVERVIEW=overview,
+                ROUTES="\n".join(routes) or "(none chosen)", SOURCE=source)  # fmt: skip
+    return _call(llm, p, WRITER_MODEL, SUGGEST_SCHEMA, "low", 4000)["rules"][:6]
+
+
+def investigate(llm, kind: str, requirements: str, criteria, index, source, flagged,
+                extra_rules: list[str] | None = None) -> dict:  # fmt: skip
     view = [{k: c[k] for k in ("id", "title", "actor", "given", "when", "then", "status_code")}
             for c in criteria]  # fmt: skip
     p = _prompt(
         "investigator",
         KIND=kind,
         OBSERVED_GUIDANCE=OBSERVED[kind],
-        RULES=(PROMPTS / "rules.md").read_text(),
+        RULES=rules_text(extra_rules),
         FLAGGED=json.dumps(flagged) if flagged else "none",
         REQUIREMENTS=requirements,
         CRITERIA=json.dumps(view, indent=1),

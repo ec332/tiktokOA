@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from tp.core import db, sut
+from tp.core import db, review, sut
 from tp.core.contract import StageResult, register
 from tp.stages.spec import ai, checks, code_index, questions
 from tp.stages.spec.cli import app as cli
@@ -20,6 +20,25 @@ def load_index(root: Path = Path(".")) -> tuple[dict, dict[str, str]]:
     return idx, files
 
 
+def _rules(opts: dict) -> list[str]:
+    return list((opts.get("rules") or {}).get("clarify", []))
+
+
+def suggest_rules(llm, overview: str, routes: list[str]) -> list[dict]:
+    """For the New run screen (M8 D14): suggestions from the overview and the chosen routes."""
+    index, files = load_index()
+    changed = list((sut.load().get("target") or {}).get("changed", {}))
+    if routes:
+        index, files = code_index.focus(index, files, routes, changed)
+    return ai.suggest_rules(llm, overview, routes, code_index.numbered_source(files))
+
+
+def routes() -> list[dict]:
+    """Every API route of the target, for the route chips: [{method, path, file, line}]."""
+    index, _ = load_index()
+    return [{k: r[k] for k in ("method", "path", "file", "line")} for r in index["routes"]]
+
+
 def _scratch(ctx) -> Path:
     # shortcut: draft kept outside the artifact store between review rounds (design D11);
     # replace with a contract-level scratch store if a second stage needs one.
@@ -31,16 +50,23 @@ class SpecStage:
     version = f"1.0.0+p{ai.prompt_hash()}"  # prompt changes bump the version (design D8)
     consumes: dict[str, int] = {"requirements": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"spec": 1, "spec_md": 1}  # noqa: RUF012
+    # for the New run screen (M8), reached through the stage registry
+    routes = staticmethod(routes)
+    suggest_rules = staticmethod(suggest_rules)
+    default_rules = staticmethod(ai.default_rules)
 
     def run(self, ctx, inputs):
         path = _scratch(ctx)
         state = json.loads(path.read_text()) if path.exists() else None
         if state is None:
-            state = self._round1(ctx, inputs["requirements"])
-            fresh = inputs["run_options"].body.get("fresh", False)
-            # Earlier answers are reused only for the same SUT ref and requirements text.
-            state["scope"] = None if fresh else {"sut_ref": state["sut"]["ref"],
-                                                 "requirements": state["requirements"]}  # fmt: skip
+            opts = inputs["run_options"].body
+            state = self._round1(ctx, inputs["requirements"], opts)
+            # Earlier answers are reused only for the same SUT ref, requirements text, routes and
+            # rules (M8 D15): new rules can change what should be asked.
+            scope = {"sut_ref": state["sut"]["ref"], "requirements": state["requirements"]}
+            if opts.get("routes") or _rules(opts):
+                scope |= {"routes": sorted(opts.get("routes", [])), "rules": _rules(opts)}
+            state["scope"] = None if opts.get("fresh", False) else scope
             return self._ask(ctx, state, path)
         items = ctx.review.items()
         if open_ := [i["id"] for i in items if i["status"] == "open"]:
@@ -55,9 +81,13 @@ class SpecStage:
 
     # ---- round 1: extract, check, lint, investigate ------------------------------
 
-    def _round1(self, ctx, req) -> dict:
+    def _round1(self, ctx, req, opts) -> dict:
         kind, text = req.body["kind"], req.body["text"]
         index, files = load_index()
+        if opts.get("routes"):  # M8 D12: the chosen routes, their app imports, the branch diff
+            changed = list((sut.load().get("target") or {}).get("changed", {}))
+            index, files = code_index.focus(index, files, opts["routes"], changed)
+            ctx.emit("spec_focused", routes=len(index["routes"]), files=len(files))
         extracted, rejected = checks.check_extracted(ai.extract(ctx.llm, kind, text), text)
         criteria = [{"id": f"C-{n}", **c} for n, c in enumerate(extracted, 1)]
         checks.lint_all(criteria)
@@ -65,7 +95,7 @@ class SpecStage:
             c.update(status=checks.initial_status(c), suspected_defect=False, review_needed=False)
         flagged = {c["id"]: c["ambiguity"] for c in criteria if c["ambiguity"]}
         source = code_index.numbered_source(files)
-        found = ai.investigate(ctx.llm, kind, text, criteria, index, source, flagged)
+        found = ai.investigate(ctx.llm, kind, text, criteria, index, source, flagged, _rules(opts))
         ctx.emit(
             "spec_investigated", findings=len(found["findings"]), observed=len(found["observed"])
         )
@@ -137,6 +167,8 @@ class SpecStage:
             payload = {k: q[k] for k in ("key", "criterion", "kind", "about", "changes", "text",
                                          "choices", "recommended")}  # fmt: skip
             payload |= {"round": state["round"], "scope": scope}
+            payload["choices"] = [*payload["choices"], {"id": review.OTHER_CHOICE,
+                                  "text": "Other: describe what should happen"}]  # fmt: skip
             state["pending"].append(ctx.review.create("question", payload))
         for c in state["criteria"]:
             if c["status"] == "observed" and not c.get("suspected_defect") and not c.get("asked"):
@@ -172,7 +204,9 @@ class SpecStage:
                 continue
             choices = {ch["id"]: ch["text"] for ch in p["choices"]}
             deferred = item["decision"] == "defer"
-            text = choices[p["recommended"] if deferred else item["detail"]["choice"]]
+            picked = None if deferred else item["detail"]["choice"]
+            text = (item["detail"]["text"] if picked == review.OTHER_CHOICE
+                    else choices[p["recommended"] if deferred else picked])  # fmt: skip
             q = {"kind": p["kind"], "changes": p["changes"]}
             if ch := questions.apply_answer(crit.get(p["criterion"]), q, text, deferred):
                 changes.append(ch)

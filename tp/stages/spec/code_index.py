@@ -135,3 +135,19 @@ def numbered_source(files: dict[str, str]) -> str:
         out.append(f"=== {path}")
         out += [f"{i:>4}  {line}" for i, line in enumerate(text.splitlines(), 1)]
     return "\n".join(out)
+
+
+def focus(index: dict, files: dict[str, str], routes: list[str], extra: list[str]) -> tuple:
+    """M8 D12: narrow the index and source to the chosen routes, the files those routes' modules
+    import from the app (`from app.x import`), and `extra` (the branch's changed files)."""
+    keys = {route_key(*r.split(" ", 1)) for r in routes if " " in r}
+    kept = [r for r in index["routes"] if route_key(r["method"], r["path"]) in keys]
+    want = {r["file"] for r in kept} | {f for f in extra if f in files}
+    for f in list(want):
+        for mod, names in re.findall(
+            r"^from (app(?:\.\w+)*) import ([\w, ]+)", files.get(f, ""), re.MULTILINE
+        ):
+            base = mod.replace(".", "/")
+            cands = [base + ".py", *(f"{base}/{n.strip()}.py" for n in names.split(","))]
+            want |= {p for c in cands for p in files if p.endswith("/" + c)}
+    return {**index, "routes": kept}, {p: t for p, t in files.items() if p in want}

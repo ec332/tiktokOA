@@ -361,3 +361,34 @@ def test_numbers_in_answers_are_not_mistaken_for_status_codes():
     questions.apply_answer(c, {"kind": "ambiguity", "changes": "expected_value"},
                            "Reject titles over 255 characters with 422", False)  # fmt: skip
     assert c["status_code"] == 422
+
+
+def test_focus_keeps_chosen_routes_their_app_imports_and_changed_files():
+    """M8 D12."""
+    from tp.stages.spec import code_index
+
+    files = {
+        "backend/app/api/routes/items.py": "from app.models import Item\nfrom app import crud\n",
+        "backend/app/api/routes/users.py": "from app.models import User\n",
+        "backend/app/models.py": "class Item: ...\n",
+        "backend/app/core/db.py": "x = 1\n",
+        "backend/app/crud.py": "def create_item(): ...\n",
+    }
+    index = {"routes": [
+        {"method": "POST", "path": "/api/v1/items/", "file": "backend/app/api/routes/items.py"},
+        {"method": "GET", "path": "/api/v1/users/", "file": "backend/app/api/routes/users.py"},
+    ]}  # fmt: skip
+    idx, kept = code_index.focus(index, files, ["POST /api/v1/items/"], ["backend/app/core/db.py"])
+    assert [r["path"] for r in idx["routes"]] == ["/api/v1/items/"]
+    assert set(kept) == {"backend/app/api/routes/items.py", "backend/app/models.py",
+                         "backend/app/crud.py", "backend/app/core/db.py"}  # fmt: skip
+
+
+def test_run_rules_are_added_after_the_defaults():
+    """M8 D13: defaults always apply; a run's rules follow them."""
+    from tp.stages.spec import ai
+
+    assert ai.rules_text() == ai.rules_text([])
+    text = ai.rules_text(["Money fields: ask about rounding"])
+    assert text.startswith(ai.rules_text()) and text.endswith("- Money fields: ask about rounding")
+    assert len(ai.default_rules()) == 6

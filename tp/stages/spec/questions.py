@@ -35,6 +35,12 @@ def earlier_answer(k: str, scope: dict | None) -> dict | None:
             and p.get("scope") == scope
             and item["decision"] == "pick"
         ):
+            if item["detail"]["choice"] == review.OTHER_CHOICE:
+                return {
+                    "item": item["id"],
+                    "text": item["detail"]["text"],
+                    "by": item["decided_by"],
+                }
             choice = next(c for c in p["choices"] if c["id"] == item["detail"]["choice"])
             return {"item": item["id"], "text": choice["text"], "by": item["decided_by"]}
     return None
