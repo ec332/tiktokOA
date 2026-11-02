@@ -8,7 +8,7 @@ from tp.core import artifacts, db
 from tp.core.contract import StageResult, register
 from tp.stages.execute import record
 from tp.stages.execute.stage import ExecuteStage
-from tp.stages.retest import decide
+from tp.stages.retest import decide, feed
 
 
 class RetestStage:
@@ -73,4 +73,4 @@ class RetestStage:
         return StageResult.succeeded({"retest": {"retests": [out]}})
 
 
-STAGE = register(RetestStage())
+STAGE = register(RetestStage(), cli=feed.app)
