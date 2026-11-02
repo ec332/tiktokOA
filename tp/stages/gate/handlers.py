@@ -155,3 +155,76 @@ def generate(src: Path, ref: str, refs: list[tuple[str, int, str]], out: Path,
             path.write_text(ast.unparse(ast.fix_missing_locations(tree)) + "\n")
             files[mutmut_src.IMAGE_ROOT + mutmut_src.rel(repo_path)] = path
     return files, sorted(found, key=lambda m: (m["file"], m["line"] or 0, m["name"]))
+
+
+# ---- field-constraint mutants (M8 gate D21) -----------------------------------------------
+# A feature that lives in model fields (`price: Decimal = Field(ge=0, decimal_places=2)`) has
+# no function body for mutmut or the handler mutator. Each constraint keyword on a line the
+# branch changed becomes `**({mutated} if MUTANT_UNDER_TEST == name else {original})`. The class
+# body runs at import, and the gate's matrix runs one interpreter per mutant, so the switch
+# holds for the whole job. No function is "reached", so these mutants link to every test
+# that passed in stats mode (function "*").
+
+SWAP_KW = {"ge": "gt", "gt": "ge", "le": "lt", "lt": "le"}
+SIZE_KW = {"max_length", "min_length", "max_digits", "decimal_places"}
+
+
+def _num(node: ast.AST) -> bool:
+    return isinstance(node, ast.Constant) and type(node.value) in (int, float)
+
+
+def _field_variants(kw: ast.keyword) -> list[tuple[str, ast.AST]]:
+    """[(new keyword, new value)] for one constraint keyword."""
+    if kw.arg in SWAP_KW:
+        out = [(SWAP_KW[kw.arg], kw.value)]
+        if _num(kw.value):
+            out.append((kw.arg, ast.Constant(kw.value.value + 1)))
+        return out
+    if kw.arg in SIZE_KW and _num(kw.value):
+        return [
+            (kw.arg, ast.Constant(kw.value.value + d)) for d in (1, -1) if kw.value.value + d >= 0
+        ]
+    return []
+
+
+def fields(src: Path, changed: dict[str, list[int]], out: Path, skip_files: set[str],
+           exclude: set[str] = frozenset()) -> tuple[dict[str, Path], list[dict]]:  # fmt: skip
+    """-> ({container path: mutated file}, mutants) for `Field(...)` keywords on changed lines."""
+    files, found = {}, []
+    for repo_path, lines in sorted(changed.items()):
+        if repo_path in skip_files or not (src / repo_path).is_file():
+            continue
+        tree = ast.parse((src / repo_path).read_text())
+        module = mutmut_src.module_of(mutmut_src.rel(repo_path))
+        want, n = set(lines), 0
+        for call in [c for c in ast.walk(tree) if isinstance(c, ast.Call)
+                     and getattr(c.func, "id", getattr(c.func, "attr", None)) == "Field"
+                     and c.lineno in want]:  # fmt: skip
+            new_kws = []
+            for kw in call.keywords:
+                variants = _field_variants(kw) if kw.arg else []
+                chain: ast.AST = ast.Dict([ast.Constant(kw.arg)], [kw.value]) if variants else None
+                named = []
+                for arg, value in variants:
+                    n += 1
+                    named.append((f"{module}.field__{n}", arg, value))
+                for name, arg, value in reversed(named):
+                    if name in exclude:
+                        continue
+                    before = f"{kw.arg}={ast.unparse(kw.value)}"
+                    found.append({"name": name, "module": module, "function": "*",
+                                  "file": repo_path, "line": call.lineno, "n": n,
+                                  "diff": f"-{before}\n+{arg}={ast.unparse(value)}"})  # fmt: skip
+                    test = ast.parse(f"_tp_os.environ.get('MUTANT_UNDER_TEST', '') == {name!r}",
+                                     mode="eval").body  # fmt: skip
+                    chain = ast.IfExp(test, ast.Dict([ast.Constant(arg)], [value]), chain)
+                new_kws.append(ast.keyword(arg=None, value=chain) if variants else kw)
+            call.keywords = new_kws
+        if any(m["file"] == repo_path for m in found):
+            tree.body.insert(0, ast.Import(names=[ast.alias(name="os", asname="_tp_os")]))
+            at = out / mutmut_src.rel(repo_path)
+            at.parent.mkdir(parents=True, exist_ok=True)
+            at.write_text(ast.unparse(ast.fix_missing_locations(tree)) + "\n")
+            files[mutmut_src.IMAGE_ROOT + mutmut_src.rel(repo_path)] = at
+    order = lambda m: (m["file"], m["line"], int(m["name"].rsplit("__", 1)[1]))
+    return files, [{k: v for k, v in m.items() if k != "n"} for m in sorted(found, key=order)]

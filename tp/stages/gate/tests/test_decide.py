@@ -61,3 +61,24 @@ def test_survivor_classes_and_strength():
         ("nl", "unclassified", [], False)]  # fmt: skip
     assert decide.strength(3, 10, 2) == 0.375 and decide.strength(0, 1, 1) is None
     assert decide.matrix_csv(["t"], ["k", "gap"], {"t": {"k": "K"}}) == "test,k,gap\r\nt,K,.\r\n"
+
+
+def test_run_settings_are_clamped_and_default_to_the_built_in_values():
+    """M8 gate D22."""
+    assert decide.settings({}) == decide.DEFAULTS
+    s = decide.settings({"gate": {"k": 50, "min_kills": 2, "near": -1, "every_criterion": False,
+                                  "bogus": 1}})  # fmt: skip
+    assert s == {"k": 10, "min_kills": 2, "near": 0, "every_criterion": False}
+
+
+def test_min_kills_turns_a_single_kill_weak():
+    cells = {"a": {"m1": "K"}}
+    assert decide.admit("a", {"a": "u1"}, cells, False, True)[0] == "ADMITTED"
+    assert decide.admit("a", {"a": "u1"}, cells, False, True, min_kills=2)[0] == "WEAK"
+    assert decide.admit("a", {"a": "u1"}, cells, True, True, min_kills=2)[0] == "ADMITTED"
+
+
+def test_uncovered_lists_criteria_without_an_admitted_test():
+    rows = [{"ac": "C-1", "status": "ADMITTED_REDUNDANT"}, {"ac": "C-2", "status": "WEAK"}]
+    assert decide.uncovered(["C-1", "C-2", "C-3"], rows) == ["C-2", "C-3"]
+    assert decide.uncovered(["C-2"], [{"ac": "C-2", "status": "CANDIDATE_DEFECT"}]) == []

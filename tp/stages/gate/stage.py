@@ -15,7 +15,7 @@ from tp.core.hashing import sha256
 from tp.stages.gate import ai, blind, decide, handlers, mutants
 
 HERE = Path(__file__).parent
-K = 5  # † stability runs on reference, plus one shuffled run (plan K3)
+K = decide.DEFAULTS["k"]  # † stability runs on reference, plus one shuffled run (plan K3)
 MUTANT_TIMEOUT = "15"  # † seconds per test under a mutant (a mutant may loop)
 
 
@@ -32,6 +32,7 @@ class GateStage:
     version = f"1.1.0+p{ai.version_hash()}"  # 1.1: handler mutants (K8)
     consumes: dict[str, int] = {"bound_tests": 1, "cases": 1, "spec": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"gate_report": 1, "kill_matrix": 1}  # noqa: RUF012
+    settings_defaults, settings_limits = decide.DEFAULTS, decide.LIMITS  # M8 D22, for the UI
 
     def run(self, ctx, inputs):
         path = _scratch(ctx)
@@ -53,7 +54,8 @@ class GateStage:
                     "criteria": {c["id"]: {k: c.get(k) for k in ("status", "human_judgement")}
                                  for c in spec["criteria"]},
                     "signed": bool(cases.get("signoff", {}).get("signed")),
-                    "refs": decide.code_refs(spec)}  # fmt: skip
+                    "refs": decide.code_refs(spec), "settings": decide.settings(opts),
+                    "in_scope": sorted({c["ac"] for c in cases.get("cases", [])})}  # fmt: skip
         if opts.get("admit", "v2") == "v1":
             return self._v1(ctx, work, ctx_info)
         m = self._measure(ctx, work, tests, ctx_info)
@@ -96,11 +98,14 @@ class GateStage:
         seeded = yaml.safe_load((HERE / "seeded.yaml").read_text())
         h_files, h_ms = handlers.generate(Path(scope["src"]), sut.load()["ref"], info["refs"],
                                           work / "handlers", blind.sealed())  # fmt: skip
+        f_files, f_ms = handlers.fields(Path(scope["src"]), scope.get("changed") or {},
+                                        work / "fields", {m["file"] for m in h_ms})  # fmt: skip
+        h_files, h_ms = h_files | f_files, h_ms + f_ms
         key = sha256({"handlers": {c: p.read_text() for c, p in sorted(h_files.items())},"tests": sorted((t["file"], t["source"], t["lock_hash"]) for t in tests),
                       "runner": json.loads((db.data_dir() / "published.json").read_text())
                       ["runner"]["digest"],
                       "scope": {p: (Path(scope["src"]) / p).read_text() for p in scope["mutate"]},
-                      "version": self.version, "k": K, "seeded": seeded,
+                      "version": self.version, "k": info["settings"]["k"], "seeded": seeded,
                       "code": {p.name: p.read_text() for p in sorted(HERE.glob("*.py"))}})  # fmt: skip
         cache = db.data_dir() / "gate_cache" / f"{key}.json"
         if cache.exists():
@@ -110,7 +115,7 @@ class GateStage:
         seed = info["bound_tests"].removeprefix("sha256:")[:8]
 
         runs = [ctx.env.pytest(work / "tests", work / f"k{i}", "reference")["results"]
-                for i in range(K)]  # fmt: skip
+                for i in range(info["settings"]["k"])]  # fmt: skip
         runs.append(ctx.env.pytest(work / "tests", work / "shuffled", "reference",
                                    env={"TP_SHUFFLE": seed})["results"])  # fmt: skip
         stab = decide.stability(runs)
@@ -128,7 +133,8 @@ class GateStage:
                                args=tuple(_node_args(passing)))["results"]  # fmt: skip
         reached = {r["nodeid"]: r.get("reached", []) for r in stats if r["outcome"] == "passed"}
         broken = sorted(set(passing) - set(reached))  # fail with the trampolines in place
-        linked = {m["name"]: sorted(n for n, fns in reached.items() if m["function"] in fns)
+        linked = {m["name"]: sorted(n for n, fns in reached.items()
+                                    if m["function"] in fns or m["function"] == "*")
                   for m in ms}  # fmt: skip
         jobs = [{"key": m["name"], "env": {"MUTANT_UNDER_TEST": m["name"],
                                            "TP_TIMEOUT": MUTANT_TIMEOUT},
@@ -150,7 +156,10 @@ class GateStage:
         """K4: each test of a targeted criterion must fail on its flag's variant: in-process
         first, then confirmed once over the network on that variant's stack (design D6)."""
         res = {}
+        live = set(sut.load().get("flags", []))  # seeded bugs off (M8 D23): no bug: variants
         for flag, spec in seeded.items():
+            if flag not in live:
+                continue
             nodes = [n for n in passing if self._where(info, n)["ac"] in spec["criteria"]]
             if not nodes:
                 continue
@@ -191,9 +200,10 @@ class GateStage:
             if status is None:
                 status, n_kills, n_unique = decide.admit(
                     node, unit_of, cells, bool(seed and seed["killed"]),
-                    measurable=bool(m["mutants"]) or where["ac"] in targeted)  # fmt: skip
+                    measurable=bool(m["mutants"]) or where["ac"] in targeted,
+                    min_kills=info["settings"]["min_kills"])  # fmt: skip
             rows.append({"node": node, **where, "case_id": st["case_id"],
-                         "stability": f"STABLE@K{K}" if st["stable"] else "FLAKY",
+                         "stability": f"STABLE@K{info['settings']['k']}" if st["stable"] else "FLAKY",
                          "outcome": st["outcome"], "origin": st["origin"], "status": status,
                          "seeded": seed and {"flag": flag, **seed},
                          "misses_target": bool(seed) and not seed["killed"],
@@ -202,7 +212,8 @@ class GateStage:
         return {"info": info, "rows": rows, "cells": cells, "measure": {
                     k: m.get(k) for k in ("mutants", "linked", "timings", "shuffle_seed",
                                           "overlay_broken", "cache", "held_out")},
-                "survivors": decide.survivors(m["mutants"], cells, m["linked"], info["refs"])}  # fmt: skip
+                "survivors": decide.survivors(m["mutants"], cells, m["linked"], info["refs"],
+                                              info["settings"]["near"])}  # fmt: skip
 
     def _resume(self, ctx, state, path):
         items = ctx.review.items()
@@ -245,7 +256,10 @@ class GateStage:
                                              meas.get("held_out")),
                   "survivors": surv, "proposals": state.get("proposals", []),
                   "overlay_broken": meas["overlay_broken"], "timings": meas["timings"],
-                  "shuffle_seed": meas["shuffle_seed"], "cache": meas["cache"]}  # fmt: skip
+                  "shuffle_seed": meas["shuffle_seed"], "cache": meas["cache"],
+                  "settings": state["info"]["settings"],
+                  "uncovered_criteria": decide.uncovered(state["info"]["in_scope"], rows)
+                  if state["info"]["settings"]["every_criterion"] else []}  # fmt: skip
         order = [r["node"] for r in sorted(rows, key=lambda r: (r["ac"] or "", r["node"]))]
         csv_text = decide.matrix_csv(order, names, cells)
         work.mkdir(parents=True, exist_ok=True)

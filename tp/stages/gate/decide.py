@@ -9,6 +9,21 @@ PRODUCT = {"ASSERTION", "CONTRACT", "PRODUCT_ERROR"}
 BINDING = {"BINDING", "CONFORMANCE", "DATA"}
 KILL = PRODUCT | {"CONFORMANCE", "TIMEOUT"}  # failing for the reason the test claims (D10)
 NEAR = 3  # † lines: a survivor this close to a criterion's code ref is a test gap (D12)
+# Per-run settings (M8 gate D22): defaults = the values above; a run may change them.
+DEFAULTS = {"k": 5, "min_kills": 1, "near": NEAR, "every_criterion": True}
+LIMITS = {"k": (2, 10), "min_kills": (1, 5), "near": (0, 20)}
+
+
+def settings(opts: dict) -> dict:
+    """The run's gate settings, clamped to LIMITS; unknown keys are ignored."""
+    given = (opts or {}).get("gate") or {}
+    out = dict(DEFAULTS)
+    for k, (lo, hi) in LIMITS.items():
+        if isinstance(given.get(k), int) and not isinstance(given.get(k), bool):
+            out[k] = min(hi, max(lo, given[k]))
+    if isinstance(given.get("every_criterion"), bool):
+        out["every_criterion"] = given["every_criterion"]
+    return out
 
 
 def stability(runs: list[list[dict]]) -> dict[str, dict]:
@@ -59,9 +74,14 @@ def kills(matrix: dict[str, list[dict]]) -> dict[str, dict[str, str]]:
 
 
 def admit(node: str, unit_of: dict[str, str], cells: dict, seeded_ok: bool,
-          measurable: bool) -> tuple[str, int, int]:  # fmt: skip
-    """-> (status, kills, unique kills). Unique = no other *unit* kills that mutant."""
+          measurable: bool, min_kills: int = 1) -> tuple[str, int, int]:  # fmt: skip
+    """-> (status, kills, unique kills). Unique = no other *unit* kills that mutant. A test
+    with fewer than `min_kills` kills (and no seeded kill) is WEAK when kills can be measured."""
     mine = {m for m, c in cells.get(node, {}).items() if c == "K"}
+    if measurable and not seeded_ok and 0 < len(mine) < min_kills:
+        return "WEAK", len(mine), len(mine - {m for n, row in cells.items()
+                                              if unit_of.get(n) != unit_of.get(node)
+                                              for m, c in row.items() if c == "K"})  # fmt: skip
     others = {m for n, row in cells.items() if unit_of.get(n) != unit_of.get(node)
               for m, c in row.items() if c == "K"}  # fmt: skip
     unique = mine - others
@@ -82,14 +102,14 @@ def code_refs(spec: dict) -> list[tuple[str, int, str]]:
 
 
 def survivors(mutants: list[dict], cells: dict, linked: dict[str, list[str]],
-              refs: list[tuple[str, int, str]]) -> list[dict]:  # fmt: skip
+              refs: list[tuple[str, int, str]], within: int = NEAR) -> list[dict]:  # fmt: skip
     killed = {m for row in cells.values() for m, c in row.items() if c == "K"}
     out = []
     for m in mutants:
         if m["name"] in killed:
             continue
         near = sorted({cid for f, ln, cid in refs
-                       if f == m["file"] and m["line"] and abs(ln - m["line"]) <= NEAR})  # fmt: skip
+                       if f == m["file"] and m["line"] and abs(ln - m["line"]) <= within})  # fmt: skip
         kind = "unclassified" if not m["line"] else "test_gap" if near else "out_of_scope"
         out.append({"mutant": m["name"], "file": m["file"], "line": m["line"], "class": kind,
                     "criteria": near, "covered": bool(linked.get(m["name"])),
@@ -110,3 +130,13 @@ def matrix_csv(rows: list[str], mutants: list[str], cells: dict) -> str:
     for node in rows:
         w.writerow([node, *(cells.get(node, {}).get(m, ".") for m in mutants)])
     return buf.getvalue()
+
+
+def uncovered(criteria_in_scope: list[str], rows: list[dict]) -> list[str]:
+    """Criteria with cases but no admitted (or defect-finding) test (M8 gate D22)."""
+    ok = {
+        r["ac"]
+        for r in rows
+        if r["status"].startswith("ADMITTED") or r["status"] == "CANDIDATE_DEFECT"
+    }  # a test that found a defect covers it
+    return sorted(c for c in criteria_in_scope if c not in ok)

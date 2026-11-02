@@ -85,3 +85,36 @@ def test_excluded_mutants_leave_numbering_stable(tmp_path):
     files, ms = handlers.generate(tmp_path, ref, refs, tmp_path / "b", exclude={gone})
     assert [m["name"] for m in ms] == [m["name"] for m in all_ms[1:]]
     assert gone not in next(iter(files.values())).read_text()
+
+
+def test_field_constraints_on_changed_lines_become_switched_mutants(tmp_path):
+    """M8 gate D21: ge/le swap and +1, size keywords ±1; only changed lines; import-time switch."""
+    import os
+    import runpy
+
+    src = tmp_path / "src"
+    (src / "backend/app").mkdir(parents=True)
+    (src / "backend/app/models.py").write_text(
+        "def Field(**kw):\n    return kw\n\n"
+        "class Item:\n"
+        "    title = Field(max_length=255)\n"
+        "    price = Field(default=None, ge=0, decimal_places=2)\n"
+    )
+    files, ms = handlers.fields(src, {"backend/app/models.py": [6]}, tmp_path / "out", set())
+    diffs = [m["diff"] for m in ms]
+    assert diffs == ["-ge=0\n+gt=0", "-ge=0\n+ge=1", "-decimal_places=2\n+decimal_places=3",
+                     "-decimal_places=2\n+decimal_places=1"]  # fmt: skip
+    assert all(m["function"] == "*" and m["line"] == 6 for m in ms)
+    (path,) = files.values()
+    assert runpy.run_path(str(path))["Item"].price == {
+        "default": None,
+        "ge": 0,
+        "decimal_places": 2,
+    }
+    os.environ["MUTANT_UNDER_TEST"] = ms[0]["name"]
+    try:
+        assert runpy.run_path(str(path))["Item"].price == {"default": None, "gt": 0,
+                                                           "decimal_places": 2}  # fmt: skip
+        assert runpy.run_path(str(path))["Item"].title == {"max_length": 255}  # unchanged line
+    finally:
+        del os.environ["MUTANT_UNDER_TEST"]
