@@ -5,6 +5,8 @@ import { Approve } from "../panels/cases/Approve";
 import { ProductReport, type Product } from "../panels/report/Product";
 import { Clarify } from "../panels/spec/Clarify";
 import { resolveItem } from "../flow/resolve";
+import { ApprovedTests, BuildResults, ClarifyHistory, Requirements, type CasesBody, type Criterion, type GateRow, type Verdict } from "../flow/Details";
+import { NavProvider, STEP, type Target } from "../flow/nav";
 
 function OtherDecision({ item, onDone }: { item: ReviewItem; onDone: () => void }) {
   const go = useMutation({ mutationFn: (d: string) => resolveItem(item.id, { decision: d, reason: "decided on the run page" }), onSuccess: onDone });
@@ -80,6 +82,11 @@ export function Flow({ run }: { run: RunDetail }) {
     queryFn: () => ok(api.GET("/runs/{run_id}/events/list", { params: { path: { run_id: run.id }, query: { after: 0 } } })),
   });
   const reviews = useQuery({ queryKey: ["reviews", "open"], queryFn: () => ok(api.GET("/reviews", { params: { query: { status: "open" } } })) });
+  const resolved = useQuery({ queryKey: ["reviews", "resolved"], queryFn: () => ok(api.GET("/reviews", { params: { query: { status: "resolved" } } })) });
+  const [expanded, setExpanded] = useState<Set<string>>(new Set([STEP.report]));
+  const [target, setTarget] = useState<Target | null>(null);
+  const go = (t: Target) => { setExpanded((e) => new Set(e).add(t.step)); setTarget({ ...t }); };
+  const toggle = (step: string) => setExpanded((e) => { const n = new Set(e); if (n.has(step)) n.delete(step); else n.add(step); return n; });
 
   const latest = new Map<string, Execution>();
   for (const e of run.executions) latest.set(e.stage, e);
@@ -95,7 +102,28 @@ export function Flow({ run }: { run: RunDetail }) {
   const cost = (events.data ?? []).filter((e) => e.kind === "llm_cost").reduce((s, e) => s + Number((e.payload as { usd: number }).usd), 0);
 
   const spec = latest.get("spec");
-  const specOut = useArtifact<{ criteria: { id: string; title: string }[] }>(spec?.outputs.spec);
+  const specOut = useArtifact<{ criteria: Criterion[] }>(spec?.outputs.spec);
+  const casesEx = latest.get("cases");
+  const casesOut = useArtifact<CasesBody>(casesEx?.outputs.cases);
+  const gateEx = latest.get("gate");
+  const gateOut = useArtifact<{ rows: GateRow[] }>(gateEx?.outputs.gate_report);
+  const execEx = latest.get("execute");
+  const rrOut = useArtifact<{ verdicts: Verdict[] }>(execEx?.status === "succeeded" ? execEx.outputs.run_records : undefined);
+  const titles = Object.fromEntries((casesOut.data?.body.cases ?? []).map((u) => [u.id, u.purpose]));
+  const specExIds = new Set(run.executions.filter((e) => e.stage === "spec").map((e) => e.id));
+  const answered = (resolved.data ?? []).filter((i) => specExIds.has(i.stage_execution) && ["question", "confirm_observed"].includes(i.kind));
+  useEffect(() => {
+    if (!target) return;
+    const t = setTimeout(() => {
+      // a test approved once may run as several points (TC-O7-2.a, .b): take the first
+      const el = document.getElementById(target.anchor) ?? document.querySelector(`[id^="${CSS.escape(target.anchor)}."]`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("flash");
+      setTimeout(() => el.classList.remove("flash"), 1800);
+    }, 120);
+    return () => clearTimeout(t);
+  }, [target, expanded]);
   const report = latest.get("report");
   const rep = useArtifact<{ report: { product: Product; evidence: Record<string, unknown> } }>(report?.outputs.report);
   const retest = latest.get("retest");
@@ -126,10 +154,23 @@ export function Flow({ run }: { run: RunDetail }) {
   const cancel = useMutation({ mutationFn: () => fetch(`/api/runs/${run.id}/cancel`, { method: "POST" }), onSuccess: refresh });
   const resume = useMutation({ mutationFn: () => fetch(`/api/runs/${run.id}/resume`, { method: "POST" }), onSuccess: refresh });
   const failed = [...latest.values()].find((e) => e.status === "failed");
+  /** What each finished step produced (null: nothing to show yet). */
+  const details = (step: string) => {
+    if (step === STEP.understand && specOut.data) return <Requirements criteria={specOut.data.body.criteria} />;
+    if (step === STEP.clarify && resolved.data) return <ClarifyHistory items={answered as ReviewItem[]} />;
+    if (step === STEP.design && casesOut.data) return <ApprovedTests body={casesOut.data.body} />;
+    if (step === STEP.build && gateOut.data) return <BuildResults rows={gateOut.data.body.rows} verdicts={rrOut.data?.body.verdicts ?? []} titles={titles} />;
+    if (step === STEP.report && rep.data?.body.report.product) return (
+      <ProductReport product={rep.data.body.report.product} evidence={rep.data.body.report.evidence ?? {}}
+        runId={run.id} retests={(ret.data?.body.retests ?? []) as never[]} />
+    );
+    return null;
+  };
   // a decision the happy path doesn't expect (no stop of its own): never leave it invisible
   const other = open.filter((i) => !["question", "confirm_observed", "signoff"].includes(i.kind));
 
   return (
+    <NavProvider value={go}>
     <div className="page">
       <div className="row">
         <span className="muted grow" style={{ fontSize: 13 }}>
@@ -147,7 +188,11 @@ export function Flow({ run }: { run: RunDetail }) {
               <span className="dot" aria-hidden>{state === "done" ? "✓" : state === "failed" ? "!" : i + 1}</span>
               <div style={{ minWidth: 0 }}>
                 <div className="head">
-                  <strong>{s.name}</strong>
+                  {state === "done" && details(s.name) ? (
+                    <button className="linkish" onClick={() => toggle(s.name)} aria-expanded={expanded.has(s.name)}>
+                      <strong>{s.name}</strong> <span className="muted">{expanded.has(s.name) ? "▾" : "▸"}</span>
+                    </button>
+                  ) : <strong>{s.name}</strong>}
                   {state === "waiting" && <span className="needs">Needs you</span>}
                   {state === "running" && <span className="muted" style={{ fontSize: 12 }}>{elapsed(runningEx?.started)}</span>}
                 </div>
@@ -159,6 +204,7 @@ export function Flow({ run }: { run: RunDetail }) {
                 ) : (
                   <div className="line">{state === "failed" ? `Failed: ${s.stages.map((n) => latest.get(n)).find((e) => e?.status === "failed")?.reason ?? ""}` : lastLine(s.stages)}</div>
                 )}
+                {state === "done" && expanded.has(s.name) && details(s.name) && <div className="body">{details(s.name)}</div>}
               </div>
             </div>
           );
@@ -171,13 +217,7 @@ export function Flow({ run }: { run: RunDetail }) {
         </div>
       )}
       {other.map((i) => <OtherDecision key={i.id} item={i as ReviewItem} onDone={refresh} />)}
-      {rep.data && (
-        <section>
-          <h1 style={{ marginTop: 8 }}>Report</h1>
-          <ProductReport product={rep.data.body.report.product} evidence={rep.data.body.report.evidence ?? {}}
-            runId={run.id} retests={(ret.data?.body.retests ?? []) as never[]} />
-        </section>
-      )}
     </div>
+    </NavProvider>
   );
 }

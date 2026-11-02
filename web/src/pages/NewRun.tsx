@@ -16,6 +16,13 @@ type Defaults = {
 };
 type Gate = { k: number; min_kills: number; near: number; every_criterion: boolean };
 type Suggestion = { rule: string; why: string };
+type Mode = "feature" | "story" | "endpoint";
+const MODES: [Mode, string][] = [["feature", "Feature"], ["story", "User story"], ["endpoint", "Endpoint"]];
+const MODE_HELP: Record<Mode, string> = {
+  feature: "A few sentences about the feature. The platform reads the code and asks you about the gaps.",
+  story: "A full user story with acceptance criteria. Each criterion becomes a requirement; the platform asks only where they are unclear.",
+  endpoint: "No description: pick API endpoints. Requirements come from what the code does, and you confirm each behaviour.",
+};
 
 async function json<T>(r: Promise<Response>): Promise<T> {
   const res = await r;
@@ -151,7 +158,7 @@ export function NewRunPage() {
   const defaults = useQuery({ queryKey: ["rule-defaults"], queryFn: () => get<Defaults>("/rules/defaults") });
 
   const [overview, setOverview] = useState("");
-  const [story, setStory] = useState(false);
+  const [mode, setMode] = useState<Mode>("feature");
   const [chosen, setChosen] = useState<Set<string>>(new Set());
   const [clarify, setClarify] = useState<string[]>([]);
   const [caseRules, setCaseRules] = useState<string[]>([]);
@@ -173,13 +180,15 @@ export function NewRunPage() {
   }, [routes.data]);
 
   const suggest = useMutation({
-    mutationFn: () => post<Suggestion[]>("/rules/suggest", { overview, routes: [...chosen] }),
+    mutationFn: () => post<Suggestion[]>("/rules/suggest", { overview: mode === "endpoint" ? `Endpoints: ${[...chosen].join(", ")}` : overview, routes: [...chosen] }),
     onSuccess: (s) => setSuggestions(s),
   });
   const start = useMutation({
     mutationFn: () => post<{ id: number }>("/runs", {
       mode: "live", stub: false, focused: true,
-      requirements: { kind: story ? "story" : "brief", text: overview },
+      requirements: mode === "endpoint"
+        ? { kind: "brief", text: `Test these API endpoints as they are implemented: ${[...chosen].join(", ")}.` }
+        : { kind: mode === "story" ? "story" : "brief", text: overview },
       routes: [...chosen],
       rules: { clarify: [...suggestions.map((s) => s.rule).filter((r) => picked.has(r)), ...clarify], cases: caseRules },
       templates: templates ? [...templates] : null,
@@ -189,7 +198,7 @@ export function NewRunPage() {
   });
 
   if (!sut.data) return <p className="muted">Loading…</p>;
-  const ready = !!sut.data.target && overview.trim().length > 0;
+  const ready = !!sut.data.target && (mode === "endpoint" ? chosen.size > 0 : overview.trim().length > 0);
   const toggle = (k: string) => { const n = new Set(chosen); if (n.has(k)) n.delete(k); else n.add(k); setChosen(n); };
 
   return (
@@ -198,16 +207,23 @@ export function NewRunPage() {
       <RepoCard sut={sut.data} onChanged={() => { qc.invalidateQueries({ queryKey: ["sut"] }); qc.invalidateQueries({ queryKey: ["routes"] }); }} />
 
       <section className="card" style={{ display: "grid", gap: 10 }} aria-label="Feature">
-        <strong>Feature</strong>
-        <label className="field"><span>What should be tested? A few sentences are enough; the platform asks about the rest.</span>
-          <textarea id="overview" value={overview} onChange={(e) => setOverview(e.target.value)}
-            placeholder="Items get a price and a discount percentage; responses show the discounted price." />
-        </label>
-        <label className="row" style={{ fontSize: 13 }}>
-          <input type="checkbox" checked={story} onChange={(e) => setStory(e.target.checked)} /> This is a full user story with acceptance criteria
-        </label>
+        <div className="row">
+          <strong className="grow">What to test</strong>
+          <div className="seg" role="radiogroup" aria-label="Input mode">
+            {MODES.map(([m, label]) => (
+              <button key={m} role="radio" aria-checked={mode === m} className={mode === m ? "on" : ""} onClick={() => setMode(m)}>{label}</button>
+            ))}
+          </div>
+        </div>
+        <p className="muted" style={{ margin: 0, fontSize: 13 }}>{MODE_HELP[mode]}</p>
+        {mode !== "endpoint" && (
+          <textarea id="overview" value={overview} onChange={(e) => setOverview(e.target.value)} rows={mode === "story" ? 10 : 3}
+            placeholder={mode === "story"
+              ? "As an item owner I want to set a price and a discount percentage…\n\nAcceptance criteria:\n- …"
+              : "Items get a price and a discount percentage; responses show the discounted price."} />
+        )}
         {sut.data.target && (
-          <div className="field"><span>Routes to focus on (optional: none = the whole API)</span>
+          <div className="field"><span>{mode === "endpoint" ? "Endpoints to test (pick at least one)" : "Routes to focus on (optional: none = the whole API)"}</span>
             {routes.isLoading && <span className="muted">Reading routes…</span>}
             {groups.map(([group, rs]) => (
               <div key={group} className="row" style={{ alignItems: "baseline" }}>
@@ -234,7 +250,7 @@ export function NewRunPage() {
           <div className="rules-grid">
             <RuleList title="Clarifications" defaults={defaults.data.clarify} mine={clarify} setMine={setClarify}
               suggestions={suggestions} picked={picked} setPicked={setPicked}
-              onSuggest={overview.trim() ? () => suggest.mutate() : undefined} suggesting={suggest.isPending}
+              onSuggest={overview.trim() || (mode === "endpoint" && chosen.size) ? () => suggest.mutate() : undefined} suggesting={suggest.isPending}
               suggestError={suggest.error ? (suggest.error as Error).message : undefined} />
             <div>
               <RuleList title="Test cases" defaults={[]} mine={caseRules} setMine={setCaseRules} />
@@ -272,7 +288,7 @@ export function NewRunPage() {
       <div className="row">
         <button className="primary" disabled={!ready || start.isPending} onClick={() => start.mutate()}>Start run</button>
         {!sut.data.target && <span className="muted">Choose a repo and branch first.</span>}
-        {sut.data.target && !overview.trim() && <span className="muted">Describe the feature to start.</span>}
+        {sut.data.target && !ready && <span className="muted">{mode === "endpoint" ? "Pick at least one endpoint." : "Describe what to test."}</span>}
         {start.error && <span className="error">{(start.error as Error).message}</span>}
       </div>
     </div>
