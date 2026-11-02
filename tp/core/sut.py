@@ -1,5 +1,7 @@
 """SUT workspace (plan 3.1): read sut.yaml, apply/verify/reset patches in place."""
 
+import fnmatch
+import json
 import re
 import subprocess
 from pathlib import Path
@@ -17,10 +19,114 @@ class SutError(Exception):
 
 
 def load(root: Path = Path(".")) -> dict:
+    """sut.yaml, with the web-chosen target (repo path + branch + base) laid over it (M8 D10)."""
     cfg = yaml.safe_load((root / "sut/sut.yaml").read_text())
     if missing := [k for k in REQUIRED if k not in cfg]:
         raise SutError(f"sut.yaml is missing {missing}")
+    if t := target():
+        _overlay(cfg, t)
     return cfg
+
+
+# ---- target: a local repo + branch, cloned and tested at the branch head (M8 D10-D14) ----
+
+
+def _target_file() -> Path:
+    return db.data_dir() / "sut" / "target.json"
+
+
+def target() -> dict | None:
+    f = _target_file()
+    return json.loads(f.read_text()) if f.exists() else None
+
+
+def clear_target() -> None:
+    _target_file().unlink(missing_ok=True)
+
+
+def _overlay(cfg: dict, t: dict) -> None:
+    seeded = t.get("seeded", False)
+    cfg["repo"], cfg["ref"] = t["clone"], t["ref"]
+    cfg["patches"] = [p for p in cfg["patches"] if seeded or p != "flags"]  # D12
+    cfg["flags"] = cfg.get("flags", []) if seeded else []
+    if t.get("alembic_head"):  # D13
+        cfg["lifecycle"]["db_probe"]["expect"] = t["alembic_head"]
+    scope = cfg.setdefault("code_scope", {})
+    if t.get("changed"):  # D14: the branch's changed lines, not the fixed file list
+        scope["mutate"] = sorted(t["changed"])
+        scope["changed"] = t["changed"]
+    cfg["target"] = t
+
+
+def _alembic_head(tree: Path, versions: str) -> str | None:
+    revs, downs = set(), set()
+    for f in (tree / versions).glob("*.py"):
+        text = f.read_text()
+        if m := re.search(r'^revision\s*=\s*["\']([^"\']+)', text, re.MULTILINE):
+            revs.add(m.group(1))
+        for d in re.findall(r"^down_revision\s*=\s*(.+)$", text, re.MULTILINE):
+            downs |= set(re.findall(r'["\']([^"\']+)["\']', d))
+    heads = revs - downs
+    return heads.pop() if len(heads) == 1 else None
+
+
+def _changed_lines(tree: Path, base: str, ref: str, exclude: list[str]) -> dict[str, list[int]]:
+    """{file: [new-side line numbers]} for app Python the branch changed (not tests/migrations)."""
+    diff = _git(tree, "diff", "-U0", f"{base}...{ref}", "--", "*.py").stdout
+    out: dict[str, list[int]] = {}
+    file = None
+    for line in diff.splitlines():
+        if line.startswith("+++ "):
+            file = line[6:] if line.startswith("+++ b/") else None
+            if file and ("/tests/" in file or any(fnmatch.fnmatch(file, g) for g in exclude)):
+                file = None
+        elif file and (m := re.match(r"^@@ -\S+ \+(\d+)(?:,(\d+))? @@", line)):
+            start, count = int(m.group(1)), int(m.group(2) or 1)
+            out.setdefault(file, []).extend(range(start, start + count))
+    return {f: ls for f, ls in out.items() if ls}
+
+
+def set_target(repo: str, branch: str, base: str, seeded: bool = False,
+               root: Path = Path(".")) -> dict:  # fmt: skip
+    """Clone `repo` (once) into data/sut/, fetch, check out `branch`'s head. Never touches
+    the user's checkout. Returns the stored target, with warnings."""
+    src = Path(repo).expanduser().resolve()
+    if not (src / ".git").exists():
+        raise SutError(f"{src} is not a git repository")
+    raw = yaml.safe_load((root / "sut/sut.yaml").read_text())
+    clone = db.data_dir() / "sut" / f"target-{src.name}"
+    if not clone.exists():
+        clone.parent.mkdir(parents=True, exist_ok=True)
+        _git(clone.parent, "clone", "-q", "--no-checkout", str(src), clone.name)
+    _git(clone, "fetch", "-q", "--prune", str(src), "+refs/heads/*:refs/remotes/origin/*")
+    ref, base_ref = (_git(clone, "rev-parse", "--verify", f"origin/{b}^{{commit}}").stdout.strip()
+                     for b in (branch, base))  # fmt: skip
+    _git(clone, "reset", "-q", "--hard")  # our clone: drop applied patches before moving
+    _git(clone, "clean", "-fdq")
+    _git(clone, "checkout", "-q", "--detach", ref)
+    warnings = []
+    dirty = _git(src, "status", "--porcelain").stdout.strip()
+    if dirty:
+        warnings.append(f"{src} has uncommitted changes; they are not in the tested clone")
+    exclude = raw.get("code_scope", {}).get("exclude", [])
+    t = {
+        "repo": str(src), "branch": branch, "base": base, "ref": ref, "base_ref": base_ref,
+        "clone": str(clone.resolve()), "seeded": seeded,
+        "alembic_head": _alembic_head(clone, raw["lifecycle"].get("migrations", "")),
+        "changed": _changed_lines(clone, base_ref, ref, exclude),
+        "subject": _git(clone, "log", "-1", "--format=%s", ref).stdout.strip(),
+        "warnings": warnings,
+    }  # fmt: skip
+    _target_file().write_text(json.dumps(t, indent=2))
+    return t
+
+
+def branches(repo: str) -> list[str]:
+    src = Path(repo).expanduser().resolve()
+    if not (src / ".git").exists():
+        raise SutError(f"{src} is not a git repository")
+    out = _git(src, "for-each-ref", "--format=%(refname:short)", "refs/heads").stdout
+    return sorted(out.split())
 
 
 def _git(path: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess:

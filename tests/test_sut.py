@@ -94,3 +94,42 @@ def test_load_requires_keys(tmp_path):
     (tmp_path / "sut/sut.yaml").write_text("name: x\n")
     with pytest.raises(sut.SutError, match="missing"):
         sut.load(tmp_path)
+
+
+def test_target_clones_branch_and_overlays(tmp_path, monkeypatch):
+    """M8 D10-D14: clone at the branch head, flags patch dropped, head + changed lines read."""
+    monkeypatch.setenv("TP_DATA", str(tmp_path / "data"))
+    repo = tmp_path / "app"
+    (repo / "app/alembic/versions").mkdir(parents=True)
+    git(repo, "init", "-q", "-b", "master")
+    (repo / "app/alembic/versions/a1.py").write_text('revision = "a1"\ndown_revision = None\n')
+    (repo / "app/models.py").write_text("x = 1\n")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "base")
+    git(repo, "checkout", "-qb", "feature")
+    (repo / "app/alembic/versions/b2.py").write_text('revision = "b2"\ndown_revision = "a1"\n')
+    (repo / "app/models.py").write_text("x = 1\ny = 2\n")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "feat")
+    git(repo, "checkout", "-q", "master")
+    root = tmp_path / "platform"
+    (root / "sut").mkdir(parents=True)
+    (root / "sut/sut.yaml").write_text(
+        "name: app\nrepo: x\nref: y\npatches: [testinfo, flags, trace]\nflags: [BUG_A]\n"
+        "compose: {}\nlifecycle: {db_probe: {sql: s, expect: old}, "
+        "migrations: app/alembic/versions}\ncode_scope: {exclude: ['app/alembic/**']}\n"
+    )
+    t = sut.set_target(str(repo), "feature", "master", root=root)
+    assert t["alembic_head"] == "b2" and t["changed"] == {"app/models.py": [2]}
+    assert Path(t["clone"]) != repo and (Path(t["clone"]) / "app/alembic/versions/b2.py").exists()
+    assert git(repo, "branch", "--show-current") == "master"  # the user's checkout untouched
+    cfg = sut.load(root)
+    assert cfg["patches"] == ["testinfo", "trace"] and cfg["flags"] == []
+    assert cfg["ref"] == git(repo, "rev-parse", "feature")
+    assert cfg["lifecycle"]["db_probe"]["expect"] == "b2"
+    assert cfg["code_scope"]["mutate"] == ["app/models.py"]
+    assert sut.branches(str(repo)) == ["feature", "master"]
+    sut.set_target(str(repo), "feature", "master", seeded=True, root=root)
+    assert sut.load(root)["patches"] == ["testinfo", "flags", "trace"]
+    sut.clear_target()
+    assert sut.load(root)["ref"] == "y"
