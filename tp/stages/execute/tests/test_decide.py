@@ -7,7 +7,8 @@ def ran(outcome="passed", origin=None, failed=()):
 
 
 def test_pass_needs_every_attempt_to_pass():
-    assert decide.verdict([ran()] * 3) == {"verdict": "PASS", "dist": "0/3"}
+    assert decide.verdict([ran()] * 3) == {"verdict": "PASS", "dist": "0/3",
+                                           "max_undetected_rate": 0.63}  # fmt: skip
 
 
 def test_consistent_fail_needs_same_origin_and_assertion():
@@ -37,3 +38,7 @@ def test_escalated_only_when_stable_on_reference():
     assert decide.escalation(fails, [ran()] * 10)["escalated"] is True
     assert decide.escalation(fails, [ran(), ran("failed")])["escalated"] is False
     assert decide.escalation(fails, [])["escalated"] is False  # no reference evidence
+
+
+def test_detection_power_shrinks_with_k():
+    assert [decide.max_undetected_rate(k) for k in (3, 5, 10)] == [0.63, 0.45, 0.26]

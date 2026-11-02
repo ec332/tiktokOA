@@ -24,7 +24,7 @@ def folder(execution_id: int) -> Path:
 
 class ExecuteStage:
     name = "execute"
-    version = "1.1.0"  # 1.1: full fingerprint per variant (retest D5)
+    version = "1.2.0"  # 1.1: full fingerprint per variant (retest D5); 1.2: detection power
     consumes: dict[str, int] = {"gate_report": 1, "bound_tests": 1, "env_spec": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"run_records": 1}  # noqa: RUF012
 

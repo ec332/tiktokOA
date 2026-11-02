@@ -1,6 +1,7 @@
 """Deterministic parts of execute: lanes, verdicts, escalation (design D1, D5, D11). Pure."""
 
 ESCALATE_K = 10  # observation lane runs (plan †)
+CONFIDENCE = 0.95
 TEST_SIDE = {"BINDING", "CONFORMANCE", "PLATFORM"}  # the test's own code failed, not the SUT
 
 
@@ -29,13 +30,19 @@ def verdict(attempts: list[dict]) -> dict:
     failed = [a for a in attempts if a["outcome"] != "passed"]
     dist = f"{len(failed)}/{n}"
     if not failed:
-        return {"verdict": "PASS", "dist": dist}
+        return {"verdict": "PASS", "dist": dist, "max_undetected_rate": max_undetected_rate(n)}
     sigs = {signature(a) for a in failed}
     if len(failed) == n and len(sigs) == 1:
         origin = failed[0].get("origin")
         return {"verdict": "TIMEOUT" if origin == "TIMEOUT" else "CONSISTENT_FAIL", "dist": dist,
                 "origin": origin, "assertions": list(signature(failed[0])[1])}  # fmt: skip
     return {"verdict": "INTERMITTENT", "dist": dist, "signatures": sorted(map(str, sigs))}
+
+
+def max_undetected_rate(k: int) -> float:
+    """Detection power (X5 analytics, design 004 D16): the highest failure rate that still passes
+    k of k runs with 5% probability, i.e. what a PASS at K can't rule out: 0.63 at K=3."""
+    return round(1 - (1 - CONFIDENCE) ** (1 / k), 2)
 
 
 def escalation(on_variant: list[dict], on_reference: list[dict]) -> dict:
