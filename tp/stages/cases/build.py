@@ -14,7 +14,6 @@ _ACCEPT = re.compile(r"\b(accept(ed|s)?|succeeds?|created|returned|returns|can|i
                      r"ok|updated|deleted|stored|receives?)\b")  # fmt: skip
 _REFUSE = re.compile(r"\b(refused?|reject(ed|s)?|cannot|denied|forbidden|not allowed|fails?|"
                      r"error|invalid)\b")  # fmt: skip
-_ACTOR = re.compile(r"\b(other users?|another user|owner|administrator|superuser|anonymous)\b")
 
 
 def _text(c: dict) -> str:
@@ -214,21 +213,29 @@ def dedupe_and_budget(units: list[dict], minimum: dict[str, list[str]]) -> tuple
     return kept, deferred
 
 
-def rank(units: list[dict], criteria: dict[str, dict], findings: list[dict]) -> None:
-    """Additive flags (plan): candidate defect 5, permission 4, rule interaction 3, observed 3,
-    default 1. Sets score/priority and sorts in place; ties by technique order, then criterion."""
+def rank(units: list[dict], criteria: dict[str, dict], findings: list[dict],
+         changed: dict[str, list[int]] | None = None) -> None:  # fmt: skip
+    """Additive flags (cases/009 P3): candidate defect 7, in the feature 4 (the user's own
+    criterion, or one citing a line the branch changed), authorisation table 3, rule
+    interaction 2, acceptance 2, default 1. P0 >= 8, P1 >= 5, else P2. Sorts in place; ties by
+    technique order, then criterion."""
     interacting = {
         cid for f in findings if f["kind"] == "rule_interaction" for cid in f["criteria"]
     }
+    touched = {(f, ln) for f, lines in (changed or {}).items() for ln in lines}
     for u in units:
         c = criteria[u["ac"]]
+        in_feature = u["ac"].startswith("C-") or any(
+            (s.get("file"), s.get("line")) in touched for s in c.get("sources", [])
+        )
         score = 1
-        score += 5 if c.get("suspected_defect") else 0
-        score += 4 if u["technique"] == "decision_table" or _ACTOR.search(_text(c)) else 0
-        score += 3 if u["ac"] in interacting else 0
-        score += 3 if u["ac"].startswith("O-") else 0
+        score += 7 if c.get("suspected_defect") else 0
+        score += 4 if in_feature else 0
+        score += 3 if u["technique"] == "decision_table" else 0
+        score += 2 if u["ac"] in interacting else 0
+        score += 2 if u["technique"] == "acceptance" else 0
         u["score"] = score
-        u["priority"] = "P0" if score >= 8 else "P1" if score >= 5 else "P2" if score >= 3 else "P3"
+        u["priority"] = "P0" if score >= 8 else "P1" if score >= 5 else "P2"
     order = {t: i for i, t in enumerate(TECHNIQUE_ORDER)}
     units.sort(key=lambda u: (-u["score"], order[u["technique"]], u["ac"]))
 
@@ -288,4 +295,43 @@ def line(u: dict) -> dict:
     # title + one sentence for the approve list (M8 cases D15); the hash covers the whole unit
     return {"id": u["id"], "text": text, "flow": u["flow"], "hash": sha256(body),
             "title": u["purpose"], "summary": u["defect_hypothesis"], "ac": u["ac"],
-            "technique": u["technique"]}  # fmt: skip
+            "technique": u["technique"], "priority": u["priority"]}  # fmt: skip
+
+
+# ---- product-owner decisions (cases/012) -------------------------------------------------
+
+NON_ANSWERS = ("Leave to human judgement", "Out of scope: don't test this")
+_ROUNDING = {"half_up": re.compile(r"half[ _-]?up", re.IGNORECASE),
+             "half_even": re.compile(r"half[ _-]?(to[ _-]?)?even|banker", re.IGNORECASE)}  # fmt: skip
+
+
+def decision_rules(decisions: list[dict]) -> list[str]:
+    """The spec's decisions as drafter rules (D1). Non-answers are left out."""
+    return [f"Product owner decided (overrides any criterion text that disagrees): "
+            f"{d['about']}: {d['answer']}"
+            for d in decisions if d.get("answer") and d["answer"] not in NON_ANSWERS]  # fmt: skip
+
+
+def _expectations(u: dict) -> list[tuple[str, dict]]:
+    if "rows" in u:
+        return [(r["id"], r["expected"]) for r in u["rows"]]
+    if "points" in u:
+        return [(f"{u['id']} @ {p['value']}", p["expected"]) for p in u["points"]]
+    return [(u["id"], u["expected"])]
+
+
+def decision_conflicts(units: list[dict], decisions: list[dict]) -> list[str]:
+    """D2: a percent_off expectation whose rounding differs from the one rounding mode the
+    decisions name. Deterministic backstop for D1."""
+    named = {mode for d in decisions if d.get("answer") not in NON_ANSWERS
+             for mode, rx in _ROUNDING.items() if rx.search(str(d.get("answer", "")))}  # fmt: skip
+    if len(named) != 1:
+        return []
+    (decided,) = named
+    out = []
+    for u in units:
+        for where, exp in _expectations(u):
+            used = (exp.get("params") or {}).get("rounding", "half_up")
+            if exp.get("oracle") == "calculator:percent_off" and used != decided:
+                out.append(f"{where}: expects {used} rounding, but you decided {decided}")
+    return out

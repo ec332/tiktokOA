@@ -346,3 +346,25 @@ def test_criteria_without_an_acceptance_case_are_redrafted_once(model, monkeypat
     assert calls[1] == ["C-11"]
     lines = _signoff()["payload"]["lines"]
     assert any(ln["ac"] == "C-11" and ln["technique"] == "acceptance" for ln in lines)
+
+
+def test_decisions_reach_the_drafter_and_a_rounding_conflict_is_flagged():
+    """cases/012 D1-D2, on r-0001's shape: the rounding answer had no criterion."""
+    from tp.stages.cases import build
+
+    decisions = [{"about": "final_price rounding mode", "answer": "Switch to ROUND_HALF_UP."},
+                 {"about": "intended behaviour", "answer": "Leave to human judgement"}]  # fmt: skip
+    prefix = "Product owner decided (overrides any criterion text that disagrees): "
+    assert build.decision_rules(decisions) == [
+        prefix + "final_price rounding mode: Switch to ROUND_HALF_UP."
+    ]
+    calc = {"oracle": "calculator:percent_off", "value": "0.02",
+            "params": {"amount": "0.05", "percent": "50", "rounding": "half_even"}}  # fmt: skip
+    units = [{"id": "TC-O4-1", "expected": calc},
+             {"id": "TC-O1-2", "expected": calc | {"params": {"rounding": "half_up"}}},
+             {"id": "TC-O9-1", "rows": [{"id": "TC-O9-1.1", "expected": {"oracle": "literal",
+                                                                          "value": "422"}}]}]  # fmt: skip
+    assert build.decision_conflicts(units, decisions) == [
+        "TC-O4-1: expects half_even rounding, but you decided half_up"
+    ]
+    assert build.decision_conflicts(units, decisions[1:]) == []  # no rounding decided

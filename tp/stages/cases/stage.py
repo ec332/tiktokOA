@@ -37,7 +37,7 @@ def approved_hashes(scope: dict | None) -> set[str]:
 
 class CasesStage:
     name = "cases"
-    version = f"1.0.0+p{ai.version_hash()}"
+    version = f"1.2.0+p{ai.version_hash()}"  # 1.1: priority (cases/010); 1.2: decisions (012)
     consumes: dict[str, int] = {"spec": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"cases": 1, "signoff_md": 1}  # noqa: RUF012
     templates = staticmethod(lambda: {n: t.get("name", n) for n, t in ai.catalogue().items()})
@@ -104,6 +104,8 @@ class CasesStage:
             flows = tuple(sorted({c["flow"] for c in scope}))
         minimum = {c["id"]: [t for t in signals.minimum_templates(c)
                              if templates is None or t in templates] for c in scope}  # fmt: skip
+        # the product owner's answers override criterion text that disagrees (cases/012 D1)
+        rules = build.decision_rules(spec.get("decisions", [])) + list(rules or [])
         # key by the criterion id the model echoes; it sometimes adds the title ("C-5 Expired …")
         drafts = {
             d["criterion"].split()[0].rstrip(":"): d
@@ -122,9 +124,10 @@ class CasesStage:
                 )
         units += self._fill_acceptance(ctx, scope, units, minimum, templates, rules, attention)
         units, deferred = build.dedupe_and_budget(units, minimum)
-        build.rank(units, crit, spec.get("findings", []))
+        build.rank(units, crit, spec.get("findings", []), self._changed(ctx))
         build.assign_ids(units)
         attention += build.exit_problems(units, scope, minimum, drafts)
+        attention += build.decision_conflicts(units, spec.get("decisions", []))
         attention += [f"{c['id']}: criterion is assumed, not confirmed: check its cases"
                       for c in scope if c["status"] == "assumed"]  # fmt: skip
         ctx.emit(
@@ -135,6 +138,15 @@ class CasesStage:
                 "minimum": minimum, "drafts": drafts, "units": units, "deferred": deferred,
                 "attention": attention, "not_tested": not_tested, "approved": [], "carried": [],
                 "round": 1}  # fmt: skip
+
+    @staticmethod
+    def _changed(ctx) -> dict[str, list[int]]:
+        """The branch's changed lines (env's code scope); none without a live env."""
+        scope = getattr(getattr(ctx, "env", None), "code_scope", None)
+        try:
+            return scope()["changed"] if scope else {}
+        except Exception:  # noqa: BLE001 — priority falls back to the other flags
+            return {}
 
     def _fill_acceptance(self, ctx, scope, units, minimum, templates, rules, attention) -> list:
         """Every criterion needs a case for its normal outcome (drafter rule 2). The model
