@@ -118,6 +118,10 @@ def _case(c, flow, d, attention) -> dict:
             "oracle": f"calculator:{d['calculator']}",
             "params": params,
         }
+        if d["calculator"] == "percent_off" and not calculators.PROPERTIES["percent_off_bounded"](
+            params["amount"], params["percent"], value
+        ):  # differential check against the property
+            attention.append(f"{c['id']}: percent_off disagrees with property percent_off_bounded")
         if d["calculator"] == "page_window":  # differential check against the property
             args = {k: int(params[k]) for k in ("total", "skip", "limit")}
             if not calculators.PROPERTIES["page_len_ok"](**args, data_len=value["data_len"]):

@@ -37,3 +37,20 @@ def test_newest_first():
 
 def test_run_coerces_string_params():
     assert calc.run("page_window", {"total": "5", "skip": "4", "limit": "3"})["data_len"] == 1
+
+
+def test_percent_off_rounds_with_decimal_arithmetic():
+    from tp.stages.cases import calculators as calc
+
+    assert calc.run("percent_off", {"amount": "10.05", "percent": "15"}) == "8.54"
+    assert calc.run("percent_off", {"amount": "0.05", "percent": "50"}) == "0.03"
+    assert (
+        calc.run("percent_off", {"amount": "0.05", "percent": "50", "rounding": "half_even"})
+        == "0.02"
+    )
+    assert calc.run("percent_off", {"amount": "20.00", "percent": "100"}) == "0.00"
+    assert calc.run("percent_off", {"amount": "10", "percent": "0"}) == "10.00"
+    for a, p in [("10.05", "15"), ("0.05", "50"), ("99999999.99", "33")]:
+        assert calc.PROPERTIES["percent_off_bounded"](
+            a, p, calc.run("percent_off", {"amount": a, "percent": p})
+        )

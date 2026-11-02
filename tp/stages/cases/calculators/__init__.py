@@ -71,6 +71,34 @@ def boundary_monotonic(points: list[int], outcomes: list[str], ok: str, directio
     return True
 
 
+ROUNDING = {"half_up": "ROUND_HALF_UP", "half_even": "ROUND_HALF_EVEN", "down": "ROUND_DOWN"}
+
+
+@calculator
+def percent_off(amount: str, percent: str, rounding: str = "half_up", places: int = 2) -> str:
+    """A price after a percentage discount: amount × (100 − percent) / 100, rounded to `places`
+    decimals with `rounding` (half_up, half_even or down). Decimal arithmetic, returned as a
+    string with exactly `places` decimals, e.g. ("10.05", "15") -> "8.54"."""
+    import decimal
+
+    if rounding not in ROUNDING:
+        raise ValueError(f"rounding must be one of {sorted(ROUNDING)}")
+    exact = decimal.Decimal(amount) * (100 - decimal.Decimal(percent)) / 100
+    q = decimal.Decimal(1).scaleb(-places)
+    return str(exact.quantize(q, rounding=getattr(decimal, ROUNDING[rounding])))
+
+
+@prop
+def percent_off_bounded(amount: str, percent: str, result: str) -> bool:
+    """Independent of percent_off: for 0-100 percent the result lies between 0 and the amount,
+    within one unit of the last place of the exact value."""
+    from fractions import Fraction
+
+    a, p, r = Fraction(amount), Fraction(percent), Fraction(result)
+    exact = a * (100 - p) / 100
+    return 0 <= r <= a and abs(r - exact) <= Fraction(1, 100)
+
+
 def describe() -> list[dict]:
     """The catalogue the drafter sees: name, signature, purpose."""
     return [
