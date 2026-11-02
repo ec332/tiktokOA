@@ -6,12 +6,13 @@ import shutil
 import time
 from pathlib import Path
 
+import typer
 import yaml
 
-from tp.core import db
+from tp.core import db, sut
 from tp.core.contract import StageResult, register
 from tp.core.hashing import sha256
-from tp.stages.gate import ai, decide, mutants
+from tp.stages.gate import ai, blind, decide, handlers, mutants
 
 HERE = Path(__file__).parent
 K = 5  # † stability runs on reference, plus one shuffled run (plan K3)
@@ -28,7 +29,7 @@ def _node_args(nodes) -> list[str]:
 
 class GateStage:
     name = "gate"
-    version = f"1.0.0+p{ai.version_hash()}"
+    version = f"1.1.0+p{ai.version_hash()}"  # 1.1: handler mutants (K8)
     consumes: dict[str, int] = {"bound_tests": 1, "cases": 1, "spec": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"gate_report": 1, "kill_matrix": 1}  # noqa: RUF012
 
@@ -93,7 +94,9 @@ class GateStage:
     def _measure(self, ctx, work, tests, info) -> dict:
         scope = ctx.env.code_scope()
         seeded = yaml.safe_load((HERE / "seeded.yaml").read_text())
-        key = sha256({"tests": sorted((t["file"], t["source"], t["lock_hash"]) for t in tests),
+        h_files, h_ms = handlers.generate(Path(scope["src"]), sut.load()["ref"], info["refs"],
+                                          work / "handlers", blind.sealed())  # fmt: skip
+        key = sha256({"handlers": {c: p.read_text() for c, p in sorted(h_files.items())},"tests": sorted((t["file"], t["source"], t["lock_hash"]) for t in tests),
                       "runner": json.loads((db.data_dir() / "published.json").read_text())
                       ["runner"]["digest"],
                       "scope": {p: (Path(scope["src"]) / p).read_text() for p in scope["mutate"]},
@@ -118,8 +121,8 @@ class GateStage:
         seeded_res = self._seeded(ctx, work, info, seeded, passing)
         timings["seeded"] = round(time.perf_counter() - t0 - sum(timings.values()), 1)
 
-        files = mutants.generate(ctx.env, scope["mutate"], work / "mutants")
-        ms = mutants.parse(work / "mutants", scope["mutate"])
+        files = mutants.generate(ctx.env, scope["mutate"], work / "mutants") | h_files
+        ms = mutants.parse(work / "mutants", scope["mutate"]) + h_ms
         stats = ctx.env.pytest(work / "tests", work / "stats", "reference", mounts=files,
                                env={"MUTANT_UNDER_TEST": "stats"},
                                args=tuple(_node_args(passing)))["results"]  # fmt: skip
@@ -137,7 +140,8 @@ class GateStage:
         out = {"stability": stab, "shuffle_seed": seed, "seeded": seeded_res, "mutants": ms,
                "linked": linked, "matrix": {k: [{f: r[f] for f in ("nodeid", "outcome", "origin")}
                                                 for r in v] for k, v in matrix.items()},
-               "overlay_broken": broken, "timings": timings}  # fmt: skip
+               "overlay_broken": broken, "timings": timings,
+               "held_out": len(blind.sealed())}  # fmt: skip
         cache.parent.mkdir(parents=True, exist_ok=True)
         cache.write_text(json.dumps(out))
         return out | {"cache": "miss"}
@@ -196,8 +200,8 @@ class GateStage:
                          "kills": n_kills, "unique_kills": n_unique,
                          "linked_mutants": sum(1 for v in m["linked"].values() if node in v)})  # fmt: skip
         return {"info": info, "rows": rows, "cells": cells, "measure": {
-                    k: m[k] for k in ("mutants", "linked", "timings", "shuffle_seed",
-                                      "overlay_broken", "cache")},
+                    k: m.get(k) for k in ("mutants", "linked", "timings", "shuffle_seed",
+                                          "overlay_broken", "cache", "held_out")},
                 "survivors": decide.survivors(m["mutants"], cells, m["linked"], info["refs"])}  # fmt: skip
 
     def _resume(self, ctx, state, path):
@@ -237,6 +241,8 @@ class GateStage:
                               "not_covered": sum(1 for s in surv if not s["covered"]),
                               "strength": decide.strength(len(killed), len(names),
                                                           len(equivalent))},
+                  "handlers": self._handlers(meas["mutants"], killed, equivalent,
+                                             meas.get("held_out")),
                   "survivors": surv, "proposals": state.get("proposals", []),
                   "overlay_broken": meas["overlay_broken"], "timings": meas["timings"],
                   "shuffle_seed": meas["shuffle_seed"], "cache": meas["cache"]}  # fmt: skip
@@ -252,5 +258,16 @@ class GateStage:
               "cells": cells, "csv": csv_text, "csv_path": str(work / "kill_matrix.csv")}  # fmt: skip
         return StageResult.succeeded({"gate_report": report, "kill_matrix": km})
 
+    @staticmethod
+    def _handlers(ms, killed, equivalent, held_out) -> dict:
+        """Handler-only numbers (design 003 D17); the whole pool stays in `mutants`."""
+        names = {m["name"] for m in ms if "__ast_" in m["name"]}
+        return {"total": len(names), "killed": len(names & killed),
+                "equivalent": len(names & equivalent), "held_out_blind": held_out or 0,
+                "strength": decide.strength(len(names & killed), len(names),
+                                            len(names & equivalent))}  # fmt: skip
 
-STAGE = register(GateStage())
+
+cli = typer.Typer(no_args_is_help=True, help="Gate tools")
+cli.add_typer(blind.app, name="blind")
+STAGE = register(GateStage(), cli=cli)
