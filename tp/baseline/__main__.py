@@ -15,13 +15,13 @@ import typer
 
 from tp.baseline import decide, propose, suite
 from tp.core import artifacts, contract, db, llm, sut
+from tp.stages.gate.decide import code_refs as decide_refs
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"  # 1.1: handler mutants, blind bugs, assertion kills (design 003)
 # The platform arm's existing artifacts (B4; retest status 004 handover).
 RUN_RECORDS = "sha256:dfb6c25a8cf6f37254e682f70dbae61826df818b3fca48c8acafd83c4176df01"  # x252
 CHECK_RECORDS = "sha256:aefea7ec748c16b033f58e7079276fd14c7aa13ebfa6115a8ccb2040e8a29814"  # #469
 RETEST = "sha256:91080c4e8a394049bc134b7a475de8992d27aa70d4fb0295825cffc1d50a7acf"  # O-6 fixed
-GATE_REPORT = "sha256:e06c537d3d73b52a0c99ee93098d702a3e2133f9e4fa1f88c74f38d256ce7497"
 
 app = typer.Typer(add_completion=False)
 
@@ -76,8 +76,9 @@ def naive(samples: int = 3, replay: bool = False, budget: float = 3.0):
     typer.echo(art.id)
 
 
-def _platform(fix: str) -> tuple[dict, int, int]:
-    """Arm (c) from its artifacts: per-node verdicts per variant, kills, mutants (B4)."""
+def _platform(fix: str, gate: dict) -> tuple[dict, int, int]:
+    """Arm (c) from its artifacts: per-node verdicts per variant, mutmut-pool kills and total
+    (B4; the M7 gate report adds handler mutants, which are split out)."""
     rr = artifacts.get(RUN_RECORDS).body
     v: dict[str, dict] = {}
     for x in rr["verdicts"]:
@@ -86,8 +87,8 @@ def _platform(fix: str) -> tuple[dict, int, int]:
     rt = artifacts.get(RETEST).body["retests"][0]
     assert rt["after"]["variant"] == fix, rt["after"]
     v[fix] = {x["node"]: x["after"] for x in rt["fail_to_pass"]}  # the fixed run's flips
-    g = artifacts.get(GATE_REPORT).body["mutants"]
-    return v, g["killed"], g["total"]
+    g, h = gate["mutants"], gate.get("handlers", {"killed": 0, "total": 0})
+    return v, g["killed"] - h["killed"], g["total"] - h["total"]
 
 
 def _images_match() -> tuple[bool, str]:
@@ -97,81 +98,100 @@ def _images_match() -> tuple[bool, str]:
     return ok, f"backend {pub['base_id'][:19]}, runner {pub['digest'][:19]}"
 
 
-def _gate_mutants() -> list[str]:
+def _gate_mutants(gate_report: str) -> set[str]:
     with db.connect() as c:
         outs = [json.loads(r["outputs"]) for r in c.execute(
-            "SELECT outputs FROM stage_executions WHERE outputs LIKE ?", (f"%{GATE_REPORT}%",))]  # fmt: skip
-    return sorted(m["name"] for m in artifacts.get(outs[0]["kill_matrix"]).body["mutants"])
+            "SELECT outputs FROM stage_executions WHERE outputs LIKE ?", (f"%{gate_report}%",))]  # fmt: skip
+    return {m["name"] for m in artifacts.get(outs[0]["kill_matrix"]).body["mutants"]}
 
 
 @app.command()
-def compare(naive_id: Annotated[str, typer.Option("--naive")]):
-    """The three-arm table over the same variants and mutants (B1-B8)."""
+def compare(naive_id: Annotated[str, typer.Option("--naive")],
+            gate_report: Annotated[str, typer.Option("--gate-report", help="M7 gate (K8)")],
+            blind_id: Annotated[str, typer.Option("--blind", help="blind_reveal artifact")],
+            samples: Annotated[int, typer.Option(help="naive samples to measure")] = 1):  # fmt: skip
+    """The three-arm table over the same variants and mutants (B1-B13)."""
     env, cfg = _env(), sut.load()
     src, ref, fix = Path(env.code_scope()["src"]), cfg["ref"], f"fixed:{suite.FIX}"
     ok, images = _images_match()
     if not ok:
         raise typer.Exit(f"platform arm's images differ from the current ones ({images}): "
                          "re-run the platform's execute before comparing (design B4)")  # fmt: skip
+    gate, reveal = artifacts.get(gate_report).body, artifacts.get(blind_id).body
+    spec = artifacts.get(gate["cases"]).body["spec"]
     env.ensure("reference")
     work = _work("compare")
-    muts = suite.generate_mutants(env, work / "mutants")
-    if (names := sorted(m["name"] for m in muts["list"])) != _gate_mutants():
-        raise typer.Exit(f"mutants differ from the gate's ({len(names)} generated)")
+    muts = suite.generate_mutants(env, work / "mutants",
+                                  decide_refs(artifacts.get(spec).body))  # fmt: skip
+    names = {m["name"] for m in muts["list"]}
+    blind = set(reveal["names"])
+    mm = {n for n in names if "__mutmut_" in n}
+    handler = names - mm - blind
+    if mm | handler != _gate_mutants(gate_report) or not blind <= names:
+        raise typer.Exit("mutants differ from the gate's (design B1)")
 
-    pv, pk, pm = _platform(fix)
-    rows = [decide.row("Platform", pv, fix, pk, pm, {"source": RUN_RECORDS})]
+    def split(m) -> tuple[int, dict]:
+        ks = {x for ms in m["killed"].values() for x in ms}
+        return len(ks & mm), {"handler_kills": len(ks & handler), "handlers": len(handler),
+                              "seeded_blind": f"{len(ks & blind)}/{len(blind)}",
+                              "asserted": len(set(m["asserted"]) & (mm | handler)),
+                              "killed": m["killed"]}  # fmt: skip
+
+    pv, pk, pm = _platform(fix, gate)
+    h = gate["handlers"]
+    rows = [decide.row("Platform", pv, fix, pk, pm, {
+        "source": RUN_RECORDS, "handler_kills": h["killed"], "handlers": h["total"],
+        "seeded_blind": f"{reveal['detected']}/{reveal['count']}"})]  # fmt: skip
     typer.echo("SUT's own tests")
     m = suite.measure(env, suite.sut_tests(src, ref, work / "sut-tests"), work / "sut", muts,
                       typer.echo)  # fmt: skip
-    rows.append(decide.row("SUT's own tests", decide.verdicts(m["variants"]), fix,
-                           len({x for ms in m["killed"].values() for x in ms}), m["mutants"],
-                           {"killed": m["killed"]}))  # fmt: skip
+    k, extra = split(m)
+    rows.append(decide.row("SUT's own tests", decide.verdicts(m["variants"]), fix, k, len(mm),
+                           extra))  # fmt: skip
     nt = artifacts.get(naive_id)
-    for s in nt.body["samples"]:
+    # One sample by default: in M6 the three samples agreed on every bug column, and each arm
+    # costs a full variant + mutant pass (user, 2026-11-02).
+    for s in nt.body["samples"][:samples]:
         typer.echo(f"naive sample {s['sample']}")
         folder = suite.sut_tests(src, ref, work / f"naive-s{s['sample']}", with_tests=False)
         propose.write(folder, s["imports"], {t["name"]: t["source"] for t in s["tests"]})
         m = suite.measure(env, folder, work / f"naive-{s['sample']}", muts, typer.echo)
+        k, extra = split(m)
         rows.append(decide.row(f"Naive LLM, sample {s['sample']}", decide.verdicts(m["variants"]),
-                               fix, len({x for ms in m["killed"].values() for x in ms}),
-                               m["mutants"], {"killed": m["killed"], "cost_usd": s["cost_usd"],
-                                              "generated": s["generated"],
-                                              "dropped": len(s["dropped"]),
-                                              "repaired": len(s["repaired"])}))  # fmt: skip
+                               fix, k, len(mm), extra | {
+                                   "cost_usd": s["cost_usd"], "generated": s["generated"],
+                                   "dropped": len(s["dropped"]),
+                                   "repaired": len(s["repaired"])}))  # fmt: skip
     notes = [
-        (
-            f"Same variants ({', '.join(suite.variants())}) and the gate's {pm} mutants for every "
-            f"arm; strength = kills / {pm}. Detection: PASS on reference and FAIL on bug:FLAG "
-            f"(all K runs); real bug: FAIL on reference, PASS on {fix}. No triage."
-        ),
-        (
-            f"Platform from artifacts: run_records {RUN_RECORDS[:19]}… (K=3), retest "
-            f"{RETEST[:19]}…, gate_report {GATE_REPORT[:19]}…; images match the current ones "
-            f"({images})."
-        ),
-        (
-            f"SUT and naive arms: in-process, K={suite.K}; {fix} overlays the patched file; the "
-            "mutant is off during fixture setup (mutant_phase)."
-        ),
-        (
-            f"Naive: {nt.body['model']}, upstream source at {ref[:7]} without our patches, ≤"
-            f"{nt.body['repairs']} repair rounds on reference, then failing tests dropped. "
-            "Each sample is its own row."
-        ),
-        "Race flag (BUG_FLAKE_RACE) is outside the headline: a timing bug (execute X5 not met).",
-        (
-            "Bias: the requirements, the seeded bugs and the platform's tests share one author, which "
-            "favours the platform on 'seeded, authored'. Blind bugs (M7) exist for that."
-        ),
-    ]
+        (f"Same variants ({', '.join(suite.variants())}) and mutants for every arm: mutmut's "
+         f"{len(mm)} (crud/deps/security; 'Mutation strength') and {len(handler)} route-handler "
+         f"mutants (K8; 'Handler strength'). Detection: PASS on reference and FAIL on bug:FLAG "
+         f"(all K runs); real bug: FAIL on reference, PASS on {fix}. No triage."),
+        (f"Seeded, blind: {len(blind)} handler mutants sealed before the gate run (hash in "
+         f"blind_seal), held out of every pool above, revealed in {blind_id[:19]}…. A sealed "
+         "mutant may be equivalent: a miss for every arm alike."),
+        ("Assertion kills: mutants (both pools) some test kills with an AssertionError. The other "
+         "kills are crashes, mostly from inline data setup. Platform: '—', its kills are already "
+         "oracle-classified by the gate (D10) and its data setup runs with the mutant off."),
+        (f"Platform from artifacts: run_records {RUN_RECORDS[:19]}… (K=3), retest "
+         f"{RETEST[:19]}…, gate_report {gate_report[:19]}…; images match the current ones "
+         f"({images})."),
+        (f"SUT and naive arms: in-process, K={suite.K}; {fix} overlays the patched file; the "
+         "mutant is off during fixture setup (mutant_phase)."),
+        (f"Naive: {nt.body['model']}, upstream source at {ref[:7]} without our patches, ≤"
+         f"{nt.body['repairs']} repair rounds on reference, then failing tests dropped. "
+         "Each sample is its own row."),
+        "Race flag (BUG_FLAKE_RACE) is outside the headline: a timing bug (execute X5).",
+        ("Bias: the requirements, the seeded bugs and the platform's tests share one author, which "
+         "favours the platform on 'seeded, authored'; 'seeded, blind' has no author."),
+    ]  # fmt: skip
     md = "# Baseline: three-arm table\n\n" + decide.markdown(rows, notes)
     (work / "baseline.md").write_text(md)
     art = artifacts.put("baseline_report", {"rows": rows, "notes": notes, "markdown": md,
                                             "folder": str(work.relative_to(db.data_dir()))},
                         stage="baseline", stage_version=VERSION,
-                        parents=[naive_id, RUN_RECORDS, RETEST, GATE_REPORT, CHECK_RECORDS],
-                        labels=nt.labels)  # fmt: skip
+                        parents=[naive_id, RUN_RECORDS, RETEST, gate_report, blind_id,
+                                 CHECK_RECORDS], labels=nt.labels)  # fmt: skip
     typer.echo(md)
     typer.echo(art.id)
 

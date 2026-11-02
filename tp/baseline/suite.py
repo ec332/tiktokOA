@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 
 from tp.core import sut
+from tp.stages.gate import handlers
 from tp.stages.gate import mutants as mutant_src
 
 HERE = Path(__file__).parent
@@ -63,14 +64,15 @@ def measure(env, tests: Path, work: Path, muts: dict, emit=print) -> dict:
         emit(f"  {v}: {sum(o == 'passed' for o in runs[v][0].values())}/{len(runs[v][0])} pass")
     ref = runs["reference"]
     passing = sorted(n for n in ref[0] if all(r.get(n) == "passed" for r in ref))
-    killed = mutate(env, tests, work / "mutants", muts, passing)
+    killed, asserted = mutate(env, tests, work / "mutants", muts, passing)
     emit(f"  mutants: {len({m for ms in killed.values() for m in ms})}/{len(muts['list'])} killed")
-    return {"variants": runs, "killed": killed, "mutants": len(muts["list"])}
+    return {"variants": runs, "killed": killed, "asserted": asserted, "mutants": len(muts["list"])}
 
 
-def mutate(env, tests: Path, work: Path, muts: dict, passing: list[str]) -> dict[str, list]:
+def mutate(env, tests: Path, work: Path, muts: dict, passing: list[str]) -> tuple[dict, list]:
     """The gate's method: a stats run links each mutant to the tests that reach it in their
-    body, then one pytest per mutant over those tests. Unreached mutants can't be killed."""
+    body, then one pytest per mutant over those tests. Unreached mutants can't be killed.
+    -> ({node: [killed mutants]}, [mutants killed by an AssertionError] (design 003 B13))."""
     mounts = PLUGIN | muts["files"]
     nodes = tuple("/work/tests/" + n for n in passing)
     stats = env.pytest(tests, work / "stats", "reference", mounts=mounts,
@@ -87,17 +89,24 @@ def mutate(env, tests: Path, work: Path, muts: dict, passing: list[str]) -> dict
     matrix = env.pytest(tests, work / "matrix", "reference", mounts=mounts, env=QUIET,
                         matrix=jobs)["matrix"] if jobs else {}  # fmt: skip
     killed: dict[str, list] = {}
+    asserted = set()
     for name, recs in matrix.items():
         for r in recs:
-            if r["outcome"] == "failed" and (r.get("failure") or {}).get("phase") == "call":
+            failure = r.get("failure") or {}
+            if r["outcome"] == "failed" and failure.get("phase") == "call":
                 killed.setdefault(r["nodeid"], []).append(name)
-    return {n: sorted(ms) for n, ms in sorted(killed.items())}
+                if failure.get("error", "").startswith("AssertionError"):
+                    asserted.add(name)
+    return {n: sorted(ms) for n, ms in sorted(killed.items())}, sorted(asserted)
 
 
-def generate_mutants(env, work: Path) -> dict:
-    scope = env.code_scope()["mutate"]
-    files = mutant_src.generate(env, scope, work)
-    return {"files": files, "list": mutant_src.parse(work, scope)}
+def generate_mutants(env, work: Path, refs: list) -> dict:
+    """mutmut's pool + the gate's handler mutants (K8), sealed blind ones included: the caller
+    splits results by pool (design 003 B11-B12)."""
+    cs = env.code_scope()
+    files = mutant_src.generate(env, cs["mutate"], work)
+    h_files, h_ms = handlers.generate(Path(cs["src"]), sut.load()["ref"], refs, work / "handlers")
+    return {"files": files | h_files, "list": mutant_src.parse(work, cs["mutate"]) + h_ms}
 
 
 def sut_tests(src: Path, ref: str, dest: Path, with_tests: bool = True) -> Path:

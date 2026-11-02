@@ -45,7 +45,7 @@ def row(arm: str, v: dict, fix: str, kills: int, mutants: int, extra: dict | Non
     tests = len(v["reference"])
     return {"arm": arm, "tests": tests,
             "seeded_authored": f"{len(found)}/{len(flags)}", "seeded_found": found,
-            "seeded_blind": "— (M7)", "race": race(v),
+            "seeded_blind": "— (not revealed)", "race": race(v),
             "real_bug": any("real" in b for b in val.values()),
             "kills": kills, "mutants": mutants, "strength": round(kills / mutants, 3),
             "bug_validating": bug_nodes,
@@ -56,7 +56,8 @@ def row(arm: str, v: dict, fix: str, kills: int, mutants: int, extra: dict | Non
 def markdown(rows: list[dict], notes: list[str]) -> str:
     cols = [("Arm", "arm"), ("Tests", "tests"), ("Seeded, authored", "seeded_authored"),
             ("Seeded, blind", "seeded_blind"), ("Race flag", "race"), ("Real bug O-6", "real"),
-            ("Mutation strength", "strength_txt"), ("Bug-validating share", "share_txt"),
+            ("Mutation strength", "strength_txt"), ("Handler strength", "handler_txt"),
+            ("Assertion kills", "asserted_txt"), ("Bug-validating share", "share_txt"),
             ("LLM cost", "cost")]  # fmt: skip
     lines = ["| " + " | ".join(c for c, _ in cols) + " |", "|" + "---|" * len(cols)]
     for r in rows:
@@ -64,6 +65,10 @@ def markdown(rows: list[dict], notes: list[str]) -> str:
                     "seeded_authored": f"{r['seeded_authored']} ({', '.join(r['seeded_found']) or '—'})",
                     "strength_txt": f"{r['strength']:.3f} ({r['kills']}/{r['mutants']})",
                     "share_txt": f"{r['bug_validating_share']:.3f} ({r['bug_validating']}/{r['tests']})",
+                    "handler_txt": (f"{r['handler_kills'] / r['handlers']:.3f} "
+                                    f"({r['handler_kills']}/{r['handlers']})"
+                                    if r.get("handlers") else "—"),
+                    "asserted_txt": r.get("asserted", "—"),
                     "cost": f"${r['cost_usd']:.3f}" if "cost_usd" in r else "—"}  # fmt: skip
         lines.append("| " + " | ".join(str(cell[k]) for _, k in cols) + " |")
     return "\n".join(lines + [""] + [f"- {n}" for n in notes]) + "\n"
