@@ -3,6 +3,7 @@
 Reached by other stages only through `ctx.env` (the SERVICE at the bottom).
 """
 
+import hashlib
 import json
 import re
 import shutil
@@ -49,7 +50,25 @@ def parse_variant(variant: str, known: list[str]) -> list[str]:
 
 
 def project_name(variant: str) -> str:
-    return "tp_" + re.sub(r"[^a-z0-9]+", "_", variant.lower()).strip("_")
+    name = "tp_" + re.sub(r"[^a-z0-9]+", "_", variant.lower()).strip("_")
+    return (
+        name if len(name) <= 40 else name[:30] + "_" + hashlib.sha256(name.encode()).hexdigest()[:8]
+    )
+
+
+def fix_patch(root: Path, fix: str) -> Path:
+    """`fixed:<name>` -> sut/patches/<name>.patch; `fixed:sha256:…` -> a patch artifact's text
+    (a triage suggestion, M8 env D20), written once under data/env/patches/."""
+    if not fix.startswith("sha256:"):
+        return (root / "sut/patches" / f"{fix}.patch").resolve()
+    from tp.core import artifacts
+
+    out = db.data_dir() / "env" / "patches" / f"{fix.removeprefix('sha256:')}.patch"
+    if not out.exists():
+        body = artifacts.get(fix).body
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(body["patch"])
+    return out.resolve()
 
 
 def normalise_config(config: dict, replace: dict[str, str]) -> dict:
@@ -90,14 +109,17 @@ class Stack:
         self.variant = variant
         # fixed:<patch> = no flags, plus that fix patch on top, in the image only (retest D3)
         self.fix = variant.removeprefix("fixed:") if variant.startswith("fixed:") else None
-        if self.fix and not (root / "sut/patches" / f"{self.fix}.patch").is_file():
-            raise EnvError(f"bad variant {variant!r}: no sut/patches/{self.fix}.patch")
+        try:
+            if self.fix and not fix_patch(root, self.fix).is_file():
+                raise EnvError(f"bad variant {variant!r}: no sut/patches/{self.fix}.patch")
+        except KeyError:
+            raise EnvError(f"bad variant {variant!r}: no such patch artifact") from None
         self.flags = parse_variant(variant, self.cfg.get("flags", []))
         self.project = project_name(variant)
         self.dir = db.data_dir() / "env" / self.project
         self.src = sut.checkout(self.cfg, root)
         self.patch_hashes = {
-            n: sha256((root / "sut/patches" / f"{n}.patch").read_text())
+            n: sha256(fix_patch(root, n).read_text())
             for n in [*self.cfg["patches"], *([self.fix] if self.fix else [])]
         }
         source = {"ref": self.cfg["ref"], "patches": self.patch_hashes}
@@ -182,7 +204,7 @@ class Stack:
             if not self.fix:
                 self.compose("build", "backend", timeout=1800)
                 return self.image
-            patch = str((self.root / "sut/patches" / f"{self.fix}.patch").resolve())
+            patch = str(fix_patch(self.root, self.fix))
             git = ["git", "-C", str(self.src), "apply"]
             r = subprocess.run([*git, patch], check=False, capture_output=True, text=True)
             if r.returncode:
@@ -535,7 +557,12 @@ class EnvService:
     def code_scope(self) -> dict:
         """The SUT manifest's mutation scope and where the patched source is on the host."""
         stack = Stack("reference")
-        return {"mutate": stack.cfg.get("code_scope", {}).get("mutate", []), "src": stack.src}
+        scope = stack.cfg.get("code_scope", {})
+        return {
+            "mutate": scope.get("mutate", []),
+            "src": stack.src,
+            "changed": scope.get("changed", {}),
+        }  # the target branch's changed lines (M8)
 
     def probe(self, variant: str) -> list[dict]:
         return Stack(variant).probe()

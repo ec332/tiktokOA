@@ -1,5 +1,7 @@
 """No Docker needed: variant parsing, naming, config normalisation, the override, wiring."""
 
+from pathlib import Path
+
 import pytest
 import yaml
 
@@ -118,3 +120,17 @@ def test_a_fix_patch_left_applied_is_found(tmp_path):  # retest review gap 2
     assert stack.stray_patches() == ["fix-x"]  # still applied, as after a hard kill mid-build
     git("checkout", "items.py")
     assert stack.stray_patches() == []
+
+
+def test_fixed_variant_from_a_patch_artifact(tmp_path, monkeypatch):
+    """M8 env D20: fixed:sha256:… resolves to the artifact's patch text; project names stay short."""
+    from tp.core import artifacts
+    from tp.stages.env import service
+
+    monkeypatch.setenv("TP_DATA", str(tmp_path))
+    art = artifacts.put("fix_patch", {"patch": "--- a/x\n+++ b/x\n"})
+    p = service.fix_patch(Path("."), art.id)
+    assert p.read_text() == "--- a/x\n+++ b/x\n"
+    assert service.fix_patch(Path("."), "fix-pagination").name == "fix-pagination.patch"
+    assert len(service.project_name(f"fixed:{art.id}")) <= 40
+    assert service.parse_variant(f"fixed:{art.id}", []) == []
