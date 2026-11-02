@@ -583,5 +583,9 @@ class EnvService:
     def factories(self, variant: str, tc_id: str):
         return Stack(variant).factories(tc_id)
 
+    def harness_files(self) -> dict[str, Path]:
+        """The pytest harness and data factories the runner mounts (exported with tests)."""
+        return {f: Path(__file__).parent / f for f in HARNESS_FILES}
+
 
 SERVICE = EnvService()
