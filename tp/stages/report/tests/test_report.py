@@ -154,3 +154,11 @@ def test_defects_with_one_cause_merge_and_duplicate_rows_collapse():
     )  # the one that applies
     assert [r["ac"] for r in p["causes"][0]["requirements"]] == ["C-1", "C-2"]
     assert [(t["title"], t["count"]) for t in p["problematic_tests"]] == [("bound", 2)]
+
+
+def test_request_bodies_in_the_worklist_are_not_counts():
+    """M8: a failing request with a numeric body (price, discount) must not trip the R1 check."""
+    from tp.stages.report import build
+
+    assert list(build.walk({"worklist": {"P0": [{"observed": {"json": {"price": 5.0}}}]}})) == []
+    assert list(build.walk({"n_tests": 3})) == [".n_tests"]

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ReviewItem } from "../../api/client";
+import { ReqLink, ResultLink, TestLink } from "../../flow/nav";
 
 /** The report on the run page (M8 report D12-D15). Every line comes from a record; the fix is
  *  labelled as a suggestion. Actions: confirm a defect, try the suggested fix, retest my fix. */
@@ -71,18 +72,24 @@ function DefectCard({ d, runId, evidence, decided, retests }: {
   return (
     <div className="card defect">
       <div className="row">
-        <strong className="grow">{d.requirements && d.requirements.length > 1 ? `${d.location?.file}:${d.location?.line ?? "?"}` : d.criterion || d.ac}</strong>
+        <strong className="grow">{d.requirements && d.requirements.length > 1 ? `${d.location?.file}:${d.location?.line ?? "?"}` : <ReqLink id={d.ac}>{d.criterion || d.ac}</ReqLink>}</strong>
         <span className="pill bad">{d.class.replace("_", " ").toLowerCase()}</span>
         {decided ? <span className={`pill ${decided.decision === "confirm" ? "bad" : "ok"}`}>{decided.decision === "confirm" ? "confirmed by you" : "not a bug (you)"}</span>
           : <span className="pill">unconfirmed</span>}
       </div>
       {d.requirements && d.requirements.length > 1 && (
-        <div style={{ fontSize: 13 }}>One cause, {d.requirements.length} requirements: {d.requirements.map((r) => `${r.ac} ${r.criterion}`).join("; ")}</div>
+        <div style={{ fontSize: 13 }}>One cause, {d.requirements.length} requirements:{" "}
+          {d.requirements.map((r, i) => <span key={r.id}>{i > 0 && "; "}<ReqLink id={r.ac}>{r.ac} {r.criterion}</ReqLink></span>)}
+        </div>
       )}
       {o && <div className="mono" style={{ fontSize: 12.5 }}>{o.method} {o.path}{query(o.query)} → {o.status}</div>}
       {d.failed_assertions.slice(0, 2).map((a, i) => <div key={i} className="muted" style={{ fontSize: 13 }}>{a.message ?? `expected ${JSON.stringify(a.expected)}, got ${JSON.stringify(a.actual)}`}</div>)}
       {d.location && <div style={{ fontSize: 13 }}>Where: <span className="mono">{d.location.file}:{d.location.line ?? "?"}</span>{d.location.text && <span className="mono muted"> {d.location.text}</span>}</div>}
-      <div style={{ fontSize: 13 }}>Found by: {[...new Set(d.tests.map((t) => t.title))].join("; ")}</div>
+      <div style={{ fontSize: 13 }}>Found by:{" "}
+        {[...new Map(d.tests.map((t) => [t.title, t])).values()].map((t, i) => (
+          <span key={t.case}>{i > 0 && "; "}<TestLink caseId={t.case}>{t.title}</TestLink></span>
+        ))}
+      </div>
       {s && (
         <div style={{ display: "grid", gap: 4 }}>
           <div style={{ fontSize: 13 }}><strong>Suggested change</strong> <span className="muted">(AI suggestion{s.applies ? ", applies cleanly" : ""})</span>: {s.explanation}</div>
@@ -146,7 +153,8 @@ export function ProductReport({ product, evidence, runId, retests }: {
             <thead><tr><th>Test</th><th>Status</th><th>Why</th></tr></thead>
             <tbody>{product.problematic_tests.map((t, i) => (
               <tr key={i}>
-                <td><div>{t.title}{(t.count ?? 1) > 1 && <span className="muted"> ×{t.count}</span>}</div><div className="muted" style={{ fontSize: 12 }}>{t.ac} {t.criterion}</div></td>
+                <td><div><ResultLink caseId={t.case}>{t.title}</ResultLink>{(t.count ?? 1) > 1 && <span className="muted"> ×{t.count}</span>}</div>
+                  <div className="muted" style={{ fontSize: 12 }}>{t.ac && <ReqLink id={t.ac}>{t.ac} {t.criterion}</ReqLink>}</div></td>
                 <td><span className={`pill ${STATUS_TONE[t.status ?? ""] ?? ""}`}>{(t.status ?? "").replace(/_/g, " ").toLowerCase()}</span></td>
                 <td style={{ fontSize: 13 }}>{t.reason}</td>
               </tr>
@@ -161,7 +169,8 @@ export function ProductReport({ product, evidence, runId, retests }: {
           <div style={{ display: "grid", gap: 6 }}>
             {product.improve.map((i, n) => (
               <div key={n} className="card" style={{ display: "grid", gap: 2 }}>
-                <div className="row"><span className="pill warn">{IMPROVE_LABEL[i.kind] ?? i.kind}</span><strong className="grow">{i.title}</strong></div>
+                <div className="row"><span className="pill warn">{IMPROVE_LABEL[i.kind] ?? i.kind}</span><strong className="grow">{i.title}</strong>
+                  {i.ac && i.ac.split(", ").filter(Boolean).map((a) => <ReqLink key={a} id={a} />)}</div>
                 {i.kind === "survivor" ? <pre className="patch">{i.detail}</pre> : <div className="muted" style={{ fontSize: 13 }}>{i.detail}</div>}
               </div>
             ))}

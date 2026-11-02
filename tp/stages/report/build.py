@@ -243,6 +243,7 @@ POSITIONS = {
     "item",
     "review_item",
     "shuffle_seed",
+    "observed",  # a copied request/response (evidence): its numbers are data, not report counts
 }  # positions and ids, not counts
 
 
