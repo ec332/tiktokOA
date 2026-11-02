@@ -5,7 +5,7 @@ import json
 
 from tp.core import artifacts, db
 from tp.core.contract import StageResult, register
-from tp.stages.report import build, render
+from tp.stages.report import build, product, render
 
 
 def lineage_decisions(roots: list[str]) -> list[dict]:
@@ -34,18 +34,20 @@ def lineage_decisions(roots: list[str]) -> list[dict]:
 
 class ReportStage:
     name = "report"
-    version = "1.0.0"
+    version = "1.1.0"  # 1.1: the product section (M8)
     consumes: dict[str, int] = {  # noqa: RUF012
         "spec": 1,
         "cases": 1,
         "gate_report": 1,
         "run_records": 1,
         "triage": 1,
+        "run_options": 1,
     }
     produces: dict[str, int] = {"report": 1}  # noqa: RUF012
 
     def run(self, ctx, inputs):
         b = {t: a.body for t, a in inputs.items()}
+        inputs = {t: a for t, a in inputs.items() if t != "run_options"}
         labels = sorted({lbl for a in inputs.values() for lbl in a.labels})
         decisions = lineage_decisions([a.id for a in inputs.values()])
         report = build.build(b["spec"], b["cases"], b["gate_report"], b["run_records"], b["triage"],
@@ -60,6 +62,8 @@ class ReportStage:
             )
         ):
             return StageResult.failed(f"numbers without a composition: {bare[:5]}")
+        report["product"] = product.build(b["spec"], b["cases"], b["gate_report"], b["triage"],
+                                          b.get("run_options") or {})  # fmt: skip
         page, md, text = render.html(report), render.summary_md(report), render.cli(report)
         out = db.data_dir() / "runs" / f"report-exec-{ctx.review.execution_id}"
         out.mkdir(parents=True, exist_ok=True)

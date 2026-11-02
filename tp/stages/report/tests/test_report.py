@@ -92,3 +92,65 @@ def test_stage_writes_the_files(tmp_path):
     assert res.status == "succeeded", res.reason
     body = res.outputs["report"]
     assert Path(body["path"]).read_text() == body["html"] and body["cli"].startswith("P0 defects")
+
+
+def test_product_section_lists_defects_problem_tests_and_improvements():
+    """M8 report D13: built from records; reasons are templated per status."""
+    from tp.stages.report import product
+
+    spec = {"criteria": [{"id": "C-1", "title": "Discount is 0-100"},
+                         {"id": "C-2", "title": "Price rounds half-up", "status": "assumed",
+                          "review_needed": True}],
+            "decisions": [{"about": "rounding", "answer": "half-up", "assumed": True}]}  # fmt: skip
+    cases = {"cases": [{"id": "TC-C1-1", "purpose": "Discount of 100 is accepted",
+                        "defect_hypothesis": "an exclusive upper bound", "ac": "C-1"}],
+             "signoff": {"approved": 1, "lines": 1}}  # fmt: skip
+    gate = {"rows": [{"node": "t1", "unit": "TC-C1-1", "case_id": "TC-C1-1.b", "ac": "C-1",
+                      "status": "CANDIDATE_DEFECT"},
+                     {"node": "t2", "unit": "TC-C1-1", "case_id": "TC-C1-1.a", "ac": "C-1",
+                      "status": "WEAK"}],
+            "uncovered_criteria": ["C-2"], "settings": {"k": 5},
+            "survivors": [{"class": "test_gap", "file": "m.py", "line": 3, "diff": "-a\n+b",
+                           "criteria": ["C-1"]}]}  # fmt: skip
+    tri = {"defects": [{"id": "D-reference/C-1", "kind": "real", "class": "PRODUCT_DEFECT",
+                        "ac": "C-1", "cases": ["TC-C1-1.b"], "evidence": ["ex:1"],
+                        "suspects": [{"file": "m.py", "line": 3, "text": "le=99", "basis": "b"}],
+                        "suggestion": {"explanation": "x", "patch": "p", "applies": True}}],
+           "findings": [{"variant": "reference", "node": "t1", "case_id": "TC-C1-1.b",
+                         "ac": "C-1", "class": "PRODUCT_DEFECT", "rule": "r",
+                         "evidence": ["ex:1"]}]}  # fmt: skip
+    p = product.build(spec, cases, gate, tri, {"rules": {"clarify": ["money: rounding"]}})
+    assert p["defects"][0]["location"]["file"] == "m.py"
+    assert p["defects"][0]["tests"][0]["title"] == "Discount of 100 is accepted"
+    assert [(t["status"], t["source"]) for t in p["problematic_tests"]] == [
+        ("PRODUCT_DEFECT", "execute"),
+        ("WEAK", "gate"),
+    ]
+    assert {i["kind"] for i in p["improve"]} == {"uncovered", "survivor", "assumed", "spec_gap"}
+    assert p["rules"]["clarify"] == ["money: rounding"] and p["summary"]["defects"] == 1
+    assert p["causes"][0]["requirements"] == [{"id": "D-reference/C-1", "ac": "C-1",
+                                               "criterion": "Discount is 0-100"}]  # fmt: skip
+
+
+def test_defects_with_one_cause_merge_and_duplicate_rows_collapse():
+    from tp.stages.report import product
+
+    spec = {"criteria": [{"id": "C-1", "title": "a"}, {"id": "C-2", "title": "b"}]}
+    loc = [{"file": "items.py", "line": 75, "text": "", "basis": ""}]
+    obs = {"method": "PUT", "path": "/x", "status": 500}
+    tri = {"defects": [{"id": f"D-reference/C-{i}", "kind": "real", "class": "PRODUCT_DEFECT",
+                        "ac": f"C-{i}", "cases": [], "evidence": [f"ex:{i}"], "suspects": loc,
+                        "observed": obs, "suggestion": {"applies": i == 2, "patch": "p"}}
+                       for i in (1, 2)],
+           "findings": [{"variant": "reference", "node": n, "case_id": "TC-C1-1.a" if n == "x"
+                         else "TC-C1-1.b", "ac": "C-1", "class": "PRODUCT_DEFECT", "rule": "r",
+                         "evidence": [n]} for n in ("x", "y")]}  # fmt: skip
+    cases = {
+        "cases": [{"id": "TC-C1-1", "purpose": "bound", "defect_hypothesis": "h", "ac": "C-1"}]
+    }
+    p = product.build(spec, cases, {"rows": []}, tri, {})
+    assert (
+        len(p["causes"]) == 1 and p["causes"][0]["id"] == "D-reference/C-2"
+    )  # the one that applies
+    assert [r["ac"] for r in p["causes"][0]["requirements"]] == ["C-1", "C-2"]
+    assert [(t["title"], t["count"]) for t in p["problematic_tests"]] == [("bound", 2)]
