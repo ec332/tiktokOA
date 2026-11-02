@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ReviewItem } from "../../api/client";
 import { ReqLink, ResultLink, TestLink } from "../../flow/nav";
+import { ExportTests } from "./Export";
 
 /** The report on the run page (M8 report D12-D15). Every line comes from a record; the fix is
  *  labelled as a suggestion. Actions: confirm a defect, try the suggested fix, retest my fix. */
@@ -119,6 +120,32 @@ function DefectCard({ d, runId, evidence, decided, retests }: {
   );
 }
 
+function TestTable({ tests }: { tests: Test[] }) {
+  return (
+    <div className="table-wrap"><table className="table">
+      <thead><tr><th>Test</th><th>Status</th><th>Why</th></tr></thead>
+      <tbody>{tests.map((t, i) => (
+        <tr key={i}>
+          <td><div><ResultLink caseId={t.case}>{t.title}</ResultLink>{(t.count ?? 1) > 1 && <span className="muted"> ×{t.count}</span>}</div>
+            <div className="muted" style={{ fontSize: 12 }}>{t.ac && <ReqLink id={t.ac}>{t.ac} {t.criterion}</ReqLink>}</div></td>
+          <td><span className={`pill ${STATUS_TONE[t.status ?? ""] ?? ""}`}>{(t.status ?? "").replace(/_/g, " ").toLowerCase()}</span></td>
+          <td style={{ fontSize: 13 }}>{t.reason}</td>
+        </tr>
+      ))}</tbody>
+    </table></div>
+  );
+}
+
+function ImproveCard({ i }: { i: Improve }) {
+  return (
+    <div className="card" style={{ display: "grid", gap: 2 }}>
+      <div className="row"><span className="pill warn">{IMPROVE_LABEL[i.kind] ?? i.kind}</span><strong className="grow">{i.title}</strong>
+        {i.ac && i.ac.split(", ").filter(Boolean).map((a) => <ReqLink key={a} id={a} />)}</div>
+      {i.kind === "survivor" ? <pre className="patch">{i.detail}</pre> : <div className="muted" style={{ fontSize: 13 }}>{i.detail}</div>}
+    </div>
+  );
+}
+
 export function ProductReport({ product, evidence, runId, retests }: {
   product: Product; evidence: Record<string, unknown>; runId: number; retests: Retest[];
 }) {
@@ -146,36 +173,40 @@ export function ProductReport({ product, evidence, runId, retests }: {
         </div>
       </section>
 
+      <ExportTests runId={runId} />
+
       <section>
         <h2>Problematic tests</h2>
-        {product.problematic_tests.length === 0 ? <p className="muted">None.</p> : (
-          <div className="table-wrap"><table className="table">
-            <thead><tr><th>Test</th><th>Status</th><th>Why</th></tr></thead>
-            <tbody>{product.problematic_tests.map((t, i) => (
-              <tr key={i}>
-                <td><div><ResultLink caseId={t.case}>{t.title}</ResultLink>{(t.count ?? 1) > 1 && <span className="muted"> ×{t.count}</span>}</div>
-                  <div className="muted" style={{ fontSize: 12 }}>{t.ac && <ReqLink id={t.ac}>{t.ac} {t.criterion}</ReqLink>}</div></td>
-                <td><span className={`pill ${STATUS_TONE[t.status ?? ""] ?? ""}`}>{(t.status ?? "").replace(/_/g, " ").toLowerCase()}</span></td>
-                <td style={{ fontSize: 13 }}>{t.reason}</td>
-              </tr>
-            ))}</tbody>
-          </table></div>
-        )}
+        {product.problematic_tests.length === 0 ? <p className="muted">None.</p> : (() => {
+          const weak = product.problematic_tests.filter((t) => t.status === "WEAK");
+          const main = product.problematic_tests.filter((t) => t.status !== "WEAK");
+          return (<>
+            {main.length > 0 ? <TestTable tests={main} /> : <p className="muted">None besides weak tests.</p>}
+            {weak.length > 0 && (
+              <details style={{ marginTop: 8 }}>
+                <summary className="muted" style={{ cursor: "pointer" }}>{weak.length} weak test{weak.length === 1 ? "" : "s"}: they pass, but caught none of the planted bugs</summary>
+                <TestTable tests={weak} />
+              </details>
+            )}
+          </>);
+        })()}
       </section>
 
       <section>
         <h2>Areas to improve</h2>
-        {product.improve.length === 0 ? <p className="muted">Nothing open.</p> : (
-          <div style={{ display: "grid", gap: 6 }}>
-            {product.improve.map((i, n) => (
-              <div key={n} className="card" style={{ display: "grid", gap: 2 }}>
-                <div className="row"><span className="pill warn">{IMPROVE_LABEL[i.kind] ?? i.kind}</span><strong className="grow">{i.title}</strong>
-                  {i.ac && i.ac.split(", ").filter(Boolean).map((a) => <ReqLink key={a} id={a} />)}</div>
-                {i.kind === "survivor" ? <pre className="patch">{i.detail}</pre> : <div className="muted" style={{ fontSize: 13 }}>{i.detail}</div>}
-              </div>
-            ))}
-          </div>
-        )}
+        {product.improve.length === 0 ? <p className="muted">Nothing open.</p> : (() => {
+          const survivors = product.improve.filter((i) => i.kind === "survivor");
+          const main = product.improve.filter((i) => i.kind !== "survivor");
+          return (<div style={{ display: "grid", gap: 6 }}>
+            {main.map((i, n) => <ImproveCard key={n} i={i} />)}
+            {survivors.length > 0 && (
+              <details>
+                <summary className="muted" style={{ cursor: "pointer" }}>{survivors.length} unnoticed change{survivors.length === 1 ? "" : "s"}: planted code changes no test caught</summary>
+                <div style={{ display: "grid", gap: 6, marginTop: 6 }}>{survivors.map((i, n) => <ImproveCard key={n} i={i} />)}</div>
+              </details>
+            )}
+          </div>);
+        })()}
       </section>
 
       <details className="card">

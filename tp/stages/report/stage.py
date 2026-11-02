@@ -5,7 +5,7 @@ import json
 
 from tp.core import artifacts, db
 from tp.core.contract import StageResult, register
-from tp.stages.report import build, product, render
+from tp.stages.report import build, export, product, render
 
 
 def lineage_decisions(roots: list[str]) -> list[dict]:
@@ -35,6 +35,11 @@ def lineage_decisions(roots: list[str]) -> list[dict]:
 class ReportStage:
     name = "report"
     version = "1.1.0"  # 1.1: the product section (M8)
+    # Export to the user's repo (M8 report/009): an API action, not a stage step.
+    export_candidates = staticmethod(export.candidates)
+    export_branch = staticmethod(export.branch_name)
+    export_tests = staticmethod(export.export)
+    ExportError = export.ExportError
     consumes: dict[str, int] = {  # noqa: RUF012
         "spec": 1,
         "cases": 1,
