@@ -4,7 +4,7 @@ signed off line by line."""
 import json
 from pathlib import Path
 
-from tp.core import db, review
+from tp.core import artifacts, db, review
 from tp.core.contract import StageResult, register
 from tp.core.hashing import sha256
 from tp.stages.cases import ai, build, signals
@@ -47,7 +47,11 @@ class CasesStage:
         state = json.loads(path.read_text()) if path.exists() else None
         if state is None:
             opts = inputs["run_options"].body
-            state = self._draft(ctx, inputs["spec"], tuple(opts.get("flows") or self.flows))
+            iteration = artifacts.get(opts["iteration"]).body if opts.get("iteration") else None
+            if iteration and iteration["spec"] != inputs["spec"].id:
+                return StageResult.failed("iteration was fed from another spec (design 006)")
+            state = self._draft(ctx, inputs["spec"], tuple(opts.get("flows") or self.flows),
+                                iteration)  # fmt: skip
             state["scope"] = None if opts.get("fresh") else {"sut_ref": state["sut"]["ref"]}
             return self._ask(ctx, state, path, [u["id"] for u in state["units"]])
         items = ctx.review.items()
@@ -71,18 +75,25 @@ class CasesStage:
 
     # ---- drafting ----------------------------------------------------------------------
 
-    def _draft(self, ctx, spec_art, flows: tuple[str, ...]) -> dict:
+    def _draft(self, ctx, spec_art, flows: tuple[str, ...], iteration: dict | None = None) -> dict:
+        """iteration (V4, design 006): scope is its candidates' criteria, whatever their flow,
+        and each carries its gaps into the drafting prompt."""
         spec = spec_art.body
         crit = {c["id"]: c for c in spec["criteria"]}
+        gaps = {x["criterion"]: x["basis"] for x in (iteration or {}).get("candidates", [])}
         scope, not_tested = [], []
         for c in spec["criteria"]:
             flow = signals.flow_of(c)
             if c["status"] == "out_of_scope":
                 not_tested.append({"criterion": c["id"], "reason": "out of scope in the spec"})
-            elif flow not in flows:
+            elif iteration and c["id"] not in gaps:
+                not_tested.append({"criterion": c["id"], "reason": "not an iteration candidate"})
+            elif not iteration and flow not in flows:
                 not_tested.append({"criterion": c["id"], "reason": f"flow {flow} not in this run"})
             else:
-                scope.append(c | {"flow": flow})
+                scope.append(c | {"flow": flow} | ({"gaps": gaps[c["id"]]} if iteration else {}))
+        if iteration:
+            flows = tuple(sorted({c["flow"] for c in scope}))
         minimum = {c["id"]: signals.minimum_templates(c) for c in scope}
         # key by the criterion id the model echoes; it sometimes adds the title ("C-5 Expired …")
         drafts = {

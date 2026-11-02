@@ -77,11 +77,14 @@ def draft(llm, criteria: list[dict], minimum: dict[str, list[str]]) -> list[dict
     view = [{"id": c["id"], "title": c["title"], "actor": c.get("actor", ""), "given": c["given"],
              "when": c["when"], "then": c["then"], "status_code": c.get("status_code"),
              "resolution": c.get("resolution"), "suspected_defect": c.get("suspected_defect", False),
-             "status": c["status"], "minimum": minimum[c["id"]]} for c in criteria]  # fmt: skip
+             "status": c["status"], "minimum": minimum[c["id"]],
+             **({"gaps": c["gaps"]} if c.get("gaps") else {})} for c in criteria]  # fmt: skip
     p = _prompt("drafter", FACTORIES=", ".join(FACTORIES),
                 TEMPLATES=yaml.safe_dump(list(catalogue().values()), sort_keys=False),
                 CALCULATORS=json.dumps(calculators.describe(), indent=1),
                 CRITERIA=json.dumps(view, indent=1))  # fmt: skip
+    if any(c.get("gaps") for c in criteria):  # only then: a first-cycle prompt stays byte-identical
+        p += _prompt("gaps")
     raw = llm.call(p, model=MODEL, schema=DRAFT_SCHEMA, effort=EFFORT, max_tokens=64000)
     return json.loads(raw)["criteria"]
 

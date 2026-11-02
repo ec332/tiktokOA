@@ -265,3 +265,29 @@ def test_the_flows_option_changes_the_scope(model):
     assert "unsigned" in art.labels and not art.body["signoff"]["signed"]
     reasons = {n["criterion"]: n["reason"] for n in art.body["not_tested"]}
     assert reasons["C-11"] == "flow FLOW-items-crud not in this run"
+
+
+def test_an_iteration_scopes_to_its_criteria_and_puts_the_gaps_in_the_prompt(model):
+    spec = artifacts.put("spec", SPEC)
+    gap = "surviving mutant at backend/app/api/routes/items.py:20: -len(t) > 255 +len(t) >= 255"
+    it = artifacts.put("iteration", {"spec": spec.id, "candidates": [
+        {"criterion": "C-11", "basis": [gap]}]})  # fmt: skip
+    run_id = runner.start_run("record", options={"iteration": it.id})
+    runner.rerun(run_id, "cases", overrides={"spec": spec.id})
+    assert gap in PROMPTS[-1] and "Iteration (second cycle)" in PROMPTS[-1]
+    assert "Login returns a token" not in PROMPTS[-1]
+    _approve_all(_signoff())
+    _, art = _cases(run_id)
+    reasons = {n["criterion"]: n["reason"] for n in art.body["not_tested"]}
+    assert reasons["C-1"] == "not an iteration candidate"
+
+
+def test_a_first_cycle_prompt_has_no_iteration_text(model):
+    _run()
+    assert "Iteration (second cycle)" not in PROMPTS[-1] and '"gaps"' not in PROMPTS[-1]
+
+
+def test_an_iteration_from_another_spec_fails(model):
+    it = artifacts.put("iteration", {"spec": "sha256:other", "candidates": []})
+    _, ex = _run(options={"iteration": it.id})
+    assert ex["status"] == "failed" and "another spec" in ex["reason"]
