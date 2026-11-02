@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from tp.core import artifacts, contract, events, review, runner
+from tp.core import artifacts, contract, events, llm, review, runner, sut
 
 app = FastAPI(title="testplat")
 worker = ThreadPoolExecutor(max_workers=1)
@@ -52,6 +52,11 @@ class Run(BaseModel):
     status: str
 
 
+class RunSummary(Run):
+    focused: bool  # started from the New run screen (the happy path)
+    overview: str | None  # the feature text the run was given
+
+
 class RunDetail(Run):
     executions: list[Execution]
 
@@ -61,6 +66,11 @@ class Requirements(BaseModel):
     text: str = Field(min_length=1)
 
 
+class RunRules(BaseModel):
+    clarify: list[str] = []  # added after spec's rules.md, this run only (M8 D28)
+    cases: list[str] = []  # added after the drafter's rules
+
+
 class RunCreate(BaseModel):
     mode: str = "live"
     stub: bool = True
@@ -68,6 +78,38 @@ class RunCreate(BaseModel):
     requirements: Requirements | None = None  # a full user story or a vague brief
     flows: list[str] | None = None  # cases scope (default: the stage's own default)
     fresh: bool = False  # reuse no earlier answers or sign-offs
+    # M8 happy path
+    focused: bool = False  # only clarifications and test approval wait for a person (D27)
+    routes: list[str] | None = None  # "METHOD /path" code focus (spec D12)
+    rules: RunRules | None = None
+    templates: list[str] | None = None  # enabled case templates (cases D14)
+    gate: dict[str, int | bool] | None = None  # gate settings for this run (gate D22)
+
+
+FOCUSED_STOPS = ["question", "confirm_observed", "signoff"]
+
+
+class SutTarget(BaseModel):
+    repo: str = Field(min_length=1)
+    branch: str = Field(min_length=1)
+    base: str = Field(min_length=1)
+    seeded: bool = False
+
+
+class SuggestRules(BaseModel):
+    overview: str = Field(min_length=1)
+    routes: list[str] = []
+
+
+class RetestRequest(BaseModel):
+    defect: str
+    mode: Literal["suggested", "mine"]
+
+
+class DefectDecision(BaseModel):
+    decision: Literal["confirm", "reject"]
+    by: str = "you"
+    reason: str = ""
 
 
 class Rerun(BaseModel):
@@ -148,9 +190,20 @@ def list_stages(stub: bool = True):
     ]
 
 
-@app.get("/runs", response_model=list[Run])
-def list_runs():
-    return runner.list_runs()
+def _summary(run: dict) -> dict:
+    """A run plus what the run list shows: whether it is a happy-path run, and its feature."""
+    with_inputs = runner.get_run(run["id"])
+    given = next((e["outputs"] for e in with_inputs["executions"] if e["stage"] == "input"), {})
+    opts = artifacts.get(given["run_options"]).body if "run_options" in given else {}
+    req = artifacts.get(given["requirements"]).body if "requirements" in given else {}
+    return {**run, "focused": "stops" in opts, "overview": req.get("text")}
+
+
+@app.get("/runs", response_model=list[RunSummary])
+def list_runs(focused: bool = False):
+    """focused=true: only runs started from the New run screen."""
+    out = [_summary(r) for r in runner.list_runs()]
+    return [r for r in out if r["focused"]] if focused else out
 
 
 @app.post("/runs", response_model=Run)
@@ -160,7 +213,13 @@ def create_run(body: RunCreate):
         if body.requirements:
             req = body.requirements.model_dump()
             inputs["requirements"] = artifacts.put("requirements", req).id
-        options = {k: v for k, v in (("flows", body.flows), ("fresh", body.fresh)) if v}
+        options = {k: v for k, v in (("flows", body.flows), ("fresh", body.fresh),
+                                     ("routes", body.routes), ("templates", body.templates),
+                                     ("gate", body.gate)) if v}  # fmt: skip
+        if body.rules and (body.rules.clarify or body.rules.cases):
+            options["rules"] = body.rules.model_dump()
+        if body.focused:
+            options["stops"] = FOCUSED_STOPS
         run_id = runner.start_run(body.mode, body.stub, body.unattended, inputs, options)
     except ValueError as e:
         raise HTTPException(422, str(e))
@@ -183,6 +242,70 @@ def rerun_stage(run_id: int, name: str, body: Rerun):
         raise HTTPException(404, "unknown stage")
     submit(runner.rerun, run_id, name, body.inputs, body.from_run)
     return runner.get_run(run_id)
+
+
+@app.post("/runs/{run_id}/cancel", response_model=Run)
+def cancel_run(run_id: int):
+    get_run(run_id)
+    return runner.cancel(run_id)
+
+
+@app.post("/runs/{run_id}/resume", response_model=Run)
+def resume_run(run_id: int):
+    """Continue a cancelled run, or retry a failed one from its failed step."""
+    run = get_run(run_id)
+    submit(runner.retry if run["status"] == "failed" else runner.advance, run_id)
+    return runner.get_run(run_id)
+
+
+@app.post("/runs/{run_id}/retest", response_model=Run)
+def retest(run_id: int, body: RetestRequest):
+    """M8 retest D16. suggested: build fixed:<patch artifact> from triage's suggestion.
+    mine: refresh the target to the branch's new head and retest on reference."""
+    heads = runner.heads(run_id)
+    if "triage" not in heads:
+        raise HTTPException(409, "this run has no triage yet")
+    tri = artifacts.get(heads["triage"]).body
+    d = next((x for x in tri["defects"] if x["id"] == body.defect), None)
+    if d is None:
+        raise HTTPException(404, "no such defect")
+    if body.mode == "suggested":
+        sug = d.get("suggestion") or {}
+        if not sug.get("applies"):
+            raise HTTPException(409, "this defect has no suggested fix that applies")
+        fix = artifacts.put("fix_patch", {"patch": sug["patch"], "defect": d["id"],
+                                          "triage": heads["triage"]})  # fmt: skip
+        after = f"fixed:{fix.id}"
+    else:
+        t = sut.target()
+        if not t:
+            raise HTTPException(409, "no repo target is set")
+        old = t["ref"]
+        t = sut.set_target(t["repo"], t["branch"], t["base"], t.get("seeded", False))
+        if t["ref"] == old:
+            raise HTTPException(409, f"{t['branch']} has no new commit since {old[:7]}")
+        after = "reference"
+    opts = artifacts.put("run_options", {**artifacts.get(heads["run_options"]).body,
+                                         "defect": d["id"], "after": after})  # fmt: skip
+    submit(runner.rerun, run_id, "retest", {"run_options": opts.id})
+    return runner.get_run(run_id)
+
+
+@app.post("/runs/{run_id}/defects/{defect:path}", response_model=ReviewItem)
+def decide_defect(run_id: int, defect: str, body: DefectDecision):
+    """M8 triage D15: confirm a defect from the report; logged in the shared review queue."""
+    ex = next((e for e in get_run(run_id)["executions"]
+               if e["stage"] == "triage" and e["status"] in ("succeeded", "stale")), None)  # fmt: skip
+    if ex is None:
+        raise HTTPException(409, "this run has no triage yet")
+    item = review.create(ex["id"], "real_defect", {"defect": defect})
+    return review.resolve(item, body.decision, body.by, body.reason)
+
+
+@app.get("/runs/{run_id}/defects", response_model=list[ReviewItem])
+def defect_decisions(run_id: int):
+    ids = {e["id"] for e in get_run(run_id)["executions"]}
+    return [i for i in review.list_() if i["kind"] == "real_defect" and i["stage_execution"] in ids]
 
 
 @app.get("/runs/{run_id}/events/list", response_model=list[Event])
@@ -209,6 +332,67 @@ async def stream_events(run_id: int, request: Request):
             await asyncio.sleep(0.3)
 
     return StreamingResponse(gen(), media_type="text/event-stream")
+
+
+# ---- SUT target and the New run screen (M8) -------------------------------------------
+
+PREP: dict[str, Any] = {"state": "idle", "error": None}  # reference stack warm-up (env D18)
+
+
+def _warm() -> None:
+    PREP.update(state="starting", error=None)
+    try:
+        contract.SERVICES["env"].ensure("reference")
+        PREP.update(state="ready")
+    except Exception as e:  # noqa: BLE001 — shown on the SUT card
+        PREP.update(state="failed", error=f"{type(e).__name__}: {e}"[:600])
+
+
+@app.get("/sut")
+def get_sut():
+    cfg = sut.load()
+    return {"name": cfg["name"], "ref": cfg["ref"], "target": cfg.get("target"), "stack": PREP}
+
+
+@app.get("/sut/branches")
+def sut_branches(repo: str):
+    try:
+        return sut.branches(repo)
+    except sut.SutError as e:
+        raise HTTPException(422, str(e))
+
+
+@app.post("/sut/target")
+def set_sut_target(body: SutTarget):
+    try:
+        t = sut.set_target(body.repo, body.branch, body.base, body.seeded)
+    except sut.SutError as e:
+        raise HTTPException(422, str(e))
+    PREP.update(state="queued", error=None)
+    submit(_warm)
+    return {"target": t, "stack": PREP}
+
+
+@app.get("/sut/routes")
+def sut_routes():
+    return contract.resolve("spec").routes()
+
+
+@app.get("/rules/defaults")
+def rule_defaults():
+    gate = contract.resolve("gate")
+    return {"clarify": contract.resolve("spec").default_rules(),
+            "templates": contract.resolve("cases").templates(),
+            "gate": {"defaults": gate.settings_defaults, "limits": gate.settings_limits}}  # fmt: skip
+
+
+@app.post("/rules/suggest")
+def rules_suggest(body: SuggestRules):
+    gw = llm.Gateway("live", llm.anthropic_provider, budget_usd=0.05)
+    try:
+        return contract.resolve("spec").suggest_rules(gw, body.overview, body.routes)
+    except Exception as e:  # noqa: BLE001 — suggestions are optional
+        raise HTTPException(502, f"no suggestions: {type(e).__name__}: {e}"[:300])
 
 
 # ---- artifacts ------------------------------------------------------------------

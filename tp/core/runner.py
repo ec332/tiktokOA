@@ -81,6 +81,8 @@ def advance(run_id: int) -> dict:
     """Run every stage that can run, in pipeline order. Stops at a review or a failure."""
     _set_run(run_id, "running")
     for name in PIPELINE:
+        if _cancelled(run_id):
+            return get_run(run_id)
         ex = _latest(run_id, name)
         if ex["status"] in DONE:
             continue
@@ -142,6 +144,32 @@ def heads(run_id: int) -> dict[str, str]:
     return out
 
 
+def retry(run_id: int) -> dict:
+    """Give each failed stage a fresh pending execution, then advance (M8: a failed run can be
+    continued from the failed step; earlier outputs and decisions are kept)."""
+    for name in PIPELINE:
+        if _latest(run_id, name)["status"] == "failed":
+            with db.connect() as c:
+                c.execute("INSERT INTO stage_executions (run_id, stage, status) VALUES (?,?,?)",
+                          (run_id, name, "pending"))  # fmt: skip
+            events.emit(run_id, None, "stage_retried", stage=name)
+    return advance(run_id)
+
+
+def cancel(run_id: int) -> dict:
+    """Stop a run (M8 P2). Cooperative: the stage that is running finishes; nothing after it
+    starts. A cancelled run can be resumed by advancing it again."""
+    _set_run(run_id, "cancelled")
+    events.emit(run_id, None, "run_cancelled")
+    return get_run(run_id)
+
+
+def _cancelled(run_id: int) -> bool:
+    with db.connect() as c:
+        return c.execute("SELECT status FROM pipeline_runs WHERE id=?", (run_id,)).fetchone()[0] \
+            == "cancelled"  # fmt: skip
+
+
 # ---- one execution ------------------------------------------------------------
 
 
@@ -191,14 +219,15 @@ def _execute(
         env=contract.SERVICES.get("env"),
         emit=lambda kind, **p: events.emit(run_id, ex_id, kind, **p),
     )
+    stops = _stops(run_id)
     while True:
         try:
             result = stage.run(ctx, inputs)
         except Exception as e:  # noqa: BLE001 — a crashing stage fails its execution, not the runner
             return _fail(run_id, ex_id, f"{type(e).__name__}: {e}")
-        if result.status != "awaiting_review" or not run["unattended"]:
+        if result.status != "awaiting_review" or (stops is None and not run["unattended"]):
             break
-        if not _auto_decide(ex_id):
+        if not _auto_decide(ex_id, () if run["unattended"] else stops):
             break
 
     if result.status == "failed":
@@ -246,14 +275,23 @@ def _mark_stale(run_id: int, dead: set[str]) -> None:
         dead = newly
 
 
-def _auto_decide(ex_id: int) -> bool:
-    """Unattended mode: apply the default decision; False if some item has no default."""
+def _stops(run_id: int) -> tuple[str, ...] | None:
+    """Focused mode (M8 skeleton D27): the review kinds that wait for a person; None = all."""
+    opt = heads(run_id).get("run_options")
+    stops = artifacts.get(opt).body.get("stops") if opt else None
+    return None if stops is None else tuple(stops)
+
+
+def _auto_decide(ex_id: int, stops: tuple[str, ...] = ()) -> bool:
+    """Apply the default decision to every open item whose kind isn't a stop. False if any item
+    is left open (a stop, or a kind with no default): the execution then waits for a person."""
+    by = "focused" if stops else "unattended"
     for item in _open_items(ex_id):
         decision = review.UNATTENDED_DECISION.get(item["kind"])
-        if not decision:
-            return False
-        review.resolve(item["id"], decision, by="unattended", reason="unattended default")
-    return True
+        if item["kind"] in stops or not decision:
+            continue
+        review.resolve(item["id"], decision, by=by, reason=f"{by} default")
+    return not _open_items(ex_id)
 
 
 # ---- helpers -------------------------------------------------------------------
@@ -295,6 +333,8 @@ def _set_run(run_id: int, status: str) -> None:
 
 
 def _finish(run_id: int, status: str) -> dict:
+    if _cancelled(run_id):
+        return get_run(run_id)
     _set_run(run_id, status)
     events.emit(run_id, None, "run_" + status)
     return get_run(run_id)

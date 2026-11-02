@@ -28,7 +28,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Runs */
+        /**
+         * List Runs
+         * @description focused=true: only runs started from the New run screen.
+         */
         get: operations["list_runs_runs_get"];
         put?: never;
         /** Create Run */
@@ -73,6 +76,98 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/runs/{run_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Run */
+        post: operations["cancel_run_runs__run_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runs/{run_id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume Run */
+        post: operations["resume_run_runs__run_id__resume_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runs/{run_id}/retest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retest
+         * @description M8 retest D16. suggested: build fixed:<patch artifact> from triage's suggestion.
+         *     mine: refresh the target to the branch's new head and retest on reference.
+         */
+        post: operations["retest_runs__run_id__retest_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runs/{run_id}/defects/{defect}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decide Defect
+         * @description M8 triage D15: confirm a defect from the report; logged in the shared review queue.
+         */
+        post: operations["decide_defect_runs__run_id__defects__defect__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runs/{run_id}/defects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Defect Decisions */
+        get: operations["defect_decisions_runs__run_id__defects_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/runs/{run_id}/events/list": {
         parameters: {
             query?: never;
@@ -104,6 +199,108 @@ export interface paths {
         get: operations["stream_events_runs__run_id__events_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sut": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Sut */
+        get: operations["get_sut_sut_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sut/branches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sut Branches */
+        get: operations["sut_branches_sut_branches_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sut/target": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set Sut Target */
+        post: operations["set_sut_target_sut_target_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sut/routes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sut Routes */
+        get: operations["sut_routes_sut_routes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rules/defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rule Defaults */
+        get: operations["rule_defaults_rules_defaults_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rules/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rules Suggest */
+        post: operations["rules_suggest_rules_suggest_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -244,6 +441,24 @@ export interface components {
              */
             schema_version: number;
         };
+        /** DefectDecision */
+        DefectDecision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "confirm" | "reject";
+            /**
+             * By
+             * @default you
+             */
+            by: string;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+        };
         /** Event */
         Event: {
             /** Id */
@@ -333,6 +548,16 @@ export interface components {
             /** Seconds */
             seconds?: number | null;
         };
+        /** RetestRequest */
+        RetestRequest: {
+            /** Defect */
+            defect: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "suggested" | "mine";
+        };
         /** ReviewItem */
         ReviewItem: {
             /** Id */
@@ -406,6 +631,20 @@ export interface components {
              * @default false
              */
             fresh: boolean;
+            /**
+             * Focused
+             * @default false
+             */
+            focused: boolean;
+            /** Routes */
+            routes?: string[] | null;
+            rules?: components["schemas"]["RunRules"] | null;
+            /** Templates */
+            templates?: string[] | null;
+            /** Gate */
+            gate?: {
+                [key: string]: number | boolean;
+            } | null;
         };
         /** RunDetail */
         RunDetail: {
@@ -428,6 +667,42 @@ export interface components {
             /** Executions */
             executions: components["schemas"]["Execution"][];
         };
+        /** RunRules */
+        RunRules: {
+            /**
+             * Clarify
+             * @default []
+             */
+            clarify: string[];
+            /**
+             * Cases
+             * @default []
+             */
+            cases: string[];
+        };
+        /** RunSummary */
+        RunSummary: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Sut Ref */
+            sut_ref: string | null;
+            /** Mode */
+            mode: string;
+            /** Stub */
+            stub: boolean;
+            /** Unattended */
+            unattended: boolean;
+            /** Started */
+            started: string;
+            /** Status */
+            status: string;
+            /** Focused */
+            focused: boolean;
+            /** Overview */
+            overview: string | null;
+        };
         /** StageInfo */
         StageInfo: {
             /** Name */
@@ -442,6 +717,30 @@ export interface components {
             produces: {
                 [key: string]: number;
             };
+        };
+        /** SuggestRules */
+        SuggestRules: {
+            /** Overview */
+            overview: string;
+            /**
+             * Routes
+             * @default []
+             */
+            routes: string[];
+        };
+        /** SutTarget */
+        SutTarget: {
+            /** Repo */
+            repo: string;
+            /** Branch */
+            branch: string;
+            /** Base */
+            base: string;
+            /**
+             * Seeded
+             * @default false
+             */
+            seeded: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -498,7 +797,9 @@ export interface operations {
     };
     list_runs_runs_get: {
         parameters: {
-            query?: never;
+            query?: {
+                focused?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -511,7 +812,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Run"][];
+                    "application/json": components["schemas"]["RunSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -616,6 +926,170 @@ export interface operations {
             };
         };
     };
+    cancel_run_runs__run_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resume_run_runs__run_id__resume_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retest_runs__run_id__retest_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RetestRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_defect_runs__run_id__defects__defect__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+                defect: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DefectDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    defect_decisions_runs__run_id__defects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_events_runs__run_id__events_list_get: {
         parameters: {
             query?: {
@@ -659,6 +1133,163 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sut_sut_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    sut_branches_sut_branches_get: {
+        parameters: {
+            query: {
+                repo: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_sut_target_sut_target_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SutTarget"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sut_routes_sut_routes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    rule_defaults_rules_defaults_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    rules_suggest_rules_suggest_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuggestRules"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

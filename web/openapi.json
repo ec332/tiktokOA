@@ -52,18 +52,41 @@
     "/runs": {
       "get": {
         "summary": "List Runs",
+        "description": "focused=true: only runs started from the New run screen.",
         "operationId": "list_runs_runs_get",
+        "parameters": [
+          {
+            "name": "focused",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Focused"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Run"
-                  },
                   "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RunSummary"
+                  },
                   "title": "Response List Runs Runs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -74,14 +97,14 @@
         "summary": "Create Run",
         "operationId": "create_run_runs_post",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RunCreate"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -204,6 +227,236 @@
         }
       }
     },
+    "/runs/{run_id}/cancel": {
+      "post": {
+        "summary": "Cancel Run",
+        "operationId": "cancel_run_runs__run_id__cancel_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/resume": {
+      "post": {
+        "summary": "Resume Run",
+        "operationId": "resume_run_runs__run_id__resume_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/retest": {
+      "post": {
+        "summary": "Retest",
+        "description": "M8 retest D16. suggested: build fixed:<patch artifact> from triage's suggestion.\nmine: refresh the target to the branch's new head and retest on reference.",
+        "operationId": "retest_runs__run_id__retest_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/defects/{defect}": {
+      "post": {
+        "summary": "Decide Defect",
+        "description": "M8 triage D15: confirm a defect from the report; logged in the shared review queue.",
+        "operationId": "decide_defect_runs__run_id__defects__defect__post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "defect",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Defect"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/defects": {
+      "get": {
+        "summary": "Defect Decisions",
+        "operationId": "defect_decisions_runs__run_id__defects_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewItem"
+                  },
+                  "title": "Response Defect Decisions Runs  Run Id  Defects Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/runs/{run_id}/events/list": {
       "get": {
         "summary": "List Events",
@@ -273,6 +526,163 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sut": {
+      "get": {
+        "summary": "Get Sut",
+        "operationId": "get_sut_sut_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sut/branches": {
+      "get": {
+        "summary": "Sut Branches",
+        "operationId": "sut_branches_sut_branches_get",
+        "parameters": [
+          {
+            "name": "repo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Repo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sut/target": {
+      "post": {
+        "summary": "Set Sut Target",
+        "operationId": "set_sut_target_sut_target_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SutTarget"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sut/routes": {
+      "get": {
+        "summary": "Sut Routes",
+        "operationId": "sut_routes_sut_routes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rules/defaults": {
+      "get": {
+        "summary": "Rule Defaults",
+        "operationId": "rule_defaults_rules_defaults_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rules/suggest": {
+      "post": {
+        "summary": "Rules Suggest",
+        "operationId": "rules_suggest_rules_suggest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestRules"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -706,6 +1116,33 @@
         ],
         "title": "ArtifactUpload"
       },
+      "DefectDecision": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "confirm",
+              "reject"
+            ],
+            "title": "Decision"
+          },
+          "by": {
+            "type": "string",
+            "title": "By",
+            "default": "you"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "DefectDecision"
+      },
       "Event": {
         "properties": {
           "id": {
@@ -964,6 +1401,28 @@
         ],
         "title": "Resolve"
       },
+      "RetestRequest": {
+        "properties": {
+          "defect": {
+            "type": "string",
+            "title": "Defect"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "suggested",
+              "mine"
+            ],
+            "title": "Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "defect",
+          "mode"
+        ],
+        "title": "RetestRequest"
+      },
       "ReviewItem": {
         "properties": {
           "id": {
@@ -1163,6 +1622,70 @@
             "type": "boolean",
             "title": "Fresh",
             "default": false
+          },
+          "focused": {
+            "type": "boolean",
+            "title": "Focused",
+            "default": false
+          },
+          "routes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Routes"
+          },
+          "rules": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunRules"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "templates": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Templates"
+          },
+          "gate": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gate"
           }
         },
         "type": "object",
@@ -1231,6 +1754,100 @@
         ],
         "title": "RunDetail"
       },
+      "RunRules": {
+        "properties": {
+          "clarify": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Clarify",
+            "default": []
+          },
+          "cases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cases",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "RunRules"
+      },
+      "RunSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "sut_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sut Ref"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "stub": {
+            "type": "boolean",
+            "title": "Stub"
+          },
+          "unattended": {
+            "type": "boolean",
+            "title": "Unattended"
+          },
+          "started": {
+            "type": "string",
+            "title": "Started"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "focused": {
+            "type": "boolean",
+            "title": "Focused"
+          },
+          "overview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overview"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "sut_ref",
+          "mode",
+          "stub",
+          "unattended",
+          "started",
+          "status",
+          "focused",
+          "overview"
+        ],
+        "title": "RunSummary"
+      },
       "StageInfo": {
         "properties": {
           "name": {
@@ -1264,6 +1881,59 @@
           "produces"
         ],
         "title": "StageInfo"
+      },
+      "SuggestRules": {
+        "properties": {
+          "overview": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Overview"
+          },
+          "routes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Routes",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "overview"
+        ],
+        "title": "SuggestRules"
+      },
+      "SutTarget": {
+        "properties": {
+          "repo": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Repo"
+          },
+          "branch": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Branch"
+          },
+          "base": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Base"
+          },
+          "seeded": {
+            "type": "boolean",
+            "title": "Seeded",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "repo",
+          "branch",
+          "base"
+        ],
+        "title": "SutTarget"
       },
       "ValidationError": {
         "properties": {

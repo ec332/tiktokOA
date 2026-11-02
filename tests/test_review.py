@@ -19,7 +19,7 @@ def _lines(item, **overrides):
 
 def test_stage_blocks_and_resumes_after_resolution(data):
     run_id, item = _blocked_signoff()
-    assert item["kind"] == "signoff" and item["line_options"] == ["approve", "reject"]
+    assert item["kind"] == "signoff" and item["line_options"] == ["approve", "reject", "exclude"]
     review.resolve(item["id"], None, "tester", detail=_lines(item))
     assert runner.resume(item["id"])["status"] == "succeeded"
     line = json.loads((data / "decisions.jsonl").read_text().splitlines()[-1])
@@ -102,3 +102,18 @@ def test_time_spent_is_logged_with_the_decision_not_on_the_item(data):
     assert "seconds" not in (resolved["detail"] or {})
     logged = json.loads((data / "decisions.jsonl").read_text().splitlines()[-1])
     assert logged["seconds"] == 12.5
+
+
+def test_other_choice_needs_and_keeps_free_text():
+    """M8: a question can be answered in the reviewer's own words."""
+    from tp.core import runner
+
+    run_id = runner.start_run(stub=True)
+    ex = runner._latest(run_id, "spec")["id"]
+    payload = {"choices": [{"id": "a", "text": "x"}, {"id": "other", "text": "Other"}],
+               "recommended": "a"}  # fmt: skip
+    i = review.create(ex, "question", payload)
+    with pytest.raises(ValueError, match="needs detail.text"):
+        review.resolve(i, "pick", "po", detail={"choice": "other"})
+    item = review.resolve(i, "pick", "po", detail={"choice": "other", "text": "0 to 100 inclusive"})
+    assert item["detail"] == {"choice": "other", "text": "0 to 100 inclusive"}

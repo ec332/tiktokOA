@@ -130,3 +130,63 @@ def test_the_llm_budget_covers_the_whole_execution_across_review_rounds(monkeypa
     spec = next(e for e in run["executions"] if e["stage"] == "spec")
     assert spec["status"] == "failed" and "BudgetExceeded" in spec["reason"]
     assert len(calls) == 2  # $2 + $2 > $3: the third call never went out
+
+
+def test_focused_mode_stops_only_on_listed_kinds(monkeypatch):
+    """M8 D27: a stop kind waits for a person; other kinds take their default, logged as focused."""
+    run_id = runner.start_run(stub=True, options={"stops": ["signoff"]})
+    assert runner.advance(run_id)["status"] == "awaiting_review"  # signoff is a stop
+    assert _approve_and_finish(run_id)["status"] == "succeeded"
+
+    from tp.core import contract
+    from tp.core.contract import StageResult
+
+    real = contract.resolve("gate", stub=True)
+
+    class AsksEquivalence:
+        name, version = real.name, real.version
+        consumes, produces = real.consumes, real.produces
+
+        def run(self, ctx, inputs):
+            if not ctx.review.items():
+                return StageResult.awaiting_review([ctx.review.create("equivalent_mutant", {})])
+            return real.run(ctx, inputs)
+
+    orig = contract.resolve
+    monkeypatch.setattr(
+        contract,
+        "resolve",
+        lambda n, stub=False: AsksEquivalence() if n == "gate" else orig(n, stub),
+    )
+    ex = runner.rerun(run_id, "gate")
+    assert ex["status"] == "succeeded"
+    item = review.list_(execution_id=ex["id"])[0]
+    assert (item["decided_by"], item["decision"]) == ("focused", "not_equivalent")
+
+
+def test_retry_continues_a_failed_run_from_the_failed_stage(monkeypatch):
+    """M8: earlier outputs are kept; only the failed stage runs again."""
+    from tp.core import contract
+
+    run_id = runner.start_run(stub=True, unattended=True)
+    real, calls = contract.resolve, []
+
+    class Boom:
+        def __init__(self, s):
+            self.s, self.name, self.version = s, s.name, s.version
+            self.consumes, self.produces = s.consumes, s.produces
+
+        def run(self, ctx, inputs):
+            calls.append(1)
+            if len(calls) == 1:
+                raise RuntimeError("runner image mismatch")
+            return self.s.run(ctx, inputs)
+
+    boom = Boom(real("generate", True))
+    monkeypatch.setattr(
+        contract, "resolve", lambda n, stub=False: boom if n == "generate" else real(n, stub)
+    )
+    assert runner.advance(run_id)["status"] == "failed"
+    spec_ex = runner._latest(run_id, "spec")["id"]
+    assert runner.retry(run_id)["status"] == "succeeded"
+    assert runner._latest(run_id, "spec")["id"] == spec_ex and len(calls) == 2

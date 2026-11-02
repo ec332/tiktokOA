@@ -1,0 +1,183 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { api, ok, type Event, type Execution, type ReviewItem, type RunDetail } from "../api/client";
+import { Approve } from "../panels/cases/Approve";
+import { ProductReport, type Product } from "../panels/report/Product";
+import { Clarify } from "../panels/spec/Clarify";
+import { resolveItem } from "../flow/resolve";
+
+function OtherDecision({ item, onDone }: { item: ReviewItem; onDone: () => void }) {
+  const go = useMutation({ mutationFn: (d: string) => resolveItem(item.id, { decision: d, reason: "decided on the run page" }), onSuccess: onDone });
+  return (
+    <div className="card" style={{ display: "grid", gap: 6 }}>
+      <span><span className="needs">Needs you</span> A {item.kind.replace(/_/g, " ")} decision is waiting.</span>
+      <pre className="patch">{JSON.stringify(item.payload, null, 1).slice(0, 1200)}</pre>
+      <div className="row">{item.options.map((o) => <button key={o} onClick={() => go.mutate(o)} disabled={go.isPending}>{o.replace(/_/g, " ")}</button>)}</div>
+      {go.error && <span className="error">{(go.error as Error).message}</span>}
+    </div>
+  );
+}
+
+/** M8 run page (skeleton D26): nine stages shown as five steps; a stop becomes a card in place. */
+
+type StepState = "pending" | "running" | "waiting" | "done" | "failed";
+const STEPS: { name: string; stages: string[] }[] = [
+  { name: "Understand the feature", stages: ["spec"] },
+  { name: "Clarify", stages: ["spec"] },
+  { name: "Design and approve tests", stages: ["cases"] },
+  { name: "Build and check", stages: ["generate", "gate", "env", "execute"] },
+  { name: "Report", stages: ["triage", "report"] },
+];
+
+/** One plain line per progress event; unknown kinds are skipped. */
+function say(e: Event): string | null {
+  const p = e.payload as Record<string, number | string | Record<string, number>>;
+  switch (e.kind) {
+    case "spec_focused": return `Focused on ${p.routes} routes in ${p.files} files`;
+    case "spec_investigated": return `Read the code: ${p.observed} behaviours, ${p.findings} findings`;
+    case "spec_frozen": return `${p.criteria} requirements written down`;
+    case "cases_drafted": return `${p.units} tests designed`;
+    case "cases_signed": case "cases_unsigned": return `${p.approved} of ${p.lines} tests approved`;
+    case "runner_rebuilding": return "Rebuilding the test runner for your branch (about a minute)";
+    case "runner_rebuilt": return "Test runner ready";
+    case "stage_retried": return `Retrying ${p.stage}`;
+    case "bindings_written": return `Writing test code for ${p.units} tests`;
+    case "dry_run": return `Checking the test code (round ${p.round})`;
+    case "tests_bound": return `Test code ready: ${Object.entries(p).map(([k, v]) => `${v} ${k.toLowerCase()}`).join(", ")}`;
+    case "env_up": return "Stack is up";
+    case "gate_stability": return `${p.stable_passing} of ${p.nodes} tests pass every time on your branch`;
+    case "gate_matrix": return `Mutation check: ${p.mutants} code changes, ${p.jobs} runs`;
+    case "gate_done": return `Gate: ${Object.entries(p).map(([k, v]) => `${v} ${k.toLowerCase().replace(/_/g, " ")}`).join(", ")}`;
+    case "execute_variant": return `Running the admitted tests on ${p.variant === "reference" ? "your branch" : p.variant}`;
+    case "execute_sealed": return "Results recorded and sealed";
+    case "triage_classified": return `${p.defects} defects among ${p.findings} failing results`;
+    case "triage_fix_suggested": return `Fix suggested for ${p.defect}`;
+    case "report_written": return "Report ready";
+    case "stage_failed": return `Failed: ${p.reason}`;
+    default: return null;
+  }
+}
+
+function elapsed(from?: string | null) {
+  if (!from) return "";
+  const s = Math.max(0, Math.round((Date.now() - Date.parse(from)) / 1000));
+  return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
+}
+
+function useArtifact<T>(id?: string) {
+  return useQuery({
+    queryKey: ["artifact", id], enabled: !!id, staleTime: Infinity,
+    queryFn: () => ok(api.GET("/artifacts/{art_id}", { params: { path: { art_id: id! } } })) as Promise<{ body: T }>,
+  });
+}
+
+export function Flow({ run }: { run: RunDetail }) {
+  const qc = useQueryClient();
+  const [, tick] = useState(0);
+  useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 1000); return () => clearInterval(t); }, []);
+  const events = useQuery({
+    queryKey: ["events", run.id],
+    queryFn: () => ok(api.GET("/runs/{run_id}/events/list", { params: { path: { run_id: run.id }, query: { after: 0 } } })),
+  });
+  const reviews = useQuery({ queryKey: ["reviews", "open"], queryFn: () => ok(api.GET("/reviews", { params: { query: { status: "open" } } })) });
+
+  const latest = new Map<string, Execution>();
+  for (const e of run.executions) latest.set(e.stage, e);
+  const exIds = new Set(run.executions.map((e) => e.id));
+  const exStage = new Map(run.executions.map((e) => [e.id, e.stage]));
+  const open = (reviews.data ?? []).filter((i) => exIds.has(i.stage_execution));
+  const openFor = (stage: string) => open.filter((i) => exStage.get(i.stage_execution) === stage);
+  const lastLine = (stages: string[]) => {
+    const ids = new Set(run.executions.filter((e) => stages.includes(e.stage)).map((e) => e.id));
+    const said = (events.data ?? []).filter((e) => e.stage_execution && ids.has(e.stage_execution)).map(say).filter(Boolean);
+    return said[said.length - 1] ?? "";
+  };
+  const cost = (events.data ?? []).filter((e) => e.kind === "llm_cost").reduce((s, e) => s + Number((e.payload as { usd: number }).usd), 0);
+
+  const spec = latest.get("spec");
+  const specOut = useArtifact<{ criteria: { id: string; title: string }[] }>(spec?.outputs.spec);
+  const report = latest.get("report");
+  const rep = useArtifact<{ report: { product: Product; evidence: Record<string, unknown> } }>(report?.outputs.report);
+  const retest = latest.get("retest");
+  const ret = useArtifact<{ retests: never[] }>(retest?.status === "succeeded" ? retest.outputs.retest : undefined);
+  const criteria = Object.fromEntries((specOut.data?.body.criteria ?? []).map((c) => [c.id, c.title]));
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["reviews"] });
+    qc.invalidateQueries({ queryKey: ["run", run.id] });
+  };
+
+  const st = (name: string): StepState => {
+    const sts = STEPS.find((s) => s.name === name)!.stages.map((s) => latest.get(s)?.status ?? "pending");
+    if (name === "Understand the feature") return spec?.status === "running" ? "running" : spec?.status === "failed" ? "failed" : spec && spec.status !== "pending" ? "done" : "pending";
+    if (name === "Clarify") return openFor("spec").length ? "waiting" : spec?.status === "succeeded" || spec?.status === "stale" ? "done" : "pending";
+    if (name === "Design and approve tests" && openFor("cases").length) return "waiting";
+    if (sts.includes("failed")) return "failed";
+    if (sts.includes("running") || (sts.some((s) => s === "succeeded") && sts.includes("pending") && run.status === "running")) return "running";
+    if (sts.every((s) => s === "succeeded" || s === "stale")) return "done";
+    return "pending";
+  };
+  const needsYou = open.length > 0;
+  useEffect(() => {
+    const prev = document.title;
+    document.title = needsYou ? `Needs you · ${run.name}` : `${run.name} · Test Platform`;
+    return () => { document.title = prev; };
+  }, [needsYou, run.name]);
+
+  const cancel = useMutation({ mutationFn: () => fetch(`/api/runs/${run.id}/cancel`, { method: "POST" }), onSuccess: refresh });
+  const resume = useMutation({ mutationFn: () => fetch(`/api/runs/${run.id}/resume`, { method: "POST" }), onSuccess: refresh });
+  const failed = [...latest.values()].find((e) => e.status === "failed");
+  // a decision the happy path doesn't expect (no stop of its own): never leave it invisible
+  const other = open.filter((i) => !["question", "confirm_observed", "signoff"].includes(i.kind));
+
+  return (
+    <div className="page">
+      <div className="row">
+        <span className="muted grow" style={{ fontSize: 13 }}>
+          {cost > 0 && `AI cost so far $${cost.toFixed(3)}`}
+        </span>
+        {run.status === "running" && <button onClick={() => cancel.mutate()} disabled={cancel.isPending}>Cancel run</button>}
+        {run.status === "cancelled" && <><span className="warn">Cancelled after the current step.</span><button onClick={() => resume.mutate()}>Resume</button></>}
+      </div>
+      <div className="steps">
+        {STEPS.map((s, i) => {
+          const state = st(s.name);
+          const runningEx = s.stages.map((n) => latest.get(n)).find((e) => e?.status === "running");
+          return (
+            <div key={s.name} className={`step ${state}`}>
+              <span className="dot" aria-hidden>{state === "done" ? "✓" : state === "failed" ? "!" : i + 1}</span>
+              <div style={{ minWidth: 0 }}>
+                <div className="head">
+                  <strong>{s.name}</strong>
+                  {state === "waiting" && <span className="needs">Needs you</span>}
+                  {state === "running" && <span className="muted" style={{ fontSize: 12 }}>{elapsed(runningEx?.started)}</span>}
+                </div>
+                {s.name === "Clarify" ? (
+                  state === "waiting" ? <div className="body"><Clarify key={openFor("spec").map((x) => x.id).join()} items={openFor("spec") as ReviewItem[]} onDone={refresh} /></div>
+                    : state === "done" && <div className="line">Answered</div>
+                ) : s.name === "Design and approve tests" && state === "waiting" ? (
+                  <div className="body"><Approve key={openFor("cases")[0].id} item={openFor("cases")[0] as ReviewItem} criteria={criteria} onDone={refresh} /></div>
+                ) : (
+                  <div className="line">{state === "failed" ? `Failed: ${s.stages.map((n) => latest.get(n)).find((e) => e?.status === "failed")?.reason ?? ""}` : lastLine(s.stages)}</div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {failed && run.status === "failed" && (
+        <div className="card row">
+          <span className="error grow">The run stopped: {failed.stage} failed. {failed.reason}</span>
+          <button className="primary" onClick={() => resume.mutate()} disabled={resume.isPending}>Retry from this step</button>
+        </div>
+      )}
+      {other.map((i) => <OtherDecision key={i.id} item={i as ReviewItem} onDone={refresh} />)}
+      {rep.data && (
+        <section>
+          <h1 style={{ marginTop: 8 }}>Report</h1>
+          <ProductReport product={rep.data.body.report.product} evidence={rep.data.body.report.evidence ?? {}}
+            runId={run.id} retests={(ret.data?.body.retests ?? []) as never[]} />
+        </section>
+      )}
+    </div>
+  );
+}

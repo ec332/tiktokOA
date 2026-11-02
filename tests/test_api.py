@@ -89,3 +89,46 @@ def test_stages_lists_the_pipeline_with_contracts(client):
 def test_unknown_things_404(client):
     assert client.get("/runs/999").status_code == 404
     assert client.get("/artifacts/sha256:00").status_code == 404
+
+
+def test_focused_run_stores_rules_routes_and_stops(client):
+    """M8 D27-D28: the New run body becomes the run's run_options."""
+    from tp.core import artifacts, runner
+
+    body = {"stub": True, "focused": True, "routes": ["POST /api/v1/items/"],
+            "rules": {"clarify": ["Money: ask about rounding"], "cases": []},
+            "templates": ["boundary"], "gate": {"k": 3},
+            "requirements": {"kind": "brief", "text": "Items get a price"}}  # fmt: skip
+    run = client.post("/runs", json=body).json()
+    opts = artifacts.get(runner.heads(run["id"])["run_options"]).body
+    assert opts["stops"] == ["question", "confirm_observed", "signoff"]
+    assert opts["rules"] == {"clarify": ["Money: ask about rounding"], "cases": []}
+    assert opts["routes"] == ["POST /api/v1/items/"] and opts["gate"] == {"k": 3}
+    assert wait(client, run["id"], "awaiting_review")["status"] == "awaiting_review"
+
+
+def test_rule_defaults_and_cancel(client):
+    d = client.get("/rules/defaults").json()
+    assert len(d["clarify"]) == 6 and "boundary" in d["templates"]
+    assert d["gate"]["defaults"]["k"] == 5
+    run = client.post("/runs", json={"stub": True}).json()
+    wait(client, run["id"], "awaiting_review")
+    assert client.post(f"/runs/{run['id']}/cancel").json()["status"] == "cancelled"
+
+
+def test_defect_decision_needs_a_triage(client):
+    run = client.post("/runs", json={"stub": True, "unattended": True}).json()
+    wait(client, run["id"], "succeeded")
+    item = client.post(f"/runs/{run['id']}/defects/D-reference/C-1",
+                       json={"decision": "confirm"}).json()  # fmt: skip
+    assert (item["kind"], item["decision"]) == ("real_defect", "confirm")
+    assert [i["id"] for i in client.get(f"/runs/{run['id']}/defects").json()] == [item["id"]]
+
+
+def test_run_list_can_show_only_happy_path_runs(client):
+    client.post("/runs", json={"stub": True})
+    run = client.post("/runs", json={"stub": True, "focused": True,
+                                     "requirements": {"kind": "brief", "text": "Items get a price"}}).json()  # fmt: skip
+    rows = client.get("/runs", params={"focused": True}).json()
+    assert [(r["id"], r["overview"]) for r in rows] == [(run["id"], "Items get a price")]
+    assert len(client.get("/runs").json()) == 2

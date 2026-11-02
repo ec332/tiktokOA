@@ -4,11 +4,9 @@ import {
 } from "@tanstack/react-router";
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { ArtifactPage, ArtifactsPage } from "./pages/Artifacts";
-import { ReviewsPage } from "./pages/Reviews";
 import { RunPage } from "./pages/Run";
 import { RunsPage } from "./pages/Runs";
-import { SutPage } from "./pages/Sut";
+import { NewRunPage } from "./pages/NewRun";
 import "./styles.css";
 
 type Theme = "system" | "light" | "dark";
@@ -37,10 +35,8 @@ function Shell() {
     <div className="shell">
       <nav className="sidebar">
         <span className="brand">Test Platform</span>
+        <Link to="/new" activeProps={{ className: "active" }}>New run</Link>
         <Link to="/runs" activeProps={{ className: "active" }}>Runs</Link>
-        <Link to="/reviews" activeProps={{ className: "active" }}>Review queue</Link>
-        <Link to="/artifacts" activeProps={{ className: "active" }}>Artifacts</Link>
-        <Link to="/sut" activeProps={{ className: "active" }}>SUT</Link>
         <span className="spacer" />
         <ThemeToggle />
       </nav>
@@ -51,13 +47,11 @@ function Shell() {
 
 const root = createRootRoute({ component: Shell });
 const routes = [
-  createRoute({ getParentRoute: () => root, path: "/", beforeLoad: () => { throw redirect({ to: "/runs" }); } }),
+  createRoute({ getParentRoute: () => root, path: "/", beforeLoad: () => { throw redirect({ to: "/new" }); } }),
+  createRoute({ getParentRoute: () => root, path: "/new", component: NewRunPage }),
   createRoute({ getParentRoute: () => root, path: "/runs", component: RunsPage }),
   createRoute({ getParentRoute: () => root, path: "/runs/$runId", component: RunPage }),
-  createRoute({ getParentRoute: () => root, path: "/reviews", component: ReviewsPage }),
-  createRoute({ getParentRoute: () => root, path: "/artifacts", component: ArtifactsPage }),
-  createRoute({ getParentRoute: () => root, path: "/artifacts/$id", component: ArtifactPage }),
-  createRoute({ getParentRoute: () => root, path: "/sut", component: SutPage }),
+  createRoute({ getParentRoute: () => root, path: "/sut", beforeLoad: () => { throw redirect({ to: "/new" }); } }),
 ] as const;
 const router = createRouter({ routeTree: root.addChildren(routes) });
 

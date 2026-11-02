@@ -15,13 +15,15 @@ KINDS: dict[str, list[str]] = {
     "triage": ["accept", "override"],
     "real_defect": ["confirm", "reject"],
 }
+OTHER_CHOICE = "other"  # a question choice whose answer is the reviewer's own text (M8)
 NEEDS_REASON = {("triage", "override")}
 CHOICE_DECISIONS = {
     ("question", "pick"),
     ("triage", "override"),
 }  # detail.choice = a payload choice
 # Kinds whose payload may carry `lines`: each line is decided on its own (plan C5).
-LINE_OPTIONS: dict[str, list[str]] = {"signoff": ["approve", "reject"]}
+# exclude (M8 cases D16): leave this test out of the run; no rewrite, no comment needed
+LINE_OPTIONS: dict[str, list[str]] = {"signoff": ["approve", "reject", "exclude"]}
 LINE_NEEDS_COMMENT = {"reject"}
 SKIPS_DETAIL = {"defer"}  # deciding the whole item at once, no per-line/choice detail
 UNATTENDED_DECISION = {
@@ -166,7 +168,7 @@ def _check_detail(item: dict, decision: str | None, detail: dict) -> tuple[str, 
                 raise ValueError(f"line {line_id}: decision must be one of {LINE_OPTIONS[kind]}")
             if d["decision"] in LINE_NEEDS_COMMENT and not d.get("comment"):
                 raise ValueError(f"line {line_id}: a comment is required to {d['decision']}")
-        derived = "approve" if all(d["decision"] == "approve" for d in given.values()) else "reject"
+        derived = "reject" if any(d["decision"] == "reject" for d in given.values()) else "approve"
         if decision not in (None, derived):
             raise ValueError(f"decision {decision!r} contradicts the line decisions ({derived})")
         return derived, {"lines": given}
@@ -174,6 +176,13 @@ def _check_detail(item: dict, decision: str | None, detail: dict) -> tuple[str, 
         choice = detail.get("choice")
         if choice not in {c["id"] for c in payload.get("choices", [])}:
             raise ValueError(f"{decision} needs detail.choice set to one of the choice ids")
+        if choice == OTHER_CHOICE:  # a free-text answer (M8): the text is the answer
+            text = str(detail.get("text") or "").strip()
+            if not text:
+                raise ValueError(
+                    "the 'other' choice needs detail.text: describe what should happen"
+                )
+            return decision, {"choice": choice, "text": text}
         return decision, {"choice": choice}
     if decision is None:
         raise ValueError("a decision is required")
