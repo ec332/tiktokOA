@@ -392,3 +392,19 @@ def test_run_rules_are_added_after_the_defaults():
     text = ai.rules_text(["Money fields: ask about rounding"])
     assert text.startswith(ai.rules_text()) and text.endswith("- Money fields: ask about rounding")
     assert len(ai.default_rules()) == 6
+
+
+def test_human_judgement_is_never_preselected_and_leaves_the_requirement_open():
+    """spec/011 H1-H2: "Leave to human judgement" is not a default and not a confirmation."""
+    q = {"key": "k", "criterion": "O-1", "kind": "defect", "about": "intended behaviour",
+         "why": "w", "changes": "expected_value",
+         "options": [questions.HUMAN, questions.OUT_OF_SCOPE]}  # fmt: skip
+    (only_non_answers,) = questions.phrase([], [q])
+    assert only_non_answers["recommended"] is None
+    (real,) = questions.phrase(
+        [], [q | {"options": [questions.HUMAN, "422", questions.OUT_OF_SCOPE]}]
+    )
+    assert real["recommended"] == "b"
+    c = {"id": "O-1", "then": "returns 500", "status_code": 500, "status": "observed"}
+    questions.apply_answer(c, q, questions.HUMAN, False)
+    assert c["status"] == "assumed" and c["review_needed"] and c["then"] == "returns 500"

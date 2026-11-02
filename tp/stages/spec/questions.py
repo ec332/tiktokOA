@@ -94,12 +94,14 @@ def phrase(written: list[dict], asked: list[dict]) -> list[dict]:
         w = by_key.get(q["key"])
         ids = [c.get("id") for c in w.get("choices", [])] if w else []
         if w and len(ids) >= 2 and len(set(ids)) == len(ids) and w.get("recommended") in ids:
-            out.append({**q, "text": w["text"], "choices": w["choices"],
-                        "recommended": w["recommended"]})  # fmt: skip
+            choices, rec, text = w["choices"], w["recommended"], w["text"]
         else:
             choices = [{"id": chr(97 + i), "text": o} for i, o in enumerate(q["options"][:4])]
-            text = f"{q['why']} ({q['about']})"
-            out.append({**q, "text": text, "choices": choices, "recommended": "a"})
+            rec, text = None, f"{q['why']} ({q['about']})"
+        # never pre-select a non-answer (spec/011 H2): first real choice, else none
+        real = [ch["id"] for ch in choices if ch.get("text") not in (HUMAN, OUT_OF_SCOPE)]
+        rec = rec if rec in real else (real[0] if real else None)
+        out.append({**q, "text": text, "choices": choices, "recommended": rec})
     return out
 
 
@@ -117,6 +119,14 @@ def apply_answer(c: dict | None, q: dict, text: str, assumed: bool) -> dict | No
     if c is None:
         return None
     before = {k: c.get(k) for k in ("then", "status_code", "status")}
+    if text == HUMAN:  # not an answer: the requirement stays open (spec/011 H1)
+        c["status"], c["review_needed"], c["human_judgement"] = "assumed", True, True
+        return {
+            "criterion": c["id"],
+            "before": before,
+            "after": {k: c.get(k) for k in ("then", "status_code", "status")},
+            "answer": text,
+        }
     if q["kind"] == "defect" or c["status"] == "draft" or q.get("changes") != "none":
         _set_outcome(c, text, q["kind"] == "defect")
     if q["kind"] == "defect" and not text.startswith(INTENDED):

@@ -20,7 +20,7 @@ Produce four things.
 
 4. questions: decisions a human must make because the requirements are ambiguous. Ask only when there are at least two plausible answers AND the answer changes an expected value or whether a test passes. For each: the criterion id it is about ("" if none), a short `about` key, why it matters, the plausible options, and what the answer changes (expected_value or pass_fail).
 
-Rules for test design to apply while reviewing:
+What the requirements must settle. Settle each point from the requirements text, then the code (as an observed criterion), and ask a question only when both leave it open:
 {{RULES}}
 
 Criteria that AmbiguityLint flagged (consider asking about them): {{FLAGGED}}

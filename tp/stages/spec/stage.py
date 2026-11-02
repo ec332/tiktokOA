@@ -205,8 +205,13 @@ class SpecStage:
             choices = {ch["id"]: ch["text"] for ch in p["choices"]}
             deferred = item["decision"] == "defer"
             picked = None if deferred else item["detail"]["choice"]
-            text = (item["detail"]["text"] if picked == review.OTHER_CHOICE
-                    else choices[p["recommended"] if deferred else picked])  # fmt: skip
+            if picked == review.OTHER_CHOICE:
+                text = item["detail"]["text"]
+            elif not deferred:
+                text = choices[picked]
+            else:  # "let the platform assume": its recommendation; none -> stays open
+                rec = p.get("recommended")
+                text = choices[rec] if rec else questions.HUMAN
             q = {"kind": p["kind"], "changes": p["changes"]}
             if ch := questions.apply_answer(crit.get(p["criterion"]), q, text, deferred):
                 changes.append(ch)
