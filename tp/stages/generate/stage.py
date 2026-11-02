@@ -15,6 +15,21 @@ def _scratch(ctx) -> Path:
     return db.data_dir() / "runs" / f"generate-exec-{ctx.review.execution_id}.json"
 
 
+def ensure_runner(ctx) -> None:
+    """The runner image holds a copy of the SUT code (in-process tests, mutants), so it must be
+    built on the current backend image. A new target branch or patch set changes that image;
+    rebuild the runner then instead of failing (M8)."""
+    base = ctx.env.backend_image("reference")
+    try:
+        current = image.published().get("base")
+    except image.ImageError:
+        current = None
+    if current != base:
+        ctx.emit("runner_rebuilding", base=base, was=current)
+        image.build(ctx.env)
+        ctx.emit("runner_rebuilt", base=base)
+
+
 class GenerateStage:
     name = "generate"
     version = f"1.0.0+p{ai.version_hash()}"
@@ -35,6 +50,7 @@ class GenerateStage:
             return StageResult.failed(f"unknown guards {guards!r}: use v1 or v2")
         units = [u for u in cases["cases"] if not opts.get("units") or u["id"] in opts["units"]]
         ctx.env.ensure("reference")
+        ensure_runner(ctx)
         openapi = ctx.env.openapi("reference")
         workdir = db.data_dir() / "runs" / f"generate-exec-{ctx.review.execution_id}"
         criteria = {c["id"]: c for c in spec["criteria"]}

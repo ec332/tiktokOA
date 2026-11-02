@@ -22,6 +22,9 @@ class FakeEnv:
     def ensure(self, variant):
         pass
 
+    def backend_image(self, variant):
+        return "tp-sut-backend:fake"  # matches the published runner's base: no rebuild
+
     def openapi(self, variant):
         return self.fx["openapi"]
 
@@ -71,7 +74,9 @@ def setup(fx, monkeypatch, data):
     SCRIPT.clear()
     PROMPTS.clear()
     monkeypatch.setattr(llm, "anthropic_provider", fake_model)
-    (data / "published.json").write_text(json.dumps({"runner": {"digest": "sha256:fake"}}))
+    (data / "published.json").write_text(
+        json.dumps({"runner": {"digest": "sha256:fake", "base": "tp-sut-backend:fake"}})
+    )
 
     def go(units, script, product=None, options=None, cases=None):
         SCRIPT.update({u: list(s) for u, s in script.items()})
@@ -190,3 +195,22 @@ def test_status_and_classification_helpers():
     assert loop.classify([], [{"origin": "BINDING", "error": "KeyError: 'id'"}]) == "locator"
     assert loop.classify([], [{"origin": "BINDING", "error": "make.item() got owner"}]) == "fixture"
     assert loop.classify([], [{"origin": "ASSERTION", "error": ""}]) == "product"
+
+
+def test_runner_is_rebuilt_when_the_backend_image_changed(monkeypatch):
+    """M8: a new target branch changes the backend image; generate rebuilds the runner."""
+    from types import SimpleNamespace as NS
+
+    from tp.stages.generate import image, stage
+
+    built, events = [], []
+    env = NS(backend_image=lambda v: "tp-sut-backend:new")
+    ctx = NS(env=env, emit=lambda k, **p: events.append(k))
+    monkeypatch.setattr(image, "build", lambda e: built.append(e))
+    monkeypatch.setattr(image, "published", lambda: {"base": "tp-sut-backend:old"})
+    stage.ensure_runner(ctx)
+    assert built == [env] and events == ["runner_rebuilding", "runner_rebuilt"]
+    built.clear()
+    monkeypatch.setattr(image, "published", lambda: {"base": "tp-sut-backend:new"})
+    stage.ensure_runner(ctx)
+    assert built == []
