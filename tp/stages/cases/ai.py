@@ -73,18 +73,31 @@ def _prompt(name: str, **fields) -> str:
     return text
 
 
-def draft(llm, criteria: list[dict], minimum: dict[str, list[str]]) -> list[dict]:
+def draft(
+    llm,
+    criteria: list[dict],
+    minimum: dict[str, list[str]],
+    templates: list[str] | None = None,
+    rules: list[str] | None = None,
+) -> list[dict]:
+    """templates: the run's enabled templates (None = all); rules: lines added after the
+    prompt's own rules (M8 cases D13-D14). Both absent: the prompt is byte-identical."""
     view = [{"id": c["id"], "title": c["title"], "actor": c.get("actor", ""), "given": c["given"],
              "when": c["when"], "then": c["then"], "status_code": c.get("status_code"),
              "resolution": c.get("resolution"), "suspected_defect": c.get("suspected_defect", False),
              "status": c["status"], "minimum": minimum[c["id"]],
              **({"gaps": c["gaps"]} if c.get("gaps") else {})} for c in criteria]  # fmt: skip
     p = _prompt("drafter", FACTORIES=", ".join(FACTORIES),
-                TEMPLATES=yaml.safe_dump(list(catalogue().values()), sort_keys=False),
+                TEMPLATES=yaml.safe_dump([t for n, t in catalogue().items()
+                                          if templates is None or n in templates],
+                                         sort_keys=False),
                 CALCULATORS=json.dumps(calculators.describe(), indent=1),
                 CRITERIA=json.dumps(view, indent=1))  # fmt: skip
     if any(c.get("gaps") for c in criteria):  # only then: a first-cycle prompt stays byte-identical
         p += _prompt("gaps")
+    if rules:
+        p += "\n\nRules added for this run (apply them on top of the rules above):\n"
+        p += "\n".join(f"- {r}" for r in rules) + "\n"
     raw = llm.call(p, model=MODEL, schema=DRAFT_SCHEMA, effort=EFFORT, max_tokens=64000)
     return json.loads(raw)["criteria"]
 

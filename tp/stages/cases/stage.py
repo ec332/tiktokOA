@@ -40,6 +40,7 @@ class CasesStage:
     version = f"1.0.0+p{ai.version_hash()}"
     consumes: dict[str, int] = {"spec": 1, "run_options": 1}  # noqa: RUF012
     produces: dict[str, int] = {"cases": 1, "signoff_md": 1}  # noqa: RUF012
+    templates = staticmethod(lambda: {n: t.get("name", n) for n, t in ai.catalogue().items()})
     flows = ("FLOW-items-crud",)  # default scope (design D2); run option `flows` overrides
 
     def run(self, ctx, inputs):
@@ -50,8 +51,10 @@ class CasesStage:
             iteration = artifacts.get(opts["iteration"]).body if opts.get("iteration") else None
             if iteration and iteration["spec"] != inputs["spec"].id:
                 return StageResult.failed("iteration was fed from another spec (design 006)")
-            state = self._draft(ctx, inputs["spec"], tuple(opts.get("flows") or self.flows),
-                                iteration)  # fmt: skip
+            # a run focused on routes (M8) tests every flow its spec holds
+            flows = opts.get("flows") or (None if opts.get("routes") else self.flows)
+            state = self._draft(ctx, inputs["spec"], tuple(flows) if flows else None, iteration,
+                                opts.get("templates"), (opts.get("rules") or {}).get("cases"))  # fmt: skip
             state["scope"] = None if opts.get("fresh") else {"sut_ref": state["sut"]["ref"]}
             return self._ask(ctx, state, path, [u["id"] for u in state["units"]])
         items = ctx.review.items()
@@ -64,6 +67,10 @@ class CasesStage:
         for ln in last["payload"]["lines"]:
             if lines[ln["id"]]["decision"] == "approve":
                 state["approved"].append(ln["hash"])
+        if excluded := {i for i, d in lines.items() if d["decision"] == "exclude"}:
+            state["units"] = [u for u in state["units"] if u["id"] not in excluded]
+            state["not_tested"] += [{"criterion": i, "reason": "excluded at sign-off"}
+                                    for i in sorted(excluded)]  # fmt: skip
         rejected = {i: d["comment"] for i, d in lines.items() if d["decision"] == "reject"}
         if not rejected:
             return self._finish(ctx, state, path, signed=True)
@@ -75,7 +82,8 @@ class CasesStage:
 
     # ---- drafting ----------------------------------------------------------------------
 
-    def _draft(self, ctx, spec_art, flows: tuple[str, ...], iteration: dict | None = None) -> dict:
+    def _draft(self, ctx, spec_art, flows: tuple[str, ...] | None, iteration: dict | None = None,
+               templates: list[str] | None = None, rules: list[str] | None = None) -> dict:  # fmt: skip
         """iteration (V4, design 006): scope is its candidates' criteria, whatever their flow,
         and each carries its gaps into the drafting prompt."""
         spec = spec_art.body
@@ -88,16 +96,18 @@ class CasesStage:
                 not_tested.append({"criterion": c["id"], "reason": "out of scope in the spec"})
             elif iteration and c["id"] not in gaps:
                 not_tested.append({"criterion": c["id"], "reason": "not an iteration candidate"})
-            elif not iteration and flow not in flows:
+            elif not iteration and flows is not None and flow not in flows:
                 not_tested.append({"criterion": c["id"], "reason": f"flow {flow} not in this run"})
             else:
                 scope.append(c | {"flow": flow} | ({"gaps": gaps[c["id"]]} if iteration else {}))
-        if iteration:
+        if iteration or flows is None:
             flows = tuple(sorted({c["flow"] for c in scope}))
-        minimum = {c["id"]: signals.minimum_templates(c) for c in scope}
+        minimum = {c["id"]: [t for t in signals.minimum_templates(c)
+                             if templates is None or t in templates] for c in scope}  # fmt: skip
         # key by the criterion id the model echoes; it sometimes adds the title ("C-5 Expired …")
         drafts = {
-            d["criterion"].split()[0].rstrip(":"): d for d in ai.draft(ctx.llm, scope, minimum)
+            d["criterion"].split()[0].rstrip(":"): d
+            for d in ai.draft(ctx.llm, scope, minimum, templates, rules)
         }
         attention: list[str] = []
         units = []
@@ -110,6 +120,7 @@ class CasesStage:
                 attention.append(
                     f"{c['id']}: skipped minimum template {s['template']}: {s['reason']}"
                 )
+        units += self._fill_acceptance(ctx, scope, units, minimum, templates, rules, attention)
         units, deferred = build.dedupe_and_budget(units, minimum)
         build.rank(units, crit, spec.get("findings", []))
         build.assign_ids(units)
@@ -124,6 +135,27 @@ class CasesStage:
                 "minimum": minimum, "drafts": drafts, "units": units, "deferred": deferred,
                 "attention": attention, "not_tested": not_tested, "approved": [], "carried": [],
                 "round": 1}  # fmt: skip
+
+    def _fill_acceptance(self, ctx, scope, units, minimum, templates, rules, attention) -> list:
+        """Every criterion needs a case for its normal outcome (drafter rule 2). The model
+        sometimes skips it; ask once more for just those criteria, keep only acceptance cases."""
+        missing = [c for c in scope
+                   if c["id"] not in {u["ac"] for u in units if u["technique"] == "acceptance"}]  # fmt: skip
+        if not missing:
+            return []
+        ctx.emit("cases_acceptance_redraft", criteria=len(missing))
+        note = ("These criteria have no acceptance case yet. For each one, write exactly one "
+                "acceptance case that checks the criterion's `then`, with its exact expected value.")  # fmt: skip
+        out = []
+        for d in ai.draft(ctx.llm, missing, {c["id"]: [] for c in missing}, templates,
+                          [*(rules or []), note]):  # fmt: skip
+            c = next((x for x in missing if x["id"] == d["criterion"].split()[0].rstrip(":")), None)
+            if c is None:
+                continue
+            only = {**d, "boundaries": [], "tables": [], "skipped_templates": [],
+                    "cases": [x for x in d["cases"] if x["technique"] == "acceptance"][:1]}  # fmt: skip
+            out += build.units_from_draft(c, c["flow"], only, attention, scope)
+        return out
 
     def _revise(self, ctx, state, rejected: dict[str, str]) -> None:
         """Rewrite the rejected units using the reviewer's comments; same shape as before."""

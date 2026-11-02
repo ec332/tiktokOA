@@ -291,3 +291,58 @@ def test_an_iteration_from_another_spec_fails(model):
     it = artifacts.put("iteration", {"spec": "sha256:other", "candidates": []})
     _, ex = _run(options={"iteration": it.id})
     assert ex["status"] == "failed" and "another spec" in ex["reason"]
+
+
+def test_run_rules_and_template_switches_reach_the_drafter(model):
+    """M8 cases D13-D15: rules follow the prompt's own; disabled templates leave the prompt;
+    a routes run tests every flow; sign-off lines carry a title and a one-sentence summary."""
+    _run(options={"routes": ["POST /api/v1/items/"], "templates": ["boundary"],
+                               "rules": {"cases": ["Every price test includes 0 and 0.01"]}})  # fmt: skip
+    p = [x for x in PROMPTS if "have no acceptance case yet" not in x][-1]  # the main draft
+    assert p.rstrip().endswith("- Every price test includes 0 and 0.01")
+    assert "Decision table (incl. authorisation)" not in p
+    assert "Login returns a token" in p and "Title has a maximum" in p  # every flow
+    ln = _signoff()["payload"]["lines"][0]
+    assert ln["title"] and ln["summary"] and ln["ac"].startswith(("C-", "O-"))
+
+
+def test_no_rules_keeps_the_prompt_byte_identical(model):
+    _run()
+    first = PROMPTS[-1]
+    _run(options={"rules": {"cases": []}})
+    assert PROMPTS[-1] == first
+
+
+def test_excluded_lines_leave_the_run_and_the_rest_is_signed(model):
+    """M8 cases D16: exclude = not generated; no rewrite round, no comment."""
+    run_id, _ = _run()
+    item = _signoff()
+    ids = [ln["id"] for ln in item["payload"]["lines"]]
+    lines = {i: {"decision": "approve"} for i in ids} | {ids[0]: {"decision": "exclude"}}
+    review.resolve(item["id"], None, "po", detail={"lines": lines})
+    runner.resume(item["id"])
+    _, art = _cases(run_id)
+    assert art.body["signoff"]["signed"] and ids[0] not in {u["id"] for u in art.body["cases"]}
+    assert {"criterion": ids[0], "reason": "excluded at sign-off"} in art.body["not_tested"]
+
+
+def test_criteria_without_an_acceptance_case_are_redrafted_once(model, monkeypatch):
+    """M8: the drafter skipped a criterion's normal case; one extra call asks for just that."""
+    from tp.stages.cases import ai
+
+    real, calls = ai.draft, []
+
+    def drop_acceptance(llm, criteria, minimum, templates=None, rules=None):
+        calls.append([c["id"] for c in criteria])
+        out = real(llm, criteria, minimum, templates, rules)
+        if len(calls) == 1:  # first pass: strip every acceptance case of C-11
+            for d in out:
+                if d["criterion"].startswith("C-11"):
+                    d["cases"] = [x for x in d["cases"] if x["technique"] != "acceptance"]
+        return out
+
+    monkeypatch.setattr(ai, "draft", drop_acceptance)
+    _run()
+    assert calls[1] == ["C-11"]
+    lines = _signoff()["payload"]["lines"]
+    assert any(ln["ac"] == "C-11" and ln["technique"] == "acceptance" for ln in lines)

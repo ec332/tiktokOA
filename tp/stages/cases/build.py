@@ -281,4 +281,7 @@ def line(u: dict) -> dict:
         exp = f"{u['expected']['value']} [{u['expected']['oracle']}]"
     body = {k: v for k, v in u.items() if k not in ("score",)}
     text = f"{u['priority']} {u['technique']}: {u['purpose']} → {exp}. Catches: {u['defect_hypothesis']}"
-    return {"id": u["id"], "text": text, "flow": u["flow"], "hash": sha256(body)}
+    # title + one sentence for the approve list (M8 cases D15); the hash covers the whole unit
+    return {"id": u["id"], "text": text, "flow": u["flow"], "hash": sha256(body),
+            "title": u["purpose"], "summary": u["defect_hypothesis"], "ac": u["ac"],
+            "technique": u["technique"]}  # fmt: skip
