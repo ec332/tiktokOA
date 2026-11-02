@@ -340,7 +340,8 @@ def export_tests(run_id: int, body: ExportRequest):
     chosen = [c for c in cands if c["unit"] in set(body.tests)]
     if unknown := set(body.tests) - {c["unit"] for c in chosen}:
         raise HTTPException(404, f"no such tests in this run: {sorted(unknown)}")
-    sources = {b["file"]: b["source"] for b in bound["tests"]}
+    # UNBOUND tests carry no source; they are never export candidates anyway
+    sources = {b["file"]: b["source"] for b in bound["tests"] if "source" in b}
     try:
         res = rep.export_tests(Path(t["repo"]), t["tested"], rep.export_branch(run["name"]),
                             run["name"], chosen, sources,
