@@ -114,8 +114,12 @@ class GateStage:
         t0, timings = time.perf_counter(), {}
         seed = info["bound_tests"].removeprefix("sha256:")[:8]
 
-        runs = [ctx.env.pytest(work / "tests", work / f"k{i}", "reference")["results"]
-                for i in range(info["settings"]["k"])]  # fmt: skip
+        k = info["settings"]["k"]
+        runs = []
+        for i in range(k):
+            ctx.emit("gate_stability_run", run=i + 1, of=k + 1, shuffled=False)
+            runs.append(ctx.env.pytest(work / "tests", work / f"k{i}", "reference")["results"])
+        ctx.emit("gate_stability_run", run=k + 1, of=k + 1, shuffled=True)
         runs.append(ctx.env.pytest(work / "tests", work / "shuffled", "reference",
                                    env={"TP_SHUFFLE": seed})["results"])  # fmt: skip
         stab = decide.stability(runs)
@@ -126,8 +130,10 @@ class GateStage:
         seeded_res = self._seeded(ctx, work, info, seeded, passing)
         timings["seeded"] = round(time.perf_counter() - t0 - sum(timings.values()), 1)
 
+        ctx.emit("gate_mutants_generating")
         files = mutants.generate(ctx.env, scope["mutate"], work / "mutants") | h_files
         ms = mutants.parse(work / "mutants", scope["mutate"]) + h_ms
+        ctx.emit("gate_linking", mutants=len(ms))
         stats = ctx.env.pytest(work / "tests", work / "stats", "reference", mounts=files,
                                env={"MUTANT_UNDER_TEST": "stats"},
                                args=tuple(_node_args(passing)))["results"]  # fmt: skip
@@ -139,6 +145,7 @@ class GateStage:
         jobs = [{"key": m["name"], "env": {"MUTANT_UNDER_TEST": m["name"],
                                            "TP_TIMEOUT": MUTANT_TIMEOUT},
                  "args": _node_args(linked[m["name"]])} for m in ms if linked[m["name"]]]  # fmt: skip
+        ctx.emit("gate_matrix_start", jobs=len(jobs))
         matrix = ctx.env.pytest(work / "tests", work / "matrix", "reference", mounts=files,
                                 matrix=jobs)["matrix"] if jobs else {}  # fmt: skip
         timings["mutants"] = round(time.perf_counter() - t0 - sum(timings.values()), 1)
