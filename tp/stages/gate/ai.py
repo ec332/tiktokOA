@@ -5,6 +5,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from tp.core import profile
+
 HERE = Path(__file__).parent
 MODEL, EFFORT = "claude-haiku-5-5", "low"
 SCHEMA = {"type": "object", "additionalProperties": False, "required": ["proposals"],
@@ -18,7 +20,7 @@ SCHEMA = {"type": "object", "additionalProperties": False, "required": ["proposa
 def version_hash() -> str:
     h = hashlib.sha256((HERE / "prompts/equivalence.md").read_bytes())
     h.update(f"{MODEL}|{EFFORT}".encode())
-    h.update((HERE / "seeded.yaml").read_bytes())
+    h.update(profile.seeded_bytes())  # the target's planted-bug targets (seams/001 D1)
     return h.hexdigest()[:8]
 
 

@@ -6,36 +6,44 @@ import difflib
 import re
 from pathlib import Path
 
-# shortcut: the SUT image keeps the repo's `backend/` at /app/backend (its Dockerfile); a SUT
-# with another layout needs this mapping in sut.yaml.
-REPO_PREFIX, IMAGE_ROOT = "backend/", "/app/backend/"
+from tp.core import profile
+
 MUTANT = re.compile(r"^x_(?P<fn>\w+?)__mutmut_(?P<n>\d+|orig)$")
+
+
+def _layout() -> dict:
+    """Where the repo's source sits in the target image: the profile's mutation fields."""
+    return profile.load().mutation.value
+
+
+def image_root() -> str:
+    return _layout()["image_root"]
 
 
 def rel(path: str) -> str:
     """A code_scope path (repo-relative) -> its path under the image root."""
-    return path.removeprefix(REPO_PREFIX)
+    return path.removeprefix(_layout()["repo_prefix"])
 
 
 def module_of(rel_path: str) -> str:
     return rel_path.removesuffix(".py").replace("/", ".")
 
 
-def generate(env, scope: list[str], out: Path) -> dict[str, Path]:
-    """Run mutmut in the runner; returns {container path: host path} of the mutated files.
-    The originals are copied next to them (out/orig) for line mapping."""
+def generate(reach, scope: list[str], out: Path) -> dict[str, Path]:
+    """Run mutmut in the runner (`reach.exec`); returns {container path: host path} of the
+    mutated files. The originals are copied next to them (out/orig) for line mapping."""
     out.mkdir(parents=True, exist_ok=True)
-    paths = [rel(p) for p in scope]
+    paths, root = [rel(p) for p in scope], image_root()
     cfg = "[mutmut]\\nsource_paths=\\n" + "".join(f"    {p}\\n" for p in paths)
     copy = " && ".join(f"mkdir -p /work/out/mut/{Path(p).parent} /work/out/orig/{Path(p).parent}"
-                       f" && cp mutants/{p} /work/out/mut/{p} && cp {IMAGE_ROOT}{p} /work/out/orig/{p}"
+                       f" && cp mutants/{p} /work/out/mut/{p} && cp {root}{p} /work/out/orig/{p}"
                        for p in paths)  # fmt: skip
-    script = (f"set -e; rm -rf /tmp/w; cp -r {IMAGE_ROOT.rstrip('/')} /tmp/w; cd /tmp/w; "
+    script = (f"set -e; rm -rf /tmp/w; cp -r {root.rstrip('/')} /tmp/w; cd /tmp/w; "
               f"printf '{cfg}' > setup.cfg; "
               "python -W ignore -c 'import mutmut.__main__ as m; print(m.create_mutants(1))'; "
               f"{copy}")  # fmt: skip
-    env.runner(["sh", "-c", script], writable={"/work/out": out})
-    return {IMAGE_ROOT + p: out / "mut" / p for p in paths}
+    reach.exec(["sh", "-c", script], writable={"/work/out": out})
+    return {root + p: out / "mut" / p for p in paths}
 
 
 def _functions(tree: ast.Module) -> dict[str, ast.FunctionDef]:

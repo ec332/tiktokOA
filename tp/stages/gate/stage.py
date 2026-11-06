@@ -7,7 +7,6 @@ import time
 from pathlib import Path
 
 import typer
-import yaml
 
 from tp.core import db, sut
 from tp.core.contract import StageResult, register
@@ -48,7 +47,7 @@ class GateStage:
         (work / "tests").mkdir(parents=True)
         for t in tests:
             (work / "tests" / t["file"]).write_text(t["source"])
-        ctx.env.ensure("reference")
+        ctx.strategies.reach.ensure("reference")
         ctx_info = {"bound_tests": inputs["bound_tests"].id, "cases": inputs["cases"].id,
                     "units": {t["file"]: {"unit": t["unit"], "ac": t["ac"]} for t in tests},
                     "criteria": {c["id"]: {k: c.get(k) for k in ("status", "human_judgement")}
@@ -73,7 +72,7 @@ class GateStage:
 
     def _v1(self, ctx, work, info):
         """Admit on "passes on reference" only (plan K2): one run, no stability, no routing."""
-        r = ctx.env.pytest(work / "tests", work / "v1", "reference")
+        r = ctx.strategies.checks.run(work / "tests", work / "v1", "reference")
         rows = [{"node": x["nodeid"], **self._where(info, x["nodeid"]), "case_id": x["case_id"],
                  "outcome": x["outcome"], "origin": x["origin"],
                  "status": "ADMITTED" if x["outcome"] == "passed" else "REJECTED"}
@@ -94,8 +93,8 @@ class GateStage:
     # ---- measurement (cached, K7) -------------------------------------------------------
 
     def _measure(self, ctx, work, tests, info) -> dict:
-        scope = ctx.env.code_scope()
-        seeded = yaml.safe_load((HERE / "seeded.yaml").read_text())
+        scope, check = ctx.strategies.mutation.scope(), ctx.strategies.checks.run
+        seeded = ctx.strategies.mutation.seeded()
         h_files, h_ms = handlers.generate(Path(scope["src"]), sut.load()["ref"], info["refs"],
                                           work / "handlers", blind.sealed())  # fmt: skip
         f_files, f_ms = handlers.fields(Path(scope["src"]), scope.get("changed") or {},
@@ -118,10 +117,10 @@ class GateStage:
         runs = []
         for i in range(k):
             ctx.emit("gate_stability_run", run=i + 1, of=k + 1, shuffled=False)
-            runs.append(ctx.env.pytest(work / "tests", work / f"k{i}", "reference")["results"])
+            runs.append(check(work / "tests", work / f"k{i}", "reference")["results"])
         ctx.emit("gate_stability_run", run=k + 1, of=k + 1, shuffled=True)
-        runs.append(ctx.env.pytest(work / "tests", work / "shuffled", "reference",
-                                   env={"TP_SHUFFLE": seed})["results"])  # fmt: skip
+        runs.append(check(work / "tests", work / "shuffled", "reference",
+                          env={"TP_SHUFFLE": seed})["results"])  # fmt: skip
         stab = decide.stability(runs)
         passing = sorted(n for n, s in stab.items() if s["stable"] and s["outcome"] == "passed")
         timings["stability"] = round(time.perf_counter() - t0, 1)
@@ -131,12 +130,12 @@ class GateStage:
         timings["seeded"] = round(time.perf_counter() - t0 - sum(timings.values()), 1)
 
         ctx.emit("gate_mutants_generating")
-        files = mutants.generate(ctx.env, scope["mutate"], work / "mutants") | h_files
+        files = mutants.generate(ctx.strategies.reach, scope["mutate"], work / "mutants") | h_files
         ms = mutants.parse(work / "mutants", scope["mutate"]) + h_ms
         ctx.emit("gate_linking", mutants=len(ms))
-        stats = ctx.env.pytest(work / "tests", work / "stats", "reference", mounts=files,
-                               env={"MUTANT_UNDER_TEST": "stats"},
-                               args=tuple(_node_args(passing)))["results"]  # fmt: skip
+        stats = check(work / "tests", work / "stats", "reference", mounts=files,
+                      env={"MUTANT_UNDER_TEST": "stats"},
+                      args=tuple(_node_args(passing)))["results"]  # fmt: skip
         reached = {r["nodeid"]: r.get("reached", []) for r in stats if r["outcome"] == "passed"}
         broken = sorted(set(passing) - set(reached))  # fail with the trampolines in place
         linked = {m["name"]: sorted(n for n, fns in reached.items()
@@ -146,8 +145,8 @@ class GateStage:
                                            "TP_TIMEOUT": MUTANT_TIMEOUT},
                  "args": _node_args(linked[m["name"]])} for m in ms if linked[m["name"]]]  # fmt: skip
         ctx.emit("gate_matrix_start", jobs=len(jobs))
-        matrix = ctx.env.pytest(work / "tests", work / "matrix", "reference", mounts=files,
-                                matrix=jobs)["matrix"] if jobs else {}  # fmt: skip
+        matrix = check(work / "tests", work / "matrix", "reference", mounts=files,
+                       matrix=jobs)["matrix"] if jobs else {}  # fmt: skip
         timings["mutants"] = round(time.perf_counter() - t0 - sum(timings.values()), 1)
         ctx.emit("gate_matrix", mutants=len(ms), jobs=len(jobs), seconds=timings["mutants"])
         out = {"stability": stab, "shuffle_seed": seed, "seeded": seeded_res, "mutants": ms,
@@ -163,7 +162,7 @@ class GateStage:
         """K4: each test of a targeted criterion must fail on its flag's variant: in-process
         first, then confirmed once over the network on that variant's stack (design D6)."""
         res = {}
-        live = set(sut.load().get("flags", []))  # seeded bugs off (M8 D23): no bug: variants
+        live = set(ctx.strategies.mutation.flags())  # seeded bugs off (M8 D23): no bug: variants
         for flag, spec in seeded.items():
             if flag not in live:
                 continue
@@ -171,14 +170,15 @@ class GateStage:
             if not nodes:
                 continue
             variant = f"bug:{flag}"
-            inproc = ctx.env.pytest(work / "tests", work / f"seed-{flag}", variant,
-                                    args=tuple(_node_args(nodes)))["results"]  # fmt: skip
-            ctx.env.ensure(variant)
+            check, reach = ctx.strategies.checks.run, ctx.strategies.reach
+            inproc = check(work / "tests", work / f"seed-{flag}", variant,
+                           args=tuple(_node_args(nodes)))["results"]  # fmt: skip
+            reach.ensure(variant)
             try:
-                net = ctx.env.pytest(work / "tests", work / f"seed-{flag}-net", variant,
-                                     mode="network", args=tuple(_node_args(nodes)))["results"]  # fmt: skip
+                net = check(work / "tests", work / f"seed-{flag}-net", variant,
+                            mode="network", args=tuple(_node_args(nodes)))["results"]  # fmt: skip
             finally:
-                ctx.env.down(variant)
+                reach.teardown(variant)
             fail = lambda recs: {
                 r["nodeid"]: r["origin"]
                 for r in recs

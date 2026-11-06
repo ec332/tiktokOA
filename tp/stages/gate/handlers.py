@@ -153,7 +153,7 @@ def generate(src: Path, ref: str, refs: list[tuple[str, int, str]], out: Path,
             path = out / mutmut_src.rel(repo_path)
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(ast.unparse(ast.fix_missing_locations(tree)) + "\n")
-            files[mutmut_src.IMAGE_ROOT + mutmut_src.rel(repo_path)] = path
+            files[mutmut_src.image_root() + mutmut_src.rel(repo_path)] = path
     return files, sorted(found, key=lambda m: (m["file"], m["line"] or 0, m["name"]))
 
 
@@ -225,6 +225,6 @@ def fields(src: Path, changed: dict[str, list[int]], out: Path, skip_files: set[
             at = out / mutmut_src.rel(repo_path)
             at.parent.mkdir(parents=True, exist_ok=True)
             at.write_text(ast.unparse(ast.fix_missing_locations(tree)) + "\n")
-            files[mutmut_src.IMAGE_ROOT + mutmut_src.rel(repo_path)] = at
+            files[mutmut_src.image_root() + mutmut_src.rel(repo_path)] = at
     order = lambda m: (m["file"], m["line"], int(m["name"].rsplit("__", 1)[1]))
     return files, [{k: v for k, v in m.items() if k != "n"} for m in sorted(found, key=order)]
