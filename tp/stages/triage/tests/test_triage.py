@@ -241,7 +241,7 @@ def _inputs(spec, tamper=False):
 
 
 def test_override_changes_the_class_and_is_recorded_with_its_reason(spec):
-    ctx = NS(env=None, emit=lambda *a, **k: None, review=review.ReviewHandle(1))
+    ctx = NS(env=None, strategies=None, emit=lambda *a, **k: None, review=review.ReviewHandle(1))
     first = TriageStage().run(ctx, _inputs(spec))
     assert first.status == "awaiting_review" and len(first.review_items) == 2  # one per real defect
     items = {i["payload"]["defect"]: i for i in review.list_(execution_id=1)}
@@ -274,7 +274,7 @@ def test_override_changes_the_class_and_is_recorded_with_its_reason(spec):
 
 
 def test_tampered_records_are_refused(spec):
-    ctx = NS(env=None, emit=lambda *a, **k: None, review=review.ReviewHandle(1))
+    ctx = NS(env=None, strategies=None, emit=lambda *a, **k: None, review=review.ReviewHandle(1))
     with pytest.raises(ValueError, match="changed after sealing"):
         TriageStage().run(ctx, _inputs(spec, tamper=True))
 

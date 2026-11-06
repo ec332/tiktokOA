@@ -6,7 +6,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from tp.core import db
+from tp.core import db, profile
 from tp.core.contract import StageResult, register
 from tp.stages.triage import localise, propose, rules
 from tp.stages.triage.evidence import EvidenceIndex
@@ -105,12 +105,12 @@ class TriageStage:
         if not state_path.exists():
             rr = inputs["run_records"].body
             rows, probes, logs = _records(db.data_dir() / rr["folder"], rr["root"])
-            src = Path(ctx.env.code_scope()["src"]) if ctx.env else None
+            src = Path(ctx.strategies.mutation.scope()["src"]) if ctx.strategies else None
             read = _git_source(src) if src else (lambda rel: None)
             app = (
                 {
                     str(p.relative_to(src)): p.read_text()
-                    for p in (src / "backend/app").rglob("*.py")
+                    for p in (src / profile.source_dir()).rglob("*.py")
                 }
                 if src
                 else {}
