@@ -7,7 +7,8 @@ Resuming after review = calling run() again on the same execution with decisions
 
 import json
 
-from tp.core import artifacts, contract, db, events, labels, llm, review
+from tp.core import artifacts, contract, db, events, labels, llm, review, strategies
+from tp.core import profile as target_profile
 from tp.core.contract import StageContext
 
 PIPELINE = ["spec", "cases", "generate", "gate", "env", "execute", "triage", "report", "retest"]
@@ -219,6 +220,11 @@ def _execute(
         env=contract.SERVICES.get("env"),
         emit=lambda kind, **p: events.emit(run_id, ex_id, kind, **p),
     )
+    try:  # a run with no target profile fails at the first stage that needs one, not here
+        ctx.profile = target_profile.load()
+        ctx.strategies = strategies.resolve(ctx.profile)
+    except (target_profile.ProfileError, strategies.ResolveError) as e:
+        ctx.emit("target_unresolved", reason=str(e))
     stops = _stops(run_id)
     while True:
         try:

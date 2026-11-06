@@ -29,12 +29,16 @@ class StageResult:
 
 @dataclass
 class StageContext:
-    """Exactly four things: LLM gateway, review queue, env service, event emitter."""
+    """LLM gateway, review queue, env service, event emitter, plus (iteration 2, seams/001 A3)
+    the target profile and the strategies resolved from it. Stages reach the target through
+    `strategies`; `env` stays only until every call site has moved."""
 
     llm: Any
     review: Any
     env: Any  # the env stage's SERVICE, or None if tp/stages/env/ doesn't exist
     emit: Any
+    profile: Any = None  # tp.core.profile.TargetProfile
+    strategies: Any = None  # tp.core.strategies.StrategySet
 
 
 class Stage(Protocol):

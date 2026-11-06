@@ -1,8 +1,8 @@
 # Folder ownership (plan 1.4). The most specific path wins.
 # Stage UI panels live in web/src/panels/<stage>/ and are owned by that stage.
 # Commits tagged "[<owner>] ..." may only touch that owner's paths.
-current: M8
-milestones: [M0, M1, M2, M3, M4, M5, M6, M7, M8]
+current: I2
+milestones: [M0, M1, M2, M3, M4, M5, M6, M7, M8, I2]  # I2 = iteration 2 (docs/iteration2/)
 folders:
   # Skeleton (M0)
   - {path: pyproject.toml, owner: skeleton, milestone: M0}
@@ -15,17 +15,15 @@ folders:
   - {path: docs, owner: skeleton, milestone: M0}
   - {path: .github, owner: skeleton, milestone: M0}
   # SUT workspace + env (M1)
-  # No sut/upstream submodule: sut.yaml points at a repo path or URL (docs/status/sut/001 D1).
+  # No sut/upstream submodule: the profile points at a repo path or URL (docs/status/sut/001 D1).
+  # sut/ (sut.yaml, requirements.md, patches/) moved to targets/fastapi-template/ in iteration 2
+  # and is owned by `targets` below (docs/status/seams/001 D1).
   - {path: tp/core/sut.py, owner: sut, milestone: M1}
   - {path: tp/cli/sut.py, owner: sut, milestone: M1}
   - {path: tests/test_sut.py, owner: sut, milestone: M1}
-  - {path: sut/sut.yaml, owner: sut, milestone: M1}
-  - {path: sut/patches/testinfo.patch, owner: sut, milestone: M1}
-  - {path: sut/patches/flags.patch, owner: sut, milestone: M1}
   - {path: tp/stages/env, owner: env, milestone: M1}
   - {path: web/src/panels/env, owner: env, milestone: M1}
   # Specify (M2)
-  - {path: sut/requirements.md, owner: spec, milestone: M2}
   - {path: tp/stages/spec, owner: spec, milestone: M2}
   - {path: web/src/panels/spec, owner: spec, milestone: M2}
   - {path: tp/stages/cases, owner: cases, milestone: M2}
@@ -35,9 +33,6 @@ folders:
   - {path: web/src/panels/generate, owner: generate, milestone: M3}
   - {path: platform_rt, owner: generate, milestone: M3}
   - {path: images/runner, owner: generate, milestone: M3}
-  - {path: sut/patches/clock.patch, owner: generate, milestone: M3}
-  - {path: sut/patches/decode.patch, owner: generate, milestone: M3}
-  - {path: sut/patches/trace.patch, owner: generate, milestone: M3}
   - {path: tp/stages/gate, owner: gate, milestone: M3}
   - {path: web/src/panels/gate, owner: gate, milestone: M3}
   # Run, judge, report (M4)
@@ -50,6 +45,15 @@ folders:
   # Retest (M5)
   - {path: tp/stages/retest, owner: retest, milestone: M5}
   - {path: web/src/panels/retest, owner: retest, milestone: M5}
-  - {path: sut/patches/fix-pagination.patch, owner: retest, milestone: M5}
   # Baseline (M6)
   - {path: tp/baseline, owner: baseline, milestone: M6}
+  # Iteration 2 (I2). Stage A (seams) is cross-cutting: its call-site moves are committed under
+  # the owning stage's tag, e.g. "[gate] A5: ..." (docs/status/seams/001).
+  - {path: targets, owner: seams, milestone: I2}
+  - {path: config, owner: seams, milestone: I2}
+  - {path: tp/core/profile.py, owner: seams, milestone: I2}
+  - {path: tp/core/strategies.py, owner: seams, milestone: I2}
+  - {path: tp/core/priority.py, owner: seams, milestone: I2}
+  - {path: tests/test_target_literals.py, owner: seams, milestone: I2}
+  - {path: tests/target_literals_baseline.json, owner: seams, milestone: I2}
+  - {path: tests/test_profile.py, owner: seams, milestone: I2}
