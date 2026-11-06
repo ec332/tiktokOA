@@ -82,7 +82,7 @@ def test_code_index_reads_the_pinned_ref_not_the_patched_tree(tmp_path):
     ref = subprocess.run(["git", "rev-parse", "HEAD"], cwd=tmp_path, capture_output=True, check=True,
                          text=True).stdout.strip()  # fmt: skip
     (tmp_path / ITEMS_PY).write_text(ITEMS + '\n\n@router.get("/seeded-bug")\ndef bug(): ...\n')
-    files = code_index.source_files(tmp_path, ref, ["backend/app/alembic/**"])
+    files = code_index.source_files(tmp_path, ref, ["backend/app/alembic/**"], "backend/app")
     assert set(files) == set(FILES)  # alembic excluded
     paths = [r["path"] for r in code_index.build(files, "/api/v1")["routes"]]
     assert "/api/v1/items/seeded-bug" not in paths

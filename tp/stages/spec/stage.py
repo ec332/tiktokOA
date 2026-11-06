@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from tp.core import db, review, sut
+from tp.core import db, profile, review, sut
 from tp.core.contract import StageResult, register
 from tp.stages.spec import ai, checks, code_index, questions
 from tp.stages.spec.cli import app as cli
@@ -13,8 +13,9 @@ from tp.stages.spec.render import render
 def load_index(root: Path = Path(".")) -> tuple[dict, dict[str, str]]:
     cfg = sut.load(root)
     files = code_index.source_files(
-        sut.checkout(cfg, root), cfg["ref"], cfg.get("code_scope", {}).get("exclude", [])
-    )
+        sut.checkout(cfg, root), cfg["ref"], cfg.get("code_scope", {}).get("exclude", []),
+        profile.source_dir(root),
+    )  # fmt: skip
     idx = code_index.build(files, cfg["surfaces"]["api"]["base"])
     idx["sut"] = {"name": cfg["name"], "ref": cfg["ref"]}
     return idx, files

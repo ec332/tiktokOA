@@ -11,7 +11,6 @@ import subprocess
 from pathlib import Path
 
 METHODS = {"get", "post", "put", "patch", "delete", "head", "options"}
-SOURCE_GLOB = "backend/app/**.py"  # shortcut: the template's layout; a second SUT would set this
 
 
 def _git(repo: Path, *args: str) -> str:
@@ -20,13 +19,14 @@ def _git(repo: Path, *args: str) -> str:
     ).stdout
 
 
-def source_files(repo: Path, ref: str, exclude: list[str]) -> dict[str, str]:
-    """path -> text at `ref`, for in-scope Python files."""
+def source_files(repo: Path, ref: str, exclude: list[str], source_dir: str) -> dict[str, str]:
+    """path -> text at `ref`, for in-scope Python files under `source_dir` (the profile's)."""
+    glob = f"{source_dir.rstrip('/')}/**.py"
     paths = _git(repo, "ls-tree", "-r", "--name-only", ref).splitlines()
     keep = [
         p
         for p in paths
-        if fnmatch.fnmatch(p, SOURCE_GLOB) and not any(fnmatch.fnmatch(p, x) for x in exclude)
+        if fnmatch.fnmatch(p, glob) and not any(fnmatch.fnmatch(p, x) for x in exclude)
     ]
     return {p: _git(repo, "show", f"{ref}:{p}") for p in sorted(keep)}
 
