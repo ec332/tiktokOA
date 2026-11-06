@@ -6,6 +6,7 @@ from types import SimpleNamespace as NS
 import pytest
 
 from tp.core import artifacts, db
+from tp.stages.env.strategies import from_service
 from tp.stages.execute import record
 from tp.stages.retest import decide
 from tp.stages.retest.stage import RetestStage
@@ -95,7 +96,8 @@ def run(
     inputs = {"run_records": art(failing_run(before, fingerprint)), "triage": art(tri),
               "bound_tests": art(bound(changed)), "gate_report": art(gate),
               "run_options": art({"defect": defect or f"D-{before}/O-6", "after": after})}  # fmt: skip
-    ctx = NS(env=env, emit=lambda *a, **kw: None, review=NS(execution_id=2))
+    ctx = NS(env=env, strategies=from_service(env), emit=lambda *a, **kw: None,
+             review=NS(execution_id=2))  # fmt: skip
     res = RetestStage().run(ctx, inputs)
     assert res.status == "succeeded", res.reason
     return res.outputs["retest"]["retests"][0]
@@ -145,7 +147,7 @@ def test_anything_but_code_or_flags_changing_is_inconclusive(env, kw):
 
 def test_no_defect_option_is_a_no_op_in_the_pipeline():
     art = NS(body={}, id="x")
-    ctx = NS(env=None, emit=lambda *a, **kw: None)
+    ctx = NS(env=None, strategies=None, emit=lambda *a, **kw: None)
     res = RetestStage().run(ctx, dict.fromkeys(RetestStage.consumes, art))
     assert res.outputs["retest"] == {"retests": [], "note": "no fix supplied"}
 
