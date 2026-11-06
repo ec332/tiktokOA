@@ -1,0 +1,85 @@
+# Target profile (iteration 2, seams/001 D1-D3): the only system-specific input the platform reads.
+# Hand-written for the template, so every field is `source: override`. Discovered targets (stage D)
+# get the same schema as a run artifact, with probe evidence instead.
+schema_version: 1
+target:
+  name: full-stack-fastapi-template
+  # A local path (patched in place) or a git URL (cloned once into data/sut/<name>/).
+  repo: https://github.com/fastapi/full-stack-fastapi-template
+  type: api            # api | ui | full-stack
+commit_tested: f4bcfaba7c85be3c6332cc74a20819f586dcdbc6
+
+reach:
+  source: override
+  value:
+    strategy: container
+    # compose.override.yml is the template's hot-reload dev setup (fixed port 8000); the env
+    # stage writes its own override per variant instead, which also defines mailpit.
+    compose: {files: [compose.yml], services: [db, backend, mailpit]}
+    env: {FASTAPI_ENV: development}
+    app_service: backend
+    db_service: db
+    # a mail catcher, so sign-up and password-reset flows have somewhere to send
+    extra_services: {mailpit: {image: axllent/mailpit}}
+    extra_env: {SMTP_HOST: mailpit, SMTP_PORT: "1025", SMTP_TLS: "false"}
+    migrate: "bash scripts/prestart.sh"          # no prestart service exists; run explicitly
+    health: /api/v1/utils/health-check/
+    testinfo: /api/v1/utils/test-info/           # from the testinfo patch
+
+spec:
+  source: override
+  # source_dir: where the route code lives in the repo (the FastAPI code index reads it)
+  value:
+    strategy: served
+    openapi: /api/v1/openapi.json
+    base: /api/v1
+    source_dir: backend/app
+    flows:  # [route prefix under base, flow], most specific first (cases design D2)
+      - [/users/signup, FLOW-signup-login]
+      - [/login, FLOW-signup-login]
+      - [/password-recovery, FLOW-password-recovery]
+      - [/reset-password, FLOW-password-recovery]
+      - [/items, FLOW-items-crud]
+      - [/users, FLOW-admin-users]
+      - [/private, FLOW-admin-users]
+
+auth:
+  source: override
+  # the superuser the template's own startup creates from its env; other users come from factories
+  value: {strategy: override_module, superuser: {user_env: FIRST_SUPERUSER, password_env: FIRST_SUPERUSER_PASSWORD}}
+
+data:
+  source: override
+  # deterministic factories over the API; loaded in the runner and on the host (env D15)
+  value: {strategy: override_module, module: factories.py}
+
+state:
+  source: override
+  value:
+    strategy: transaction
+    harness: harness.py      # pytest plugin: per-test savepoint rollback + leak guard (env E6)
+    seed_check: {table: user, column: email}   # the seeded superuser's row (env probe `seed`)
+    db_probe: {sql: "SELECT version_num FROM alembic_version", expect: fe56fa70289e}
+    migrations: backend/app/alembic/versions     # a web target reads its expected head here (M8 D13)
+
+mutation:
+  source: override
+  value:
+    strategy: in_process
+    patches: [testinfo, flags, trace]   # applied in this order from patches/<name>.patch
+    seeded: seeded.yaml                 # which criteria each planted flag targets (gate D9)
+    # the SUT image keeps the repo's `backend/` at /app/backend (its Dockerfile)
+    repo_prefix: backend/
+    image_root: /app/backend/
+    flags: [BUG_OWNERSHIP_UPDATE, BUG_TITLE_MAX, BUG_INACTIVE_LOGIN, BUG_FLAKE_RACE]
+    code_scope:
+      mutate: [backend/app/crud.py, backend/app/api/deps.py, backend/app/core/security.py]
+      exclude: [backend/app/alembic/**, frontend/src/client/**]
+
+safety:
+  source: override
+  value: {strategy: unrestricted}
+
+checks:
+  source: override
+  value: {strategy: pytest_cases}

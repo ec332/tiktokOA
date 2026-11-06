@@ -1,0 +1,14 @@
+# Priority scores (iteration 2, seams/001 D9). Every score is {score, parts}; no model ranks anything.
+# The default case weights reproduce the iteration 1 rank() exactly (cases/009 P3); the regression
+# test tp/stages/cases/tests/test_rank_regression.py holds them to it. Terms for discovered targets
+# (prescan property violations, impact) are added when stage C uses them; the PR score in stage F.
+case:
+  weights:
+    base: 1
+    suspected_defect: 7
+    in_feature: 4
+    decision_table: 3
+    rule_interaction: 2
+    acceptance: 2
+  labels: {P0: 8, P1: 5}     # score >= threshold, highest first
+  default_label: P2
