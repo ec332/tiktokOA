@@ -4,6 +4,7 @@ import itertools
 from types import SimpleNamespace as NS
 
 from tp.core import db
+from tp.stages.env.strategies import from_service
 from tp.stages.execute import record
 from tp.stages.execute.stage import ExecuteStage
 
@@ -59,7 +60,8 @@ def _run(fx, env, variants, k=3):
     inputs = {"gate_report": art(fx["gate_report"], "g"), "bound_tests": art(fx["bound_tests"], "b"),
               "env_spec": art({"spec_hash": "h-reference"}, "e"),
               "run_options": art({"variants": variants, "k": k}, "o")}  # fmt: skip
-    ctx = NS(env=env, emit=lambda *a, **kw: None, review=NS(execution_id=1))
+    ctx = NS(env=env, strategies=from_service(env), emit=lambda *a, **kw: None,
+             review=NS(execution_id=1))  # fmt: skip
     return ExecuteStage().run(ctx, inputs)
 
 

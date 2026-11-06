@@ -6,7 +6,7 @@ import random
 import shutil
 from pathlib import Path
 
-from tp.core import db, sut
+from tp.core import db
 from tp.core.contract import StageResult, register
 from tp.stages.execute import decide, record
 
@@ -29,8 +29,9 @@ class ExecuteStage:
     produces: dict[str, int] = {"run_records": 1}  # noqa: RUF012
 
     def run(self, ctx, inputs):
-        if ctx.env is None:
-            return StageResult.failed("execute needs the env service")
+        if ctx.strategies is None:
+            return StageResult.failed("execute needs the target's strategies")
+        reach = ctx.strategies.reach
         opts = inputs["run_options"].body
         gate, bound = inputs["gate_report"].body, inputs["bound_tests"].body
         ref_hash = inputs["env_spec"].body.get("spec_hash")
@@ -40,7 +41,10 @@ class ExecuteStage:
             return StageResult.failed(f"{out} is already sealed (write-once)")
         rows = {r["node"]: r for r in gate["rows"] if r["status"] not in SKIP}
         k = int(opts.get("k", K))
-        variants = opts.get("variants") or ["reference", *(f"bug:{f}" for f in sut.load()["flags"])]
+        variants = opts.get("variants") or [
+            "reference",
+            *(f"bug:{f}" for f in ctx.strategies.mutation.flags()),
+        ]
         variants = [variants] if isinstance(variants, str) else variants
         if variants[0] != "reference":
             variants = [
@@ -59,7 +63,7 @@ class ExecuteStage:
         for variant in variants:
             ctx.emit("execute_variant", variant=variant)
             try:
-                spec = ctx.env.up(variant)
+                spec = reach.provision(variant)
             except Exception as e:  # noqa: BLE001 — a dead stack yields NOT_RUN, never verdicts
                 run.envs[variant] = {"up_error": f"{type(e).__name__}: {e}"[:300]}
                 for a in range(1, k + 1):
@@ -86,9 +90,9 @@ class ExecuteStage:
                     break
             self._escalate(run, variant, bound)
             if variant != "reference":
-                run.logs[variant] = ctx.env.logs(variant)
-                ctx.env.down(variant)
-        run.logs["reference"] = ctx.env.logs("reference")
+                run.logs[variant] = reach.logs(variant)
+                reach.teardown(variant)
+        run.logs["reference"] = reach.logs("reference")
 
         verdicts = _verdicts(run.results, rows)
         files = {
@@ -156,7 +160,7 @@ class _Run:
                          for n in nodes]  # fmt: skip
 
     def _probe(self, variant, batch, when) -> bool:
-        probes = self.ctx.env.probe(variant)
+        probes = self.ctx.strategies.reach.probe(variant)
         self.probes.append({"id": f"probe:{batch}/{when}", "variant": variant, "batch": batch,
                             "when": when, "probes": probes})  # fmt: skip
         return all(p["ok"] for p in probes)
@@ -167,8 +171,8 @@ class _Run:
             self.not_run(variant, batch, lane, nodes, "ENV: pre-probe failed")
             return False
         try:
-            res = self.ctx.env.pytest(tests, self.work / "b" / _safe(batch), variant,
-                                      mode="network", env=env)  # fmt: skip
+            res = self.ctx.strategies.checks.run(tests, self.work / "b" / _safe(batch), variant,
+                                                 mode="network", env=env)  # fmt: skip
             got, error = {r["nodeid"]: r for r in res["results"]}, None
         except Exception as e:  # noqa: BLE001 — runner/batch timeout: nothing from it is trusted
             got, error = {}, f"{type(e).__name__}: {e}"[:300]
