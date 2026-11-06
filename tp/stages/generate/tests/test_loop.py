@@ -201,15 +201,16 @@ def test_runner_is_rebuilt_when_the_backend_image_changed(monkeypatch):
     """M8: a new target branch changes the backend image; generate rebuilds the runner."""
     from types import SimpleNamespace as NS
 
+    from tp.stages.env.strategies import from_service
     from tp.stages.generate import image, stage
 
     built, events = [], []
     env = NS(backend_image=lambda v: "tp-sut-backend:new")
-    ctx = NS(env=env, emit=lambda k, **p: events.append(k))
+    ctx = NS(env=env, strategies=from_service(env), emit=lambda k, **p: events.append(k))
     monkeypatch.setattr(image, "build", lambda e: built.append(e))
     monkeypatch.setattr(image, "published", lambda: {"base": "tp-sut-backend:old"})
     stage.ensure_runner(ctx)
-    assert built == [env] and events == ["runner_rebuilding", "runner_rebuilt"]
+    assert built == [ctx.strategies.reach] and events == ["runner_rebuilding", "runner_rebuilt"]
     built.clear()
     monkeypatch.setattr(image, "published", lambda: {"base": "tp-sut-backend:new"})
     stage.ensure_runner(ctx)

@@ -10,12 +10,11 @@ app = typer.Typer(no_args_is_help=True)
 @app.command()
 def image():
     """Build the runner image on the current patch set and write data/published.json."""
-    from tp.core import contract
+    from tp.core import profile, strategies
     from tp.stages.generate import image as img
 
-    contract.load()
     try:
-        runner = img.build(contract.SERVICES["env"])
+        runner = img.build(strategies.resolve(profile.load()).reach)
     except img.ImageError as e:
         typer.echo(f"error: {e}", err=True)
         raise typer.Exit(1)

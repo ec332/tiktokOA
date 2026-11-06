@@ -103,7 +103,7 @@ def bind_all(ctx, units: list[dict], criteria: dict, openapi: dict, workdir: Pat
         records: dict[str, list[dict]] = {uid: [] for uid in live}
         if any(not p for p in static.values()):
             env = {"TP_CONFORMANCE": "0" if guards == "v1" else "1", "TP_RUN": workdir.name}
-            dry = ctx.env.pytest(rdir / "tests", rdir / "out", variant, env=env)
+            dry = ctx.strategies.checks.run(rdir / "tests", rdir / "out", variant, env=env)
             by_file = {st["sc"]["file"]: uid for uid, st in live.items()}
             for r in dry["results"]:
                 uid = by_file.get(r["nodeid"].split("::")[0].split("/")[-1])

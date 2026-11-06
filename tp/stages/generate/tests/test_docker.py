@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from tp.core import contract
+from tp.stages.env.strategies import from_service
 from tp.stages.generate import loop
 
 pytestmark = pytest.mark.docker
@@ -49,6 +50,7 @@ class Ctx:
     def __init__(self):
         contract.load()
         self.env = contract.SERVICES["env"]
+        self.strategies = from_service(self.env)
 
     def emit(self, *a, **k):
         pass
@@ -58,11 +60,11 @@ class Ctx:
 def real(monkeypatch, fx, tmp_path):
     monkeypatch.setenv("TP_DATA", str(DATA))
     ctx = Ctx()
-    ctx.env.ensure("reference")
+    ctx.strategies.reach.ensure("reference")
     units = [u for u in fx["cases"]["cases"] if u["id"] in BINDINGS]
 
     def go(variant="reference"):
-        tests, ledger = loop.bind_all(ctx, units, fx["criteria"], ctx.env.openapi("reference"),
+        tests, ledger = loop.bind_all(ctx, units, fx["criteria"], ctx.strategies.spec.openapi("reference"),
                                       tmp_path / variant.replace(":", "_"), "v2", variant)  # fmt: skip
         return tests, ledger
 

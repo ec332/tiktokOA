@@ -39,9 +39,9 @@ def rt_version() -> str:
     return tomllib.loads((RT / "pyproject.toml").read_text())["project"]["version"]
 
 
-def build(env) -> dict:
-    """env: the env SERVICE (ctx.env); it owns the backend image this one starts from."""
-    base = env.backend_image("reference")
+def build(reach) -> dict:
+    """reach: the target's Reach strategy; it owns the image this one starts from."""
+    base = reach.image("reference")
     base_id = _run("docker", "image", "inspect", "--format", "{{.Id}}", base)
     with tempfile.TemporaryDirectory() as ctx:
         _run("uv", "build", "--wheel", "--out-dir", ctx, str(RT))
