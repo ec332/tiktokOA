@@ -2,15 +2,8 @@
 
 import re
 
-FLOW_BY_PREFIX = [  # most specific first (design D2)
-    ("/users/signup", "FLOW-signup-login"),
-    ("/login", "FLOW-signup-login"),
-    ("/password-recovery", "FLOW-password-recovery"),
-    ("/reset-password", "FLOW-password-recovery"),
-    ("/items", "FLOW-items-crud"),
-    ("/users", "FLOW-admin-users"),
-    ("/private", "FLOW-admin-users"),
-]
+from tp.core import profile
+
 _THRESHOLD = re.compile(
     r"\b\d+\s*(characters?|chars?|items?|days?|minutes?|bytes?)\b|\b(maximum|minimum|max|min|"
     r"limit|at most|at least|up to|longer than|shorter than|page size|skip)\b"
@@ -23,12 +16,18 @@ _FAILURE = re.compile(
 
 
 def flow_of(criterion: dict) -> str | None:
-    """The flow of a criterion's first mapped route (routes are 'METHOD /api/v1/...')."""
+    """The flow of a criterion's first mapped route ('METHOD <base>/...'). The target's profile
+    may name its flows (`spec.value.flows`: [prefix, flow], most specific first, design D2);
+    otherwise a route's flow is its first path segment under the API base."""
+    spec = profile.load().spec.value
+    flows, base = spec.get("flows") or [], spec.get("base", "")
     for route in criterion.get("routes", []):
-        path = route.split(" ", 1)[1].removeprefix("/api/v1")
-        for prefix, flow in FLOW_BY_PREFIX:
+        path = route.split(" ", 1)[1].removeprefix(base)
+        for prefix, flow in flows:
             if path.startswith(prefix):
                 return flow
+        if not flows and (segment := path.strip("/").split("/")[0]):
+            return f"FLOW-{segment}"
     return None
 
 

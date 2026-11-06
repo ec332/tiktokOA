@@ -4,6 +4,7 @@ check, dedupe, budget, ranker, exit check, sign-off lines."""
 import itertools
 import re
 
+from tp.core import priority
 from tp.core.hashing import sha256
 from tp.stages.cases import calculators
 
@@ -215,10 +216,10 @@ def dedupe_and_budget(units: list[dict], minimum: dict[str, list[str]]) -> tuple
 
 def rank(units: list[dict], criteria: dict[str, dict], findings: list[dict],
          changed: dict[str, list[int]] | None = None) -> None:  # fmt: skip
-    """Additive flags (cases/009 P3): candidate defect 7, in the feature 4 (the user's own
-    criterion, or one citing a line the branch changed), authorisation table 3, rule
-    interaction 2, acceptance 2, default 1. P0 >= 8, P1 >= 5, else P2. Sorts in place; ties by
-    technique order, then criterion."""
+    """Additive flags (cases/009 P3), weighted by config/priority.yaml (seams/001 A2): candidate
+    defect, in the feature (the user's own criterion, or one citing a line the branch changed),
+    authorisation table, rule interaction, acceptance, base. Sorts in place; ties by technique
+    order, then criterion."""
     interacting = {
         cid for f in findings if f["kind"] == "rule_interaction" for cid in f["criteria"]
     }
@@ -228,14 +229,14 @@ def rank(units: list[dict], criteria: dict[str, dict], findings: list[dict],
         in_feature = u["ac"].startswith("C-") or any(
             (s.get("file"), s.get("line")) in touched for s in c.get("sources", [])
         )
-        score = 1
-        score += 7 if c.get("suspected_defect") else 0
-        score += 4 if in_feature else 0
-        score += 3 if u["technique"] == "decision_table" else 0
-        score += 2 if u["ac"] in interacting else 0
-        score += 2 if u["technique"] == "acceptance" else 0
-        u["score"] = score
-        u["priority"] = "P0" if score >= 8 else "P1" if score >= 5 else "P2"
+        s = priority.case({
+            "suspected_defect": bool(c.get("suspected_defect")),
+            "in_feature": in_feature,
+            "decision_table": u["technique"] == "decision_table",
+            "rule_interaction": u["ac"] in interacting,
+            "acceptance": u["technique"] == "acceptance",
+        })  # fmt: skip
+        u["score"], u["priority"] = s["score"], s["priority"]
     order = {t: i for i, t in enumerate(TECHNIQUE_ORDER)}
     units.sort(key=lambda u: (-u["score"], order[u["technique"]], u["ac"]))
 

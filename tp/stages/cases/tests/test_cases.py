@@ -368,3 +368,16 @@ def test_decisions_reach_the_drafter_and_a_rounding_conflict_is_flagged():
         "TC-O4-1: expects half_even rounding, but you decided half_up"
     ]
     assert build.decision_conflicts(units, decisions[1:]) == []  # no rounding decided
+
+
+def test_flows_default_to_the_first_path_segment(monkeypatch):
+    """A target whose profile names no flows (seams/001 A5): one flow per resource."""
+    from tp.core import profile
+
+    p = profile.load()
+    spec = profile.Field({k: v for k, v in p.spec.value.items() if k != "flows"}, "override")
+    bare = profile.TargetProfile(p.slug, p.name, p.repo, p.type, p.commit_tested,
+                                 dict(p.fields) | {"spec": spec})  # fmt: skip
+    monkeypatch.setattr(profile, "load", lambda root=None: bare)
+    assert signals.flow_of({"routes": ["GET /api/v1/tags/{id}"]}) == "FLOW-tags"
+    assert signals.flow_of({"routes": []}) is None
