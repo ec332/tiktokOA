@@ -1,4 +1,7 @@
-"""SUT workspace (plan 3.1): read sut.yaml, apply/verify/reset patches in place."""
+"""SUT workspace (plan 3.1): the target's config, apply/verify/reset patches in place.
+
+The config is the active target profile seen through the reverse shim (`profile.legacy`,
+seams/001 D2) until every call site reads `ctx.profile` / `ctx.strategies` instead."""
 
 import fnmatch
 import json
@@ -6,9 +9,7 @@ import re
 import subprocess
 from pathlib import Path
 
-import yaml
-
-from tp.core import db
+from tp.core import db, profile
 
 REQUIRED = ("name", "repo", "ref", "patches", "compose", "lifecycle")
 URL = re.compile(r"^(\w+://|git@)")
@@ -18,11 +19,24 @@ class SutError(Exception):
     pass
 
 
+def _raw(root: Path) -> dict:
+    try:
+        return profile.legacy(profile.load(root))
+    except profile.ProfileError as e:
+        raise SutError(str(e)) from None
+
+
+def patches_dir(root: Path = Path(".")) -> Path:
+    """targets/<slug>/patches/: the target's hand-written patches (seams/001 D1)."""
+    return profile.target_dir(root) / "patches"
+
+
 def load(root: Path = Path(".")) -> dict:
-    """sut.yaml, with the web-chosen target (repo path + branch + base) laid over it (M8 D10)."""
-    cfg = yaml.safe_load((root / "sut/sut.yaml").read_text())
+    """The target's config, with the web-chosen target (repo path + branch + base) laid over it
+    (M8 D10)."""
+    cfg = _raw(root)
     if missing := [k for k in REQUIRED if k not in cfg]:
-        raise SutError(f"sut.yaml is missing {missing}")
+        raise SutError(f"profile is missing {missing}")
     if t := target():
         _overlay(cfg, t)
     return cfg
@@ -93,7 +107,7 @@ def set_target(repo: str, branch: str, base: str, seeded: bool = False,
     src = Path(repo).expanduser().resolve()
     if not (src / ".git").exists():
         raise SutError(f"{src} is not a git repository")
-    raw = yaml.safe_load((root / "sut/sut.yaml").read_text())
+    raw = _raw(root)
     clone = db.data_dir() / "sut" / f"target-{src.name}"
     if not clone.exists():
         clone.parent.mkdir(parents=True, exist_ok=True)
@@ -152,7 +166,7 @@ def checkout(cfg: dict, root: Path = Path(".")) -> Path:
 
 
 def _patch(root: Path, name: str) -> Path:
-    return (root / "sut/patches" / f"{name}.patch").resolve()
+    return (patches_dir(root) / f"{name}.patch").resolve()
 
 
 def _touched(patch: Path) -> set[str]:
@@ -168,7 +182,7 @@ def _guard(cfg: dict, path: Path, patches: list[Path]) -> None:
     head = _git(path, "rev-parse", "HEAD").stdout.strip()
     ref = _git(path, "rev-parse", "--verify", cfg["ref"] + "^{commit}").stdout.strip()
     if head != ref:
-        raise SutError(f"{path} is at {head[:7]}, sut.yaml pins {ref[:7]}; check out the ref")
+        raise SutError(f"{path} is at {head[:7]}, the profile pins {ref[:7]}; check out the ref")
     ours = set().union(*(_touched(p) for p in patches))
     status = _git(path, "status", "--porcelain", "--untracked-files=all").stdout.splitlines()
     if foreign := sorted({line[3:] for line in status} - ours):

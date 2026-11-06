@@ -21,7 +21,7 @@ def _do(fn) -> None:
 
 @app.command()
 def verify():
-    """Apply every patch in sut.yaml, in order, to the SUT tree (skips ones already applied)."""
+    """Apply every patch in the target profile, in order, to the SUT tree (skips ones already applied)."""
     _do(sut.verify)
 
 

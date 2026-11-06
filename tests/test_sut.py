@@ -27,14 +27,16 @@ def workspace(tmp_path: Path) -> tuple[Path, dict]:
     git(repo, "commit", "-qm", "init")
     ref = git(repo, "rev-parse", "HEAD")
     root = tmp_path / "platform"
-    (root / "sut/patches").mkdir(parents=True)
+    patches = root / "targets/app/patches"
+    patches.mkdir(parents=True)
+    (root / "targets/app/profile.yaml").touch()
     (repo / "a.txt").write_text("two\n")
-    (root / "sut/patches/first.patch").write_text(git(repo, "diff") + "\n")
+    (patches / "first.patch").write_text(git(repo, "diff") + "\n")
     git(repo, "commit", "-qam", "tmp")
     (repo / "a.txt").write_text("two\nthree\n")  # overlaps the first patch's context
     (repo / "b.txt").write_text("new\n")
     git(repo, "add", "-N", "b.txt")
-    (root / "sut/patches/second.patch").write_text(git(repo, "diff") + "\n")
+    (patches / "second.patch").write_text(git(repo, "diff") + "\n")
     git(repo, "reset", "-q", "--hard", ref)
     (repo / "b.txt").unlink(missing_ok=True)
     cfg = {
@@ -90,10 +92,26 @@ def test_conflicting_patch_is_reported(workspace):
 
 
 def test_load_requires_keys(tmp_path):
-    (tmp_path / "sut").mkdir()
-    (tmp_path / "sut/sut.yaml").write_text("name: x\n")
+    (tmp_path / "targets/x").mkdir(parents=True)
+    (tmp_path / "targets/x/profile.yaml").write_text("target: {name: x}\n")
     with pytest.raises(sut.SutError, match="missing"):
         sut.load(tmp_path)
+
+
+PROFILE = """
+target: {name: app, repo: x}
+commit_tested: y
+reach: {source: override, value: {strategy: container, compose: {}}}
+spec: {source: override, value: {strategy: served}}
+auth: {source: override, value: {strategy: override_module}}
+data: {source: override, value: {strategy: override_module}}
+state: {source: override, value: {strategy: transaction, db_probe: {sql: s, expect: old},
+                                  migrations: app/alembic/versions}}
+mutation: {source: override, value: {strategy: in_process, patches: [testinfo, flags, trace],
+                                     flags: [BUG_A], code_scope: {exclude: ['app/alembic/**']}}}
+safety: {source: override, value: {strategy: unrestricted}}
+checks: {source: override, value: {strategy: pytest_cases}}
+"""
 
 
 def test_target_clones_branch_and_overlays(tmp_path, monkeypatch):
@@ -113,12 +131,8 @@ def test_target_clones_branch_and_overlays(tmp_path, monkeypatch):
     git(repo, "commit", "-qm", "feat")
     git(repo, "checkout", "-q", "master")
     root = tmp_path / "platform"
-    (root / "sut").mkdir(parents=True)
-    (root / "sut/sut.yaml").write_text(
-        "name: app\nrepo: x\nref: y\npatches: [testinfo, flags, trace]\nflags: [BUG_A]\n"
-        "compose: {}\nlifecycle: {db_probe: {sql: s, expect: old}, "
-        "migrations: app/alembic/versions}\ncode_scope: {exclude: ['app/alembic/**']}\n"
-    )
+    (root / "targets/app").mkdir(parents=True)
+    (root / "targets/app/profile.yaml").write_text(PROFILE)
     t = sut.set_target(str(repo), "feature", "master", root=root)
     assert t["alembic_head"] == "b2" and t["changed"] == {"app/models.py": [2]}
     assert Path(t["clone"]) != repo and (Path(t["clone"]) / "app/alembic/versions/b2.py").exists()
