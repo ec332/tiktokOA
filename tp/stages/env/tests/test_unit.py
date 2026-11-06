@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tp.core import contract
+from tp.core import contract, profile
 from tp.stages.env import service
 from tp.stages.env.service import EnvError, Stack
 
@@ -35,6 +35,7 @@ def test_normalise_config_strips_machine_paths():
 def test_override_sets_every_flag_explicitly_and_a_free_port(tmp_path):
     stack = Stack.__new__(Stack)  # no SUT checkout needed for the override
     stack.cfg = {"flags": FLAGS, "env": {"FASTAPI_ENV": "development"}}
+    stack.reach = profile.load().reach.value  # the template's services (seams/001 A5)
     stack.flags, stack.image, stack.dir = ["BUG_B"], "tp-sut-backend:abc", tmp_path
     stack.write_override()
     backend = yaml.safe_load(stack.override.read_text())["services"]["backend"]
@@ -48,6 +49,7 @@ def test_override_sets_every_flag_explicitly_and_a_free_port(tmp_path):
 def test_override_puts_db_and_backend_on_an_internal_network(tmp_path):  # design D16
     stack = Stack.__new__(Stack)
     stack.cfg, stack.flags, stack.image, stack.dir = {"flags": []}, [], "x", tmp_path
+    stack.reach = profile.load().reach.value
     stack.write_override()
     override = yaml.safe_load(stack.override.read_text())
     assert override["networks"] == {"internal": {"internal": True}}
@@ -98,16 +100,17 @@ def test_fixed_variant_adds_its_patch_to_the_image_but_no_flags(tmp_path, monkey
     assert fixed.flags == [] and fixed.fix == "fix-pagination"
     assert list(fixed.patch_hashes) == [*ref.patch_hashes, "fix-pagination"]
     assert fixed.image != ref.image
-    with pytest.raises(EnvError, match="no sut/patches/nope.patch"):
+    with pytest.raises(EnvError, match="no patches/nope.patch"):
         Stack("fixed:nope")
 
 
 def test_a_fix_patch_left_applied_is_found(tmp_path):  # retest review gap 2
     import subprocess
 
-    src, patches = tmp_path / "src", tmp_path / "sut/patches"
+    src, patches = tmp_path / "src", tmp_path / "targets/t/patches"
     src.mkdir()
     patches.mkdir(parents=True)
+    (tmp_path / "targets/t/profile.yaml").touch()
     git = lambda *a: subprocess.run(["git", "-C", str(src), *a], check=True, capture_output=True)
     (src / "items.py").write_text("skip = 0\n")
     git("init", "-q")

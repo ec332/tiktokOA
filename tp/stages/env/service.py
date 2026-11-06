@@ -1,6 +1,7 @@
 """Env and data service (plan 3.2): variant stacks, probes, fingerprint, DB reset.
 
-Reached by other stages only through `ctx.env` (the SERVICE at the bottom).
+Reached by other stages only through `ctx.strategies` (tp/stages/env/strategies.py wraps
+the SERVICE at the bottom: the template's container + transaction strategies).
 """
 
 import hashlib
@@ -16,7 +17,7 @@ from pathlib import Path
 
 import yaml
 
-from tp.core import db, sut
+from tp.core import db, profile, sut
 from tp.core.hashing import sha256
 
 # † tuning numbers (plan 3.2); changing one bumps the stage version
@@ -24,7 +25,23 @@ HEALTH = {"interval": "2s", "start_interval": "1s", "retries": 5, "timeout": "5s
 TEARDOWN_TIMEOUT = 60  # seconds
 BACKEND_PORT = 8000  # inside the container
 RUN_TIMEOUT = 1800  # seconds for one runner pytest call
-HARNESS_FILES = ("harness.py", "factories.py")  # bind-mounted into the runner (design D14)
+# The runner mounts these from the target folder as /tp_env/harness.py and /tp_env/factories.py
+# (design D14; the names are what `-p harness` and `from factories import ...` load).
+
+
+def harness_files() -> dict[str, Path]:
+    """The target's in-process harness and data factories (seams/001 D1: outside tp/)."""
+    p, d = profile.load(), profile.target_dir()
+    return {"harness.py": d / p.state.value["harness"], "factories.py": d / p.data.value["module"]}
+
+
+def _factories_module():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("factories", harness_files()["factories.py"])
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 class EnvError(Exception):
@@ -57,10 +74,10 @@ def project_name(variant: str) -> str:
 
 
 def fix_patch(root: Path, fix: str) -> Path:
-    """`fixed:<name>` -> sut/patches/<name>.patch; `fixed:sha256:…` -> a patch artifact's text
-    (a triage suggestion, M8 env D20), written once under data/env/patches/."""
+    """`fixed:<name>` -> the target's patches/<name>.patch; `fixed:sha256:…` -> a patch
+    artifact's text (a triage suggestion, M8 env D20), written once under data/env/patches/."""
     if not fix.startswith("sha256:"):
-        return (root / "sut/patches" / f"{fix}.patch").resolve()
+        return (sut.patches_dir(root) / f"{fix}.patch").resolve()
     from tp.core import artifacts
 
     out = db.data_dir() / "env" / "patches" / f"{fix.removeprefix('sha256:')}.patch"
@@ -106,12 +123,15 @@ class Stack:
     def __init__(self, variant: str, root: Path = Path(".")):
         self.root = root
         self.cfg = sut.load(root)
+        self.profile = profile.load(root)
+        self.reach = self.profile.reach.value
+        self.su = self.profile.auth.value["superuser"]  # {user_env, password_env}
         self.variant = variant
         # fixed:<patch> = no flags, plus that fix patch on top, in the image only (retest D3)
         self.fix = variant.removeprefix("fixed:") if variant.startswith("fixed:") else None
         try:
             if self.fix and not fix_patch(root, self.fix).is_file():
-                raise EnvError(f"bad variant {variant!r}: no sut/patches/{self.fix}.patch")
+                raise EnvError(f"bad variant {variant!r}: no patches/{self.fix}.patch")
         except KeyError:
             raise EnvError(f"bad variant {variant!r}: no such patch artifact") from None
         self.flags = parse_variant(variant, self.cfg.get("flags", []))
@@ -145,7 +165,7 @@ class Stack:
 
     def psql(self, sql: str, database: str = "app") -> str:
         r = self.compose(
-            "exec", "-T", "db", "psql", "-U", "postgres", "-d", database, "-v",
+            "exec", "-T", self.reach["db_service"], "psql", "-U", "postgres", "-d", database, "-v",
             "ON_ERROR_STOP=1", "-tAc", sql,
         )  # fmt: skip
         return r.stdout.strip()
@@ -153,18 +173,19 @@ class Stack:
     def write_override(self) -> None:
         env = {**self.cfg.get("env", {})}
         env |= {f: ("true" if f in self.flags else "false") for f in self.cfg.get("flags", [])}
-        env |= {"SMTP_HOST": "mailpit", "SMTP_PORT": "1025", "SMTP_TLS": "false"}
+        env |= self.reach.get("extra_env", {})
+        app, dbs = self.reach["app_service"], self.reach["db_service"]
         override = {
             "services": {
-                "db": {"healthcheck": HEALTH, "networks": ["default", "internal"]},
-                "backend": {
+                dbs: {"healthcheck": HEALTH, "networks": ["default", "internal"]},
+                app: {
                     "image": self.image,
                     "networks": ["default", "internal"],
                     "ports": [f"127.0.0.1::{BACKEND_PORT}"],  # a free host port (D3)
                     "environment": env,
                     "healthcheck": HEALTH,
                 },
-                "mailpit": {"image": "axllent/mailpit"},
+                **self.reach.get("extra_services", {}),
             },
             # the runner joins only this one: no outbound network (design D16)
             "networks": {"internal": {"internal": True}},
@@ -179,7 +200,7 @@ class Stack:
 
     @property
     def base_url(self) -> str:
-        out = self.compose("port", "backend", str(BACKEND_PORT)).stdout.strip()
+        out = self.compose("port", self.reach["app_service"], str(BACKEND_PORT)).stdout.strip()
         if not out:
             raise EnvDown("backend has no published port")
         return f"http://{out}"
@@ -195,14 +216,14 @@ class Stack:
         if stray := self.stray_patches():  # else the reference image could bake in a fix
             raise EnvError(
                 f"{stray} still applied to {self.src} (an interrupted fixed: build?); "
-                f"undo with: git -C {self.src} apply -R sut/patches/<name>.patch"
+                f"undo with: git -C {self.src} apply -R {sut.patches_dir(self.root)}/<name>.patch"
             )
         self.write_override()
         if subprocess.run(
             ["docker", "image", "inspect", self.image], check=False, capture_output=True
         ).returncode:
             if not self.fix:
-                self.compose("build", "backend", timeout=1800)
+                self.compose("build", self.reach["app_service"], timeout=1800)
                 return self.image
             patch = str(fix_patch(self.root, self.fix))
             git = ["git", "-C", str(self.src), "apply"]
@@ -210,18 +231,18 @@ class Stack:
             if r.returncode:
                 raise EnvError(f"{self.fix} does not apply: {r.stderr.strip()}")
             try:
-                self.compose("build", "backend", timeout=1800)
-            finally:  # the tree goes back to the sut.yaml patch set; only the image is fixed
+                self.compose("build", self.reach["app_service"], timeout=1800)
+            finally:  # the tree goes back to the profile's patch set; only the image is fixed
                 subprocess.run([*git, "-R", patch], check=True, capture_output=True)
         return self.image
 
     def stray_patches(self) -> list[str]:
-        """Patches in sut/patches/ that sut.yaml doesn't list but that are applied to the tree."""
+        """Patches in the target's patches/ that the profile doesn't list but that are applied."""
         listed = set(self.cfg["patches"])
         git = ["git", "-C", str(self.src), "apply", "-R", "--check"]
         return [
             p.stem
-            for p in sorted((self.root / "sut/patches").glob("*.patch"))
+            for p in sorted(sut.patches_dir(self.root).glob("*.patch"))
             if p.stem not in listed
             and subprocess.run(
                 [*git, str(p.resolve())], check=False, capture_output=True
@@ -231,21 +252,22 @@ class Stack:
 
     def up(self, expect: str | None = None) -> dict:
         """Fresh bring-up: sweep → patch → build (once per patch set) → db → migrate+seed →
-        template DB → backend + mailpit → probes → fingerprint."""
+        template DB → app + extra services → probes → fingerprint."""
         sut.verify(self.cfg, self.root)
         self.write_override()
         self.down()  # orphan sweep: every bring-up starts from nothing
         self.build()
-        self.compose("up", "-d", "--wait", "db")
-        self.compose("run", "--rm", "-T", "backend", "bash", "-c", self.cfg["lifecycle"]["migrate"])
+        app = self.reach["app_service"]
+        self.compose("up", "-d", "--wait", self.reach["db_service"])
+        self.compose("run", "--rm", "-T", app, "bash", "-c", self.cfg["lifecycle"]["migrate"])
         seed = self.seed_hash()
         template = f"app_seed_{seed[:12]}"
         self.psql(f"CREATE DATABASE {template} TEMPLATE app", database="postgres")
-        self.compose("up", "-d", "--wait", "backend", "mailpit", timeout=300)
+        self.compose("up", "-d", "--wait", app, *self.reach.get("extra_services", {}), timeout=300)
         creds = {
-            k: self.compose("exec", "-T", "backend", "printenv", k).stdout.strip()
-            for k in ("FIRST_SUPERUSER", "FIRST_SUPERUSER_PASSWORD")
-        }
+            k: self.compose("exec", "-T", app, "printenv", k).stdout.strip()
+            for k in (self.su["user_env"], self.su["password_env"])
+        }  # state.json keys stay the env var names
         self.state_file.write_text(json.dumps({"template": template, "seed_hash": seed, **creds}))
         probes = self.probe()
         if failed := [p["name"] for p in probes if not p["ok"]]:
@@ -285,19 +307,18 @@ class Stack:
         return time.perf_counter() - t0
 
     def factories(self, tc_id: str):
-        from tp.stages.env.factories import Factories
-
         st = self.state()
-        return Factories(
+        return _factories_module().Factories(
             lambda method, path, **kw: _http(method, self.api(path), **kw),
-            (st["FIRST_SUPERUSER"], st["FIRST_SUPERUSER_PASSWORD"]),
+            (st[self.su["user_env"]], st[self.su["password_env"]]),
             tc_id,
         )
 
     def backend_env(self) -> dict[str, str]:
         """The backend service's environment as compose resolves it (DB URL, secrets, flags)."""
         config = json.loads(self.compose("config", "--format", "json").stdout)
-        return {k: str(v) for k, v in config["services"]["backend"]["environment"].items()}
+        app = config["services"][self.reach["app_service"]]
+        return {k: str(v) for k, v in app["environment"].items()}
 
     # ---- probes ------------------------------------------------------------
 
@@ -327,7 +348,8 @@ class Stack:
             return status == 200 and body["clock"]["source"] == "system", f"{status} {body}"
 
         def seed():
-            n = self.psql(f"SELECT count(*) FROM \"user\" WHERE email = '{st['FIRST_SUPERUSER']}'")
+            sc, who = self.profile.state.value["seed_check"], st[self.su["user_env"]]
+            n = self.psql(f"SELECT count(*) FROM \"{sc['table']}\" WHERE {sc['column']} = '{who}'")
             return n == "1", f"superuser rows: {n}"
 
         out = []
@@ -349,13 +371,14 @@ class Stack:
     # ---- fingerprint -------------------------------------------------------
 
     def seed_hash(self) -> str:
-        """Alembic head + row count per table + user emails (password hashes are salted)."""
+        """Schema head + row count per table + seeded users (password hashes are salted)."""
         tables = self.psql(
             "SELECT table_name FROM information_schema.tables "
             "WHERE table_schema = 'public' ORDER BY table_name"
         ).split()
         counts = {t: self.psql(f'SELECT count(*) FROM "{t}"') for t in tables}
-        emails = self.psql('SELECT email FROM "user" ORDER BY email').split()
+        sc = self.profile.state.value["seed_check"]
+        emails = self.psql(f'SELECT {sc["column"]} FROM "{sc["table"]}" ORDER BY 1').split()
         head = self.psql(self.cfg["lifecycle"]["db_probe"]["sql"])
         return sha256({"head": head, "counts": counts, "emails": emails})
 
@@ -368,7 +391,7 @@ class Stack:
         images = {}
         for name in self.cfg["compose"]["services"]:
             image = services[name]["image"]
-            fmt = "{{.Id}}" if name == "backend" else "{{json .RepoDigests}}"
+            fmt = "{{.Id}}" if name == self.reach["app_service"] else "{{json .RepoDigests}}"
             r = subprocess.run(
                 ["docker", "image", "inspect", "--format", fmt, image],
                 check=False, capture_output=True, text=True,
@@ -448,7 +471,7 @@ def run_pytest(
     """Run pytest over `tests` in the runner image (design D14).
 
     in_process: the SUT app in the runner, on the reference stack's DB, with the variant's
-    flags as settings; every test rolls back (harness.py). network: against the variant's
+    flags as settings; every test rolls back (the target's harness). network: against the variant's
     running backend. Every batch starts from a freshly reset DB (gate design D6).
     mounts: extra read-only files, container path -> host path (e.g. mutated SUT files).
     matrix: [{key, env, args}] runs pytest once per job in one container; results per key.
@@ -459,7 +482,7 @@ def run_pytest(
     stack.state()  # must be up
     stack.reset()  # every batch starts from the seed (a leak can't carry over)
     flags = parse_variant(variant, stack.cfg.get("flags", []))
-    runner = _runner_digest(Stack("reference"))  # sut.yaml's patch set; a fixed: image differs
+    runner = _runner_digest(Stack("reference"))  # the profile's patch set; a fixed: image differs
     out.mkdir(parents=True, exist_ok=True)
     for f in ("results.jsonl", "junit.xml"):
         (out / f).unlink(missing_ok=True)
@@ -471,12 +494,11 @@ def run_pytest(
         "TP_MODE": mode,
         "TP_RESULTS": "/work/out/results.jsonl",
         "TP_API_BASE": stack.cfg["surfaces"]["api"]["base"],
-        "TP_BASE_URL": f"http://backend:{BACKEND_PORT}",
+        "TP_BASE_URL": f"http://{stack.reach['app_service']}:{BACKEND_PORT}",
         **(env or {}),
     }
-    here = Path(__file__).parent
     vols = [f"{tests.resolve()}:/work/tests:ro", f"{out.resolve()}:/work/out"]
-    vols += [f"{here / f}:/tp_env/{f}:ro" for f in HARNESS_FILES]
+    vols += [f"{p.resolve()}:/tp_env/{n}:ro" for n, p in harness_files().items()]
     vols += [f"{Path(h).resolve()}:{c}:ro" for c, h in sorted((mounts or {}).items())]
     base = ["-p", "harness", "-p", "no:cacheprovider", "-q", "--continue-on-collection-errors",
             "--rootdir=/work/tests"]  # fmt: skip
@@ -525,7 +547,7 @@ def run_in_runner(
 
 
 class EnvService:
-    """What `ctx.env` is. Every method takes the variant name."""
+    """What the template's strategies wrap. Every method takes the variant name."""
 
     def up(self, variant: str, expect: str | None = None) -> dict:
         return Stack(variant).up(expect)
@@ -578,14 +600,17 @@ class EnvService:
 
     def logs(self, variant: str) -> str:
         """The backend's log since bring-up: trace lines and tracebacks (execute evidence)."""
-        return Stack(variant).compose("logs", "--no-color", "--no-log-prefix", "backend").stdout
+        stack = Stack(variant)
+        return stack.compose(
+            "logs", "--no-color", "--no-log-prefix", stack.reach["app_service"]
+        ).stdout
 
     def factories(self, variant: str, tc_id: str):
         return Stack(variant).factories(tc_id)
 
     def harness_files(self) -> dict[str, Path]:
         """The pytest harness and data factories the runner mounts (exported with tests)."""
-        return {f: Path(__file__).parent / f for f in HARNESS_FILES}
+        return harness_files()
 
 
 SERVICE = EnvService()
