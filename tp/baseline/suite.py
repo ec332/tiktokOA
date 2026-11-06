@@ -1,6 +1,6 @@
 """Run one in-process test folder (arms a and b) over the fixed variants and mutants (B1-B3).
 
-Through `ctx.env.pytest` in_process mode: the SUT app in the runner, on the reference DB, with
+Through the checks strategy, in_process mode: the SUT app in the runner, on the reference DB, with
 the variant's flags as settings."""
 
 import shutil
@@ -28,7 +28,7 @@ def variants() -> list[str]:
 def fixed_mounts(src: Path, patch: str, work: Path) -> dict[str, Path]:
     """fixed:<patch> in process: the runner image holds the reference code, so overlay the
     files the patch touches, patched, read-only (the mutant mechanism)."""
-    p = Path("sut/patches") / f"{patch}.patch"
+    p = sut.patches_dir() / f"{patch}.patch"
     files = sut._touched(p)
     shutil.rmtree(work, ignore_errors=True)
     for f in files:
@@ -37,7 +37,7 @@ def fixed_mounts(src: Path, patch: str, work: Path) -> dict[str, Path]:
     # `patch`, not `git apply`: work/ sits inside this repo, where git would resolve paths
     # against the repo root.
     subprocess.run(["patch", "-s", "-p1", "-d", str(work), "-i", str(p.resolve())], check=True)
-    return {mutant_src.IMAGE_ROOT + mutant_src.rel(f): work / f for f in files}
+    return {mutant_src.image_root() + mutant_src.rel(f): work / f for f in files}
 
 
 def run(env, tests: Path, out: Path, variant: str, extra_env=None) -> list[dict]:
