@@ -17,6 +17,26 @@ def _scratch(ctx) -> Path:
     return db.data_dir() / "runs" / f"cases-exec-{ctx.review.execution_id}.json"
 
 
+def _factories(ctx) -> list[str] | None:
+    """The target's precondition names (its data strategy, blackbox D15); None: the default."""
+    data = getattr(ctx.strategies, "data", None)
+    return data.factories() if hasattr(data, "factories") else None
+
+
+def _known_preconditions(units: list[dict], factories: list[str] | None) -> list[str]:
+    """Preconditions must be factory names (D15); any other one is a situation the binding sets
+    up, so it becomes a leading `Given …` step instead of failing the scaffold later. Who the
+    caller is stays the binding's call (the data strategy's doc says the default)."""
+    notes = []
+    for u in units if factories else []:
+        unknown = [p for p in u["preconditions"] if p not in factories]
+        if unknown:
+            u["preconditions"] = [p for p in u["preconditions"] if p in factories]
+            u["steps"] = [f"Given: {p.replace('_', ' ')}" for p in unknown] + u["steps"]
+            notes.append(f"{u['ac']}: preconditions {unknown} are not factories; moved to steps")
+    return notes
+
+
 def approved_hashes(scope: dict | None) -> set[str]:
     """Line hashes approved in an earlier sign-off for the same SUT ref: carried forward, not
     asked again (D4). scope None (a `fresh` run) carries nothing."""
@@ -109,7 +129,7 @@ class CasesStage:
         # key by the criterion id the model echoes; it sometimes adds the title ("C-5 Expired …")
         drafts = {
             d["criterion"].split()[0].rstrip(":"): d
-            for d in ai.draft(ctx.llm, scope, minimum, templates, rules)
+            for d in ai.draft(ctx.llm, scope, minimum, templates, rules, _factories(ctx))
         }
         attention: list[str] = []
         units = []
@@ -123,6 +143,7 @@ class CasesStage:
                     f"{c['id']}: skipped minimum template {s['template']}: {s['reason']}"
                 )
         units += self._fill_acceptance(ctx, scope, units, minimum, templates, rules, attention)
+        attention += _known_preconditions(units, _factories(ctx))
         units, deferred = build.dedupe_and_budget(units, minimum)
         build.rank(units, crit, spec.get("findings", []), self._changed(ctx))
         build.assign_ids(units)
@@ -160,7 +181,7 @@ class CasesStage:
                 "acceptance case that checks the criterion's `then`, with its exact expected value.")  # fmt: skip
         out = []
         for d in ai.draft(ctx.llm, missing, {c["id"]: [] for c in missing}, templates,
-                          [*(rules or []), note]):  # fmt: skip
+                          [*(rules or []), note], _factories(ctx)):  # fmt: skip
             c = next((x for x in missing if x["id"] == d["criterion"].split()[0].rstrip(":")), None)
             if c is None:
                 continue

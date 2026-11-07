@@ -332,9 +332,9 @@ def test_criteria_without_an_acceptance_case_are_redrafted_once(model, monkeypat
 
     real, calls = ai.draft, []
 
-    def drop_acceptance(llm, criteria, minimum, templates=None, rules=None):
+    def drop_acceptance(llm, criteria, minimum, templates=None, rules=None, factories=None):
         calls.append([c["id"] for c in criteria])
-        out = real(llm, criteria, minimum, templates, rules)
+        out = real(llm, criteria, minimum, templates, rules, factories)
         if len(calls) == 1:  # first pass: strip every acceptance case of C-11
             for d in out:
                 if d["criterion"].startswith("C-11"):
@@ -381,3 +381,17 @@ def test_flows_default_to_the_first_path_segment(monkeypatch):
     monkeypatch.setattr(profile, "load", lambda root=None: bare)
     assert signals.flow_of({"routes": ["GET /api/v1/tags/{id}"]}) == "FLOW-tags"
     assert signals.flow_of({"routes": []}) is None
+
+
+def test_unknown_preconditions_become_steps():
+    """blackbox D15: a black-box target offers one principal (`admin`)."""
+    from tp.stages.cases.stage import _known_preconditions
+
+    units = [{"ac": "C-1", "preconditions": ["archivist", "tag_exists"], "steps": ["POST"]},
+             {"ac": "C-2", "preconditions": ["anonymous_caller"], "steps": []},
+             {"ac": "C-3", "preconditions": ["admin"], "steps": []}]  # fmt: skip
+    notes = _known_preconditions(units, ["admin"])
+    assert units[0] == {"ac": "C-1", "preconditions": [],
+                        "steps": ["Given: archivist", "Given: tag exists", "POST"]}  # fmt: skip
+    assert units[1]["preconditions"] == [] and units[2]["preconditions"] == ["admin"]
+    assert len(notes) == 2

@@ -79,6 +79,7 @@ def draft(
     minimum: dict[str, list[str]],
     templates: list[str] | None = None,
     rules: list[str] | None = None,
+    factories: list[str] | None = None,
 ) -> list[dict]:
     """templates: the run's enabled templates (None = all); rules: lines added after the
     prompt's own rules (M8 cases D13-D14). Both absent: the prompt is byte-identical."""
@@ -87,7 +88,7 @@ def draft(
              "resolution": c.get("resolution"), "suspected_defect": c.get("suspected_defect", False),
              "status": c["status"], "minimum": minimum[c["id"]],
              **({"gaps": c["gaps"]} if c.get("gaps") else {})} for c in criteria]  # fmt: skip
-    p = _prompt("drafter", FACTORIES=", ".join(FACTORIES),
+    p = _prompt("drafter", FACTORIES=", ".join(factories or FACTORIES),
                 TEMPLATES=yaml.safe_dump([t for n, t in catalogue().items()
                                           if templates is None or n in templates],
                                          sort_keys=False),
