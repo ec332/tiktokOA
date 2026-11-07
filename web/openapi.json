@@ -269,6 +269,7 @@
     "/runs/{run_id}/resume": {
       "post": {
         "summary": "Resume Run",
+        "description": "Continue a cancelled run, or retry a failed one from its failed step.",
         "operationId": "resume_run_runs__run_id__resume_post",
         "parameters": [
           {
@@ -339,6 +340,90 @@
                 "schema": {
                   "$ref": "#/components/schemas/Run"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/export": {
+      "get": {
+        "summary": "Export Preview",
+        "description": "What an export would write: the tests (pre-ticked = trusted) and the branch name.",
+        "operationId": "export_preview_runs__run_id__export_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Export Tests",
+        "description": "Write the chosen tests to a new branch of the user's repo, in one commit.",
+        "operationId": "export_tests_runs__run_id__export_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -1287,6 +1372,22 @@
           "finished"
         ],
         "title": "Execution"
+      },
+      "ExportRequest": {
+        "properties": {
+          "tests": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tests"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tests"
+        ],
+        "title": "ExportRequest"
       },
       "HTTPValidationError": {
         "properties": {

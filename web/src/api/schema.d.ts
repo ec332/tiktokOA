@@ -102,7 +102,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Resume Run */
+        /**
+         * Resume Run
+         * @description Continue a cancelled run, or retry a failed one from its failed step.
+         */
         post: operations["resume_run_runs__run_id__resume_post"];
         delete?: never;
         options?: never;
@@ -125,6 +128,30 @@ export interface paths {
          *     mine: refresh the target to the branch's new head and retest on reference.
          */
         post: operations["retest_runs__run_id__retest_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runs/{run_id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Preview
+         * @description What an export would write: the tests (pre-ticked = trusted) and the branch name.
+         */
+        get: operations["export_preview_runs__run_id__export_get"];
+        put?: never;
+        /**
+         * Export Tests
+         * @description Write the chosen tests to a new branch of the user's repo, in one commit.
+         */
+        post: operations["export_tests_runs__run_id__export_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -502,6 +529,11 @@ export interface components {
             started: string | null;
             /** Finished */
             finished: string | null;
+        };
+        /** ExportRequest */
+        ExportRequest: {
+            /** Tests */
+            tests: string[];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -1010,6 +1042,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_preview_runs__run_id__export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_tests_runs__run_id__export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
