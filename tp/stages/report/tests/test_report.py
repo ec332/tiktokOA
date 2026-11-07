@@ -14,6 +14,9 @@ from tp.stages.report.stage import ReportStage
 FX = Path(__file__).parents[1] / "fixtures"
 EXPECTED = Path(__file__).parents[1] / "expected" / "report.json"
 NAMES = ("spec", "cases", "gate_report", "run_records", "triage")
+TEMPLATE_STRATEGIES = {"reach": "container", "spec": "served", "auth": "override_module",
+                       "data": "override_module", "state": "transaction", "mutation": "in_process",
+                       "safety": "unrestricted", "checks": "pytest_cases"}  # fmt: skip
 
 
 @pytest.fixture(autouse=True)
@@ -25,7 +28,14 @@ def data(tmp_path, monkeypatch):
 def report():
     b = {n: json.loads((FX / f"{n}.json").read_text()) for n in NAMES}
     return build.build(
-        b["spec"], b["cases"], b["gate_report"], b["run_records"], b["triage"], [], ["real"]
+        b["spec"],
+        b["cases"],
+        b["gate_report"],
+        b["run_records"],
+        b["triage"],
+        [],
+        ["real"],
+        strategies=TEMPLATE_STRATEGIES,
     )
 
 
@@ -162,3 +172,40 @@ def test_request_bodies_in_the_worklist_are_not_counts():
 
     assert list(build.walk({"worklist": {"P0": [{"observed": {"json": {"price": 5.0}}}]}})) == []
     assert list(build.walk({"n_tests": 3})) == [".n_tests"]
+
+
+def test_generic_checks_section_ceiling_and_unbound_reasons():
+    """checks/001 D6, D9, D12, D13 on a hand-made black-box run."""
+    rows = [{"node": f"test_tp_families.py::test_generic[{c}]", "unit": c, "ac": c, "case_id": c,
+             "status": s, **({"excluded": x} if x else {})}
+            for c, s, x in (("G:properties:GET /a", "ADMITTED_UNMEASURED", None),
+                            ("G:properties:GET /b", "SPEC_MISMATCH", None),
+                            ("G:read_back:POST /a", "EXCLUDED", "async_create: no id"))]  # fmt: skip
+    gate = {"rows": rows, "mutants": {"strength": "not_measured"}}
+    tri = {"findings": [{"id": "F-reference/G:properties:GET /b", "class": "SPEC_MISMATCH",
+                         "variant": "reference", "ac": "G:properties:GET /b", "case_id": rows[1]["case_id"],
+                         "rule": "r", "dist": "3/3", "evidence": ["ex:1"],
+                         "observed": {"request": "GET /b", "status": 404, "checks": ["Undocumented status code"],
+                                      "curl": "curl -X GET http://t/b"}}],
+           "defects": []}  # fmt: skip
+    cases = {"cases": [{"id": "TC-1", "ac": "C-1"}]}
+    bound = {"tests": [{"unit": "TC-1", "status": "UNBOUND", "reason": "no route for the upload"}]}
+    r = build.build({"criteria": []}, cases, gate, {"verdicts": []}, tri, [], [], bound,
+                    {"reach": "container", "mutation": "none"})  # fmt: skip
+    assert r["header"]["ceiling"] == "Stable, property-checked"
+    c = r["checks"]
+    assert c["families"]["properties"]["outcomes"]["SPEC_MISMATCH"]["n"] == 1
+    assert c["excluded"]["async_create"]["n"] == 1
+    assert c["spec_mismatch"][0]["observed"]["status"] == 404
+    assert r["worklist"]["P1"][0]["closes_it"] == "bind TC-1: no route for the upload"
+    assert (
+        list(
+            build.walk(
+                {k: v for k, v in r.items() if k not in ("evidence", "defects", "traceability")}
+            )
+        )
+        == []
+    )
+    page = render.html(r)
+    assert "Server and spec disagree (1 operations)" in page and "curl -X GET http://t/b" in page
+    assert "Strongest claim: Stable, property-checked." in render.summary_md(r)

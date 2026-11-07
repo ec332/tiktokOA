@@ -88,6 +88,16 @@
   },
   "triage": "no AI in M4 (rules only; the AI judge is M7)"
  },
+ "checks": {
+  "excluded": {},
+  "families": {},
+  "spec_mismatch": [],
+  "spec_mismatch_more": {
+   "d": 0,
+   "ids": [],
+   "n": 0
+  }
+ },
  "coverage": {
   "boundary": {
    "d": 59,
@@ -788,12 +798,23 @@
  },
  "header": {
   "cases_signed": true,
+  "ceiling": "Likely defect, catches planted bugs",
   "execution": 252,
   "k": 3,
   "labels": [
    "real"
   ],
   "run_records": "sha256:dfb6c25a8cf6f37254e682f70dbae61826df818b3fca48c8acafd83c4176df01",
+  "strategies": {
+   "auth": "override_module",
+   "checks": "pytest_cases",
+   "data": "override_module",
+   "mutation": "in_process",
+   "reach": "container",
+   "safety": "unrestricted",
+   "spec": "served",
+   "state": "transaction"
+  },
   "sut": {
    "name": "full-stack-fastapi-template",
    "ref": "f4bcfaba7c85be3c6332cc74a20819f586dcdbc6"
@@ -2432,31 +2453,31 @@
    {
     "ac": "C-4",
     "case": "TC-C4-1",
-    "closes_it": "bind TC-C4-1 (needs the clock/decode patches)",
+    "closes_it": "bind TC-C4-1",
     "what": "signed case not bound to a test"
    },
    {
     "ac": "C-5",
     "case": "TC-C5-1",
-    "closes_it": "bind TC-C5-1 (needs the clock/decode patches)",
+    "closes_it": "bind TC-C5-1",
     "what": "signed case not bound to a test"
    },
    {
     "ac": "C-5",
     "case": "TC-C5-2",
-    "closes_it": "bind TC-C5-2 (needs the clock/decode patches)",
+    "closes_it": "bind TC-C5-2",
     "what": "signed case not bound to a test"
    },
    {
     "ac": "O-1",
     "case": "TC-O1-1",
-    "closes_it": "bind TC-O1-1 (needs the clock/decode patches)",
+    "closes_it": "bind TC-O1-1",
     "what": "signed case not bound to a test"
    },
    {
     "ac": "O-1",
     "case": "TC-O1-2",
-    "closes_it": "bind TC-O1-2 (needs the clock/decode patches)",
+    "closes_it": "bind TC-O1-2",
     "what": "signed case not bound to a test"
    },
    {

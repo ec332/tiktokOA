@@ -5,6 +5,17 @@ P0_CLASSES = ("PRODUCT_DEFECT", "INTERMITTENT_PRODUCT")
 ADMITTED = ("ADMITTED", "ADMITTED_REDUNDANT", "ADMITTED_UNMEASURED")
 HEALTH = ("FLAKY_TEST", "INSUFFICIENT_EVIDENCE", "TEST_DEFECT", "ENV", "DATA")
 CATEGORY = {"boundary": "boundary", "error_exception": "exception", "error_guessing": "exception"}
+# What each generic family claims (checks/001 D4); its criterion id is `G:<family>:<operation>`.
+CLAIMS = {
+    "properties": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "auth_required": "no or invalid credentials: never 2xx on a secured operation, never 5xx",
+    "unknown_id": "an ID that doesn't exist: never 2xx, never 5xx",
+    "invalid_input": "a body its schema forbids: 4xx, never 5xx",
+    "read_back": "declared fields round-trip from create to read",
+    "delete_final": "a read after delete: never 2xx",
+    "paging": "out-of-range paging or a bad token: never 5xx; a 2xx is a page",
+}
+SPEC_MISMATCH_SHOWN = 10  # groups listed before the rest are only counted (checks/001 D6)
 
 
 def num(n: int, d: int | None, ids) -> dict:
@@ -12,16 +23,34 @@ def num(n: int, d: int | None, ids) -> dict:
     return {"n": n, "d": d, "ids": sorted(ids)}
 
 
+def _family(ac: str | None) -> str | None:
+    return ac.split(":")[1] if ac and ac.startswith("G:") else None
+
+
+def ceiling(strategies: dict, gate: dict) -> str | None:
+    """The strongest claim the strategies that ran allow (checks/001 D12). External: stage E."""
+    if not strategies:
+        return None
+    if strategies.get("mutation") == "in_process":
+        return "Likely defect, catches planted bugs"
+    props = any(_family(r.get("ac")) == "properties" and r["status"] not in ("EXCLUDED", "ERROR")
+                for r in gate["rows"])  # fmt: skip
+    return "Stable, property-checked" if props else "Stable"
+
+
 def build(spec: dict, cases: dict, gate: dict, rr: dict, tri: dict, decisions: list[dict],
-          labels: list[str]) -> dict:  # fmt: skip
+          labels: list[str], bound_tests: dict | None = None,
+          strategies: dict | None = None) -> dict:  # fmt: skip
     criteria = {c["id"]: c for c in spec["criteria"]}
     case_by_id = {c["id"]: c for c in cases["cases"]}
     verdicts = rr["verdicts"]
     ref = {v["case_id"]: v for v in verdicts if v["variant"] == "reference"}
     defects = tri["defects"]
     return {
-        "header": _header(rr, tri, decisions, labels, cases),
-        "worklist": _worklist(criteria, case_by_id, gate, tri, verdicts),
+        "header": _header(rr, tri, decisions, labels, cases)
+        | {"strategies": strategies or {}, "ceiling": ceiling(strategies or {}, gate)},
+        "worklist": _worklist(criteria, case_by_id, gate, tri, verdicts, bound_tests),
+        "checks": _checks(gate, tri),
         "scorecard": _scorecard(criteria, case_by_id, gate, rr, tri),
         "traceability": _traceability(criteria, case_by_id, ref, gate),
         "coverage": _coverage(case_by_id, ref),
@@ -34,7 +63,9 @@ def build(spec: dict, cases: dict, gate: dict, rr: dict, tri: dict, decisions: l
 
 def _no_admitted(gate, case_by_id) -> tuple[list[str], set[str]]:
     """Criteria in this run's scope (a gate row or a signed case) with no admitted test."""
-    in_scope = {r["ac"] for r in gate["rows"]} | {c["ac"] for c in case_by_id.values()}
+    in_scope = {r["ac"] for r in gate["rows"] if not _family(r.get("ac"))} | {
+        c["ac"] for c in case_by_id.values()
+    }  # generic families have no drafted criterion to admit a test for (checks/001)
     admitted = {r["ac"] for r in gate["rows"] if r["status"] in ADMITTED}
     return sorted(in_scope - admitted), in_scope
 
@@ -50,14 +81,56 @@ def _header(rr, tri, decisions, labels, cases):
             "unattended_decisions": num(len(unattended), len(decisions), [f"review:{d['review_item']}" for d in unattended])}  # fmt: skip
 
 
-def _worklist(criteria, case_by_id, gate, tri, verdicts):
+def _checks(gate, tri):
+    """Generic families: cases and gate outcomes per family, exclusions by reason, and server/spec
+    disagreements grouped by criterion (checks/001 D6, D9)."""
+    rows = [r for r in gate["rows"] if _family(r.get("ac"))]
+    families = {}
+    for fam, claim in CLAIMS.items():
+        mine = [r for r in rows if _family(r["ac"]) == fam]
+        if mine:
+            statuses = sorted({r["status"] for r in mine})
+            families[fam] = {"claim": claim, "cases": num(len(mine), None, [r["case_id"] for r in mine]),
+                             "outcomes": {s: num(sum(r["status"] == s for r in mine), len(mine),
+                                                 [r["case_id"] for r in mine if r["status"] == s]) for s in statuses}}  # fmt: skip
+    reasons: dict[str, list] = {}
+    for r in gate["rows"]:
+        if r["status"] == "EXCLUDED":
+            reasons.setdefault((r.get("excluded") or "unknown").split(":")[0], []).append(
+                r["case_id"]
+            )
+    groups: dict[str, list] = {}
+    for f in tri["findings"]:
+        if f["class"] == "SPEC_MISMATCH" and f["variant"] == "reference":
+            groups.setdefault(f["ac"], []).append(f)
+    shown = sorted(groups)[:SPEC_MISMATCH_SHOWN]
+    rest = sorted(groups)[SPEC_MISMATCH_SHOWN:]
+    return {
+        "families": families,
+        "excluded": {k: num(len(v), len(gate["rows"]), v) for k, v in sorted(reasons.items())},
+        "spec_mismatch": [
+            {
+                "group": ac,
+                "claim": CLAIMS.get(_family(ac) or "", "a drafted criterion"),
+                "findings": num(len(groups[ac]), None, [f["id"] for f in groups[ac]]),
+                "rule": groups[ac][0]["rule"],
+                "observed": groups[ac][0].get("observed"),
+            }
+            for ac in shown
+        ],
+        "spec_mismatch_more": num(len(rest), len(groups), rest),
+    }
+
+
+def _worklist(criteria, case_by_id, gate, tri, verdicts, bound_tests=None):
     p0 = []
     for d in tri["defects"]:
         if d["class"] not in P0_CLASSES:
             continue
-        c = criteria.get(d["ac"], {})
+        c = criteria.get(d["ac"], {}) or {"then": CLAIMS.get(_family(d["ac"]) or "")}
         p0.append({"defect": d["id"], "kind": d["kind"], "flag": d.get("flag"), "ac": d["ac"],
-                   "title": c.get("title"), "expected": c.get("resolution") or c.get("then"),
+                   "title": c.get("title") or (d["ac"] if _family(d["ac"]) else None),
+                   "expected": c.get("resolution") or c.get("then"),
                    "observed": d.get("observed"), "cases": num(len(d["cases"]), None, d["cases"]),
                    "root_cause": d.get("root_cause"), "suspects": d["suspects"], "evidence": d["evidence"],
                    "decision": d.get("decision") or {"by": "rules", "decision": "seeded (ground truth known)"},
@@ -69,8 +142,11 @@ def _worklist(criteria, case_by_id, gate, tri, verdicts):
           for r in rows if r["status"] == "WEAK"]  # fmt: skip
     bound = {r["unit"] for r in rows}
     unbound = sorted({c["id"] for c in case_by_id.values()} - bound - {r["case_id"] for r in rows})
+    # checks/001 D13: the recorded reason, never the template's "needs the clock/decode patches"
+    why = {t["unit"]: t.get("reason") for t in (bound_tests or {}).get("tests", [])}
     p1 += [{"what": "signed case not bound to a test", "case": cid, "ac": case_by_id[cid]["ac"],
-            "closes_it": f"bind {cid} (needs the clock/decode patches)"} for cid in unbound]  # fmt: skip
+            "closes_it": f"bind {cid}" + (f": {why[cid]}" if why.get(cid) else "")}
+           for cid in unbound]  # fmt: skip
     p1 += [{"what": "criterion with no admitted test", "ac": ac, "case": None,
             "closes_it": ", ".join(sorted(c["id"] for c in case_by_id.values() if c["ac"] == ac)) or "no case drafted"}
            for ac in _no_admitted(gate, case_by_id)[0]]  # fmt: skip

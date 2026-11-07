@@ -57,6 +57,47 @@ def _evidence(eid: str, ev: dict) -> str:
     return f'<details class=ev id="{e(eid)}"><summary><code>{e(eid)}</code> {e(title)}</summary>{body}</details>'
 
 
+def _claim(h: dict) -> str:
+    if not h.get("ceiling"):
+        return ""
+    ran = ", ".join(f"{k}={v}" for k, v in h["strategies"].items())
+    return f"<p>Strongest claim: <b>{e(h['ceiling'])}</b> <span class=muted>· strategies: {e(ran)}</span></p>"
+
+
+def _checks_html(c: dict) -> str:
+    """Generic families and server/spec disagreements (checks/001 D6). Empty when none ran."""
+    if not c["families"] and not c["spec_mismatch"]:
+        return ""
+    out = [
+        "<section><h2>Generic checks</h2><table><thead><tr><th>family</th><th>claim</th><th>cases</th><th>gate outcomes</th></tr></thead><tbody>"
+    ]
+    out += [f"<tr><td>{e(f)}</td><td>{e(v['claim'])}</td><td>{_num(v['cases'])}</td><td>"
+            + " · ".join(f"{e(s)} {_num(n)}" for s, n in v["outcomes"].items()) + "</td></tr>"
+            for f, v in c["families"].items()]  # fmt: skip
+    out.append("</tbody></table>")
+    if c["excluded"]:
+        out.append(
+            "<p>Excluded: "
+            + " · ".join(f"{e(k)} {_num(v)}" for k, v in c["excluded"].items())
+            + "</p>"
+        )
+    out.append("</section>")
+    n = len(c["spec_mismatch"]) + c["spec_mismatch_more"]["n"]
+    out.append(f"<section><h2>Server and spec disagree ({n} operations)</h2><p class=muted>Valid HTTP that "
+               "contradicts the served spec. Either side may be wrong: these become issues, never "
+               "defects or PRs, unless Clarify settles which side is intended.</p>")  # fmt: skip
+    for g in c["spec_mismatch"]:
+        o = g["observed"] or {}
+        out.append(f"<article class=card><h3><code>{e(g['group'])}</code></h3><p>{e(g['rule'])} · "
+                   f"findings {_num(g['findings'])}</p><p><b>Observed</b> <code>{e(str(o.get('request')))} → "
+                   f"{e(str(o.get('status')))}</code>{(' · <b>checks</b> ' + e(', '.join(o['checks']))) if o.get('checks') else ''}</p>"
+                   f"{('<pre>' + e(o['curl']) + '</pre>') if o.get('curl') else ''}"
+                   f"<p class=muted>{e(str(o.get('error') or ''))}</p></article>")  # fmt: skip
+    if c["spec_mismatch_more"]["n"]:
+        out.append(f"<p>And {_num(c['spec_mismatch_more'])} more, not listed.</p>")
+    return "".join(out) + "</section>"
+
+
 def html(r: dict) -> str:
     h, w, sc = r["header"], r["worklist"], r["scorecard"]
     labels = " ".join(f"<span class=label>{e(x)}</span>" for x in h["labels"])
@@ -65,7 +106,7 @@ def html(r: dict) -> str:
     parts = [
         f"""<header><h1>Test report</h1><div>{labels}
 <span class=label>no AI in run/judge/report</span>{'<span class="label warn">unattended decisions ' + e(_n(unatt)) + "</span>" if unatt["n"] else ""}</div>
-<p class=muted>SUT <code>{e(str((h.get("sut") or {}).get("ref", "")))[:12]}</code> · variants {variants} · K={h["k"]} · run_records <code>{e(str(h["run_records"])[:19])}</code></p>{f"<p class=muted>Network: at run time {e(h['network']['run'])}; build: {e(h['network']['build'])}.</p>" if h.get("network") else ""}</header>"""
+<p class=muted>SUT <code>{e(str((h.get("sut") or {}).get("ref", "")))[:12]}</code> · variants {variants} · K={h["k"]} · run_records <code>{e(str(h["run_records"])[:19])}</code></p>{f"<p class=muted>Network: at run time {e(h['network']['run'])}; build: {e(h['network']['build'])}.</p>" if h.get("network") else ""}{_claim(h)}</header>"""
     ]
 
     parts.append("<section><h2>P0 — defects</h2>")
@@ -117,6 +158,8 @@ def html(r: dict) -> str:
         for p in w["P3"]
     ]
     parts.append("</tbody></table></section>")
+
+    parts.append(_checks_html(r["checks"]))
 
     rows = [
         ("Seeded detected (authored)", _num(sc["seeded_authored"])),
@@ -229,6 +272,7 @@ def summary_md(r: dict) -> str:
             if (n := r["header"].get("network"))
             else []
         ),  # fmt: skip (blackbox D5)
+        *([f"Strongest claim: {h}."] if (h := r["header"].get("ceiling")) else []),
         "",
         "## P0 — defects",
     ]
@@ -251,6 +295,20 @@ def summary_md(r: dict) -> str:
     out += ["", "## P3 — spec and code drift"] + [
         f"- {p['what']}: {p['case'] or p['ac']} — {p['why']}" for p in w["P3"]
     ]
+    c = r["checks"]
+    if c["families"]:
+        out += ["", "## Generic checks"] + [
+            f"- {f}: {_n(v['cases'])} cases — " + ", ".join(f"{s} {_n(n)}" for s, n in v["outcomes"].items())
+            for f, v in c["families"].items()
+        ] + [f"- excluded ({k}): {_n(v)}" for k, v in c["excluded"].items()]  # fmt: skip
+    if c["spec_mismatch"]:
+        out += [
+            "",
+            f"## Server and spec disagree ({len(c['spec_mismatch']) + c['spec_mismatch_more']['n']} operations)",
+        ]
+        out += [f"- `{g['group']}`: {(g['observed'] or {}).get('request')} → {(g['observed'] or {}).get('status')}"
+                f"{' (' + ', '.join(g['observed']['checks']) + ')' if (g['observed'] or {}).get('checks') else ''}"
+                for g in c["spec_mismatch"]]  # fmt: skip
     out += [
         "",
         "## Scorecard",
@@ -275,4 +333,8 @@ def cli(r: dict) -> str:
         ),
         f"P3 spec/code drift: {len(w['P3'])}",
     ]
+    c = r["checks"]
+    if c["families"] or c["spec_mismatch"]:
+        lines.append(f"Generic checks: {sum(v['cases']['n'] for v in c['families'].values())} case(s); "
+                     f"server/spec disagree on {len(c['spec_mismatch']) + c['spec_mismatch_more']['n']}")  # fmt: skip
     return "\n".join(lines)

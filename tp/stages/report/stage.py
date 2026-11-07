@@ -44,6 +44,7 @@ class ReportStage:
         "spec": 1,
         "cases": 1,
         "gate_report": 1,
+        "bound_tests": 1,
         "run_records": 1,
         "triage": 1,
         "run_options": 1,
@@ -55,8 +56,10 @@ class ReportStage:
         inputs = {t: a for t, a in inputs.items() if t != "run_options"}
         labels = sorted({lbl for a in inputs.values() for lbl in a.labels})
         decisions = lineage_decisions([a.id for a in inputs.values()])
+        p = getattr(ctx, "profile", None)
+        strategies = {c: f.strategy for c, f in p.fields.items()} if p else {}
         report = build.build(b["spec"], b["cases"], b["gate_report"], b["run_records"], b["triage"],
-                             decisions, labels)  # fmt: skip
+                             decisions, labels, b.get("bound_tests"), strategies)  # fmt: skip
         if bare := list(
             build.walk(
                 {
