@@ -82,3 +82,24 @@ def test_uncovered_lists_criteria_without_an_admitted_test():
     rows = [{"ac": "C-1", "status": "ADMITTED_REDUNDANT"}, {"ac": "C-2", "status": "WEAK"}]
     assert decide.uncovered(["C-1", "C-2", "C-3"], rows) == ["C-2", "C-3"]
     assert decide.uncovered(["C-2"], [{"ac": "C-2", "status": "CANDIDATE_DEFECT"}]) == []
+
+
+def test_gate_without_mutation_reports_not_measured_and_eventual_consistency(tmp_path):
+    """blackbox D16: stability only; retries in a stable pass mark it eventually consistent."""
+    from types import SimpleNamespace
+
+    from tp.stages.gate.stage import GateStage
+
+    def run(tests, out, variant, env=None):
+        rec = {"nodeid": "t.py::test_a", "case_id": "TC-1", "outcome": "passed", "origin": None,
+               "retries": {"attempts": 2 if env else 0, "waited_s": 0.3}}  # fmt: skip
+        return {"results": [rec, {"nodeid": "t.py::test_b", "case_id": "TC-2",
+                                  "outcome": "passed", "origin": None}]}  # fmt: skip
+
+    ctx = SimpleNamespace(emit=lambda *a, **k: None, strategies=SimpleNamespace(
+        checks=SimpleNamespace(run=run), mutation=SimpleNamespace(available=lambda: False)))  # fmt: skip
+    info = {"bound_tests": "sha256:abcdef0123", "settings": {"k": 2}}
+    m = GateStage()._measure(ctx, tmp_path, [], info)
+    assert m["strength"] == "not_measured" and m["mutants"] == []
+    assert m["eventually"] == ["t.py::test_a"]
+    assert all(s["stable"] for s in m["stability"].values())

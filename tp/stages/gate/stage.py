@@ -92,7 +92,44 @@ class GateStage:
 
     # ---- measurement (cached, K7) -------------------------------------------------------
 
+    def _stability(self, ctx, work, info) -> tuple[dict, str, list[str]]:
+        """K runs + one shuffled -> (per-node stability, shuffle seed, nodes that needed
+        `eventually` retries in some run while passing in all: eventually consistent, D8)."""
+        check, seed, k = (
+            ctx.strategies.checks.run,
+            info["bound_tests"].removeprefix("sha256:")[:8],
+            info["settings"]["k"],
+        )
+        runs = []
+        for i in range(k):
+            ctx.emit("gate_stability_run", run=i + 1, of=k + 1, shuffled=False)
+            runs.append(check(work / "tests", work / f"k{i}", "reference")["results"])
+        ctx.emit("gate_stability_run", run=k + 1, of=k + 1, shuffled=True)
+        runs.append(check(work / "tests", work / "shuffled", "reference",
+                          env={"TP_SHUFFLE": seed})["results"])  # fmt: skip
+        stab = decide.stability(runs)
+        retried = sorted({r["nodeid"] for run in runs for r in run
+                          if (r.get("retries") or {}).get("attempts")})  # fmt: skip
+        eventually = [n for n in retried if stab.get(n, {}).get("stable")
+                      and stab[n]["outcome"] == "passed"]  # fmt: skip
+        return stab, seed, eventually
+
+    def _unmeasured(self, ctx, work, info) -> dict:
+        """No in-process mutation (black-box targets, D16): stability only. Stable passes are
+        admitted as ADMITTED_UNMEASURED and the verdict says strength: not_measured."""
+        t0 = time.perf_counter()
+        stab, seed, eventually = self._stability(ctx, work, info)
+        ctx.emit("gate_stability", nodes=len(stab),
+                 stable_passing=sum(1 for s in stab.values() if s["stable"]
+                                    and s["outcome"] == "passed"))  # fmt: skip
+        return {"stability": stab, "shuffle_seed": seed, "seeded": {}, "mutants": [],
+                "linked": {}, "matrix": {}, "overlay_broken": [], "held_out": 0,
+                "timings": {"stability": round(time.perf_counter() - t0, 1)}, "cache": "none",
+                "eventually": eventually, "strength": "not_measured"}  # fmt: skip
+
     def _measure(self, ctx, work, tests, info) -> dict:
+        if not ctx.strategies.mutation.available():
+            return self._unmeasured(ctx, work, info)
         scope, check = ctx.strategies.mutation.scope(), ctx.strategies.checks.run
         seeded = ctx.strategies.mutation.seeded()
         h_files, h_ms = handlers.generate(Path(scope["src"]), sut.load()["ref"], info["refs"],
@@ -111,17 +148,7 @@ class GateStage:
             ctx.emit("gate_cache", hit=True, key=key[:12])
             return json.loads(cache.read_text()) | {"cache": "hit"}
         t0, timings = time.perf_counter(), {}
-        seed = info["bound_tests"].removeprefix("sha256:")[:8]
-
-        k = info["settings"]["k"]
-        runs = []
-        for i in range(k):
-            ctx.emit("gate_stability_run", run=i + 1, of=k + 1, shuffled=False)
-            runs.append(check(work / "tests", work / f"k{i}", "reference")["results"])
-        ctx.emit("gate_stability_run", run=k + 1, of=k + 1, shuffled=True)
-        runs.append(check(work / "tests", work / "shuffled", "reference",
-                          env={"TP_SHUFFLE": seed})["results"])  # fmt: skip
-        stab = decide.stability(runs)
+        stab, seed, _ = self._stability(ctx, work, info)
         passing = sorted(n for n, s in stab.items() if s["stable"] and s["outcome"] == "passed")
         timings["stability"] = round(time.perf_counter() - t0, 1)
         ctx.emit("gate_stability", nodes=len(stab), stable_passing=len(passing))
@@ -215,10 +242,11 @@ class GateStage:
                          "seeded": seed and {"flag": flag, **seed},
                          "misses_target": bool(seed) and not seed["killed"],
                          "kills": n_kills, "unique_kills": n_unique,
-                         "linked_mutants": sum(1 for v in m["linked"].values() if node in v)})  # fmt: skip
+                         "linked_mutants": sum(1 for v in m["linked"].values() if node in v),
+                         "eventually_consistent": node in m.get("eventually", [])})  # fmt: skip
         return {"info": info, "rows": rows, "cells": cells, "measure": {
                     k: m.get(k) for k in ("mutants", "linked", "timings", "shuffle_seed",
-                                          "overlay_broken", "cache", "held_out")},
+                                          "overlay_broken", "cache", "held_out", "strength")},
                 "survivors": decide.survivors(m["mutants"], cells, m["linked"], info["refs"],
                                               info["settings"]["near"])}  # fmt: skip
 
@@ -246,8 +274,8 @@ class GateStage:
             mine = {m for n in c["nodes"] for m, v in cells.get(n, {}).items() if v == "K"}
             criteria[ac] = {"statuses": c["statuses"], "reached_mutants": len(reach),
                             "killed": len(mine), "equivalent": len(reach & equivalent),
-                            "strength": decide.strength(len(mine), len(reach),
-                                                        len(reach & equivalent))}  # fmt: skip
+                            "strength": meas.get("strength") or decide.strength(
+                                len(mine), len(reach), len(reach & equivalent))}  # fmt: skip
         surv = [s | {"equivalent": s["mutant"] in equivalent} for s in state["survivors"]]
         summary: dict[str, int] = {}
         for r in rows:
@@ -257,8 +285,8 @@ class GateStage:
                   "mutants": {"total": len(names), "killed": len(killed),
                               "equivalent": len(equivalent),
                               "not_covered": sum(1 for s in surv if not s["covered"]),
-                              "strength": decide.strength(len(killed), len(names),
-                                                          len(equivalent))},
+                              "strength": meas.get("strength") or decide.strength(
+                                  len(killed), len(names), len(equivalent))},
                   "handlers": self._handlers(meas["mutants"], killed, equivalent,
                                              meas.get("held_out")),
                   "survivors": surv, "proposals": state.get("proposals", []),
