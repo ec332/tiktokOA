@@ -15,7 +15,13 @@ dependencies = [
 tp = "tp.cli.main:app"
 
 [dependency-groups]
-dev = ["pytest", "ruff", "httpx", "pre-commit"]
+dev = [
+    "pytest",
+    "ruff",
+    "httpx",
+    "pre-commit",
+    "schemathesis==4.33.1",
+]
 
 [build-system]
 requires = ["hatchling"]

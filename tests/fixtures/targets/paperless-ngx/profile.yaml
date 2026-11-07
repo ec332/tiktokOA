@@ -43,7 +43,13 @@ data:
   source: override
   evidence: documents are consumed asynchronously by a Celery worker (OCR); a one-page PDF took
     14-57 s to appear over 9 runs (r-0011, blackbox/005), so 120 s leaves headroom
-  value: {strategy: spec_derived, read_back_timeout_s: 120}
+  value:
+    strategy: spec_derived
+    read_back_timeout_s: 120
+    # conventions the generic families need (checks/001); stage D must discover these too
+    id_field: id                   # POST /api/tags/ -> {"id": 7, ...}
+    id_style: integer
+    paging: {style: page, page: page, size: page_size}   # DRF PageNumberPagination
 
 state:
   source: override
@@ -59,4 +65,6 @@ safety:
 
 checks:
   source: override
-  value: {strategy: pytest_cases}
+  value:
+    strategy: pytest_cases
+    families: {per_family: 5, examples: 10, rate: 5, exclude: []}   # checks/001 defaults

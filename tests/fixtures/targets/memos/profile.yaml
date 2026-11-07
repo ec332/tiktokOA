@@ -1,0 +1,49 @@
+# Hand-written Memos profile (checks/001 D10): the conventions the generic families need, for the
+# contract test against a scripted fake (platform_rt/tests/test_rt_families.py). Test input, not
+# platform input. Stage D discovers the real profile from the repo and runs Memos live.
+schema_version: 1
+target:
+  name: memos
+  repo: https://github.com/usememos/memos
+  type: api
+commit_tested: null
+
+reach:
+  source: override
+  evidence: master §4 - build from scripts/Dockerfile at the commit under test (stage D)
+  value: {strategy: container, dockerfile: scripts/Dockerfile, port: 5230, health: /healthz}
+
+spec:
+  source: override
+  evidence: proto/gen/openapi.yaml declares no security (master §4)
+  value: {strategy: repo_file, openapi: proto/gen/openapi.yaml, base: /api/v1}
+
+auth:
+  source: override
+  evidence: the first user of an instance becomes its admin (master §4); found by probing in D
+  value: {strategy: bearer_login}
+
+data:
+  source: override
+  evidence: "resource names (`memos/{memo}`) and pageSize/pageToken paging (master §4)"
+  value:
+    strategy: spec_derived
+    id_field: name                 # POST /api/v1/memos -> {"name": "memos/abc", ...}
+    id_style: string
+    paging: {style: token, size: pageSize, token: pageToken}
+
+state:
+  source: override
+  value: {strategy: namespace}
+
+mutation:
+  source: override
+  value: {strategy: none}
+
+safety:
+  source: override
+  value: {strategy: unrestricted}
+
+checks:
+  source: override
+  value: {strategy: pytest_cases}
