@@ -68,6 +68,15 @@ class OverrideData:
     def make(self, tc_id: str, variant: str = "reference") -> Any:
         return self.svc.factories(variant, tc_id)
 
+    def factories(self) -> list[str]:
+        """Precondition names the cases may use (blackbox D15): the profile's."""
+        return list(profile.load().data.value["factories"])
+
+    def doc(self) -> dict[str, str]:
+        """What the binding writer is told about `make` and `api` (the profile's text)."""
+        v = profile.load().data.value
+        return {"make": v["make_doc"], "api": v["api_doc"], "imports": []}
+
 
 class TransactionState:
     def __init__(self, svc: Any):
@@ -125,6 +134,25 @@ def from_service(svc: Any) -> strategies.StrategySet:
 
 
 def register() -> None:
-    """Factories read the env SERVICE at resolve time, so a test's monkeypatched service is used."""
+    """Factories read the env SERVICE at resolve time, so a test's monkeypatched service is used.
+
+    `container` reach (and its served spec and pytest checks) has two implementations: the env
+    service's in-process harness stack needs `transaction` state (the app imported in the runner);
+    any other target runs the generic black-box stack (blackbox D6: the profile decides)."""
+    from tp.stages.env import blackbox
+
+    def pick(concern, name, cls):
+        def factory(p):
+            if p.state.strategy != "transaction" and (concern, name) in blackbox.IMPLS:
+                return blackbox.strategy(concern, name, p)
+            return cls(contract.SERVICES["env"])
+
+        return factory
+
     for (concern, name), cls in IMPLS.items():
-        strategies.register(concern, name, lambda _p, cls=cls: cls(contract.SERVICES["env"]))
+        strategies.register(concern, name, pick(concern, name, cls))
+    for concern, name in [*blackbox.IMPLS, ("auth", "basic"), ("auth", "token_header")]:
+        if (concern, name) not in IMPLS:
+            strategies.register(
+                concern, name, lambda p, c=concern, n=name: blackbox.strategy(c, n, p)
+            )
