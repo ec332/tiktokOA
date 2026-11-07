@@ -37,7 +37,9 @@ def load(root: Path = Path(".")) -> dict:
     cfg = _raw(root)
     if missing := [k for k in REQUIRED if k not in cfg]:
         raise SutError(f"profile is missing {missing}")
-    if t := target():
+    # a branch target exists to mutate its changed lines in-process (blackbox D17)
+    in_process = profile.load(root).mutation.strategy == "in_process"
+    if in_process and (t := target()):
         _overlay(cfg, t)
     return cfg
 
