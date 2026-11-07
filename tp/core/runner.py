@@ -27,8 +27,10 @@ def start_run(
     unattended: bool = False,
     inputs: dict[str, str] | None = None,
     options: dict | None = None,
+    pipeline: list[str] | None = None,
 ) -> int:
-    """inputs: artifact type -> id given to the run itself (e.g. requirements). They are the
+    """pipeline: the stages this run holds (default PIPELINE; `tp target add` holds only
+    discover, discover/001 D5). inputs: artifact type -> id given to the run itself (e.g. requirements). They are the
     outputs of an already-succeeded `input` execution, so heads() resolves them like any other.
     options: stage settings for this run (e.g. flows, fresh), stored as the run_options input."""
     llm.Gateway(mode)  # validates mode
@@ -52,12 +54,16 @@ def start_run(
                 "VALUES (?,?,?,?,?,?)",
                 (run_id, "input", "succeeded", json.dumps(inputs), db.now(), db.now()),
             )
-        for name in PIPELINE:
+        for name in pipeline or PIPELINE:
             c.execute(
                 "INSERT INTO stage_executions (run_id, stage, status) VALUES (?,?,?)",
                 (run_id, name, "pending"),
             )
     events.emit(run_id, None, "run_created", mode=mode, stub=stub)
+    if pipeline != ["discover"] and (target := _pin_target(options)):
+        events.emit(
+            run_id, None, "run_target", path=target
+        )  # every stage runs on it (discover/006)
     return run_id
 
 
@@ -81,7 +87,7 @@ def list_runs(limit: int = 100) -> list[dict]:
 def advance(run_id: int) -> dict:
     """Run every stage that can run, in pipeline order. Stops at a review or a failure."""
     _set_run(run_id, "running")
-    for name in PIPELINE:
+    for name in stages(run_id):
         if _cancelled(run_id):
             return get_run(run_id)
         ex = _latest(run_id, name)
@@ -121,7 +127,8 @@ def resume(item_id: int) -> dict | None:
         ).fetchone()
     if _open_items(ex_id):
         return None
-    earlier = PIPELINE[: PIPELINE.index(stage)] if stage in PIPELINE else []
+    order = stages(run_id)
+    earlier = order[: order.index(stage)] if stage in order else []
     if all(_latest(run_id, s)["status"] in DONE for s in earlier):
         return advance(run_id)
     # The stage was run on its own (tp stage run): continue just that execution, with the inputs
@@ -148,7 +155,7 @@ def heads(run_id: int) -> dict[str, str]:
 def retry(run_id: int) -> dict:
     """Give each failed stage a fresh pending execution, then advance (M8: a failed run can be
     continued from the failed step; earlier outputs and decisions are kept)."""
-    for name in PIPELINE:
+    for name in stages(run_id):
         if _latest(run_id, name)["status"] == "failed":
             with db.connect() as c:
                 c.execute("INSERT INTO stage_executions (run_id, stage, status) VALUES (?,?,?)",
@@ -174,8 +181,32 @@ def _cancelled(run_id: int) -> bool:
 # ---- one execution ------------------------------------------------------------
 
 
+def _pin_target(options: dict) -> str | None:
+    """The target this run is for: `run_options.profile` (a path or slug, e.g. from the New run
+    page), else the one TP_TARGET selects now; absolute, so a resume or retry from another
+    process uses the same profile. None when nothing resolves (a discover-only run)."""
+    with target_profile.selected(options.get("profile")):
+        try:
+            d = target_profile.target_dir()
+        except target_profile.ProfileError:
+            return None
+    return str(d.resolve()) if (d / "profile.yaml").exists() else None
+
+
+def run_target(run_id: int) -> str | None:
+    return next((e["payload"]["path"] for e in events.since(run_id) if e["kind"] == "run_target"),
+                None)  # fmt: skip
+
+
 def _execute(
     run_id: int, ex_id: int, overrides: dict[str, str] | None = None, from_run: int | None = None
+) -> dict:
+    with target_profile.selected(run_target(run_id)):
+        return _execute_one(run_id, ex_id, overrides, from_run)
+
+
+def _execute_one(
+    run_id: int, ex_id: int, overrides: dict[str, str] | None, from_run: int | None
 ) -> dict:
     run = get_run(run_id)
     ex = next(e for e in run["executions"] if e["id"] == ex_id)
@@ -210,7 +241,7 @@ def _execute(
     gateway = llm.Gateway(
         run["mode"],
         provider,
-        budget_usd=llm.DEFAULT_BUDGET_USD,
+        budget_usd=getattr(stage, "budget_usd", llm.DEFAULT_BUDGET_USD),
         spent_usd=spent,
         on_cost=lambda usd, model: events.emit(run_id, ex_id, "llm_cost", usd=usd, model=model),
     )
@@ -272,7 +303,7 @@ def _execute(
 def _mark_stale(run_id: int, dead: set[str]) -> None:
     while dead:
         newly: set[str] = set()
-        for name in PIPELINE:
+        for name in stages(run_id):
             ex = _latest(run_id, name)
             if ex["status"] == "succeeded" and dead & set(ex["inputs"].values()):
                 _update(ex["id"], status="stale")
@@ -301,6 +332,14 @@ def _auto_decide(ex_id: int, stops: tuple[str, ...] = ()) -> bool:
 
 
 # ---- helpers -------------------------------------------------------------------
+
+
+def stages(run_id: int) -> list[str]:
+    """The stages a run holds, in its order (PIPELINE unless it was started with its own)."""
+    with db.connect() as c:
+        rows = c.execute("SELECT stage FROM stage_executions WHERE run_id=? AND stage!='input' "
+                         "GROUP BY stage ORDER BY MIN(id)", (run_id,)).fetchall()  # fmt: skip
+    return [r[0] for r in rows]
 
 
 def _open_items(ex_id: int) -> list[dict]:
@@ -347,7 +386,7 @@ def _finish(run_id: int, status: str) -> dict:
 
 
 def _derived_status(run_id: int) -> str:
-    statuses = {_latest(run_id, n)["status"] for n in PIPELINE}
+    statuses = {_latest(run_id, n)["status"] for n in stages(run_id)}
     return next((s for s in ("failed", "awaiting_review", "pending") if s in statuses), "succeeded")
 
 

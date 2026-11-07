@@ -7,6 +7,7 @@ import { createRoot } from "react-dom/client";
 import { RunPage } from "./pages/Run";
 import { RunsPage } from "./pages/Runs";
 import { NewRunPage } from "./pages/NewRun";
+import { TargetsPage } from "./pages/Targets";
 import "./styles.css";
 
 type Theme = "system" | "light" | "dark";
@@ -37,6 +38,7 @@ function Shell() {
         <span className="brand">Test Platform</span>
         <Link to="/new" activeProps={{ className: "active" }}>New run</Link>
         <Link to="/runs" activeProps={{ className: "active" }}>Runs</Link>
+        <Link to="/targets" activeProps={{ className: "active" }}>Targets</Link>
         <span className="spacer" />
         <ThemeToggle />
       </nav>
@@ -51,6 +53,7 @@ const routes = [
   createRoute({ getParentRoute: () => root, path: "/new", component: NewRunPage }),
   createRoute({ getParentRoute: () => root, path: "/runs", component: RunsPage }),
   createRoute({ getParentRoute: () => root, path: "/runs/$runId", component: RunPage }),
+  createRoute({ getParentRoute: () => root, path: "/targets", component: TargetsPage }),
   createRoute({ getParentRoute: () => root, path: "/sut", beforeLoad: () => { throw redirect({ to: "/new" }); } }),
 ] as const;
 const router = createRouter({ routeTree: root.addChildren(routes) });

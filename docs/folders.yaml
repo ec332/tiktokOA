@@ -58,3 +58,6 @@ folders:
   - {path: tests/test_target_literals.py, owner: seams, milestone: I2}
   - {path: tests/target_literals_baseline.json, owner: seams, milestone: I2}
   - {path: tests/test_profile.py, owner: seams, milestone: I2}
+  # Stage D, discover (docs/status/discover/001)
+  - {path: tp/stages/discover, owner: discover, milestone: I2}
+  - {path: web/src/panels/discover, owner: discover, milestone: I2}

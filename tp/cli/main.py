@@ -81,8 +81,20 @@ def run(
     opt: Annotated[
         list[str] | None, typer.Option("--opt", help="Stage option key=value (e.g. guards=v1)")
     ] = None,
+    target: Annotated[
+        str | None,
+        typer.Option(help="Target slug or folder (hand-written or discovered); default TP_TARGET"),
+    ] = None,
 ):
     """Start a pipeline run and drive it until it finishes or needs a review."""
+    from tp.core import profile
+
+    if target:
+        with profile.selected(target):
+            try:
+                profile.load()
+            except profile.ProfileError as e:
+                raise typer.BadParameter(str(e), param_hint="--target") from e
     if story and brief:
         raise typer.BadParameter("give --story or --brief, not both")
     inputs = {}
@@ -93,9 +105,8 @@ def run(
             else {"kind": "brief", "text": brief}
         )
         inputs["requirements"] = artifacts.put("requirements", req).id
-    run_id = runner.start_run(
-        _mode(mode, replay), stub, unattended, inputs, _options(flows, fresh, opt)
-    )
+    options = _options(flows, fresh, opt) | ({"profile": target} if target else {})
+    run_id = runner.start_run(_mode(mode, replay), stub, unattended, inputs, options)
     result = runner.advance(run_id)
     _print_run(result)
     raise typer.Exit(1 if result["status"] == "failed" else 0)
@@ -175,6 +186,7 @@ def review_resolve(
         str | None, typer.Option(help="Same decision for every line: approve | reject:comment")
     ] = None,
     choice: Annotated[str | None, typer.Option(help="Choice id for a question's pick")] = None,
+    text: Annotated[str | None, typer.Option(help="A setup answer's text")] = None,
     by: str = "cli",
     reason: str = "",
 ):
@@ -191,6 +203,8 @@ def review_resolve(
             detail["lines"] = detail.get("lines", {}) | {k: _line(v) for k, v in lines.items()}
         if choice:
             detail["choice"] = choice
+        if text:
+            detail["text"] = text
         review.resolve(item_id, decision, by, reason, detail)
     except (KeyError, ValueError) as e:
         typer.echo(f"error: {e}", err=True)

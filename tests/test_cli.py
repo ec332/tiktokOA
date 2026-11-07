@@ -64,3 +64,18 @@ def test_stage_panel_folder_owned_by_its_stage():
     folders = yaml.safe_load(Path("docs/folders.yaml").read_text())["folders"]
     assert owner_of("web/src/panels/cases/index.tsx", folders) == "cases"
     assert owner_of("web/src/panels/registry.ts", folders) == "skeleton"
+
+
+def test_run_on_a_chosen_target(tmp_path):
+    """Master §10 `tp run --target <slug>` (discover/008): the run is pinned to that profile."""
+    import shutil
+    from pathlib import Path
+
+    from tp.core import runner
+
+    bad = cli.invoke(app, ["run", "--stub", "--mode", "replay", "--target", "no-such-target"])
+    assert bad.exit_code == 2 and "no profile" in bad.output
+    shutil.copytree(Path("tests/fixtures/targets/memos"), tmp_path / "targets" / "memos")
+    cli.invoke(app, ["run", "--stub", "--mode", "replay", "--target", "memos"])
+    rid = runner.list_runs(1)[0]["id"]
+    assert runner.run_target(rid) == str((tmp_path / "targets" / "memos").resolve())

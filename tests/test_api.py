@@ -101,7 +101,7 @@ def test_focused_run_stores_rules_routes_and_stops(client):
             "requirements": {"kind": "brief", "text": "Items get a price"}}  # fmt: skip
     run = client.post("/runs", json=body).json()
     opts = artifacts.get(runner.heads(run["id"])["run_options"]).body
-    assert opts["stops"] == ["question", "confirm_observed", "signoff"]
+    assert opts["stops"] == ["question", "confirm_observed", "setup", "signoff"]
     assert opts["rules"] == {"clarify": ["Money: ask about rounding"], "cases": []}
     assert opts["routes"] == ["POST /api/v1/items/"] and opts["gate"] == {"k": 3}
     assert wait(client, run["id"], "awaiting_review")["status"] == "awaiting_review"
@@ -149,3 +149,18 @@ def test_black_box_runs_are_not_exported(client, monkeypatch):
                         lambda k: SimpleNamespace(body=spec if k == "spec" else {}))  # fmt: skip
     r = client.get("/runs/1/export")
     assert r.status_code == 409 and "black-box" in r.json()["detail"]
+
+
+def test_a_run_can_be_started_on_a_listed_target_only(client, tmp_path, monkeypatch):
+    """discover/006: the New run page's target picker reads GET /profiles."""
+    import shutil
+    from pathlib import Path
+
+    from tp.core import runner
+
+    shutil.copytree(Path("tests/fixtures/targets/memos"), tmp_path / "targets" / "memos")
+    got = {c["slug"]: c for c in client.get("/profiles").json()}
+    assert set(got) == {"fastapi-template", "memos"} and got["memos"]["black_box"]
+    r = client.post("/runs", json={"stub": True, "profile": got["memos"]["path"]})
+    assert r.status_code == 200 and runner.run_target(r.json()["id"]) == got["memos"]["path"]
+    assert client.post("/runs", json={"stub": True, "profile": "/etc"}).status_code == 422

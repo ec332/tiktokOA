@@ -55,12 +55,12 @@ SERVICES: dict[str, Any] = {}  # stage name -> service other stages reach via ct
 CLIS: dict[str, Any] = {}  # stage name -> Typer app, mounted as `tp <name>`
 
 
-def register(stage: Stage, service: Any = None, cli: Any = None) -> Stage:
+def register(stage: Stage, service: Any = None, cli: Any = None, cli_name: str = "") -> Stage:
     REGISTRY[stage.name] = stage
     if service is not None:
         SERVICES[stage.name] = service
     if cli is not None:
-        CLIS[stage.name] = cli
+        CLIS[cli_name or stage.name] = cli
     return stage
 
 

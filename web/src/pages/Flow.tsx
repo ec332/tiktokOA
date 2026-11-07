@@ -21,9 +21,39 @@ function OtherDecision({ item, onDone }: { item: ReviewItem; onDone: () => void 
   );
 }
 
+/** Stage D: a `setup` question (answered with text, verified by a probe when the run resumes) or
+ *  discovery's "these operations answer without credentials" check (discover/006). */
+function DiscoverItem({ item, onDone }: { item: ReviewItem; onDone: () => void }) {
+  const p = item.payload as { question?: string; detail?: string; title?: string; then?: string;
+    ops?: { op: string; description: string }[] };
+  const [text, setText] = useState("");
+  const go = useMutation({
+    mutationFn: (d: string) => resolveItem(item.id, { decision: d, reason: "decided on the run page", ...(d === "answer" ? { detail: { text } } : {}) }),
+    onSuccess: onDone,
+  });
+  const label: Record<string, string> = { answer: "Answer", skip: "Skip (stop discovery)", confirm: "Intended (public)", reject: "A hole (should be secured)", out_of_scope: "Not now" };
+  return (
+    <div className="card" style={{ display: "grid", gap: 6 }}>
+      <span><span className="needs">Needs you</span> {item.kind === "setup" ? p.question : p.title}</span>
+      {item.kind === "setup" ? <>
+        {p.detail && <span className="muted" style={{ fontSize: 13 }}>Why: {p.detail}</span>}
+        <input aria-label="Answer" value={text} onChange={(e) => setText(e.target.value)} placeholder="Your answer" />
+      </> : (
+        <ul style={{ margin: 0 }}>{(p.ops ?? []).map((o) => <li key={o.op}><span className="mono">{o.op}</span>{o.description && <span className="muted">: {o.description}</span>}</li>)}</ul>
+      )}
+      <div className="row">{item.options.map((o) => (
+        <button key={o} className={o === "answer" ? "primary" : ""} onClick={() => go.mutate(o)}
+          disabled={go.isPending || (o === "answer" && !text.trim())}>{label[o] ?? o.replace(/_/g, " ")}</button>
+      ))}</div>
+      {go.error && <span className="error">{(go.error as Error).message}</span>}
+    </div>
+  );
+}
+
 /** M8 run page (skeleton D26): nine stages shown as five steps; a stop becomes a card in place. */
 
 type StepState = "pending" | "running" | "waiting" | "done" | "failed";
+const DISCOVER_STEPS: { name: string; stages: string[] }[] = [{ name: "Discover the target", stages: ["discover"] }];
 const STEPS: { name: string; stages: string[] }[] = [
   { name: "Understand the feature", stages: ["spec"] },
   { name: "Clarify", stages: ["spec"] },
@@ -62,6 +92,8 @@ export function Flow({ run }: { run: RunDetail }) {
 
   const latest = new Map<string, Execution>();
   for (const e of run.executions) latest.set(e.stage, e);
+  // a `tp target add` run holds only the discover stage (discover/001 D5): one step of its own
+  const steps = latest.has("discover") && !latest.has("spec") ? DISCOVER_STEPS : STEPS;
   const exIds = new Set(run.executions.map((e) => e.id));
   const exStage = new Map(run.executions.map((e) => [e.id, e.stage]));
   const open = (reviews.data ?? []).filter((i) => exIds.has(i.stage_execution));
@@ -107,7 +139,8 @@ export function Flow({ run }: { run: RunDetail }) {
   };
 
   const st = (name: string): StepState => {
-    const sts = STEPS.find((s) => s.name === name)!.stages.map((s) => latest.get(s)?.status ?? "pending");
+    const sts = steps.find((s) => s.name === name)!.stages.map((s) => latest.get(s)?.status ?? "pending");
+    if (name === "Discover the target" && openFor("discover").some((i) => i.kind === "setup")) return "waiting";
     if (name === "Understand the feature") return spec?.status === "running" ? "running" : spec?.status === "failed" ? "failed" : spec && spec.status !== "pending" ? "done" : "pending";
     if (name === "Clarify") return openFor("spec").length ? "waiting" : spec?.status === "succeeded" || spec?.status === "stale" ? "done" : "pending";
     if (name === "Design and approve tests" && openFor("cases").length) return "waiting";
@@ -139,7 +172,8 @@ export function Flow({ run }: { run: RunDetail }) {
     return null;
   };
   // a decision the happy path doesn't expect (no stop of its own): never leave it invisible
-  const other = open.filter((i) => !["question", "confirm_observed", "signoff"].includes(i.kind));
+  const other = open.filter((i) => !["question", "confirm_observed", "signoff"].includes(i.kind)
+    && exStage.get(i.stage_execution) !== "discover");  // discover's items have their own cards
 
   return (
     <NavProvider value={go}>
@@ -153,7 +187,7 @@ export function Flow({ run }: { run: RunDetail }) {
         {run.status === "cancelled" && <><span className="warn">Cancelled after the current step.</span><button onClick={() => resume.mutate()}>Resume</button></>}
       </div>
       <div className="steps">
-        {STEPS.map((s, i) => {
+        {steps.map((s, i) => {
           const state = st(s.name);
           const runningEx = s.stages.map((n) => latest.get(n)).find((e) => e?.status === "running");
           return (
@@ -169,7 +203,14 @@ export function Flow({ run }: { run: RunDetail }) {
                   {state === "waiting" && <span className="needs">Needs you</span>}
                   {state === "running" && <span className="muted" style={{ fontSize: 12 }}>{elapsed(runningEx?.started)}</span>}
                 </div>
-                {s.name === "Clarify" ? (
+                {s.name === "Discover the target" && openFor("discover").length ? (
+                  <div className="body" style={{ display: "grid", gap: 8 }}>
+                    {openFor("discover").map((i) => <DiscoverItem key={i.id} item={i as ReviewItem} onDone={refresh} />)}
+                    {state === "done" && <div className="line">Discovered. See the profile on the <a href="/targets">Targets page</a>.</div>}
+                  </div>
+                ) : s.name === "Discover the target" && state === "done" ? (
+                  <div className="line">Discovered. See the profile on the <a href="/targets">Targets page</a>.</div>
+                ) : s.name === "Clarify" ? (
                   state === "waiting" ? <div className="body"><Clarify key={openFor("spec").map((x) => x.id).join()} items={openFor("spec") as ReviewItem[]} onDone={refresh} /></div>
                     : state === "done" && <div className="line">Answered</div>
                 ) : s.name === "Design and approve tests" && state === "waiting" ? (

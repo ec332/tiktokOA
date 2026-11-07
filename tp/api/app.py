@@ -86,9 +86,10 @@ class RunCreate(BaseModel):
     rules: RunRules | None = None
     templates: list[str] | None = None  # enabled case templates (cases D14)
     gate: dict[str, int | bool] | None = None  # gate settings for this run (gate D22)
+    profile: str | None = None  # target folder path or slug (GET /profiles); default TP_TARGET
 
 
-FOCUSED_STOPS = ["question", "confirm_observed", "signoff"]
+FOCUSED_STOPS = ["question", "confirm_observed", "setup", "signoff"]  # setup: discover/001 D5
 
 
 class SutTarget(BaseModel):
@@ -221,7 +222,11 @@ def create_run(body: RunCreate):
             inputs["requirements"] = artifacts.put("requirements", req).id
         options = {k: v for k, v in (("flows", body.flows), ("fresh", body.fresh),
                                      ("routes", body.routes), ("templates", body.templates),
-                                     ("gate", body.gate)) if v}  # fmt: skip
+                                     ("gate", body.gate), ("profile", body.profile)) if v}  # fmt: skip
+        if body.profile and body.profile not in {c["path"] for c in profile_choices()} | {
+            c["slug"] for c in profile_choices()
+        }:
+            raise ValueError(f"unknown target profile: {body.profile}")
         if body.rules and (body.rules.clarify or body.rules.cases):
             options["rules"] = body.rules.model_dump()
         if body.focused:
@@ -490,6 +495,53 @@ def get_artifact(art_id: str):
 
 
 # ---- reviews --------------------------------------------------------------------
+
+
+# ---- targets (stage D: discovered profiles) -------------------------------------
+
+
+def profile_choices() -> list[dict]:
+    from tp.core import profile
+
+    return profile.choices()
+
+
+@app.get("/profiles", response_model=list[dict[str, Any]])
+def list_profiles():
+    """Targets a run can use: hand-written and discovered (discover/006)."""
+    return profile_choices()
+
+
+class TargetAdd(BaseModel):
+    target: str  # a repo URL, optionally @<tag>
+    no_conventions: bool = False
+
+
+@app.get("/targets", response_model=list[dict[str, Any]])
+def list_targets():
+    from tp.stages.discover import targets
+
+    return targets.list_()
+
+
+@app.get("/targets/{slug}", response_model=dict[str, Any])
+def get_target(slug: str):
+    from tp.stages.discover import targets
+
+    try:
+        return targets.detail(slug)
+    except KeyError:
+        raise HTTPException(404, "target not found")
+
+
+@app.post("/targets", response_model=Run)
+def add_target(body: TargetAdd):
+    """`tp target add`: a run holding only the discover stage (discover/001 D5)."""
+    opts = {"target": body.target} | ({"no_conventions": True} if body.no_conventions else {})
+    run_id = runner.start_run("live", options=opts | {"stops": FOCUSED_STOPS},
+                              pipeline=["discover"])  # fmt: skip
+    submit(runner.advance, run_id)
+    return runner.get_run(run_id)
 
 
 @app.get("/reviews", response_model=list[ReviewItem])

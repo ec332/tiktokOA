@@ -916,6 +916,131 @@
         }
       }
     },
+    "/profiles": {
+      "get": {
+        "summary": "List Profiles",
+        "description": "Targets a run can use: hand-written and discovered (discover/006).",
+        "operationId": "list_profiles_profiles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List Profiles Profiles Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/targets": {
+      "get": {
+        "summary": "List Targets",
+        "operationId": "list_targets_targets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List Targets Targets Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add Target",
+        "description": "`tp target add`: a run holding only the discover stage (discover/001 D5).",
+        "operationId": "add_target_targets_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetAdd"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/targets/{slug}": {
+      "get": {
+        "summary": "Get Target",
+        "operationId": "get_target_targets__slug__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Target Targets  Slug  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/reviews": {
       "get": {
         "summary": "List Reviews",
@@ -1787,6 +1912,17 @@
               }
             ],
             "title": "Gate"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile"
           }
         },
         "type": "object",
@@ -2035,6 +2171,24 @@
           "base"
         ],
         "title": "SutTarget"
+      },
+      "TargetAdd": {
+        "properties": {
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "no_conventions": {
+            "type": "boolean",
+            "title": "No Conventions",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "title": "TargetAdd"
       },
       "ValidationError": {
         "properties": {

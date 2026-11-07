@@ -9,6 +9,7 @@ type Target = {
   changed: Record<string, number[]>; warnings: string[];
 };
 type SutInfo = { name: string; ref: string; target: Target | null; stack: { state: string; error: string | null } };
+type Choice = { slug: string; kind: "hand_written" | "discovered"; path: string; repo: string | null; commit_tested: string | null; black_box: boolean };
 type Route = { method: string; path: string; file: string; line: number };
 type Defaults = {
   clarify: string[]; templates: Record<string, string>;
@@ -157,6 +158,11 @@ export function NewRunPage() {
   });
   const routes = useQuery({ queryKey: ["routes", sut.data?.target?.ref], queryFn: () => get<Route[]>("/sut/routes"), enabled: !!sut.data?.target });
   const defaults = useQuery({ queryKey: ["rule-defaults"], queryFn: () => get<Defaults>("/rules/defaults") });
+  // which target the run is for (discover/006): hand-written or discovered; default = the server's
+  const profiles = useQuery({ queryKey: ["profiles"], queryFn: () => get<Choice[]>("/profiles") });
+  const [profile, setProfile] = useState<string>("");
+  const choice = profiles.data?.find((c) => c.path === profile);
+  const blackBox = !!choice?.black_box;
 
   const [overview, setOverview] = useState("");
   const [mode, setMode] = useState<Mode>("feature");
@@ -191,6 +197,7 @@ export function NewRunPage() {
         ? { kind: "brief", text: `Test these API endpoints as they are implemented: ${[...chosen].join(", ")}.` }
         : { kind: mode === "story" ? "story" : "brief", text: overview },
       routes: [...chosen],
+      ...(profile ? { profile } : {}),
       rules: { clarify: [...suggestions.map((s) => s.rule).filter((r) => picked.has(r)), ...clarify], cases: caseRules },
       templates: templates ? [...templates] : null,
       gate: gate ?? null,
@@ -199,19 +206,32 @@ export function NewRunPage() {
   });
 
   if (!sut.data) return <p className="muted">Loading…</p>;
-  const ready = !!sut.data.target && (mode === "endpoint" ? chosen.size > 0 : overview.trim().length > 0);
+  // a black-box target has no repo/branch to pick and no code index: the whole API is in scope
+  const hasTarget = blackBox || !!sut.data.target;
+  const ready = hasTarget && (mode === "endpoint" ? !blackBox && chosen.size > 0 : overview.trim().length > 0);
   const toggle = (k: string) => { const n = new Set(chosen); if (n.has(k)) n.delete(k); else n.add(k); setChosen(n); };
 
   return (
     <div className="page">
       <h1>New test run</h1>
-      <RepoCard sut={sut.data} onChanged={() => { qc.invalidateQueries({ queryKey: ["sut"] }); qc.invalidateQueries({ queryKey: ["routes"] }); }} />
+      <section className="card row" aria-label="Target">
+        <label className="field grow"><span>Target</span>
+          <select aria-label="Target" value={profile} onChange={(e) => { setProfile(e.target.value); setChosen(new Set()); if (e.target.value) setMode((m) => (m === "endpoint" ? "feature" : m)); }}>
+            <option value="">Default ({sut.data.name})</option>
+            {(profiles.data ?? []).map((c) => (
+              <option key={c.path} value={c.path}>{c.slug} · {c.kind === "discovered" ? "discovered" : "hand-written"}{c.commit_tested ? ` @ ${c.commit_tested.slice(0, 7)}` : ""}</option>
+            ))}
+          </select>
+        </label>
+        {blackBox && <span className="muted">Black-box target: the whole API is in scope.</span>}
+      </section>
+      {!blackBox && <RepoCard sut={sut.data} onChanged={() => { qc.invalidateQueries({ queryKey: ["sut"] }); qc.invalidateQueries({ queryKey: ["routes"] }); }} />}
 
       <section className="card" style={{ display: "grid", gap: 10 }} aria-label="Feature">
         <div className="row">
           <strong className="grow">What to test</strong>
           <div className="seg" role="radiogroup" aria-label="Input mode">
-            {MODES.map(([m, label]) => (
+            {MODES.filter(([m]) => !(blackBox && m === "endpoint")).map(([m, label]) => (
               <button key={m} role="radio" aria-checked={mode === m} className={mode === m ? "on" : ""} onClick={() => setMode(m)}>{label}</button>
             ))}
           </div>
@@ -223,7 +243,7 @@ export function NewRunPage() {
               ? "As an item owner I want to set a price and a discount percentage…\n\nAcceptance criteria:\n- …"
               : "Items get a price and a discount percentage; responses show the discounted price."} />
         )}
-        {sut.data.target && (
+        {sut.data.target && !blackBox && (
           <div className="field"><span>{mode === "endpoint" ? "Endpoints to test (pick at least one)" : "Routes to focus on (optional: none = the whole API)"}</span>
             {routes.isLoading && <span className="muted">Reading routes…</span>}
             {groups.map(([group, rs]) => (
@@ -300,8 +320,8 @@ export function NewRunPage() {
 
       <div className="row">
         <button className="primary" disabled={!ready || start.isPending} onClick={() => start.mutate()}>Start run</button>
-        {!sut.data.target && <span className="muted">Choose a repo and branch first.</span>}
-        {sut.data.target && !ready && <span className="muted">{mode === "endpoint" ? "Pick at least one endpoint." : "Describe what to test."}</span>}
+        {!hasTarget && <span className="muted">Choose a repo and branch first.</span>}
+        {hasTarget && !ready && <span className="muted">{mode === "endpoint" ? "Pick at least one endpoint." : "Describe what to test."}</span>}
         {start.error && <span className="error">{(start.error as Error).message}</span>}
       </div>
     </div>

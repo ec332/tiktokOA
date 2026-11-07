@@ -14,7 +14,9 @@ KINDS: dict[str, list[str]] = {
     "equivalent_mutant": ["equivalent", "not_equivalent"],
     "triage": ["accept", "override"],
     "real_defect": ["confirm", "reject"],
+    "setup": ["answer", "skip"],  # discovery could not verify a step (discover/001 D5)
 }
+TEXT_DECISIONS = {("setup", "answer")}  # detail.text is the answer, verified by a probe
 OTHER_CHOICE = "other"  # a question choice whose answer is the reviewer's own text (M8)
 NEEDS_REASON = {("triage", "override")}
 CHOICE_DECISIONS = {
@@ -172,6 +174,11 @@ def _check_detail(item: dict, decision: str | None, detail: dict) -> tuple[str, 
         if decision not in (None, derived):
             raise ValueError(f"decision {decision!r} contradicts the line decisions ({derived})")
         return derived, {"lines": given}
+    if (kind, decision) in TEXT_DECISIONS:
+        text = str(detail.get("text") or "").strip()
+        if not text:
+            raise ValueError(f"{decision} needs detail.text")
+        return decision, {"text": text}
     if (kind, decision) in CHOICE_DECISIONS:
         choice = detail.get("choice")
         if choice not in {c["id"] for c in payload.get("choices", [])}:
