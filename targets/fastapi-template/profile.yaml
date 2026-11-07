@@ -50,8 +50,15 @@ auth:
 
 data:
   source: override
-  # deterministic factories over the API; loaded in the runner and on the host (env D15)
-  value: {strategy: override_module, module: factories.py}
+  # deterministic factories over the API; loaded in the runner and on the host (env D15).
+  # factories: the precondition names cases may use; make_doc / api_doc: what the binding
+  # writer is told about them (blackbox D15)
+  value:
+    strategy: override_module
+    module: factories.py
+    factories: [user, superuser, item, inactive_user]
+    make_doc: "- `make`: test-data factories. `make.user()` → `{id, email, password, full_name, is_active, token}`; `make.superuser()` → `{email, token}`; `make.item(owner=user)` → `{id, owner_id, title, description}` (a new owner if none is given); `make.inactive_user()` → a user with `token` None. Use them for any extra users or items you need (e.g. \"another user's item\", \"5 items in total\")."
+    api_doc: "- `api.get/post/put/patch/delete(path, token=None, params=None, json=None)` → an `httpx.Response`. Paths are the full OpenAPI paths (e.g. `/api/v1/items/`). Pass the caller's token (e.g. `token=user[\"token\"]`); `token=None` sends no credentials and is only for an anonymous caller (`REQUEST[case_id][\"auth\"]` is false)."
 
 state:
   source: override

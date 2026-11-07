@@ -1,0 +1,12 @@
+# Sandbox for target containers (blackbox design D3, D5). Generic: no target names here.
+limits: {cpus: "2", mem_limit: 2g}   # per service; check the target isn't OOM-killed
+# inbound-only forwarder: host 127.0.0.1:<random> -> <app service>:<port> on the internal network
+forwarder: {image: "alpine/socat:1.8.0.3", port: 8000}
+# compose service keys kept as they are; anything not listed here or in `drop` fails closed
+keep: [image, build, command, entrypoint, environment, depends_on, healthcheck, working_dir,
+       user, expose, labels, stop_grace_period, tmpfs, init, shm_size]
+drop: [ports, restart, container_name, network_mode, privileged, cap_add, devices, pid, ipc,
+       networks, deploy, extra_hosts, logging]
+# build: keys kept; anything else (additional_contexts, ssh, secrets, network, cache_from: local
+# paths) can reach the host and fails closed. The context must stay inside the checkout.
+build_keep: [context, dockerfile, args, target, labels]

@@ -52,9 +52,10 @@ class TargetProfile:
 
 
 def active_slug(root: Path = Path(".")) -> str:
-    """TP_TARGET if set, else the only folder under targets/."""
+    """TP_TARGET if set, else the only folder under targets/. A TP_TARGET holding a `/` is a
+    path to a target folder (blackbox D13), e.g. a test fixture: its slug is the folder name."""
     if slug := os.environ.get("TP_TARGET"):
-        return slug
+        return Path(slug).name if "/" in slug else slug
     found = sorted(p.name for p in (root / TARGETS).glob("*/profile.yaml") for p in [p.parent])
     if len(found) != 1:
         raise ProfileError(f"{len(found)} targets under {root / TARGETS}: set TP_TARGET")
@@ -62,6 +63,8 @@ def active_slug(root: Path = Path(".")) -> str:
 
 
 def target_dir(root: Path = Path(".")) -> Path:
+    if "/" in (t := os.environ.get("TP_TARGET", "")):
+        return root / t
     return root / TARGETS / active_slug(root)
 
 
@@ -122,7 +125,7 @@ def legacy(p: TargetProfile) -> dict:
         "flags": list(mut.get("flags", [])),
         "code_scope": dict(mut.get("code_scope", {})),
         "surfaces": {"api": {"openapi": spec.get("openapi"), "base": spec.get("base", "")}},
-        "compose": dict(reach.get("compose", {})),
+        "compose": dict(c) if isinstance(c := reach.get("compose"), dict) else {},
         "env": dict(reach.get("env", {})),
         "lifecycle": {
             "migrate": reach.get("migrate"),
