@@ -105,7 +105,8 @@ class TriageStage:
         if not state_path.exists():
             rr = inputs["run_records"].body
             rows, probes, logs = _records(db.data_dir() / rr["folder"], rr["root"])
-            src = Path(ctx.strategies.mutation.scope()["src"]) if ctx.strategies else None
+            where = ctx.strategies.mutation.scope()["src"] if ctx.strategies else None
+            src = Path(where) if where else None  # a black-box target has no source
             read = _git_source(src) if src else (lambda rel: None)
             app = (
                 {
