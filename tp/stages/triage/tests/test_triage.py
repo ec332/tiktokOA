@@ -103,6 +103,52 @@ def test_spec_gap_rule():
     assert rules.classify(v, None, rows_for(v))[0] == "SPEC_GAP"
 
 
+def test_spec_mismatch_and_infrastructure_statuses():
+    """checks/001 D6, D8: server-vs-spec disagreement is never a defect; 429/502–504 are ENV."""
+    v = vd("G:properties:GET /x", gate="SPEC_MISMATCH")
+    assert rules.classify(v, None, rows_for(v, origin="SPEC"))[0] == "SPEC_MISMATCH"
+    rows = rows_for(v)
+    for r in rows.values():
+        r["exchanges"][0]["status"] = 503
+    assert rules.classify(v, None, rows)[0] == "ENV"
+
+
+def test_an_assumed_criterion_is_wrong_or_drift_depending_on_the_spec():
+    """checks/001 D7: on an OpenAPI-indexed spec, a failing SPEC_GAP whose status the spec
+    declares is a wrong assumption; an undeclared one is SPEC_MISMATCH, with what was observed."""
+    from tp.stages.triage.stage import _spec_side
+
+    fs, rows = [], {}
+    for case, declared in (("TC-A", True), ("TC-B", False)):
+        v = vd(case, gate="SPEC_GAP")
+        rows |= {a: r | {"failure": {"declared": declared, "error": "x"}}
+                 for a, r in rows_for(v, origin="ASSERTION").items()}  # fmt: skip
+        fs.append({"class": "SPEC_GAP", "rule": "", "evidence": v["attempts"]})
+    _spec_side([dict(f) for f in fs], rows, from_openapi=False)  # a source-indexed spec: unchanged
+    _spec_side(fs, rows, from_openapi=True)
+    assert [f["class"] for f in fs] == ["SPEC_GAP", "SPEC_MISMATCH"]
+    assert "assumption is wrong" in fs[0]["rule"]
+    assert (
+        fs[1]["observed"]["request"] == "GET /api/v1/items/" and fs[1]["observed"]["status"] == 200
+    )
+
+
+def test_a_property_mismatch_keeps_its_checks_curl_and_example_count():
+    """checks/004: the report shows how many examples drifted, from the record's `observed`."""
+    from tp.stages.triage.stage import _spec_side
+
+    v = vd("G:properties:GET /x", gate="SPEC_MISMATCH")
+    obs = {
+        "checks": ["Undocumented status code"],
+        "curl": "curl -X GET http://t/x",
+        "examples": "4/10",
+    }
+    rows = {a: r | {"observed": obs} for a, r in rows_for(v, origin="SPEC").items()}
+    fs = [{"class": "SPEC_MISMATCH", "rule": "", "evidence": v["attempts"]}]
+    _spec_side(fs, rows, from_openapi=True)
+    assert {k: fs[0]["observed"][k] for k in obs} == obs
+
+
 def test_product_defect_and_seeded_needs_a_pass_on_reference():
     ref_fail, ref_pass = vd("T"), vd("T", verdict="PASS")
     seeded = vd("T", variant="bug:BUG_X")

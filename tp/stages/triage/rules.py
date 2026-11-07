@@ -1,16 +1,31 @@
 """HardRules (plan Stage 7, design D2–D4). Pure functions over execute's verdicts.
 
-Order: ENV → DATA → FLAKY_TEST / INTERMITTENT_PRODUCT → TEST_DEFECT → SPEC_GAP → PRODUCT_DEFECT.
+Order: ENV → DATA → FLAKY_TEST / INTERMITTENT_PRODUCT → TEST_DEFECT → SPEC_MISMATCH → SPEC_GAP
+→ PRODUCT_DEFECT.
 Anything the rules leave open is INSUFFICIENT_EVIDENCE (the AI judge is M7)."""
 
 PRODUCT_SIDE = {"PRODUCT_ERROR", "ASSERTION", "CONTRACT"}
 TEST_SIDE = {"BINDING", "CONFORMANCE", "PLATFORM"}
-CLASSES = ("ENV", "DATA", "FLAKY_TEST", "INTERMITTENT_PRODUCT", "TEST_DEFECT", "SPEC_GAP",
-           "PRODUCT_DEFECT", "INSUFFICIENT_EVIDENCE")  # fmt: skip
+CLASSES = ("ENV", "DATA", "FLAKY_TEST", "INTERMITTENT_PRODUCT", "TEST_DEFECT", "SPEC_MISMATCH",
+           "SPEC_GAP", "PRODUCT_DEFECT", "INSUFFICIENT_EVIDENCE")  # fmt: skip
+INFRA = {429, 502, 503, 504}  # rate limited or a gateway in front: the environment (checks/001 D8)
 
 
 def _origins(vd: dict, rows: dict) -> set:
     return {rows[a].get("origin") for a in vd["attempts"]
+            if a in rows and rows[a].get("outcome") not in (None, "passed")}  # fmt: skip
+
+
+def under_test(row: dict) -> dict | None:
+    """The exchange a failing record asserted on (its last test request if none was marked)."""
+    steps = [e for e in row.get("exchanges", []) if not e.get("setup")]
+    return next(
+        (e for e in steps if e["step"] == row.get("under_test")), steps[-1] if steps else None
+    )
+
+
+def _statuses(vd: dict, rows: dict) -> set:
+    return {(under_test(rows[a]) or {}).get("status") for a in vd["attempts"]
             if a in rows and rows[a].get("outcome") not in (None, "passed")}  # fmt: skip
 
 
@@ -28,6 +43,8 @@ def classify(vd: dict, ref: dict | None, rows: dict) -> tuple[str, str]:
         return "ENV", "a failing attempt's origin is ENV"
     if "DATA" in origins:
         return "DATA", "a failing attempt's origin is DATA (setup/factory)"
+    if (statuses := _statuses(vd, rows)) and statuses <= INFRA:
+        return "ENV", f"the target answered {sorted(statuses)}: rate limited or a gateway error"
     if v == "INTERMITTENT":
         if origins and origins <= TEST_SIDE:
             return "FLAKY_TEST", "intermittent, failures raised in the test's own code"
@@ -43,6 +60,11 @@ def classify(vd: dict, ref: dict | None, rows: dict) -> tuple[str, str]:
         return "SAME_AS_REFERENCE", "fails on reference too: not a finding of this variant"
     if origins & TEST_SIDE:
         return "TEST_DEFECT", f"consistent failure raised in the test ({sorted(origins)})"
+    if "SPEC" in origins:
+        return (
+            "SPEC_MISMATCH",
+            "valid HTTP that disagrees with the served spec: server or spec is wrong",
+        )
     if vd["gate_status"] == "SPEC_GAP":
         return "SPEC_GAP", "the criterion is only assumed (gate SPEC_GAP)"
     if v == "CONSISTENT_FAIL" and origins <= PRODUCT_SIDE:

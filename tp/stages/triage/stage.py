@@ -44,6 +44,7 @@ def analyse(run_records: dict, rows: list, probes: list, logs: dict, spec: dict,
     """Everything up to the human decisions. Pure given its inputs."""
     idx = EvidenceIndex(rows, probes, logs)
     fs = rules.findings(run_records["verdicts"], idx.rows)
+    _spec_side(fs, idx.rows, (spec.get("index") or {}).get("from") == "openapi")
     ds = rules.defects(fs)
     criteria = {c["id"]: c for c in spec["criteria"]}
     src = localise.Source(read)
@@ -77,6 +78,32 @@ def analyse(run_records: dict, rows: list, probes: list, logs: dict, spec: dict,
         "scores": scores,
         "evidence": {e: _excerpt(e, idx.resolve(e)) for e in sorted(cited)},
     }
+
+
+WRONG_ASSUMPTION = ("SPEC_GAP", ("the served spec and the server agree on this status: the "
+                                 "drafted assumption is wrong"))  # fmt: skip
+UNDECLARED = ("SPEC_MISMATCH", ("an assumed criterion failed on a status its spec doesn't "
+                                "declare: server or spec is wrong"))  # fmt: skip
+
+
+def _spec_side(fs: list[dict], rows: dict, from_openapi: bool) -> None:
+    """checks/001 D7: an assumed criterion failing on a status its served spec declares is a
+    wrong assumption, not a finding of any kind; on an undeclared one, server and spec disagree.
+    Every SPEC_MISMATCH carries what the report shows: the request, status, checks and curl."""
+    for f in fs:
+        row = next(
+            (rows[a] for a in f["evidence"] if rows.get(a, {}).get("outcome") == "failed"), {}
+        )
+        declared = (row.get("failure") or {}).get("declared")
+        if from_openapi and f["class"] == "SPEC_GAP" and declared is not None:
+            f["declared"] = declared
+            f["class"], f["rule"] = WRONG_ASSUMPTION if declared else UNDECLARED
+        if f["class"] == "SPEC_MISMATCH":
+            ex, obs = rules.under_test(row) or {}, row.get("observed") or {}
+            f["observed"] = {"request": f"{ex.get('method')} {ex.get('path')}",
+                             "status": ex.get("status"),
+                             "error": (row.get("failure") or {}).get("error"),
+                             **{k: obs[k] for k in ("checks", "curl", "examples") if k in obs}}  # fmt: skip
 
 
 def _excerpt(eid: str, ev: dict) -> dict:
