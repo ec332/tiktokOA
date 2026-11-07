@@ -6,6 +6,8 @@ import os
 import stat
 from pathlib import Path
 
+from tp.core import secrets
+
 SEAL = "records.sha256"
 
 
@@ -18,10 +20,11 @@ def write(folder: Path, files: dict[str, str]) -> str:
     Refuses a folder that already holds a seal: a record is never overwritten."""
     if (folder / SEAL).exists():
         raise FileExistsError(f"{folder} is sealed; a new attempt needs a new folder")
+    pairs = secrets.known()  # sealed records never carry a secret (blackbox D9)
     for rel, text in files.items():
         p = folder / rel
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(text)
+        p.write_text(secrets.redact(text, pairs))
     lines = [f"{_sha(folder / rel)}  {rel}" for rel in sorted(files)]
     (folder / SEAL).write_text("\n".join(lines) + "\n")
     for rel in [*files, SEAL]:
