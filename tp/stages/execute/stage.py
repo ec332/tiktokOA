@@ -11,7 +11,7 @@ from tp.core.contract import StageResult, register
 from tp.stages.execute import decide, record
 
 K = 3  # main-lane attempts (plan †)
-SKIP = ("REJECTED", "UNBOUND")
+SKIP = ("REJECTED", "UNBOUND", "EXCLUDED")
 
 
 def _safe(name: str) -> str:
