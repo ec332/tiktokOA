@@ -10,13 +10,13 @@ import httpx
 import pytest
 
 from platform_rt import record
-from platform_rt.api import api, route_matches
+from platform_rt.api import api, route_matches, token
 
 
 class Make:
     def admin(self) -> dict:
         """The admin principal the platform provisioned: `{token}` (sent as $TP_AUTH_SCHEME)."""
-        return {"token": os.environ["TP_SECRET_TOKEN"]}
+        return {"token": token()}
 
     def name(self, label: str = "x") -> str:
         return record.current().name(label)
@@ -74,8 +74,7 @@ def pytest_runtest_teardown(item):
     from platform_rt.plugin import _openapi
 
     spec = _openapi() or {}
-    auth = {"Authorization": f"{os.environ.get('TP_AUTH_SCHEME', 'Bearer')} "
-                             f"{os.environ['TP_SECRET_TOKEN']}"}  # fmt: skip
+    auth = {"Authorization": f"{os.environ.get('TP_AUTH_SCHEME', 'Bearer')} {token()}"}
     done = []
     for e in reversed(rec.created):
         if target := delete_path(spec, e):

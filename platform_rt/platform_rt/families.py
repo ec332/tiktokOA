@@ -15,6 +15,7 @@ import pytest
 
 from platform_rt import record
 from platform_rt.api import api
+from platform_rt.api import token as api_token
 from platform_rt.blackbox import eventually
 from platform_rt.expect import ExpectationFailed, SpecMismatch
 from platform_rt.origin import resolve
@@ -76,10 +77,15 @@ def _param_names(spec: dict, op: dict) -> set[str]:
     return {resolve(spec, p).get("name") for p in op.get("parameters", []) + op["_shared"]}
 
 
-def secured(spec: dict, op: dict) -> bool:
+def secured(spec: dict, op: dict, c: dict | None = None, key: str = "") -> bool:
     """The spec requires credentials: a non-empty security list without an empty (anonymous)
-    alternative, on the operation or else globally."""
-    sec = op.get("security", spec.get("security")) or []
+    alternative, on the operation or else globally. When the spec declares no security at all,
+    the profile's discovered map decides (discover/002 P1): its default, unless the operation
+    ("METHOD path") is public or was observed open (those stay spec-side until confirmed)."""
+    sec = op.get("security", spec.get("security"))
+    if sec is None and (m := (c or {}).get("secured")):
+        return m.get("default") == "secured" and key not in m.get("public", []) \
+            and key not in m.get("observed_open", [])  # fmt: skip
     return bool(sec) and {} not in sec
 
 
@@ -121,7 +127,7 @@ def plan(spec: dict, c: dict, focus: list[str] = ()) -> list[tuple[str, str | No
 
 
 def _send(method: str, path: str, *, token: str | None | bool = True, **kw):
-    tok = os.environ.get("TP_SECRET_TOKEN") if token is True else token
+    tok = api_token() if token is True else token
     r = api.request(method, path, token=tok or None, **kw)
     rec = record.current()
     rec.under_test = rec.exchanges[-1]  # the exchange the claim is about
@@ -154,10 +160,16 @@ def unknown(c: dict) -> str:
     return str(n) if c["id_style"] == "integer" else f"tp-no-such-{n:x}"
 
 
+UNSET_ENUM = re.compile(r"(^|_)UNSPECIFIED$")  # AIP-126: an enum's zero value means "unset"
+
+
 def _valid(spec: dict, schema: dict | None, name: str):
     s = resolve(spec, schema or {})
     if "enum" in s:
-        return s["enum"][0]
+        # the first real value: an "unset" zero value (https://google.aip.dev/126) is replaced by
+        # the server's default, so sending it would make read_back report a defect that isn't one
+        return next((v for v in s["enum"] if not (isinstance(v, str) and UNSET_ENUM.search(v))),
+                    s["enum"][0])  # fmt: skip
     t = s.get("type")
     if t == "string":
         v = record.current().name(name)
@@ -255,7 +267,9 @@ def properties(spec, c, method, path, op):
 
 
 def auth_required(spec, c, method, path, op):
-    sec = secured(spec, op)
+    sec = secured(spec, op, c, f"{method} {path}")
+    if f"{method} {path}" in (c.get("secured") or {}).get("public", []):
+        pytest.skip("public: the sign-in or first-user operation (discover/002 P1)")
     for label, token in (("no credentials", None), ("an invalid token", "tp-invalid-token")):
         r = _send(method, _fill(path, unknown(c)), token=token)
         _no_5xx(label, r)

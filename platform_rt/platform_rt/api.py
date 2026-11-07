@@ -184,6 +184,9 @@ class Api:
         )
 
     def openapi(self) -> dict:
+        if f := os.environ.get("TP_OPENAPI_FILE"):  # black-box: the platform's copy (discover/002)
+            with open(f) as fh:
+                return json.load(fh)
         path = os.environ.get("TP_OPENAPI_PATH") or (
             os.environ.get("TP_API_BASE", "/api/v1") + "/openapi.json"
         )
@@ -191,3 +194,37 @@ class Api:
 
 
 api = Api()
+
+REFRESH_S = 60  # log in again when a token has less than this left (discover/002 P7)
+
+
+def _expiry(token: str) -> float | None:
+    """A JWT's `exp` (RFC 7519); None for any other token."""
+    import base64
+
+    try:
+        part = token.split(".")[1]
+        return float(json.loads(base64.urlsafe_b64decode(part + "=" * (-len(part) % 4)))["exp"])
+    except IndexError, ValueError, KeyError, TypeError:
+        return None
+
+
+def token() -> str | None:
+    """The admin token ($TP_SECRET_TOKEN). With $TP_LOGIN set, a JWT about to expire is replaced
+    by a fresh login before it is used, never after a 401 (so a 401 stays evidence)."""
+    tok = os.environ.get("TP_SECRET_TOKEN")
+    login = os.environ.get("TP_LOGIN")
+    exp = _expiry(tok or "")
+    if not (tok and login and exp is not None and exp - time.time() < REFRESH_S):
+        return tok
+    spec = json.loads(login)
+    body = json.loads(
+        json.dumps(spec["body"]).replace(
+            "$TP_SECRET_ADMIN_PASSWORD",
+            json.dumps(os.environ.get("TP_SECRET_ADMIN_PASSWORD", ""))[1:-1],
+        )
+    )
+    kw = {"json": body} if spec.get("json") else {"data": body}
+    tok = str(api.client.post(spec["path"], **kw).json()[spec["token_field"]])
+    os.environ["TP_SECRET_TOKEN"] = tok
+    return tok

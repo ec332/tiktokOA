@@ -110,6 +110,11 @@ def env(monkeypatch):
     api.use(None)
 
 
+@pytest.fixture(autouse=True)
+def _data(tmp_path, monkeypatch):
+    monkeypatch.setenv("TP_DATA", str(tmp_path))  # families_config reads review answers
+
+
 def conf(slug: str, monkeypatch) -> dict:
     monkeypatch.setenv("TP_TARGET", str(FIXTURES / slug))
     return families.DEFAULTS | families_config(profile.load())
@@ -146,11 +151,22 @@ def test_the_same_families_run_on_both_conventions(slug, monkeypatch):
     assert got[f"G:unknown_id:GET {s['item']}"] == "passed"
     assert got[f"G:invalid_input:POST {s['coll']}"] == "passed"
     assert all(v == "passed" for k, v in got.items() if k.startswith("G:properties:"))
-    # anonymous reads: refused on the secured spec; allowed by the unsecured one, so server and
-    # spec disagree (D5): SPEC, never a defect
-    anon_list = got[f"G:auth_required:GET {s['coll']}"]
-    assert anon_list == ("passed" if s["secured"] else "SPEC")
-    assert "PRODUCT_ERROR" not in got.values() and "ASSERTION" not in got.values()
+    # anonymous reads: refused on the secured spec. The unsecured spec declares nothing, so the
+    # profile's discovered map decides (discover/002 P1): secured by default, so the fake's
+    # anonymous 2xx is a product failure; an observed-open op stays SPEC (next test)
+    anon_key = f"G:auth_required:GET {s['coll']}"
+    assert got[anon_key] == ("passed" if s["secured"] else "ASSERTION")
+    rest = {k: v for k, v in got.items() if k != anon_key}
+    assert "PRODUCT_ERROR" not in rest.values() and "ASSERTION" not in rest.values()
+
+
+def test_an_observed_open_read_stays_spec_side_until_confirmed(monkeypatch):
+    monkeypatch.setenv("TP_TARGET", str(FIXTURES / "memos"))
+    p = profile.load()
+    p.auth.value["secured"]["observed_open"] = [f"GET {SHAPES['memos']['coll']}"]
+    monkeypatch.setattr(profile, "load", lambda *a, **k: p)
+    got = run_all("memos", monkeypatch)
+    assert got[f"G:auth_required:GET {SHAPES['memos']['coll']}"] == "SPEC"
 
 
 def test_defects_fail_as_product_and_drift_as_spec(monkeypatch):
@@ -257,3 +273,15 @@ def test_generate_embeds_the_runs_routes():
         "GET /api/tags/",
         "POST /api/tags/",
     ]
+
+
+def test_an_unset_enum_zero_value_is_never_sent():
+    """AIP-126: `*_UNSPECIFIED` means "unset" and the server stores its default instead, which
+    read_back would report as a round-trip defect (checks/007: Memos r-0025, r-0031)."""
+    from platform_rt.families import _valid
+
+    enum = lambda *v: {"type": "string", "enum": list(v)}
+    assert _valid({}, enum("VISIBILITY_UNSPECIFIED", "PRIVATE", "PUBLIC"), "v") == "PRIVATE"
+    assert _valid({}, enum("UNSPECIFIED", "ON"), "v") == "ON"
+    assert _valid({}, enum("draft", "published"), "v") == "draft"  # ordinary enums: unchanged
+    assert _valid({}, enum("STATE_UNSPECIFIED"), "v") == "STATE_UNSPECIFIED"  # nothing else
