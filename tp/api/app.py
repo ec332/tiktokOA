@@ -302,12 +302,14 @@ def _export_inputs(run_id: int) -> tuple[dict, dict, list[dict], dict]:
     run, heads = get_run(run_id), runner.heads(run_id)
     if missing := [k for k in ("bound_tests", "gate_report", "cases", "spec") if k not in heads]:
         raise HTTPException(409, f"nothing to export yet (missing {', '.join(missing)})")
-    t = sut.target()
-    if not t:
-        raise HTTPException(409, "no repo target is set")
     body = {
         k: artifacts.get(heads[k]).body for k in ("bound_tests", "gate_report", "cases", "spec")
     }
+    if body["spec"].get("index", {}).get("from") == "openapi":  # blackbox/006: stage F's job
+        raise HTTPException(409, "exporting black-box tests is not supported yet (stage F)")
+    t = sut.target()
+    if not t:
+        raise HTTPException(409, "no repo target is set")
     tri = artifacts.get(heads["triage"]).body if "triage" in heads else None
     cands = contract.resolve("report").export_candidates(
         body["bound_tests"], body["gate_report"], body["cases"], tri

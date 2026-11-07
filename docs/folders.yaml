@@ -33,6 +33,7 @@ folders:
   - {path: web/src/panels/generate, owner: generate, milestone: M3}
   - {path: platform_rt, owner: generate, milestone: M3}
   - {path: images/runner, owner: generate, milestone: M3}
+  - {path: images/runner-blackbox, owner: generate, milestone: I2}  # stage B (blackbox/001)
   - {path: tp/stages/gate, owner: gate, milestone: M3}
   - {path: web/src/panels/gate, owner: gate, milestone: M3}
   # Run, judge, report (M4)

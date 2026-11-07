@@ -132,3 +132,20 @@ def test_run_list_can_show_only_happy_path_runs(client):
     rows = client.get("/runs", params={"focused": True}).json()
     assert [(r["id"], r["overview"]) for r in rows] == [(run["id"], "Items get a price")]
     assert len(client.get("/runs").json()) == 2
+
+
+def test_black_box_runs_are_not_exported(client, monkeypatch):
+    """blackbox/006: export writes the template's harness into a repo branch; a black-box run
+    (spec indexed from OpenAPI) is refused until stage F, never written to the wrong repo."""
+    from types import SimpleNamespace
+
+    from tp.api import app as api_app
+
+    monkeypatch.setattr(api_app, "get_run", lambda rid: {"name": "r-1"})
+    monkeypatch.setattr(api_app.runner, "heads",
+                        lambda rid: {k: k for k in ("bound_tests", "gate_report", "cases", "spec")})  # fmt: skip
+    spec = {"index": {"from": "openapi"}, "sut": {"ref": "x"}}
+    monkeypatch.setattr(api_app.artifacts, "get",
+                        lambda k: SimpleNamespace(body=spec if k == "spec" else {}))  # fmt: skip
+    r = client.get("/runs/1/export")
+    assert r.status_code == 409 and "black-box" in r.json()["detail"]

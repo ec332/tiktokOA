@@ -9,7 +9,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-from tp.core import db, hashing
+from tp.core import db, hashing, secrets
 from tp.core import labels as labels_mod
 
 
@@ -56,6 +56,7 @@ def put(
     labels: list[str] = (),
     signed: dict | None = None,
 ) -> Artifact:
+    body = secrets.scrub(body)  # nothing sealed carries a secret (blackbox D9)
     manifest = {
         "type": type,
         "schema_version": schema_version,

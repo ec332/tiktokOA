@@ -1,0 +1,62 @@
+# Hand-written Paperless-ngx profile (stage B, docs/status/blackbox/001 + 002 D13): the input B
+# runs before discovery exists. Stage D must reproduce it field by field. Test input, not platform
+# input: select it with TP_TARGET=tests/fixtures/targets/paperless-ngx.
+schema_version: 1
+target:
+  name: paperless-ngx
+  repo: https://github.com/paperless-ngx/paperless-ngx
+  type: api
+commit_tested: d939d873e11dd14896d1bfe23f65b1baa6513ba7   # tag v3.4.2
+
+reach:
+  source: override
+  evidence: docker/compose/docker-compose.sqlite.yml at v3.4.2 (webserver + valkey broker)
+  value:
+    strategy: container
+    ref: v3.4.2
+    compose: docker/compose/docker-compose.sqlite.yml
+    service: webserver
+    port: 8000
+    image_tag_from: ref            # the compose pulls :latest; test the image of the checked-out tag
+    health: /api/schema/
+    env:                           # docs/configuration.md: the admin made at first start
+      PAPERLESS_ADMIN_USER: tpadmin
+      PAPERLESS_ADMIN_PASSWORD: {secret: admin_password}
+      PAPERLESS_SECRET_KEY: {secret: app_secret_key}   # the app refuses the env file's 'change-me'
+
+spec:
+  source: override
+  evidence: drf-spectacular serves the schema at /api/schema/ (YAML unless ?format=json)
+  value: {strategy: served, openapi: "/api/schema/?format=json", base: /api}
+
+auth:
+  source: override
+  evidence: "POST /api/token/ -> {token}; sent as `Authorization: Token <token>`"
+  value:
+    strategy: token_header
+    scheme: Token
+    login: {path: /api/token/, body: {username: tpadmin, password: {secret: admin_password}},
+            token_field: token}
+    check: /api/tags/              # 401 without credentials, 200 with them (the auth probe)
+
+data:
+  source: override
+  evidence: documents are consumed asynchronously by a Celery worker (OCR); a one-page PDF took
+    14-57 s to appear over 9 runs (r-0011, blackbox/005), so 120 s leaves headroom
+  value: {strategy: spec_derived, read_back_timeout_s: 120}
+
+state:
+  source: override
+  value: {strategy: namespace}
+
+mutation:
+  source: override
+  value: {strategy: none}
+
+safety:
+  source: override
+  value: {strategy: unrestricted}
+
+checks:
+  source: override
+  value: {strategy: pytest_cases}
