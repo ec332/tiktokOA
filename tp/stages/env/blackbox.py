@@ -386,6 +386,9 @@ class Stack:
             "TP_AUTH_SCHEME": who["scheme"],
             "TP_READ_BACK_TIMEOUT": str(read_back := self.p.data.value.get("read_back_timeout_s", 5)),
             "TP_TIMEOUT": str(max(60, int(read_back) + 60)),  # a read-back must fit in one test
+            "TP_ID_FIELD": self.p.data.value.get("id_field", "id"),
+            "TP_FAMILIES": json.dumps(families_config(self.p)),
+            "TP_RATE": str(families_config(self.p)["rate"]),
             **(env or {}),
         }  # fmt: skip
         secret_env = {"TP_SECRET_TOKEN": who["token"]}
@@ -437,6 +440,16 @@ class Stack:
         return out
 
 
+def families_config(p: TargetProfile) -> dict:
+    """$TP_FAMILIES for platform_rt.families (checks/001): the data conventions (ID field and
+    style, paging) from `data`, the family knobs (per_family, examples, rate, exclude) from
+    `checks.families`."""
+    d = p.data.value
+    return {"id_field": d.get("id_field", "id"), "id_style": d.get("id_style", "integer"),
+            "paging": d.get("paging"), "rate": 5, "per_family": 5, "examples": 10, "exclude": []
+            } | (p.checks.value.get("families") or {})  # fmt: skip
+
+
 def _matches(template: str, path: str) -> bool:
     """`/api/tags/{id}/` matches `/api/tags/7/` (a parameter is one non-empty segment)."""
     want, got = template.split("/"), path.split("/")
@@ -453,7 +466,7 @@ def delete_path(spec: dict, entry: dict) -> str | None:
     if loc := entry.get("location"):
         cands.append(httpx.URL(loc).path)
     if entry.get("id") is not None:
-        stem = entry["path"].rstrip("/") + f"/{entry['id']}"
+        stem = entry["path"].rstrip("/") + f"/{str(entry['id']).split('/')[-1]}"  # names: last part
         cands += [stem + "/", stem]
     return next((c for c in cands for p in paths if _matches(p, c)), None)
 
