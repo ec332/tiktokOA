@@ -6,22 +6,34 @@ target:
   name: memos
   repo: https://github.com/usememos/memos
   type: api
-commit_tested: null
+commit_tested: b40d8a7b573774c52b022c8d6537d6baf2129dc0   # tag 26.11.0
 
+# reach, spec and auth corrected to what discovery found on 26.11.0 (discover/004, r-0020):
+# the base is /api (not /api/v1) and the release image is pulled, not built.
 reach:
   source: override
-  evidence: master §4 - build from scripts/Dockerfile at the commit under test (stage D)
-  value: {strategy: container, dockerfile: scripts/Dockerfile, port: 5230, health: /healthz}
+  evidence: discover/004 r-0020 (scripts/compose.yaml, neosmemo/memos:stable retagged 26.11.0)
+  value: {strategy: container, ref: 26.11.0, compose: scripts/compose.yaml, service: memos,
+          port: 5230, image_tag_from: ref, health: /healthz}
 
 spec:
   source: override
-  evidence: proto/gen/openapi.yaml declares no security (master §4)
-  value: {strategy: repo_file, openapi: proto/gen/openapi.yaml, base: /api/v1}
+  evidence: proto/gen/openapi.yaml declares no security (master §4); not served
+  value: {strategy: repo_file, openapi: proto/gen/openapi.yaml, base: /api}
 
 auth:
   source: override
-  evidence: the first user of an instance becomes its admin (master §4); found by probing in D
-  value: {strategy: bearer_login}
+  evidence: the first user of an instance becomes its admin; found by probing in discover/004
+  value:
+    strategy: token_header
+    scheme: Bearer
+    check: /api/attachments
+    login: {path: /api/auth/signin, json: true, token_field: accessToken,
+            body: {passwordCredentials: {username: tpadmin, password: {secret: admin_password}}}}
+    bootstrap: {path: /api/users, json: true,
+                body: {username: tpadmin, password: {secret: admin_password}, role: ADMIN, state: NORMAL}}
+    secured: {default: secured, public: [POST /api/auth/signin, POST /api/users],
+              observed_open: [GET /api/identity-providers, GET /api/instance/profile]}
 
 data:
   source: override

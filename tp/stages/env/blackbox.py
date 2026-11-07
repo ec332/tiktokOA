@@ -14,6 +14,7 @@ import base64
 import json
 import os
 import re
+import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -67,10 +68,13 @@ def _value(v, refs: set[str]) -> str:
     return str(v).replace("$", "$$")
 
 
+FLOATING = ("", "latest", "stable", "main", "master", "nightly", "edge", "canary")  # P6f
+
+
 def retag(image: str, tag: str) -> str:
-    """`repo/name:latest` or untagged -> `repo/name:<tag>`; other tags are pinned already."""
+    """`repo/name:<floating tag>` or untagged -> `repo/name:<tag>`; other tags are pinned."""
     name, _, cur = image.rpartition(":") if ":" in image.rsplit("/", 1)[-1] else (image, "", "")
-    return f"{name}:{tag}" if cur in ("", "latest") else image
+    return f"{name}:{tag}" if cur in FLOATING else image
 
 
 def _bind(src: str, run_dir: Path) -> str:
@@ -183,11 +187,35 @@ class Stack:
     def src(self) -> Path:
         """The repo at the profile's ref, cloned once (shallow: only that ref is ever tested)."""
         path = db.data_dir() / "sut" / self.p.slug
+        ref = self.r["ref"]
         if not (path / ".git").exists():
             path.parent.mkdir(parents=True, exist_ok=True)
-            self._git(path.parent, "clone", "-q", "--depth", "1", "--branch", self.r["ref"],
+            self._git(path.parent, "clone", "-q", "--depth", "1", "--branch", ref,
                       self.p.repo, path.name)  # fmt: skip
+        elif self._at(path) != ref:  # an existing clone of another ref (discover/006)
+            if self._git(path, "status", "--porcelain"):
+                raise BlackboxError(f"{path} has local changes; it can't be moved to {ref}")
+            tag = self._remote_tag(path, ref)
+            spec = f"+refs/tags/{ref}:refs/tags/{ref}" if tag else ref
+            self._git(path, "fetch", "-q", "--depth", "1", "origin", spec)
+            self._git(path, "checkout", "-q", "--detach", ref if tag else "FETCH_HEAD")
+            if self._at(path) != ref:
+                raise BlackboxError(f"{path}: checked out {ref} but HEAD doesn't match it")
         return path
+
+    def _at(self, path: Path) -> str | None:
+        """`ref` when HEAD is that tag, branch tip or commit; else None."""
+        ref = self.r["ref"]
+        head = self._git(path, "rev-parse", "HEAD")
+        r = subprocess.run(["git", "rev-parse", "-q", "--verify", f"{ref}^{{commit}}"], cwd=path,
+                           check=False, capture_output=True, text=True)  # fmt: skip
+        hit = r.returncode == 0 and r.stdout.strip() == head
+        return ref if hit or head.startswith(ref) else None
+
+    def _remote_tag(self, path: Path, ref: str) -> bool:
+        r = subprocess.run(["git", "ls-remote", "--tags", "origin", f"refs/tags/{ref}"], cwd=path,
+                           check=False, capture_output=True, text=True, timeout=60)  # fmt: skip
+        return bool(r.stdout.strip())
 
     @staticmethod
     def _git(cwd: Path, *args: str) -> str:
@@ -254,15 +282,38 @@ class Stack:
                 built.append(name)
         return built
 
-    def up(self) -> dict:
+    def start(self, health: str | None = None, wait: bool = True) -> None:
+        """Bring the stack up from nothing and wait for `health` (discovery starts here, before
+        the profile has auth or a spec)."""
         self.down()  # every bring-up starts from nothing: a fresh database, so a fresh login
+        # bind mounts live under the env dir and outlive `down -v`: an app keeping its database
+        # in one (SQLite) would otherwise start with the last run's users (found in discover/004)
+        shutil.rmtree(self.dir / "binds", ignore_errors=True)
         if "login" in self.p.auth.value:
             secrets.forget(self.p.slug, self.p.auth.value.get("token", {}).get("secret", "token"))
         self.build()
         self.compose(
             "up", "-d", "--wait", "--wait-timeout", str(UP_TIMEOUT), timeout=UP_TIMEOUT + 60
         )
-        self.wait_http(self.r.get("health") or self.p.spec.value["openapi"])
+        if wait:
+            self.wait_http(health or self.r.get("health") or self.p.spec.value["openapi"])
+            self.bootstrap()
+
+    def bootstrap(self) -> None:
+        """Replay the profile's first-user creation (discover/001 D3): a fresh container has no
+        users, so every bring-up creates the admin the login then uses."""
+        b = self.p.auth.value.get("bootstrap")
+        if not b:
+            return
+        body = _resolve(self.p.slug, b["body"])
+        status, resp = self.http(
+            "POST", b["path"], **({"json": body} if b.get("json") else {"data": body})
+        )
+        if not 200 <= status < 300:
+            raise BlackboxError(f"bootstrap {b['path']}: {status} {str(resp)[:200]}")
+
+    def up(self) -> dict:
+        self.start()
         probes = self.probe()
         if failed := [p["name"] for p in probes if not p["ok"]]:
             raise BlackboxError(f"probes failed after bring-up: {failed}: {probes}")
@@ -358,10 +409,17 @@ class Stack:
     # ---- the runner ----
 
     def openapi(self) -> dict:
+        """The served spec, or (`repo_file`) the spec file at the tested commit; cached as
+        <env dir>/openapi.json, which the runner reads (TP_OPENAPI_FILE)."""
         cached = self.dir / "openapi.json"
-        status, body = self.http("GET", self.p.spec.value["openapi"])
-        if status != 200 or not isinstance(body, dict):
-            raise BlackboxError(f"spec {self.p.spec.value['openapi']}: {status}")
+        s = self.p.spec.value
+        if s["strategy"] == "repo_file":
+            body = yaml.safe_load((self.src / s["openapi"]).read_text())
+        else:
+            status, body = self.http("GET", s["openapi"])
+            if status != 200 or not isinstance(body, dict):
+                raise BlackboxError(f"spec {s['openapi']}: {status}")
+        self.dir.mkdir(parents=True, exist_ok=True)
         cached.write_text(json.dumps(body))
         return body
 
@@ -377,6 +435,7 @@ class Stack:
         for f in ("results.jsonl", "junit.xml", "ledger.jsonl"):
             (out / f).unlink(missing_ok=True)
         who = make_auth(self.p, self).principal("admin")
+        self.openapi()  # the runner reads this copy, served or repo file (discover/002)
         run_env = {
             "TP_MODE": "blackbox", "TP_RESULTS": "/work/out/results.jsonl",
             "TP_LEDGER": "/work/out/ledger.jsonl",
@@ -389,11 +448,19 @@ class Stack:
             "TP_ID_FIELD": self.p.data.value.get("id_field", "id"),
             "TP_FAMILIES": json.dumps(families_config(self.p)),
             "TP_RATE": str(families_config(self.p)["rate"]),
+            "TP_OPENAPI_FILE": "/work/openapi.json",
             **(env or {}),
         }  # fmt: skip
         secret_env = {"TP_SECRET_TOKEN": who["token"]}
+        if login := self.p.auth.value.get("login"):  # the runner refreshes an expiring JWT (P7)
+            run_env["TP_LOGIN"] = json.dumps({k: login[k] for k in ("path", "token_field")}
+                                             | {"json": bool(login.get("json")),
+                                                "body": _placeholders(login["body"])})  # fmt: skip
+            secret_env["TP_SECRET_ADMIN_PASSWORD"] = secrets.get(self.p.slug, "admin_password",
+                                                                 generate=True)  # fmt: skip
         cmd = ["docker", "run", "--rm", "--network", f"{self.project}_{RUN_NET}",
-               "-v", f"{tests.resolve()}:/work/tests:ro", "-v", f"{out.resolve()}:/work/out"]  # fmt: skip
+               "-v", f"{tests.resolve()}:/work/tests:ro", "-v", f"{out.resolve()}:/work/out",
+               "-v", f"{(self.dir / 'openapi.json').resolve()}:/work/openapi.json:ro"]  # fmt: skip
         cmd += [a for k, v in sorted(run_env.items()) for a in ("-e", f"{k}={v}")]
         cmd += [a for k in sorted(secret_env) for a in ("-e", k)]  # value from our env, not argv
         cmd += [runner, "python", "-m", "pytest", "-p", "platform_rt.blackbox", "-p",
@@ -443,11 +510,31 @@ class Stack:
 def families_config(p: TargetProfile) -> dict:
     """$TP_FAMILIES for platform_rt.families (checks/001): the data conventions (ID field and
     style, paging) from `data`, the family knobs (per_family, examples, rate, exclude) from
-    `checks.families`."""
+    `checks.families`, and the discovered secured map (discover/002 P1) with its
+    `confirm_observed` answer applied: confirm = intended, so public; reject = a hole, so secured."""
     d = p.data.value
-    return {"id_field": d.get("id_field", "id"), "id_style": d.get("id_style", "integer"),
-            "paging": d.get("paging"), "rate": 5, "per_family": 5, "examples": 10, "exclude": []
-            } | (p.checks.value.get("families") or {})  # fmt: skip
+    out = {"id_field": d.get("id_field", "id"), "id_style": d.get("id_style", "integer"),
+           "paging": d.get("paging"), "rate": 5, "per_family": 5, "examples": 10, "exclude": []
+           } | (p.checks.value.get("families") or {})  # fmt: skip
+    if sec := p.auth.value.get("secured"):
+        from tp.core import review
+
+        sec = dict(sec)
+        # only an answer about exactly these operations: an old answer about a different list
+        # (an earlier discovery, or another profile of the slug) doesn't carry over (discover/006)
+        ops = sorted(sec.get("observed_open", []))
+        answered = [i for i in review.list_(status="resolved") if i["kind"] == "confirm_observed"
+                    and i["payload"].get("about") == "secured"
+                    and i["payload"].get("target") == p.slug
+                    and sorted(o["op"] for o in i["payload"].get("ops", [])) == ops]  # fmt: skip
+        if answered:
+            decision = answered[-1]["decision"]
+            if decision == "confirm":
+                sec["public"] = [*sec.get("public", []), *sec.get("observed_open", [])]
+            if decision in ("confirm", "reject"):
+                sec["observed_open"] = []  # out_of_scope leaves them spec-side
+        out["secured"] = sec
+    return out
 
 
 def _matches(template: str, path: str) -> bool:
@@ -479,7 +566,31 @@ def header(principal: dict) -> dict:
 
 
 def _resolve(slug: str, v):
-    return secrets.get(slug, v["secret"], generate=True) if isinstance(v, dict) else v
+    """`{secret: name}` -> its value, anywhere in a (nested) body."""
+    if isinstance(v, dict):
+        if set(v) == {"secret"}:
+            return secrets.get(slug, v["secret"], generate=True)
+        return {k: _resolve(slug, x) for k, x in v.items()}
+    return [_resolve(slug, x) for x in v] if isinstance(v, list) else v
+
+
+def _placeholders(v):
+    """`{secret: name}` -> `$TP_SECRET_<NAME>`, for the runner (values go in as env vars)."""
+    if isinstance(v, dict):
+        if set(v) == {"secret"}:
+            return "$" + secrets.env_name(v["secret"])
+        return {k: _placeholders(x) for k, x in v.items()}
+    return [_placeholders(x) for x in v] if isinstance(v, list) else v
+
+
+def _jwt_expired(token: str, margin: float = 60) -> bool:
+    """True for a JWT (RFC 7519) within `margin` seconds of its `exp`; False for other tokens."""
+    try:
+        part = token.split(".")[1]
+        exp = json.loads(base64.urlsafe_b64decode(part + "=" * (-len(part) % 4)))["exp"]
+    except IndexError, ValueError, KeyError, TypeError:
+        return False
+    return float(exp) - time.time() < margin
 
 
 class BasicAuth:
@@ -505,10 +616,11 @@ class TokenHeaderAuth:
     def principal(self, role: str = "admin", variant: str = "reference") -> dict:
         scheme, slug = self.v.get("scheme", "Bearer"), self.p.slug
         name = self.v.get("token", {}).get("secret", "token")
-        if (token := secrets.load(slug).get(name)) is None:
+        if (token := secrets.load(slug).get(name)) is None or _jwt_expired(token):
             login = self.v["login"]
-            body = {k: _resolve(slug, v) for k, v in login["body"].items()}
-            status, resp = (self.stack or Stack(self.p)).http("POST", login["path"], data=body)
+            body = _resolve(slug, login["body"])
+            kw = {"json": body} if login.get("json") else {"data": body}
+            status, resp = (self.stack or Stack(self.p)).http("POST", login["path"], **kw)
             if status != 200 or not isinstance(resp, dict) or login["token_field"] not in resp:
                 raise BlackboxError(f"login {login['path']}: {status}")
             token = secrets.put(slug, name, str(resp[login["token_field"]]))
@@ -637,7 +749,7 @@ class Checks:
         return self.stack.pytest(tests, out, variant, **kw)
 
 
-IMPLS = {("reach", "container"): Reach, ("spec", "served"): Spec,
+IMPLS = {("reach", "container"): Reach, ("spec", "served"): Spec, ("spec", "repo_file"): Spec,
          ("data", "spec_derived"): SpecDerivedData, ("state", "namespace"): NamespaceState,
          ("mutation", "none"): NoMutation, ("checks", "pytest_cases"): Checks}  # fmt: skip
 
