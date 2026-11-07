@@ -116,6 +116,7 @@ def pytest_runtest_makereport(item, call):
             "assertions": rec.assertions, "observed": rec.observed,
             "under_test": rec.under_test and rec.under_test["step"],
             "exchanges": rec.exchanges, "trace_id": rec.trace_id, "reached": sorted(rec.reached),
+            "retries": rec.retries,
         })  # fmt: skip
 
 

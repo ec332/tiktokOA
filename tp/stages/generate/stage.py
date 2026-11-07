@@ -21,6 +21,9 @@ def ensure_runner(ctx) -> None:
     rebuild the runner then instead of failing (M8)."""
     reach = ctx.strategies.reach
     base = reach.image("reference")
+    if base is None:  # black-box target: the generic runner, tagged by its wheel's hash, so an
+        image.build_blackbox()  # unchanged wheel is a Docker-cached no-op
+        return
     try:
         current = image.published().get("base")
     except image.ImageError:
@@ -29,6 +32,11 @@ def ensure_runner(ctx) -> None:
         ctx.emit("runner_rebuilding", base=base, was=current)
         image.build(reach)
         ctx.emit("runner_rebuilt", base=base)
+
+
+def _runner(ctx) -> dict:
+    no_image = ctx.strategies.reach.image("reference") is None
+    return image.published_blackbox() if no_image else image.published()
 
 
 class GenerateStage:
@@ -58,7 +66,7 @@ class GenerateStage:
         tests, ledger = loop.bind_all(ctx, units, criteria, openapi, workdir, guards, variant,
                                       int(opts.get("max_repairs", loop.MAX_REPAIRS)))  # fmt: skip
         state = {"cases": inputs["cases"].id, "signature": cases["signoff"]["hash"],
-                 "guards": guards, "variant": variant, "runner": image.published(),
+                 "guards": guards, "variant": variant, "runner": _runner(ctx),
                  "openapi_hash": sha256(openapi), "tests": [tests[u["id"]] for u in units],
                  "ledger": ledger}  # fmt: skip
         items = [ctx.review.create("unbound", {"unit": t["unit"], "reason": t["reason"],

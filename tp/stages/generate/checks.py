@@ -7,14 +7,15 @@ from dataclasses import dataclass
 from tp.stages.generate import scaffold as S
 
 ALLOWED_IMPORTS = {("pytest", None), ("platform_rt", "ABSENT"), ("platform_rt", "api"),
-                   ("platform_rt", "expect"), ("platform_rt", "observe")}  # fmt: skip
+                   ("platform_rt", "expect"), ("platform_rt", "observe"),
+                   ("platform_rt", "eventually")}  # fmt: skip
 NONDETERMINISTIC_NAMES = {"random", "time", "datetime", "uuid", "secrets", "os", "sys"}
 NONDETERMINISTIC_ATTRS = {"sleep", "now", "utcnow", "today", "uuid4", "random", "randint",
                           "choice", "shuffle", "time_ns", "perf_counter", "monotonic"}  # fmt: skip
 DYNAMIC = {"eval", "exec", "compile", "__import__", "open", "getattr", "setattr", "delattr",
            "globals", "locals", "vars", "breakpoint", "input"}  # fmt: skip
 PROTECTED = {"api", "expect", "observe", "platform_rt", "pytest", "CASE_DATA", "EXPECTED",
-             "HINTS", "REQUEST", "UNIT", "make", "ABSENT"}  # fmt: skip
+             "HINTS", "REQUEST", "UNIT", "make", "ABSENT", "eventually"}  # fmt: skip
 MUTATORS = {"update", "pop", "popitem", "clear", "setdefault", "__setitem__", "__delitem__"}
 SKIPS = {"skip", "xfail", "importorskip", "skipif", "fail", "exit"}
 
@@ -177,7 +178,8 @@ def registry_fixtures_only(p: Parsed, meta: dict) -> list[str]:
             out.append(f"test arguments must be (make, case_id), got {args}")
     for n in ast.walk(p.tree):
         if (isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)
-                and n.value.id == "make" and n.attr not in S.REGISTRY):  # fmt: skip
+                and n.value.id == "make"
+                and n.attr not in meta.get("make", S.REGISTRY)):  # fmt: skip
             out.append(f"line {n.lineno}: make.{n.attr} is not a registry fixture")
     return out
 

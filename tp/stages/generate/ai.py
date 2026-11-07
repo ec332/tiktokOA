@@ -61,12 +61,15 @@ def hide_expected(source: str) -> str:
                   source, count=1, flags=re.DOTALL | re.MULTILINE)  # fmt: skip
 
 
-def task(unit: dict, sc: dict, routes: list[str], openapi: dict, setup: list[str]) -> str:
+def task(unit: dict, sc: dict, routes: list[str], openapi: dict, setup: list[str],
+         doc: dict[str, str]) -> str:  # fmt: skip
+    """doc: the data strategy's `make` and `api` paragraphs (blackbox D15)."""
     view = {k: unit.get(k) for k in ("id", "technique", "purpose", "input_class", "steps",
                                       "preconditions")}  # fmt: skip
     observe = "Not used by this test." if not sc["observables"] else "Observe exactly: " + "; ".join(
         f"`{o}` = {OBSERVABLES.get(o, 'see the case')}" for o in sc["observables"])  # fmt: skip
-    return _prompt("binding", SETUP=", ".join(f"`{s}`" for s in setup) or "none",
+    return _prompt("binding", MAKE=doc["make"], API=doc["api"],
+                   SETUP=", ".join(f"`{s}`" for s in setup) or "none",
                    OBSERVE=observe, CASE=json.dumps(view, indent=1),
                    OPENAPI=excerpt(openapi, routes), SOURCE=hide_expected(sc["source"]))  # fmt: skip
 

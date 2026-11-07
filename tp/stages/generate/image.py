@@ -13,6 +13,7 @@ from tp.core.hashing import sha256
 ROOT = Path(__file__).parents[3]
 RT = ROOT / "platform_rt"
 DOCKERFILE = ROOT / "images/runner/Dockerfile"
+BLACKBOX = ROOT / "images/runner-blackbox/Dockerfile"
 
 
 # mutmut's own --version needs a project config, so read package metadata
@@ -40,8 +41,11 @@ def rt_version() -> str:
 
 
 def build(reach) -> dict:
-    """reach: the target's Reach strategy; it owns the image this one starts from."""
+    """reach: the target's Reach strategy; it owns the image this one starts from. A reach with
+    no image (black-box targets) gets the generic black-box runner instead."""
     base = reach.image("reference")
+    if base is None:
+        return build_blackbox()
     base_id = _run("docker", "image", "inspect", "--format", "{{.Id}}", base)
     with tempfile.TemporaryDirectory() as ctx:
         _run("uv", "build", "--wheel", "--out-dir", ctx, str(RT))
@@ -61,8 +65,32 @@ def build(reach) -> dict:
     return runner
 
 
+def build_blackbox() -> dict:
+    """images/runner-blackbox: python + platform_rt + schemathesis, one image for every target."""
+    with tempfile.TemporaryDirectory() as ctx:
+        _run("uv", "build", "--wheel", "--out-dir", ctx, str(RT))
+        wheel = next(Path(ctx).glob("platform_rt-*.whl"))
+        src = {"dockerfile": BLACKBOX.read_text(), "wheel": sha256(wheel.read_bytes().hex())}
+        tag = f"tp-runner-blackbox:{sha256(src)[:12]}"
+        _run("docker", "build", "-q", "-f", str(BLACKBOX), "-t", tag, ctx)
+    digest = _run("docker", "image", "inspect", "--format", "{{.Id}}", tag)
+    runner = {"image": tag, "digest": digest, "base": None, "platform_rt": rt_version()}
+    path = db.data_dir() / "published.json"
+    published = json.loads(path.read_text()) if path.exists() else {}
+    path.write_text(json.dumps(published | {"runner_blackbox": runner}, indent=2))
+    return runner
+
+
 def published() -> dict:
     path = db.data_dir() / "published.json"
     if not path.exists():
         raise ImageError("no runner image published: run `tp generate image`")
     return json.loads(path.read_text())["runner"]
+
+
+def published_blackbox() -> dict:
+    path = db.data_dir() / "published.json"
+    pub = json.loads(path.read_text()) if path.exists() else {}
+    if "runner_blackbox" not in pub:
+        raise ImageError("no black-box runner published: run `tp generate image`")
+    return pub["runner_blackbox"]

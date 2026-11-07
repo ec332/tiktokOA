@@ -2,6 +2,7 @@
 
 import hashlib
 import os
+import secrets
 from dataclasses import dataclass, field
 
 
@@ -17,6 +18,14 @@ class Recorder:
     case_data: dict | None = None  # what under_test() was asked to match
     steps: int = 0
     reached: set = field(default_factory=set)  # mutated functions called (MUTANT_UNDER_TEST=stats)
+    # random per test execution: the gate repeats a test K times on one non-reset database
+    nonce: str = field(default_factory=lambda: secrets.token_hex(3))
+    retries: dict = field(default_factory=lambda: {"attempts": 0, "waited_s": 0.0})
+    created: list = field(default_factory=list)  # this test's ledger entries (deleted at teardown)
+
+    def name(self, label: str = "x") -> str:
+        """A resource name unique to this test execution (namespace state, blackbox D1)."""
+        return f"tp-{self.run}-{self.nonce}-{label}"
 
     @property
     def trace_id(self) -> str:  # W3C trace-id: 32 hex, stable per run + test

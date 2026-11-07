@@ -61,15 +61,21 @@ def bind_all(ctx, units: list[dict], criteria: dict, openapi: dict, workdir: Pat
              max_repairs: int = MAX_REPAIRS) -> tuple[dict, list[dict]]:  # fmt: skip
     """-> ({unit id: test entry}, ledger attempts)."""
     tests, ledger, live = {}, [], {}
+    data = ctx.strategies.data  # the target's factories and what the writer is told (D15)
+    registry, doc = tuple(data.factories()), data.doc()
+    # make.<x> the checker accepts: the precondition factories plus any helpers the doc offers
+    helpers = (*registry, "name", "pdf") if "eventually" in doc["imports"] else registry
     for u in units:
         routes = criteria[u["ac"]]["routes"]
         try:
-            sc = S.scaffold(u, routes, openapi, guards=guards)
+            sc = S.scaffold(u, routes, openapi, guards=guards, registry=registry,
+                            imports=tuple(doc["imports"]))  # fmt: skip
         except S.ScaffoldError as e:
             tests[u["id"]] = {"unit": u["id"], "status": "UNBOUND", "reason": str(e)}
             continue
-        setup = [ln.split("=")[0].strip() for ln in S.setup_lines(u.get("preconditions", []))]
-        text = ai.task(u, sc, routes, openapi, setup)
+        setup = [ln.split("=")[0].strip()
+                 for ln in S.setup_lines(u.get("preconditions", []), registry)]  # fmt: skip
+        text = ai.task(u, sc, routes, openapi, setup, doc)
         out = ai.write(ctx.llm, text)
         entry = {"unit": u["id"], "ac": u["ac"], "file": sc["file"], "lock_hash": sc["lock_hash"],
                  "case_ids": [p["id"] for p in sc["params"]], "routes": routes,
@@ -96,7 +102,8 @@ def bind_all(ctx, units: list[dict], criteria: dict, openapi: dict, workdir: Pat
             src = S.with_binding(st["sc"]["source"], st["binding"])
             st["source"] = src
             meta = {"unit": uid, "case_ids": st["entry"]["case_ids"],
-                    "lock_hash": st["sc"]["lock_hash"], "guards": guards}  # fmt: skip
+                    "lock_hash": st["sc"]["lock_hash"], "guards": guards,
+                    "make": helpers}  # fmt: skip
             static[uid] = checks.run(src, meta)
             if not static[uid]:
                 (rdir / "tests" / st["sc"]["file"]).write_text(src)

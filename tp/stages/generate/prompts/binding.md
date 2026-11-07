@@ -5,8 +5,8 @@ You write the BINDING region of one generated pytest test for an HTTP API. Every
 - `data`: the request fields **this case fixes** (`CASE_DATA[case_id]`). Send every key **exactly**, with the same value and type: as a query parameter if the route takes it as a query parameter, otherwise as a JSON body field. A value equal to `ABSENT` means: do not send that key at all. `data` is not the whole request: add any other field the route requires (see the OpenAPI excerpt) with an ordinary valid value, e.g. a short title.
 - `hints`: facts about the situation that are not request data (who the caller is, which item, how many items exist, which operation). Build the situation they describe.
 - `case_id`, and the setup variables already created above your region: {{SETUP}}
-- `make`: test-data factories. `make.user()` → `{id, email, password, full_name, is_active, token}`; `make.superuser()` → `{email, token}`; `make.item(owner=user)` → `{id, owner_id, title, description}` (a new owner if none is given); `make.inactive_user()` → a user with `token` None. Use them for any extra users or items you need (e.g. "another user's item", "5 items in total").
-- `api.get/post/put/patch/delete(path, token=None, params=None, json=None)` → an `httpx.Response`. Paths are the full OpenAPI paths (e.g. `/api/v1/items/`). Pass the caller's token (e.g. `token=user["token"]`); `token=None` sends no credentials and is only for an anonymous caller (`REQUEST[case_id]["auth"]` is false).
+{{MAKE}}
+{{API}}
 - `observe(name, value)`: hand a value read from a response to the locked block. {{OBSERVE}}
 
 ## Rules (a static checker rejects the file otherwise)

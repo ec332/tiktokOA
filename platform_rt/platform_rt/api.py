@@ -72,6 +72,22 @@ def _summary(e: dict) -> str:
             f"token={'yes' if e['auth'] else 'no'}")  # fmt: skip
 
 
+def _ledger(method: str, resp: httpx.Response) -> None:
+    """$TP_LEDGER: every created resource, so namespace state can delete it at end of run (D1)."""
+    path = os.environ.get("TP_LEDGER")
+    if not path or method.upper() != "POST" or not resp.is_success:
+        return
+    body = _parse(resp)
+    rid = body.get("id") if isinstance(body, dict) else None
+    entry = {"path": resp.request.url.path, "id": rid, "location": resp.headers.get("location")}
+    if rid is None and entry["location"] is None:  # e.g. an async create answering a task id:
+        entry["untracked"] = str(body)[:120]  # listed as a leftover, never silently missed
+    else:
+        record.current().created.append(entry)
+    with open(path, "a") as f:
+        f.write(json.dumps(entry) + "\n")
+
+
 class Api:
     def __init__(self):
         self._client: httpx.Client | None = None
@@ -86,7 +102,7 @@ class Api:
         return self._client
 
     def request(self, method: str, path: str, *, token: str | None = None, params=None,
-                json=None, data=None, setup: bool = False) -> httpx.Response:  # fmt: skip
+                json=None, data=None, files=None, setup: bool = False) -> httpx.Response:  # fmt: skip
         rec = record.current()
         step = rec.next_step()
         span = hashlib.sha256(f"{rec.trace_id}/{step}".encode()).hexdigest()[:16]
@@ -94,18 +110,19 @@ class Api:
             "traceparent": f"00-{rec.trace_id}-{span}-01",
             "X-Test-Trace": f"{rec.run}/{rec.tc}/{step}",
         }
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
+        if token:  # TP_AUTH_SCHEME: Bearer (default), Token, Basic (blackbox D7)
+            headers["Authorization"] = f"{os.environ.get('TP_AUTH_SCHEME', 'Bearer')} {token}"
         # Gate: a mutant is active only for the test's own steps. Setup (the factories) runs
         # unmutated, so a kill means the test's request exposed the mutant, not that the
         # mutant broke the test data (mutmut's trampoline reads this variable on every call).
         mutant = os.environ.pop("MUTANT_UNDER_TEST", None) if setup else None
         try:
             resp = self.client.request(method, path, params=params, json=json, data=data,
-                                       headers=headers)  # fmt: skip
+                                       files=files, headers=headers)  # fmt: skip
         finally:
             if mutant is not None:
                 os.environ["MUTANT_UNDER_TEST"] = mutant
+        _ledger(method, resp)
         rec.exchanges.append({
             "step": step, "setup": setup, "method": method.upper(), "path": resp.request.url.path,
             "query": dict(resp.request.url.params), "json": json, "form": data, "auth": bool(token),
@@ -159,7 +176,9 @@ class Api:
         )
 
     def openapi(self) -> dict:
-        path = os.environ.get("TP_API_BASE", "/api/v1") + "/openapi.json"
+        path = os.environ.get("TP_OPENAPI_PATH") or (
+            os.environ.get("TP_API_BASE", "/api/v1") + "/openapi.json"
+        )
         return self.client.get(path).json()
 
 
