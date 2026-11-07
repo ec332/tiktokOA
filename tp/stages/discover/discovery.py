@@ -495,7 +495,7 @@ class Discovery:
                 if (tried := tried + 1) >= 5:
                     break
         raise DiscoveryError("auth", "no GET refuses an anonymous call",
-                             "Which read operation needs credentials (e.g. GET /api/items)?")  # fmt: skip
+                             "Which read operation needs credentials (e.g. GET /api/things)?")  # fmt: skip
 
     def login_body(self, schema: dict, depth: int = 0) -> dict | None:
         """A body for a schema that takes a password: the password, one user-ish field and the
