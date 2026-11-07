@@ -1,0 +1,186 @@
+"""The discover stage (discover/001 D5): `tp target add <repo-url>[@ref]` is a run holding only
+this stage. Output: the `target_profile` artifact (also written to data/targets/<slug>/profile.yaml
+so `TP_TARGET=data/targets/<slug>` selects it) and the sealed, redacted `discovery_probes` log,
+which a replay serves instead of Docker and the network (D2).
+
+A step nothing could verify becomes a `setup` review item (at most MAX_SETUP per run); its answer
+is a candidate like any other, accepted only when its probe passes (`source: clarify`). Reads that
+answer anonymously become one `confirm_observed` item (D9), which never blocks discovery."""
+
+import json
+from typing import Annotated
+
+import typer
+import yaml
+
+from tp.core import artifacts, contract, db, runner
+from tp.core.contract import StageResult
+from tp.stages.discover import discovery
+
+MAX_SETUP = 5  # stage document: at most 5 setup questions
+
+
+def target_dir(slug: str):
+    return db.data_dir() / "targets" / slug
+
+
+def files(slug: str, no_conventions: bool = False) -> tuple:
+    """(profile, probe log) paths; a `--no-conventions` run keeps its own pair (D4)."""
+    tag = ".no-conventions" if no_conventions else ""
+    return target_dir(slug) / f"profile{tag}.yaml", target_dir(slug) / f"probes{tag}.json"
+
+
+def split(target: str) -> tuple[str, str | None]:
+    """`<url>@<ref>` -> (url, ref); a URL without `@<ref>` -> (url, None): the latest release."""
+    url, sep, ref = target.rpartition("@")
+    return (url, ref) if sep and "/" not in ref and ":" not in ref else (target, None)
+
+
+def busy(slug: str) -> str | None:
+    """A run on this target that may hold its stack (discover/006): discovery shares the compose
+    project, clone and stored token with it, so starting would tear down that run's environment.
+    Running, or waiting for review after its env stage brought the stack up."""
+    from pathlib import Path
+
+    for r in runner.list_runs(500):
+        if r["status"] not in ("running", "awaiting_review") or runner.stages(r["id"]) == [
+            "discover"
+        ]:
+            continue
+        if (t := runner.run_target(r["id"])) is None or Path(t).name != slug:
+            continue
+        env = next((e for e in reversed(runner.get_run(r["id"])["executions"])
+                    if e["stage"] == "env"), None)  # fmt: skip
+        if r["status"] == "running" or (env and env["status"] == "succeeded"):
+            return r["name"]
+    return None
+
+
+def asked_before(d) -> bool:
+    """The same "answer without credentials" question for this target is already open or
+    answered: don't ask it again (one per distinct operation list, discover/006)."""
+    from tp.core import review
+
+    ops = sorted(o["op"] for o in d.observed_open)
+    return any(i["kind"] == "confirm_observed" and i["payload"].get("about") == "secured"
+               and i["payload"].get("target") == d.slug
+               and sorted(o["op"] for o in i["payload"].get("ops", [])) == ops
+               and i["status"] in ("open", "resolved") for i in review.list_())  # fmt: skip
+
+
+class Discover:
+    name = "discover"
+    version = "0.2.0"
+    consumes = {"run_options": 1}  # noqa: RUF012
+    produces = {"target_profile": 1, "discovery_probes": 1}  # noqa: RUF012
+    budget_usd = 0.50  # discover/001 D5
+
+    def run(self, ctx, inputs):
+        opts = inputs["run_options"].body
+        url, ref = split(opts["target"])
+        nc = bool(opts.get("no_conventions"))
+        asked = [i for i in (ctx.review.items() if ctx.review else []) if i["kind"] == "setup"]
+        if pending := [i["id"] for i in asked if i["status"] == "open"]:
+            return StageResult.awaiting_review(pending)
+        if skipped := [i for i in asked if i["decision"] == "skip"]:
+            return StageResult.failed(
+                f"setup question skipped: {skipped[-1]['payload']['question']}"
+            )
+        answers = {i["payload"]["key"]: i["detail"]["text"] for i in asked}
+        d = discovery.Discovery(url, ref, ctx.llm, discovery.Probes(), not nc, ctx.emit, answers)
+        profile_path, log_path = files(d.slug, nc)
+        if ctx.llm.mode != "replay" and (other := busy(d.slug)):
+            return StageResult.failed(
+                f"{other} is using {d.slug}'s stack; cancel it or let it finish, then discover"
+            )
+        replay = None
+        if ctx.llm.mode == "replay":
+            if not log_path.exists():
+                return StageResult.failed(f"replay: no recorded probe log at {log_path}")
+            recorded = json.loads(log_path.read_text())
+            replay = recorded["probes"]
+            d.probes = discovery.Probes(replay)
+        try:
+            prof = d.run()
+        except (discovery.DiscoveryError, discovery.ReplayMiss) as e:
+            discovery.log_failure(d.slug, getattr(e, "step", type(e).__name__), str(e))
+            key = getattr(e, "key", None)
+            if ctx.review and key and key not in answers and len(asked) < MAX_SETUP:
+                item = ctx.review.create("setup", {"target": d.slug, "key": key, "step": e.step,
+                                                   "question": e.question, "detail": str(e)})  # fmt: skip
+                return StageResult.awaiting_review([item])
+            return StageResult.failed(str(e))
+        finally:
+            if d.stack is not None and replay is None and not opts.get("keep_up"):
+                d.stack.down()
+        if d.observed_open and ctx.review and replay is None and not asked_before(d):
+            n = len(d.observed_open)
+            ctx.review.create("confirm_observed", {
+                "about": "secured", "target": d.slug, "ops": d.observed_open,
+                "title": f"{n} operation{'s' if n > 1 else ''} answer without credentials",
+                "then": ", ".join(o["op"] for o in d.observed_open) + ": is that intended?",
+                "evidence": "discovery probes (the spec declares no security)"})  # fmt: skip
+        sealed = d.probes.sealed()
+        if replay is not None and recorded.get("commit") not in (None, d.commit):
+            return StageResult.failed(f"replay: the log was recorded at {recorded['commit']}, "
+                                      f"the clone is at {d.commit}")  # fmt: skip
+        profile_path.parent.mkdir(parents=True, exist_ok=True)
+        profile_path.write_text(yaml.safe_dump(prof, sort_keys=False))
+        if replay is None:
+            log_path.write_text(json.dumps({"commit": d.commit, "probes": sealed}, indent=1))
+        return StageResult.succeeded(
+            {"target_profile": prof, "discovery_probes": {"probes": sealed}}
+        )
+
+
+cli = typer.Typer(no_args_is_help=True)
+
+
+@cli.command("add")
+def add(
+    target: Annotated[str, typer.Argument(help="Repo URL, optionally @<tag>")],
+    no_conventions: Annotated[bool, typer.Option(help="Exploration only (D12)")] = False,
+    replay: Annotated[
+        bool, typer.Option(help="Probes from the recorded log, LLM from cache")
+    ] = False,
+    keep_up: Annotated[bool, typer.Option(help="Leave the discovered stack running")] = False,
+):
+    """Discover a target from its repo URL: a run holding only the discover stage."""
+    opts = {"target": target} | ({"no_conventions": True} if no_conventions else {}) \
+        | ({"keep_up": True} if keep_up else {})  # fmt: skip
+    run_id = runner.start_run("replay" if replay else "live", options=opts, pipeline=["discover"])
+    report(runner.advance(run_id), no_conventions)
+
+
+def report(run: dict, no_conventions: bool = False) -> None:
+    from tp.core import review
+
+    ex = run["executions"][-1]
+    typer.echo(f"{run['name']}  {run['status']}" + (f"  ({ex['reason']})" if ex["reason"] else ""))
+    for item in review.list_(status="open", execution_id=ex["id"]):
+        p = item["payload"]
+        if item["kind"] == "setup":
+            typer.echo(f"  setup {item['id']}: {p['question']}\n"
+                       f"    tp review resolve {item['id']} answer --text '...'  (or: skip)")  # fmt: skip
+        else:
+            typer.echo(f"  review {item['id']} ({item['kind']}): {p.get('title')}: {p.get('then')}")
+    if "target_profile" in ex["outputs"]:
+        body = artifacts.get(ex["outputs"]["target_profile"]).body
+        typer.echo(f"profile: {files(body['target']['name'], no_conventions)[0]}")
+    raise typer.Exit(0 if run["status"] in ("succeeded", "awaiting_review") else 1)
+
+
+@cli.command("show")
+def show(slug: str, no_conventions: bool = False):
+    """Print a discovered profile: each concern's source, layer and evidence."""
+    p = yaml.safe_load(files(slug, no_conventions)[0].read_text())
+    typer.echo(f"{p['target']['repo']} @ {p['commit_tested']}")
+    for c in ("reach", "spec", "auth", "data", "state", "mutation", "safety", "checks"):
+        f = p[c]
+        typer.echo(f"  {c:<9} {f['source']:<21} {f['layer'] or '':<12} {f['evidence'] or ''}")
+        for k, pv in (f.get("provenance") or {}).items():
+            typer.echo(f"    {k:<20} {pv['source']:<21} {pv['layer']:<12} "
+                       f"{'' if pv['probe'] is None else 'probe#' + str(pv['probe'])}")  # fmt: skip
+
+
+contract.register(Discover(), cli=cli, cli_name="target")
