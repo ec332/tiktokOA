@@ -26,6 +26,8 @@ def test_stability_flags_disagreement_and_missing_runs():
      {"status": "confirmed", "human_judgement": True}, True, "SPEC_GAP"),
     ({"stable": True, "outcome": "failed", "origin": "CONFORMANCE"}, {"status": "confirmed"}, True, "REJECTED_ORACLE"),
     ({"stable": True, "outcome": "failed", "origin": "ENV"}, {"status": "confirmed"}, True, "ERROR"),
+    ({"stable": True, "outcome": "skipped", "origin": None}, {}, True, "EXCLUDED"),  # checks/001 D9
+    ({"stable": True, "outcome": "failed", "origin": "SPEC"}, {"status": "confirmed"}, True, "SPEC_MISMATCH"),
 ])  # fmt: skip
 def test_reference_router(node, crit, signed, want):
     assert decide.route(node, crit, signed) == want

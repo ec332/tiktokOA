@@ -39,7 +39,8 @@ def stability(runs: list[list[dict]]) -> dict[str, dict]:
         stable = len(set(outcomes)) == 1 and len(recs) == len(runs) and len(set(origins)) <= 1
         out[node] = {"outcome": outcomes[0], "origin": origins[0] if origins else None,
                      "stable": stable, "outcomes": dict(Counter(outcomes)),
-                     "case_id": recs[0]["case_id"]}  # fmt: skip
+                     "case_id": recs[0]["case_id"],
+                     **({"skip": recs[0]["skip"]} if recs[0].get("skip") else {})}  # fmt: skip
     return out
 
 
@@ -49,7 +50,11 @@ def route(node: dict, criterion: dict, signed: bool) -> str | None:
         return "FLAKY"
     if node["outcome"] == "passed":
         return None
+    if node["outcome"] == "skipped":
+        return "EXCLUDED"  # excluded by the profile or no valid body (checks/001 D9)
     origin = node["origin"]
+    if origin == "SPEC":
+        return "SPEC_MISMATCH"  # server and spec disagree: never a defect (checks/001 D6)
     if origin in BINDING:
         return "REJECTED_ORACLE"
     if origin not in PRODUCT:

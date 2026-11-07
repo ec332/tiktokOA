@@ -49,7 +49,8 @@ class GateStage:
             (work / "tests" / t["file"]).write_text(t["source"])
         ctx.strategies.reach.ensure("reference")
         ctx_info = {"bound_tests": inputs["bound_tests"].id, "cases": inputs["cases"].id,
-                    "units": {t["file"]: {"unit": t["unit"], "ac": t["ac"]} for t in tests},
+                    "units": {t["file"]: {"unit": t["unit"], "ac": t["ac"], **({"generic": True}
+                                  if t.get("generic") else {})} for t in tests},
                     "criteria": {c["id"]: {k: c.get(k) for k in ("status", "human_judgement")}
                                  for c in spec["criteria"]},
                     "signed": bool(cases.get("signoff", {}).get("signed")),
@@ -88,7 +89,11 @@ class GateStage:
 
     @staticmethod
     def _where(info, node: str) -> dict:
-        return info["units"].get(node.split("::")[0], {"unit": None, "ac": None})
+        where = info["units"].get(node.split("::")[0], {"unit": None, "ac": None})
+        if where.get("generic"):  # each family node is its own unit and criterion (checks/001)
+            cid = node.partition("[")[2].removesuffix("]")
+            return {"unit": cid, "ac": cid, "generic": True}
+        return where
 
     # ---- measurement (cached, K7) -------------------------------------------------------
 
@@ -227,8 +232,10 @@ class GateStage:
         rows = []
         for node, st in sorted(m["stability"].items()):
             where = self._where(info, node)
-            crit = info["criteria"].get(where["ac"], {})
-            status = decide.route(st, crit, info["signed"])
+            # a generic family's claim needs no requirement, so it counts as confirmed and signed
+            generic = bool(where.get("generic"))
+            crit = {"status": "confirmed"} if generic else info["criteria"].get(where["ac"], {})
+            status = decide.route(st, crit, info["signed"] or generic)
             flag, seed = seeded_of.get(node, (None, None))
             n_kills = n_unique = 0
             if status is None:
@@ -243,7 +250,8 @@ class GateStage:
                          "misses_target": bool(seed) and not seed["killed"],
                          "kills": n_kills, "unique_kills": n_unique,
                          "linked_mutants": sum(1 for v in m["linked"].values() if node in v),
-                         "eventually_consistent": node in m.get("eventually", [])})  # fmt: skip
+                         "eventually_consistent": node in m.get("eventually", []),
+                         **({"excluded": st.get("skip")} if status == "EXCLUDED" else {})})  # fmt: skip
         return {"info": info, "rows": rows, "cells": cells, "measure": {
                     k: m.get(k) for k in ("mutants", "linked", "timings", "shuffle_seed",
                                           "overlay_broken", "cache", "held_out", "strength")},
