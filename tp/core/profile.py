@@ -9,6 +9,7 @@ sites not yet moved onto `ctx.strategies` keep working. It is deleted when the a
 """
 
 import os
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -28,7 +29,8 @@ class Field:
     value: dict
     source: str
     evidence: str | None = None
-    layer: str | None = None  # convention | exploration | clarify (stage D)
+    layer: str | None = None  # convention | algorithm | exploration | clarify (stage D)
+    provenance: dict | None = None  # {sub-key: {source, layer, probe}} (discover/001 D7)
 
     @property
     def strategy(self) -> str:
@@ -62,10 +64,57 @@ def active_slug(root: Path = Path(".")) -> str:
     return found[0]
 
 
+def _discovered(slug: str) -> Path:
+    """Where stage D writes a discovered profile: <data>/targets/<slug>/ (discover/001 D5)."""
+    from tp.core import db
+
+    return db.data_dir() / TARGETS / slug
+
+
 def target_dir(root: Path = Path(".")) -> Path:
+    """TP_TARGET as a path, else targets/<slug>/ (hand-written), else the discovered profile of
+    that slug (discover/006: `TP_TARGET=<slug>` finds data/targets/<slug>)."""
     if "/" in (t := os.environ.get("TP_TARGET", "")):
         return root / t
-    return root / TARGETS / active_slug(root)
+    slug = active_slug(root)
+    hand = root / TARGETS / slug
+    if not (hand / "profile.yaml").exists() and (_discovered(slug) / "profile.yaml").exists():
+        return _discovered(slug)
+    return hand
+
+
+@contextmanager
+def selected(path: str | None):
+    """Run a block against one target (a run's `run_options.profile`, discover/006). TP_TARGET
+    is set, not a context variable, because stages start subprocesses that read it; runs are
+    executed one at a time per process, so the swap can't race."""
+    if not path:
+        yield
+        return
+    old = os.environ.get("TP_TARGET")
+    os.environ["TP_TARGET"] = path
+    try:
+        yield
+    finally:
+        if old is None:
+            os.environ.pop("TP_TARGET", None)
+        else:
+            os.environ["TP_TARGET"] = old
+
+
+def choices(root: Path = Path(".")) -> list[dict]:
+    """Every selectable target: hand-written (targets/<slug>/) and discovered (<data>/targets/).
+    `path` is absolute: what a run stores and TP_TARGET accepts."""
+    out = []
+    for kind, base in (("hand_written", root / TARGETS), ("discovered", _discovered("x").parent)):
+        for f in sorted(base.glob("*/profile.yaml")) if base.exists() else []:
+            raw = yaml.safe_load(f.read_text()) or {}
+            out.append({"slug": f.parent.name, "kind": kind, "path": str(f.parent.resolve()),
+                        "repo": (raw.get("target") or {}).get("repo"),
+                        "commit_tested": raw.get("commit_tested"),
+                        "black_box": (raw.get("mutation") or {}).get("value", {})
+                        .get("strategy") != "in_process"})  # fmt: skip
+    return out
 
 
 def source_dir(root: Path = Path(".")) -> str:
@@ -100,7 +149,9 @@ def parse(raw: dict, slug: str, where: Path | None = None) -> TargetProfile:
             raise ProfileError(
                 f"profile {slug}: {c} needs value.strategy and a source in {SOURCES}"
             )
-        fields[c] = Field(f["value"], f["source"], f.get("evidence"), f.get("layer"))
+        fields[c] = Field(
+            f["value"], f["source"], f.get("evidence"), f.get("layer"), f.get("provenance")
+        )
     return TargetProfile(slug, t["name"], t["repo"], t.get("type", "api"), raw["commit_tested"],
                          fields, where)  # fmt: skip
 

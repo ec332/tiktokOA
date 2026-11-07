@@ -1,0 +1,65 @@
+# Discovery conventions and platform defaults (stage D, docs/iteration2/D-discover.md).
+#
+# `conventions` are candidate values from framework or standard docs, tried first and switched off
+# by `--no-conventions` (discover/001 D12). Every entry cites its framework; an entry justified only
+# by one target is rejected in review. `added_for` names the failure-log entry that motivated it.
+# `platform` holds defaults and fixed rules; they always apply.
+
+conventions:
+  - kind: spec_path
+    value: /api/schema/?format=json
+    provenance: {framework: drf-spectacular, source: "https://drf-spectacular.readthedocs.io/en/latest/readme.html#take-it-for-a-flight"}
+    added_for: initial
+  - kind: spec_path
+    value: /openapi.json
+    provenance: {framework: FastAPI, source: "https://fastapi.tiangolo.com/tutorial/first-steps/#openapi"}
+    added_for: initial
+  - kind: spec_path
+    value: /v3/api-docs
+    provenance: {framework: springdoc-openapi, source: "https://springdoc.org/#getting-started"}
+    added_for: initial
+  - kind: spec_path
+    value: /swagger/v1/swagger.json
+    provenance: {framework: ASP.NET Core Swashbuckle, source: "https://learn.microsoft.com/aspnet/core/tutorials/getting-started-with-swashbuckle"}
+    added_for: initial
+  - kind: health_path
+    value: /healthz
+    provenance: {framework: Kubernetes API health endpoints, source: "https://kubernetes.io/docs/reference/using-api/health-checks/"}
+    added_for: initial
+  - kind: admin_env_pattern
+    value: {user: DJANGO_SUPERUSER_USERNAME, password: DJANGO_SUPERUSER_PASSWORD}
+    provenance: {framework: Django createsuperuser --noinput, source: "https://docs.djangoproject.com/en/stable/ref/django-admin/#createsuperuser"}
+    added_for: initial
+  - kind: signin_op_pattern
+    value: "token|login|signin|sign_in|session"
+    provenance: {framework: "DRF obtain_auth_token; OAuth 2.0 token endpoint", source: "https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication ; https://datatracker.ietf.org/doc/html/rfc6749#section-3.2"}
+    added_for: initial
+  - kind: auth_prefix
+    value: Bearer
+    provenance: {framework: RFC 6750 bearer tokens, source: "https://datatracker.ietf.org/doc/html/rfc6750#section-2.1"}
+    added_for: initial
+  - kind: auth_prefix
+    value: Token
+    provenance: {framework: DRF TokenAuthentication, source: "https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication"}
+    added_for: initial
+  - kind: paging_param
+    value: {style: page, page: page, size: page_size}
+    provenance: {framework: DRF PageNumberPagination, source: "https://www.django-rest-framework.org/api-guide/pagination/#pagenumberpagination"}
+    added_for: initial
+  - kind: paging_param
+    value: {style: token, size: pageSize, token: pageToken}
+    provenance: {framework: Google AIP-158 pagination, source: "https://google.aip.dev/158"}
+    added_for: initial
+
+platform:
+  model: claude-haiku-5-5
+  admin_user: tpadmin
+  read_back_timeout_s: 120          # data.read_back_timeout_s (discover/001 D14: a platform default)
+  families: {per_family: 5, examples: 10, rate: 5, exclude: []}   # checks/001 defaults
+  # secret-like env vars (by name) whose repo value is a placeholder get a generated secret (P6e)
+  secret_name: "SECRET|KEY|PASSWORD|TOKEN"
+  placeholders: ["change-me", "changeme", "change_me", "secret", "password", "", "xxx", "replace-me"]
+  release_tag: '^v?\d+(\.\d+)+$'    # the latest tag matching this (no pre-releases) is the default ref
+  max_compose: 3                    # bring-up attempts, fewest services first
+  max_resources: 3                  # resources tried by the data step
+  file_cap: 200000                  # bytes per file read for exploration
