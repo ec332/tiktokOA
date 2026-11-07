@@ -41,7 +41,10 @@ def _no_admitted(gate, case_by_id) -> tuple[list[str], set[str]]:
 
 def _header(rr, tri, decisions, labels, cases):
     unattended = [d for d in decisions if d["by"] == "unattended"]
-    return {"labels": labels, "run_records": tri.get("run_records"), "execution": rr.get("execution"),
+    network = next((n for v in rr.get("variants", {}).values()
+                    if (n := (v.get("fingerprint") or {}).get("network"))), None)  # fmt: skip
+    return ({"network": network} if network else {}) | {
+            "labels": labels, "run_records": tri.get("run_records"), "execution": rr.get("execution"),
             "variants": rr.get("variants", {}), "k": rr.get("k"),
             "sut": cases.get("sut"), "cases_signed": (cases.get("signoff") or {}).get("signed"),
             "unattended_decisions": num(len(unattended), len(decisions), [f"review:{d['review_item']}" for d in unattended])}  # fmt: skip
@@ -90,7 +93,9 @@ def _worklist(criteria, case_by_id, gate, tri, verdicts):
             len(rows),
             [r["case_id"] for r in rows if r["status"] == "ADMITTED_REDUNDANT"],
         ),
-        "mutation_strength": num(m.get("killed", 0), m.get("total", 0), []),
+        "mutation_strength": "not measured"
+        if m.get("strength") == "not_measured"
+        else num(m.get("killed", 0), m.get("total", 0), []),  # no mutation: black-box (D16)
     }
     gaps = [f for f in tri["findings"] if f["class"] == "SPEC_GAP"]
     p3 = [{"what": "spec gap", "ac": f["ac"], "case": f["case_id"], "why": f["rule"],
@@ -139,7 +144,9 @@ def _scorecard(criteria, case_by_id, gate, rr, tri):
         "seeded_per_flag": per_flag,
         "seeded_blind": "not run (M7)",
         "real_defects": num(len(confirmed), len(real), [d["id"] for d in confirmed]),
-        "mutation_strength": num(m.get("killed", 0), m.get("total", 0), []),
+        "mutation_strength": "not measured"
+        if m.get("strength") == "not_measured"
+        else num(m.get("killed", 0), m.get("total", 0), []),  # no mutation: black-box (D16)
         "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits "
         "mostly under the test data, so this measures authentication more than the item rules",
         "mutation_per_criterion": per_crit,

@@ -65,7 +65,7 @@ def html(r: dict) -> str:
     parts = [
         f"""<header><h1>Test report</h1><div>{labels}
 <span class=label>no AI in run/judge/report</span>{'<span class="label warn">unattended decisions ' + e(_n(unatt)) + "</span>" if unatt["n"] else ""}</div>
-<p class=muted>SUT <code>{e(str((h.get("sut") or {}).get("ref", "")))[:12]}</code> · variants {variants} · K={h["k"]} · run_records <code>{e(str(h["run_records"])[:19])}</code></p></header>"""
+<p class=muted>SUT <code>{e(str((h.get("sut") or {}).get("ref", "")))[:12]}</code> · variants {variants} · K={h["k"]} · run_records <code>{e(str(h["run_records"])[:19])}</code></p>{f"<p class=muted>Network: at run time {e(h['network']['run'])}; build: {e(h['network']['build'])}.</p>" if h.get("network") else ""}</header>"""
     ]
 
     parts.append("<section><h2>P0 — defects</h2>")
@@ -224,6 +224,11 @@ def summary_md(r: dict) -> str:
         "# Test report — summary",
         "",
         f"Labels: {', '.join(r['header']['labels'])}",
+        *(
+            [f"Network: at run time {n['run']}; build: {n['build']}."]
+            if (n := r["header"].get("network"))
+            else []
+        ),  # fmt: skip (blackbox D5)
         "",
         "## P0 — defects",
     ]
