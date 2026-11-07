@@ -1,6 +1,6 @@
 [project]
 name = "platform-rt"
-version = "0.6.0"
+version = "0.7.0"
 description = "Test runtime for generated tests: recorded API client, expect helpers, reporter"
 requires-python = ">=3.14"
 dependencies = ["httpx", "pytest"]

@@ -57,7 +57,7 @@ def delete_path(spec: dict, entry: dict) -> str | None:
     paths = [p for p, ops in spec.get("paths", {}).items() if "delete" in ops]
     cands = [httpx.URL(entry["location"]).path] if entry.get("location") else []
     if entry.get("id") is not None:
-        stem = entry["path"].rstrip("/") + f"/{entry['id']}"
+        stem = entry["path"].rstrip("/") + f"/{str(entry['id']).split('/')[-1]}"  # names: last part
         cands += [stem + "/", stem]
     return next((c for c in cands for p in paths if route_matches(f"DELETE {p}", "DELETE", c)),
                 None)  # fmt: skip

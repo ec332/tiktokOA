@@ -5,6 +5,7 @@ TestClient (`api.use`); over the network it talks to $TP_BASE_URL."""
 import hashlib
 import json
 import os
+import time
 
 import httpx
 
@@ -78,7 +79,7 @@ def _ledger(method: str, resp: httpx.Response) -> None:
     if not path or method.upper() != "POST" or not resp.is_success:
         return
     body = _parse(resp)
-    rid = body.get("id") if isinstance(body, dict) else None
+    rid = body.get(os.environ.get("TP_ID_FIELD") or "id") if isinstance(body, dict) else None
     entry = {"path": resp.request.url.path, "id": rid, "location": resp.headers.get("location")}
     if rid is None and entry["location"] is None:  # e.g. an async create answering a task id:
         entry["untracked"] = str(body)[:120]  # listed as a leftover, never silently missed
@@ -91,6 +92,12 @@ def _ledger(method: str, resp: httpx.Response) -> None:
 class Api:
     def __init__(self):
         self._client: httpx.Client | None = None
+        self._last = 0.0  # $TP_RATE: requests per second, so rate limiters don't skew results
+
+    def _pace(self) -> None:
+        if rate := float(os.environ.get("TP_RATE") or 0):
+            time.sleep(max(0.0, self._last + 1 / rate - time.monotonic()))
+            self._last = time.monotonic()
 
     def use(self, client: httpx.Client | None) -> None:
         self._client = client
@@ -116,6 +123,7 @@ class Api:
         # unmutated, so a kill means the test's request exposed the mutant, not that the
         # mutant broke the test data (mutmut's trampoline reads this variable on every call).
         mutant = os.environ.pop("MUTANT_UNDER_TEST", None) if setup else None
+        self._pace()
         try:
             resp = self.client.request(method, path, params=params, json=json, data=data,
                                        files=files, headers=headers)  # fmt: skip

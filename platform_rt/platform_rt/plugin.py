@@ -10,7 +10,7 @@ import pytest
 
 from platform_rt import record
 from platform_rt.api import api
-from platform_rt.origin import TestTimeout, classify
+from platform_rt.origin import TestTimeout, classify, declared
 
 TIMEOUT = int(os.environ.get("TP_TIMEOUT", "60"))  # † seconds per test
 _schema: dict | None = None
@@ -100,10 +100,15 @@ def pytest_runtest_makereport(item, call):
                           rec.under_test, _openapi() if rec.exchanges else None,
                           rec.case_data)  # fmt: skip
         frame = next((f for f in reversed(tb) if f.filename == str(item.path)), None)
+        steps = [e for e in rec.exchanges if not e["setup"]]
         tp["failure"] = tp.get("failure") or {
             "phase": call.when, "origin": origin, "error": f"{type(exc).__name__}: {exc}"[:2000],
             "line": frame.lineno if frame else None,
+            "declared": declared(rec.under_test or (steps[-1] if steps else None),
+                                 _openapi() if steps else None),
         }  # fmt: skip
+    if rep.skipped and isinstance(rep.longrepr, tuple):  # why, for the report (checks/001 D9)
+        tp["skip"] = rep.longrepr[2].removeprefix("Skipped: ")
     tp["phases"][call.when] = rep.outcome
     rep.tp_origin = tp.get("failure", {}).get("origin")
     if call.when == "teardown":
@@ -116,7 +121,7 @@ def pytest_runtest_makereport(item, call):
             "assertions": rec.assertions, "observed": rec.observed,
             "under_test": rec.under_test and rec.under_test["step"],
             "exchanges": rec.exchanges, "trace_id": rec.trace_id, "reached": sorted(rec.reached),
-            "retries": rec.retries,
+            "retries": rec.retries, **({"skip": tp["skip"]} if "skip" in tp else {}),
         })  # fmt: skip
 
 

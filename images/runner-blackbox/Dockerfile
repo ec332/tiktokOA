@@ -3,5 +3,5 @@
 # target has no image of its own.
 FROM python:3.14-slim
 COPY platform_rt-*.whl /tmp/
-RUN pip install --no-cache-dir /tmp/platform_rt-*.whl schemathesis && rm /tmp/platform_rt-*.whl
+RUN pip install --no-cache-dir /tmp/platform_rt-*.whl schemathesis==4.33.1 && rm /tmp/platform_rt-*.whl
 WORKDIR /work

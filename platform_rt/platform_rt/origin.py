@@ -4,10 +4,10 @@ raised and the recorded exchanges (+ the OpenAPI schema for CONTRACT). Pure func
 from pathlib import Path
 
 from platform_rt.api import ConformanceError, route_matches
-from platform_rt.expect import ExpectationFailed, MissingObservation
+from platform_rt.expect import ExpectationFailed, MissingObservation, SpecMismatch
 
 ORIGINS = ("ENV", "DATA", "BINDING", "CONTRACT", "PRODUCT_ERROR", "ASSERTION", "CONFORMANCE",
-           "PLATFORM", "TIMEOUT")  # fmt: skip
+           "PLATFORM", "TIMEOUT", "SPEC")  # fmt: skip
 HERE = str(Path(__file__).parent)
 # By name: these come from libraries platform_rt does not import (sqlalchemy, the env factories).
 ENV_ERRORS = {"ConnectError", "ConnectTimeout", "ReadTimeout", "RemoteProtocolError",
@@ -32,6 +32,26 @@ def resolve(schema: dict, node: dict) -> dict:
         for part in ref.lstrip("#/").split("/"):
             node = node[part]
     return node
+
+
+def _operation(exchange: dict, schema: dict) -> dict | None:
+    for path, ops in schema.get("paths", {}).items():
+        op = ops.get(exchange["method"].lower())
+        if op and route_matches(
+            f"{exchange['method']} {path}", exchange["method"], exchange["path"]
+        ):
+            return op
+    return None
+
+
+def declared(exchange: dict | None, schema: dict | None) -> bool | None:
+    """Does the spec list this response's status for its operation? None: no spec or no
+    matching operation (checks/001 D7: tells a wrong assumption from spec drift)."""
+    op = exchange and schema and _operation(exchange, schema)
+    if not op:
+        return None
+    responses = op.get("responses", {})
+    return str(exchange["status"]) in responses or "default" in responses
 
 
 def contract_problem(exchange: dict, schema: dict | None) -> str | None:
@@ -86,6 +106,8 @@ def classify(phase: str, exc: BaseException, raised_in: str, exchanges: list[dic
         return "BINDING"
     if isinstance(exc, ConformanceError):
         return "CONFORMANCE"
+    if isinstance(exc, SpecMismatch):
+        return "SPEC"
     expected = isinstance(exc, (ExpectationFailed, MissingObservation))
     if raised_in.startswith(HERE) and not expected:
         return "PLATFORM"

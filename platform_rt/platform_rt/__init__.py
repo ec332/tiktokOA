@@ -6,5 +6,5 @@ from platform_rt.api import ABSENT, api
 from platform_rt.blackbox import eventually
 from platform_rt.expect import expect, observe
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __all__ = ["ABSENT", "api", "eventually", "expect", "observe"]

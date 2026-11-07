@@ -34,6 +34,16 @@ def ensure_runner(ctx) -> None:
         ctx.emit("runner_rebuilt", base=base)
 
 
+def families_entry(routes: list[str] | None = None) -> dict:
+    """The generic families as one more BOUND test file; the gate gives each of its nodes a
+    criterion of its own (`G:<family>:<METHOD> <path>`). The run's routes are sampled first."""
+    src = ('"""Generic check families (checks/001 D1): fixed platform code, no LLM."""\n\n'
+           f"TP_FOCUS = {json.dumps(sorted(routes or []))}  # sampled first (checks/002)\n\n"
+           "from platform_rt.families import pytest_generate_tests, test_generic  # noqa: E402, F401\n")  # fmt: skip
+    return {"unit": "generic", "ac": None, "file": "test_tp_families.py", "status": "BOUND",
+            "generic": True, "source": src, "lock_hash": sha256(src)}  # fmt: skip
+
+
 def _runner(ctx) -> dict:
     no_image = ctx.strategies.reach.image("reference") is None
     return image.published_blackbox() if no_image else image.published()
@@ -69,6 +79,8 @@ class GenerateStage:
                  "guards": guards, "variant": variant, "runner": _runner(ctx),
                  "openapi_hash": sha256(openapi), "tests": [tests[u["id"]] for u in units],
                  "ledger": ledger}  # fmt: skip
+        if ctx.strategies.reach.image("reference") is None and not opts.get("units"):
+            state["tests"].append(families_entry(opts.get("routes")))  # black-box only (checks/001)
         items = [ctx.review.create("unbound", {"unit": t["unit"], "reason": t["reason"],
                                                "failures": t.get("failures", [])[:3],
                                                "source": t.get("source")})

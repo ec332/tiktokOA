@@ -11,6 +11,11 @@ class ExpectationFailed(AssertionError):
         self.assertion_id = assertion_id
 
 
+class SpecMismatch(ExpectationFailed):
+    """Valid HTTP that disagrees with the served spec: the server or the spec is wrong
+    (origin SPEC, checks/001 D6). Raised by the generic families, never a product defect."""
+
+
 class MissingObservation(Exception):
     """The locked block asked for a value the binding never observed (a binding fault)."""
 

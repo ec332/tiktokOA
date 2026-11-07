@@ -84,6 +84,15 @@ def test_platform():
 def test_timeout():
     for _ in iter(int, 1):
         pass
+
+def test_skipped():
+    import pytest
+    pytest.skip("no_valid_body: POST /x answered 400")
+
+def test_spec():
+    from platform_rt.expect import SpecMismatch
+    api.get("/api/v1/items/")
+    raise SpecMismatch("G/x", "server and spec disagree")
 """
 
 
@@ -123,7 +132,7 @@ def test_a_passing_test_has_a_record_with_assertion_id_and_trace(results):
      ("test_product_error", "PRODUCT_ERROR"), ("test_assertion", "ASSERTION"),
      ("test_conformance", "CONFORMANCE"), ("test_platform", "PLATFORM"),
      ("test_incomplete_request", "BINDING"),
-     ("test_timeout", "TIMEOUT"), ("test_syntax.py", "BINDING")],
+     ("test_timeout", "TIMEOUT"), ("test_syntax.py", "BINDING"), ("test_spec", "SPEC")],
 )  # fmt: skip
 def test_each_origin_comes_from_a_broken_test(results, test, origin):
     r = results[test]
@@ -180,3 +189,11 @@ def test_shuffle_is_reproducible_and_stats_mode_records_reached_functions(pytest
         assert {r["nodeid"].split("::")[1]: r["reached"] for r in recs}["test_3"] == ["app.crud.f1"]
     assert orders[0] == orders[1] != orders[2]
     assert orders[0] != sorted(orders[0], key=lambda n: int(n.rsplit("_", 1)[1]))
+
+
+def test_skip_reasons_and_declared_statuses_are_recorded(results):
+    """checks/001 D9 (why a case was excluded) and D7 (is the failing status in the spec)."""
+    assert results["test_skipped"]["outcome"] == "skipped"
+    assert results["test_skipped"]["skip"] == "no_valid_body: POST /x answered 400"
+    assert results["test_assertion"]["failure"]["declared"] is True  # 200 is in the spec
+    assert results["test_product_error"]["failure"]["declared"] is False  # /boom/'s 500 is not
