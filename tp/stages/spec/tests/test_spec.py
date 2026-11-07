@@ -408,3 +408,30 @@ def test_human_judgement_is_never_preselected_and_leaves_the_requirement_open():
     c = {"id": "O-1", "then": "returns 500", "status_code": 500, "status": "observed"}
     questions.apply_answer(c, q, questions.HUMAN, False)
     assert c["status"] == "assumed" and c["review_needed"] and c["then"] == "returns 500"
+
+
+def test_openapi_index_has_one_citable_file_per_operation_plus_referenced_schemas():
+    """blackbox D14: a target without source is indexed from its spec."""
+    from tp.stages.spec import openapi_index
+
+    spec = {"paths": {
+        "/api/tags/": {"get": {"operationId": "tags_list"}, "post": {
+            "requestBody": {"content": {"application/json": {
+                "schema": {"$ref": "#/components/schemas/Tag"}}}}}},
+        "/api/tags/{id}/": {"delete": {}}, "/api/other/": {"get": {}}},
+        "components": {"schemas": {"Tag": {"properties": {"owner": {
+            "$ref": "#/components/schemas/User"}}}, "User": {}, "Unused": {}},
+            "securitySchemes": {"tokenAuth": {"type": "apiKey"}}}}  # fmt: skip
+    index, files = openapi_index.build(spec, ["POST /api/tags/", "DELETE /api/tags/{id}/"])
+    assert [(r["method"], r["path"]) for r in index["routes"]] == [
+        ("POST", "/api/tags/"),
+        ("DELETE", "/api/tags/{id}/"),
+    ]
+    assert set(files) == {"openapi/api/tags/POST.yaml", "openapi/api/tags/{id}/DELETE.yaml",
+                          openapi_index.COMPONENTS}  # fmt: skip
+    comp = files[openapi_index.COMPONENTS]
+    assert "Tag:" in comp and "User:" in comp and "Unused" not in comp and "tokenAuth" in comp
+    assert index["files"]["openapi/api/tags/POST.yaml"] == len(
+        files["openapi/api/tags/POST.yaml"].splitlines()
+    )
+    assert len(openapi_index.build(spec)[0]["routes"]) == 4  # no routes: every operation

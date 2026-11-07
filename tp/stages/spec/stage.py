@@ -5,12 +5,27 @@ from pathlib import Path
 
 from tp.core import db, profile, review, sut
 from tp.core.contract import StageResult, register
-from tp.stages.spec import ai, checks, code_index, questions
+from tp.stages.spec import ai, checks, code_index, openapi_index, questions
 from tp.stages.spec.cli import app as cli
 from tp.stages.spec.render import render
 
 
-def load_index(root: Path = Path(".")) -> tuple[dict, dict[str, str]]:
+def from_source(root: Path = Path(".")) -> bool:
+    """False for a target the platform has no source for (black-box, D14): index its spec."""
+    return "source_dir" in profile.load(root).spec.value
+
+
+def load_index(root: Path = Path("."), routes: list[str] | None = None,
+               strats=None) -> tuple[dict, dict[str, str]]:  # fmt: skip
+    """The code index, or (no source) the OpenAPI index narrowed to `routes` (D14)."""
+    if not from_source(root):
+        from tp.core import strategies
+
+        p = profile.load(root)
+        s = strats or strategies.resolve(p)
+        s.reach.ensure("reference")
+        idx, files = openapi_index.build(s.spec.openapi("reference"), routes)
+        return idx | {"sut": {"name": p.name, "ref": p.commit_tested}}, files
     cfg = sut.load(root)
     files = code_index.source_files(
         sut.checkout(cfg, root), cfg["ref"], cfg.get("code_scope", {}).get("exclude", []),
@@ -27,6 +42,9 @@ def _rules(opts: dict) -> list[str]:
 
 def suggest_rules(llm, overview: str, routes: list[str]) -> list[dict]:
     """For the New run screen (M8 D14): suggestions from the overview and the chosen routes."""
+    if not from_source():
+        _, files = load_index(routes=routes or None)
+        return ai.suggest_rules(llm, overview, routes, code_index.numbered_source(files))
     index, files = load_index()
     changed = list((sut.load().get("target") or {}).get("changed", {}))
     if routes:
@@ -84,8 +102,11 @@ class SpecStage:
 
     def _round1(self, ctx, req, opts) -> dict:
         kind, text = req.body["kind"], req.body["text"]
-        index, files = load_index()
-        if opts.get("routes"):  # M8 D12: the chosen routes, their app imports, the branch diff
+        if not from_source():  # D14: the spec's operations, narrowed to the chosen routes
+            index, files = load_index(routes=opts.get("routes"), strats=ctx.strategies)
+        else:
+            index, files = load_index()
+        if opts.get("routes") and from_source():  # M8 D12: chosen routes, app imports, diff
             changed = list((sut.load().get("target") or {}).get("changed", {}))
             index, files = code_index.focus(index, files, opts["routes"], changed)
             ctx.emit("spec_focused", routes=len(index["routes"]), files=len(files))
@@ -129,7 +150,8 @@ class SpecStage:
         state = {
             "round": 1, "version": 1, "kind": kind, "requirements": req.id,
             "sut": index["sut"], "index": {"routes": len(index["routes"]),
-                                           "files": len(index["files"])},
+                                           "files": len(index["files"])}
+            | ({} if from_source() else {"from": "openapi"}),  # D14; export reads it
             "criteria": criteria, "findings": findings,
             "rejected": rejected + rej_obs + [{"item": f, "reasons": ["bad evidence"]}
                                               for f in rej_find],
