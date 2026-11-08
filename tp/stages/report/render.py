@@ -213,7 +213,7 @@ def html(r: dict) -> str:
         if xs
         else "<p>none</p>"
     )
-    parts.append(f"""<section><h2>Not covered</h2><h4>Seeded race</h4><p>{e(u["seeded_race"])}</p>
+    parts.append(f"""<section><h2>Not covered</h2><h4>Seeded race</h4><p>{e(u["seeded_race"] or "none")}</p>
 <h4>Behaviour with no requirement</h4>{lst(u["behaviour_with_no_requirement"])}<h4>Criteria out of this run's scope</h4>{lst(u["criteria_out_of_scope"])}
 <h4>Assumed criteria</h4>{lst(u["assumed"])}<h4>Signed cases not bound</h4>{lst(u["unbound_cases"])}<h4>Skipped templates and notes</h4>{lst(u["skipped_templates"])}<h4>Deferred</h4>{lst(u["deferred"])}</section>""")
 

@@ -45,7 +45,7 @@ def ceiling(strategies: dict, gate: dict) -> str | None:
 
 def build(spec: dict, cases: dict, gate: dict, rr: dict, tri: dict, decisions: list[dict],
           labels: list[str], bound_tests: dict | None = None,
-          strategies: dict | None = None) -> dict:  # fmt: skip
+          strategies: dict | None = None, timing: dict | None = None) -> dict:  # fmt: skip
     criteria = {c["id"]: c for c in spec["criteria"]}
     case_by_id = {c["id"]: c for c in cases["cases"]}
     verdicts = rr["verdicts"]
@@ -59,7 +59,7 @@ def build(spec: dict, cases: dict, gate: dict, rr: dict, tri: dict, decisions: l
         "scorecard": _scorecard(criteria, case_by_id, gate, rr, tri),
         "traceability": _traceability(criteria, case_by_id, ref, gate),
         "coverage": _coverage(case_by_id, ref),
-        "uncovered": _uncovered(spec, cases, gate),
+        "uncovered": _uncovered(spec, cases, gate, timing or {}),
         "ai_decisions": _ai(spec, cases, gate, tri, decisions),
         "evidence": tri.get("evidence", {}),
         "defects": defects,
@@ -263,7 +263,7 @@ def _coverage(case_by_id, ref):
             **{k: num(len(v), len(ref), v) for k, v in out.items()}}  # fmt: skip
 
 
-def _uncovered(spec, cases, gate):
+def _uncovered(spec, cases, gate, timing):
     rows = {r["unit"] for r in gate["rows"]}
     return {
         "criteria_out_of_scope": cases.get("not_tested", []),
@@ -272,8 +272,7 @@ def _uncovered(spec, cases, gate):
         "assumed": [c["id"] for c in spec["criteria"] if c.get("status") == "assumed"],
         "unbound_cases": sorted(c["id"] for c in cases["cases"] if c["id"] not in rows),
         "behaviour_with_no_requirement": spec.get("unmapped_routes", []),
-        "seeded_race": "BUG_FLAKE_RACE: no signed case reads an item right after creating it, so the "
-        "suite cannot observe the late commit",
+        "seeded_race": "; ".join(f"{f}: {why}" for f, why in timing.items()),
     }
 
 

@@ -78,6 +78,8 @@ def test_export_writes_one_commit_on_a_new_branch_and_never_overwrites(repo, tmp
     assert gen + "test_b.py" not in files and res["tests"] == ["test_a.py"]
     readme = _git(repo, "show", f"tp/tests-r-0001:{gen}README.md")
     assert "Expected to fail until a defect is fixed" in readme and "A.2" in readme
+    conftest = _git(repo, "show", f"tp/tests-r-0001:{gen}conftest.py")
+    assert 'os.environ.setdefault("FIRST_SUPERUSER", settings.FIRST_SUPERUSER)' in conftest
 
     with pytest.raises(export.ExportError, match="already exists"):
         export.export(repo, ref, "tp/tests-r-0001", "r-0001", chosen, sources, harness)

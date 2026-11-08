@@ -1,7 +1,7 @@
 """Export a run's chosen tests to a new branch of the user's repo (M8 report/009 X1-X5).
 
 The branch starts at the commit the run tested and gets one commit that adds
-`backend/tests/generated/`. It is written through a temporary git worktree, so the user's
+`generated/` inside the repo's tests folder (the profile's `mutation.repo_prefix` + `tests`). It is written through a temporary git worktree, so the user's
 checkout and current branch are never touched. An existing branch is never overwritten.
 """
 
@@ -11,7 +11,8 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-DEST = "backend/tests/generated"
+from tp.core import profile
+
 TRUSTED = {"ADMITTED", "ADMITTED_REDUNDANT", "CANDIDATE_DEFECT"}  # gate statuses
 TRUSTED_TRIAGE = {"PRODUCT_DEFECT"}  # a triage class that keeps the test trustworthy
 WHY = {
@@ -32,13 +33,13 @@ import os
 import sys
 from pathlib import Path
 
+from tp.core import profile
+
 sys.path.insert(0, str(Path(__file__).parent / "_support"))
 
 from app.core.config import settings  # noqa: E402
 
-os.environ.setdefault("FIRST_SUPERUSER", settings.FIRST_SUPERUSER)
-os.environ.setdefault("FIRST_SUPERUSER_PASSWORD", settings.FIRST_SUPERUSER_PASSWORD)
-
+{env}
 from harness import _isolated, _sut, make  # noqa: E402,F401  (fixtures)
 from platform_rt.plugin import (  # noqa: E402,F401  (hooks)
     pytest_configure,
@@ -149,12 +150,17 @@ def export(repo: Path, ref: str, branch: str, run: str, chosen: list[dict],
         raise ExportError(f"branch {branch} already exists in {repo}; delete or rename it first")
     _git(repo, "cat-file", "-e", f"{ref}^{{commit}}")
     files = {f"{c['file']}": sources[c["file"]] for c in chosen}
-    files["conftest.py"] = CONFTEST.format(run=run)
+    p = profile.load()
+    tests, su = p.mutation.value["repo_prefix"] + "tests", p.auth.value["superuser"]
+    dest = f"{tests}/generated"
+    env = "".join(f'os.environ.setdefault("{k}", settings.{k})\n'
+                  for k in (su["user_env"], su["password_env"]))  # fmt: skip
+    files["conftest.py"] = CONFTEST.format(run=run, env=env)
     files["README.md"] = _readme(run, ref, chosen)
     files |= {f"_support/{n}": s for n, s in _platform_rt().items()}
     files |= {f"_support/{n}": p.read_text() for n, p in harness.items()}
     has_init = subprocess.run(
-        ["git", "-C", str(repo), "cat-file", "-e", f"{ref}:backend/tests/__init__.py"],
+        ["git", "-C", str(repo), "cat-file", "-e", f"{ref}:{tests}/__init__.py"],
         capture_output=True,
         check=False,
     )
@@ -164,14 +170,14 @@ def export(repo: Path, ref: str, branch: str, run: str, chosen: list[dict],
     _git(repo, "worktree", "add", "--quiet", "-b", branch, str(wt), ref)
     try:
         for name, text in files.items():
-            p = wt / DEST / name
+            p = wt / dest / name
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(text)
-        _git(wt, "add", DEST)
+        _git(wt, "add", dest)
         n = len(chosen)
         _git(wt, "commit", "--quiet", "-m",
              f"Add {n} generated test file{'s' if n != 1 else ''} from test platform run {run}",
-             "-m", f"Checked against {ref[:7]}. See {DEST}/README.md.")  # fmt: skip
+             "-m", f"Checked against {ref[:7]}. See {dest}/README.md.")  # fmt: skip
         sha = _git(wt, "rev-parse", "HEAD")
     except Exception:
         _git(repo, "worktree", "remove", "--force", str(wt))
@@ -179,5 +185,5 @@ def export(repo: Path, ref: str, branch: str, run: str, chosen: list[dict],
         raise
     _git(repo, "worktree", "remove", "--force", str(wt))
     shutil.rmtree(wt.parent, ignore_errors=True)
-    return {"branch": branch, "commit": sha, "repo": str(repo), "path": DEST,
+    return {"branch": branch, "commit": sha, "repo": str(repo), "path": dest,
             "files": sorted(files), "tests": [c["file"] for c in chosen]}  # fmt: skip

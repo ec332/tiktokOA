@@ -8,6 +8,7 @@ from types import SimpleNamespace as NS
 
 import pytest
 
+from tp.core import profile
 from tp.stages.report import build, render
 from tp.stages.report.stage import ReportStage
 
@@ -36,6 +37,7 @@ def report():
         [],
         ["real"],
         strategies=TEMPLATE_STRATEGIES,
+        timing=profile.timing_flags(),
     )
 
 

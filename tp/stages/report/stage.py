@@ -3,7 +3,7 @@ worklist, from artifacts only. No LLM. Design: docs/status/report/001."""
 
 import json
 
-from tp.core import artifacts, db
+from tp.core import artifacts, db, profile
 from tp.core.contract import StageResult, register
 from tp.stages.report import build, export, product, render
 
@@ -59,7 +59,8 @@ class ReportStage:
         p = getattr(ctx, "profile", None)
         strategies = {c: f.strategy for c, f in p.fields.items()} if p else {}
         report = build.build(b["spec"], b["cases"], b["gate_report"], b["run_records"], b["triage"],
-                             decisions, labels, b.get("bound_tests"), strategies)  # fmt: skip
+                             decisions, labels, b.get("bound_tests"), strategies,
+                             profile.timing_flags())  # fmt: skip
         if bare := list(
             build.walk(
                 {
