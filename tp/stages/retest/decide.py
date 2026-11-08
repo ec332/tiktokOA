@@ -4,7 +4,7 @@ Design: docs/status/retest/001."""
 import hashlib
 import json
 
-from platform_rt.api import route_matches
+from tp.stages.env.blackbox import _matches  # platform_rt is runner-side only
 
 K = 5  # fail→pass attempts (plan †)
 # shortcut: K is fixed; an intermittent defect with rate p needs K with (1-p)^K < 0.05. No such
@@ -80,7 +80,7 @@ def contract_diff(before: dict, after: dict, calls: set[tuple[str, str]]) -> lis
     out = []
     for method, path in sorted(calls):
         tpl = next((t for t, ops in before.get("paths", {}).items() if method.lower() in ops
-                    and route_matches(f"{method} {t}", method, path)), None)  # fmt: skip
+                    and _matches(t, path)), None)  # fmt: skip
         if tpl is None:
             out.append(f"{method} {path}: not an operation of the before build's spec")
             continue
