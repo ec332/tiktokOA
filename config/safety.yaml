@@ -1,0 +1,4 @@
+# Safe mode for external reach (docs/status/external/001 E5). Generic: no target names here.
+# A write whose path segment (or x-*scope* marker) contains one of these words is blocked.
+deny: [user, group, auth, token, login, logout, password, setting, config, credential, secret,
+       key, permission, profile, package, plugin, mail, workflow, bulk, import, export, admin]
