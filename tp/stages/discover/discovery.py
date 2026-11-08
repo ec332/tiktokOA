@@ -207,7 +207,7 @@ class Discovery:
         cfg = config()
         self.cfg = cfg["platform"]
         self.conv = cfg["conventions"] if conventions else []
-        self.slug = re.sub(r"\.git$", "", url.rstrip("/").rsplit("/", 1)[-1]).lower()
+        self.slug = self.slug_of(url)
         self.prov: dict[str, dict] = {}  # concern -> {sub-key: {source, layer, probe}}
         self.values: dict[str, dict] = {}
         self.stack: bb.Stack | None = None
@@ -215,6 +215,10 @@ class Discovery:
         self.errors_5xx: list[tuple[str, int]] = []  # ("METHOD template", probe) (D11)
         self.created: list[str] = []  # discovery's own items, deleted at the end
         self.observed_open: list[dict] = []  # [{op, description}] for confirm_observed (D9)
+
+    @staticmethod
+    def slug_of(url: str) -> str:
+        return re.sub(r"\.git$", "", url.rstrip("/").rsplit("/", 1)[-1]).lower()
 
     def conventions(self, kind: str) -> list:
         return [c["value"] for c in self.conv if c["kind"] == kind]
@@ -251,6 +255,9 @@ class Discovery:
             for c in profile.CONCERNS
         }
         return profile.parse(raw, self.slug)
+
+    def new_stack(self) -> bb.Stack:
+        return bb.Stack(self.draft())
 
     def run(self) -> dict:
         self.step_reach()
@@ -335,7 +342,7 @@ class Discovery:
         else:
             tag_probe, ref = self.latest_tag()
         self.values["reach"] = {"strategy": "container", "ref": ref}
-        self.stack = bb.Stack(self.draft())
+        self.stack = self.new_stack()
         clone = db.data_dir() / "sut" / self.slug
         if self.probes.replay is not None and not (
             (clone / ".git").exists() and self.stack._at(clone) == ref
@@ -376,7 +383,7 @@ class Discovery:
                 reach["image_tag_from"] = "ref"  # floating tag: test the image of the ref (P6f)
             reach["env"] = env
             self.values["reach"] = reach
-            self.stack = bb.Stack(self.draft())
+            self.stack = self.new_stack()
             n, out = self.probes.call("docker", f"up {path}", self._up)
             if out["ok"]:
                 break
@@ -451,7 +458,7 @@ class Discovery:
                 )
                 self.mark("spec", "base", "probed", "algorithm", n)
                 self.mark("reach", "health", "probed", "algorithm", n)
-                self.stack = bb.Stack(self.draft())
+                self.stack = self.new_stack()
                 return
         files = self.spec_files()
         layer = "algorithm"
@@ -479,7 +486,7 @@ class Discovery:
         else:
             raise DiscoveryError("reach", "no health path answers 200",
                                  "Which path answers 200 when the server is up?")  # fmt: skip
-        self.stack = bb.Stack(self.draft())
+        self.stack = self.new_stack()
 
     # ---- auth --------------------------------------------------------------------------------
 
@@ -917,6 +924,90 @@ class Discovery:
             out[c] = {"source": weakest["source"], "layer": weakest["layer"], "evidence": ev,
                       "value": self.values[c], "provenance": prov}  # fmt: skip
         return out
+
+
+def live_slug(url: str) -> str:
+    """`http://localhost:8010` -> `localhost-8010`: a live system has no repo name."""
+    u = httpx.URL(url)
+    return re.sub(r"[^a-z0-9]+", "-", f"{u.host}-{u.port or ''}".lower()).strip("-")
+
+
+class LiveDiscovery(Discovery):
+    """`tp target add <url> --live` (external/001 E9 step 3): a running system the platform didn't
+    start. The same steps, read-only: the supplied token instead of a login or a first user (D3),
+    the ID field and paging from items already there, no logs. Every request goes through the
+    external stack's safe mode. Resolves to `external` reach and `safe_mode` safety."""
+
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.slug = live_slug(self.url)
+
+    def new_stack(self) -> bb.Stack:
+        return bb.ExternalStack(self.draft())
+
+    def step_reach(self) -> None:
+        self.values["reach"] = {"strategy": "external", "url": self.url.rstrip("/")}
+        self.mark("reach", "url", "clarify", "clarify")  # given by the user
+        self.commit, self.src, self.app_env, self.admin = "unknown: a live system", None, {}, None
+        self.stack = self.new_stack()
+
+    def spec_files(self) -> list[tuple[str, dict]]:
+        return []  # no checkout: the spec must be served
+
+    def step_auth(self) -> None:
+        cn, check = self.check_op()
+        self.mark("auth", "check", "probed", "algorithm", cn)
+        self.public = []
+        if token := secrets.load(self.slug).get("token"):
+            for scheme, layer in self.prefixes() or [("Bearer", "algorithm")]:
+                n, status, _ = self.http(
+                    "GET", check, headers={"Authorization": f"{scheme} {token}"}
+                )
+                if status == 200:
+                    self.values["auth"] = {"strategy": "token_header", "scheme": scheme,
+                                           "check": check, "token": {"secret": "token"}}  # fmt: skip
+                    self.mark("auth", "scheme", "probed", layer, n)
+                    self.mark("auth", "token", "clarify", "clarify", n)  # supplied (master §10)
+                    return
+        raise DiscoveryError(
+            "auth", f"no supplied token is accepted by GET {check}",
+            f"Supply an admin token: `tp target secret {self.slug} token=<token>`, then answer "
+            "`done`.", "token")  # fmt: skip
+
+    def step_data(self) -> None:
+        h = self.auth_headers()
+        data = {"strategy": "spec_derived"}
+        # reads only, so no max_resources cap: the items may be in any collection
+        for coll, item, _ in self.resources():
+            _, status, body = self.http("GET", coll, headers=h)
+            listed = items(body) if status == 200 else []
+            if not listed or not (found := self.id_field(item, listed[0], h)):
+                continue
+            field, style, transform, n = found
+            data |= {"id_field": field, "id_style": style}
+            self.mark("data", "id_field", "probed", "algorithm", n)
+            self.item = (item, self.path_id(listed[0][field], transform))
+            paging = self.paging(coll, field, h)  # needs two items already there
+            data["paging"] = paging[0] if paging else None
+            if paging:
+                self.mark("data", "paging", "probed", paging[1], paging[2])
+            break
+        else:
+            raise DiscoveryError(
+                "data", "no collection has an item to read the ID field from (discovery writes "
+                "nothing on a live system)", "Add two items to any collection by hand (e.g. in "
+                "the app), then answer `done`.", "items")  # fmt: skip
+        data["read_back_timeout_s"] = self.cfg["read_back_timeout_s"]
+        self.mark("data", "read_back_timeout_s", "resolver", "algorithm")
+        self.values["data"] = data
+
+    def step_dependencies(self) -> None:
+        self.exclude = []  # no logs on a live system (needs_dependency reads them)
+
+    def step_resolver(self) -> None:
+        super().step_resolver()
+        self.values["mutation"] = {"strategy": "none", "reason": "external reach"}
+        self.values["safety"] = {"strategy": "safe_mode"}
 
 
 def log_failure(slug: str, step: str, detail: str) -> None:

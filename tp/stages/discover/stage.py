@@ -87,9 +87,10 @@ class Discover:
                 f"setup question skipped: {skipped[-1]['payload']['question']}"
             )
         answers = {i["payload"]["key"]: i["detail"]["text"] for i in asked}
-        d = discovery.Discovery(url, ref, ctx.llm, discovery.Probes(), not nc, ctx.emit, answers)
+        kind = discovery.LiveDiscovery if opts.get("live") else discovery.Discovery
+        d = kind(url, ref, ctx.llm, discovery.Probes(), not nc, ctx.emit, answers)
         profile_path, log_path = files(d.slug, nc)
-        if ctx.llm.mode != "replay" and (other := busy(d.slug)):
+        if ctx.llm.mode != "replay" and not opts.get("live") and (other := busy(d.slug)):
             return StageResult.failed(
                 f"{other} is using {d.slug}'s stack; cancel it or let it finish, then discover"
             )
@@ -144,10 +145,27 @@ def add(
         bool, typer.Option(help="Probes from the recorded log, LLM from cache")
     ] = False,
     keep_up: Annotated[bool, typer.Option(help="Leave the discovered stack running")] = False,
+    live: Annotated[
+        bool, typer.Option(help="A running system's URL: read-only discovery (external/001)")
+    ] = False,
+    secret: Annotated[
+        list[str] | None, typer.Option(help="name=value, stored before discovery (e.g. token=…)")
+    ] = None,
 ):
-    """Discover a target from its repo URL: a run holding only the discover stage."""
+    """Discover a target from its repo URL, or (`--live`) a running system's URL: a run holding
+    only the discover stage."""
+    from tp.core import secrets
+
+    for pair in secret or []:
+        name, sep, value = pair.partition("=")
+        if not (sep and name and value):
+            raise typer.BadParameter(f"--secret expects name=value, got {name!r}")
+        slug = (
+            discovery.live_slug(target) if live else discovery.Discovery.slug_of(split(target)[0])
+        )
+        secrets.put(slug, name, value)
     opts = {"target": target} | ({"no_conventions": True} if no_conventions else {}) \
-        | ({"keep_up": True} if keep_up else {})  # fmt: skip
+        | ({"keep_up": True} if keep_up else {}) | ({"live": True} if live else {})  # fmt: skip
     run_id = runner.start_run("replay" if replay else "live", options=opts, pipeline=["discover"])
     report(runner.advance(run_id), no_conventions)
 
@@ -181,6 +199,36 @@ def show(slug: str, no_conventions: bool = False):
         for k, pv in (f.get("provenance") or {}).items():
             typer.echo(f"    {k:<20} {pv['source']:<21} {pv['layer']:<12} "
                        f"{'' if pv['probe'] is None else 'probe#' + str(pv['probe'])}")  # fmt: skip
+
+
+@cli.command("secret")
+def secret(slug: str, pair: Annotated[str, typer.Argument(help="name=value, e.g. token=…")]):
+    """Store a supplied secret for a target (master §10), e.g. an external system's token."""
+    from tp.core import secrets
+
+    name, sep, value = pair.partition("=")
+    if not (sep and name and value):
+        raise typer.BadParameter("expected name=value")
+    secrets.put(slug, name, value)
+    typer.echo(f"stored {name} for {slug}")
+
+
+@cli.command("clean")
+def clean(target: Annotated[str, typer.Argument(help="Slug or folder of an external target")]):
+    """Delete what earlier runs left on an external target (its ledger), and list the rest."""
+    from tp.core import profile
+    from tp.stages.env import blackbox
+
+    with profile.selected(target):
+        p = profile.load()
+    if p.reach.strategy != "external":
+        raise typer.BadParameter(
+            f"{p.slug} has {p.reach.strategy} reach; only external keeps a ledger"
+        )
+    stack = blackbox.ExternalStack(p)
+    out = stack.cleanup(stack.ledger)
+    typer.echo(" · ".join(f"{k} {len(v)}" for k, v in out.items()))
+    raise typer.Exit(1 if out["failed"] or out["unknown_delete_route"] else 0)
 
 
 contract.register(Discover(), cli=cli, cli_name="target")

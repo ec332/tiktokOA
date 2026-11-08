@@ -137,8 +137,10 @@ def _ctx(mode, provider=None):
     return StageContext(llm=gw, review=None, env=None, emit=lambda *a, **k: None)
 
 
-def _discover(repo, mode="record", provider=scripted, target=None):
-    opts = artifacts.put("run_options", {"target": target or str(repo)})
+def _discover(repo, mode="record", provider=scripted, target=None, live=False):
+    opts = artifacts.put(
+        "run_options", {"target": target or str(repo)} | ({"live": True} if live else {})
+    )
     return Discover().run(_ctx(mode, provider), {"run_options": opts})
 
 
@@ -275,3 +277,39 @@ def test_a_run_can_hold_only_some_stages():
     assert runner.stages(run_id) == ["spec"]
     assert [e["stage"] for e in run["executions"] if e["stage"] != "input"] == ["spec"]
     assert run["status"] == "succeeded"
+
+
+def test_live_discovery_reads_only_and_resolves_external_safe_mode(monkeypatch):
+    """`tp target add <url> --live` (external/001 E9 step 3): supplied token, items already
+    there, no write, no Docker; the profile resolves to external reach and safe mode."""
+    from tp.core import profile, strategies
+
+    slug, tok = discovery.live_slug("http://localhost:8010"), "tok-0123456789abcdef"
+    c = fake_server(slug)
+    for n in ("a", "b"):  # data someone else already keeps on the live system
+        c.post("/api/things/", json={"name": n}, headers={"Authorization": f"Token {tok}"})
+    sent = []
+    c.event_hooks = {"request": [lambda r: sent.append(r.method)]}
+    monkeypatch.setattr(bb.Stack, "client", c)
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: pytest.fail(f"subprocess: {a}"))
+    cfg = discovery.config()
+    cfg["platform"]["max_resources"] = 0  # live reads every collection: the items may be anywhere
+    monkeypatch.setattr(discovery, "config", lambda: cfg)
+    assert slug == "localhost-8010"
+    asked = _discover(None, target="http://localhost:8010", live=True)  # no token yet: a question
+    assert asked.status == "failed" and "no supplied token" in asked.reason
+    secrets.put(slug, "token", tok)
+    res = _discover(None, target="http://localhost:8010", live=True)
+    assert res.status == "succeeded", res.reason
+    prof = res.outputs["target_profile"]
+    assert prof["reach"]["value"] == {"strategy": "external", "url": "http://localhost:8010",
+                                      "health": "/api/schema/"}  # fmt: skip
+    assert prof["auth"]["value"] == {"strategy": "token_header", "scheme": "Token",
+                                     "check": "/api/config/", "token": {"secret": "token"}}  # fmt: skip
+    assert prof["data"]["value"]["id_field"] == "id"
+    assert prof["data"]["value"]["paging"] == {"style": "page", "page": "page", "size": "page_size"}
+    assert prof["safety"]["value"] == {"strategy": "safe_mode"}
+    assert set(sent) == {"GET"}  # discovery wrote nothing
+    p = profile.parse(yaml.safe_load((target_dir(slug) / "profile.yaml").read_text()), slug)
+    s = strategies.resolve(p)
+    assert isinstance(s.reach, bb.ExternalReach) and isinstance(s.safety, bb.SafeMode)
