@@ -20,6 +20,7 @@ class Stub:
 def _load() -> dict[str, Stub]:
     from tp.core.stubs import (
         cases,
+        deliver,
         env,
         execute,
         gate,
@@ -30,7 +31,7 @@ def _load() -> dict[str, Stub]:
         triage,
     )
 
-    mods = [spec, cases, generate, gate, env, execute, triage, report, retest]
+    mods = [spec, cases, generate, gate, env, execute, triage, report, retest, deliver]
     return {m.STAGE.name: m.STAGE for m in mods}
 
 

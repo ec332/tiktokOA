@@ -11,7 +11,18 @@ from tp.core import artifacts, contract, db, events, labels, llm, review, strate
 from tp.core import profile as target_profile
 from tp.core.contract import StageContext
 
-PIPELINE = ["spec", "cases", "generate", "gate", "env", "execute", "triage", "report", "retest"]
+PIPELINE = [
+    "spec",
+    "cases",
+    "generate",
+    "gate",
+    "env",
+    "execute",
+    "triage",
+    "report",
+    "retest",
+    "deliver",
+]
 DONE = ("succeeded", "stale")
 # Artifact types a run itself is given -> schema version. run_options ({flows, fresh, ...}) is
 # always present ({} by default), so stages may consume it without making it mandatory.
@@ -264,7 +275,7 @@ def _execute_one(
             return _fail(run_id, ex_id, f"{type(e).__name__}: {e}")
         if result.status != "awaiting_review" or (stops is None and not run["unattended"]):
             break
-        if not _auto_decide(ex_id, () if run["unattended"] else stops):
+        if not _auto_decide(ex_id, () if run["unattended"] else stops, _decisions(run_id)):
             break
 
     if result.status == "failed":
@@ -319,12 +330,19 @@ def _stops(run_id: int) -> tuple[str, ...] | None:
     return None if stops is None else tuple(stops)
 
 
-def _auto_decide(ex_id: int, stops: tuple[str, ...] = ()) -> bool:
+def _decisions(run_id: int) -> dict[str, str]:
+    """A run's own defaults over UNATTENDED_DECISION (a Scan confirms code-derived behaviour,
+    autonomy/001 F9)."""
+    opt = heads(run_id).get("run_options")
+    return (artifacts.get(opt).body.get("decisions") or {}) if opt else {}
+
+
+def _auto_decide(ex_id: int, stops: tuple[str, ...] = (), decisions: dict | None = None) -> bool:
     """Apply the default decision to every open item whose kind isn't a stop. False if any item
     is left open (a stop, or a kind with no default): the execution then waits for a person."""
     by = "focused" if stops else "unattended"
     for item in _open_items(ex_id):
-        decision = review.UNATTENDED_DECISION.get(item["kind"])
+        decision = {**review.UNATTENDED_DECISION, **(decisions or {})}.get(item["kind"])
         if item["kind"] in stops or not decision:
             continue
         review.resolve(item["id"], decision, by=by, reason=f"{by} default")

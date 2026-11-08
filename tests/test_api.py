@@ -65,6 +65,7 @@ def test_stub_run_review_resume_and_rerun_over_http(client):
         "triage",
         "report",
         "retest",
+        "deliver",
     }
 
 
@@ -126,7 +127,7 @@ def test_defect_decision_needs_a_triage(client):
 
 
 def test_run_list_can_show_only_happy_path_runs(client):
-    client.post("/runs", json={"stub": True})
+    client.post("/runs", json={"stub": True, "focused": False})  # autonomy/001 F7: opt out
     run = client.post("/runs", json={"stub": True, "focused": True,
                                      "requirements": {"kind": "brief", "text": "Items get a price"}}).json()  # fmt: skip
     rows = client.get("/runs", params={"focused": True}).json()

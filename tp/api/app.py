@@ -81,7 +81,9 @@ class RunCreate(BaseModel):
     flows: list[str] | None = None  # cases scope (default: the stage's own default)
     fresh: bool = False  # reuse no earlier answers or sign-offs
     # M8 happy path
-    focused: bool = False  # only clarifications and test approval wait for a person (D27)
+    focused: bool = (
+        True  # only Clarify and Sign-off wait for a person (D27; default: autonomy/001 F7)
+    )
     routes: list[str] | None = None  # "METHOD /path" code focus (spec D12)
     rules: RunRules | None = None
     templates: list[str] | None = None  # enabled case templates (cases D14)
@@ -89,7 +91,7 @@ class RunCreate(BaseModel):
     profile: str | None = None  # target folder path or slug (GET /profiles); default TP_TARGET
 
 
-FOCUSED_STOPS = ["question", "confirm_observed", "setup", "signoff"]  # setup: discover/001 D5
+FOCUSED_STOPS = review.FOCUSED_STOPS
 
 
 class SutTarget(BaseModel):

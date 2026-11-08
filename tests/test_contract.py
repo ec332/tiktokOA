@@ -30,4 +30,4 @@ def test_every_consumed_type_is_produced_upstream_at_that_version():
                 f"{name} consumes {t} v{v}, upstream gives {produced.get(t)}"
             )
         produced |= stage.produces
-    assert len(STUBS) == 9
+    assert len(STUBS) == 10

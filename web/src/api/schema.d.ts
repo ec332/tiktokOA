@@ -723,7 +723,7 @@ export interface components {
             fresh: boolean;
             /**
              * Focused
-             * @default false
+             * @default true
              */
             focused: boolean;
             /** Routes */

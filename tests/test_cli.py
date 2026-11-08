@@ -8,11 +8,11 @@ from tp.core import runner
 cli = CliRunner()
 
 
-def test_tp_run_stub_unattended_produces_nine_artifacts():
+def test_tp_run_stub_unattended_produces_ten_artifacts():
     r = cli.invoke(app, ["run", "--stub", "--unattended"])
     assert r.exit_code == 0, r.output
-    assert r.output.count("succeeded") == 11  # run line + the input row + nine stages
-    assert len(runner.heads(1)) == 10  # + run_options
+    assert r.output.count("succeeded") == 12  # run line + the input row + ten stages
+    assert len(runner.heads(1)) == 11  # + run_options
 
 
 def test_review_resolve_resumes_from_cli():

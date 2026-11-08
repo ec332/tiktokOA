@@ -1852,7 +1852,7 @@
           "focused": {
             "type": "boolean",
             "title": "Focused",
-            "default": false
+            "default": true
           },
           "routes": {
             "anyOf": [

@@ -20,7 +20,7 @@ def test_stub_run_blocks_on_review_then_completes_with_lineage():
     run = _approve_and_finish(run_id)
     assert run["status"] == "succeeded"
     heads = runner.heads(run_id)
-    assert len(heads) == 10  # nine stage outputs + the run's run_options input
+    assert len(heads) == 11  # ten stage outputs + the run's run_options input
     gate = artifacts.get(heads["gate_report"])
     assert sorted(gate.parents) == sorted([heads["bound_tests"], heads["cases"], heads["spec"]])
     assert gate.labels == ["simulated"]
@@ -42,6 +42,7 @@ def test_superseding_cases_marks_exactly_its_consumers_stale():
         "triage",
         "report",
         "retest",
+        "deliver",
     }
 
 

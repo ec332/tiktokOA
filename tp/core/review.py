@@ -28,6 +28,10 @@ CHOICE_DECISIONS = {
 LINE_OPTIONS: dict[str, list[str]] = {"signoff": ["approve", "reject", "exclude"]}
 LINE_NEEDS_COMMENT = {"reject"}
 SKIPS_DETAIL = {"defer"}  # deciding the whole item at once, no per-line/choice detail
+# The kinds that wait for a person by default: Clarify and Sign-off (M8 D27, discover/001 D5,
+# autonomy/001 F7). Every other kind takes its UNATTENDED_DECISION.
+FOCUSED_STOPS = ["question", "confirm_observed", "setup", "signoff"]
+
 UNATTENDED_DECISION = {
     "signoff": "defer",
     "question": "defer",
