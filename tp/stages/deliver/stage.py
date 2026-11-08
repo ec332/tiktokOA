@@ -21,7 +21,7 @@ ISSUE_CLASSES = {"PRODUCT_DEFECT", "INTERMITTENT_PRODUCT", "SPEC_MISMATCH"}  # p
 WRITE = ("ADMIN", "MAINTAIN", "WRITE")
 DRAFTED = "_Drafted by an automated test platform; cases and tests were written with an AI model._"
 DISCLOSURE = (DRAFTED[:-1] + " The fix was proposed by an AI model (Claude Haiku) and accepted only "
-              "because the failing tests below pass after it, 5 times out of 5, with the same test "
+              "because the failing tests above pass after it, 5 times out of 5, with the same test "
               "hashes. Please review it as you would any outside contribution._")  # fmt: skip
 
 
