@@ -28,9 +28,14 @@ def _family(ac: str | None) -> str | None:
 
 
 def ceiling(strategies: dict, gate: dict) -> str | None:
-    """The strongest claim the strategies that ran allow (checks/001 D12). External: stage E."""
+    """The strongest claim the strategies that ran allow (checks/001 D12, external/001 E8)."""
     if not strategies:
         return None
+    if (
+        strategies.get("reach") == "external"
+    ):  # no redeploy, no logs: what was seen (external/001 E8)
+        k = (gate.get("settings") or {}).get("k", "K")
+        return f"Seen on the live system, stable {k}/{k}"
     if strategies.get("mutation") == "in_process":
         return "Likely defect, catches planted bugs"
     props = any(_family(r.get("ac")) == "properties" and r["status"] not in ("EXCLUDED", "ERROR")
