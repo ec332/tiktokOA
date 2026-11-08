@@ -12,3 +12,13 @@ case:
     acceptance: 2
   labels: {P0: 8, P1: 5}     # score >= threshold, highest first
   default_label: P2
+
+# PR score (stage F, autonomy/001 F6): score = severity x evidence. Severity comes from a fixed rule
+# on the failed status assertion (tp/core/priority.py severity()). A PR also needs every hard rule:
+# PRODUCT_DEFECT, FIXED_CONFIRMED, not external, a fork we own, under the daily cap.
+pr:
+  severity: {server_error: 3, permission_bypass: 3, wrong_value: 2, validation_gap: 1}
+  evidence: {stable: 1.0, plus_planted_bug_or_property: 1.5}
+  threshold: 3
+  only_forks_we_own: true
+  max_per_repo_per_day: 3

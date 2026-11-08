@@ -39,3 +39,30 @@ def case(terms: dict[str, bool]) -> dict:
     c = config()["case"]
     s = score({"base": True, **terms}, c["weights"])
     return s | {"priority": label(s["score"], c["labels"], c["default_label"])}
+
+
+def severity(defect: dict) -> str:
+    """The fixed severity rule (autonomy/001 F6), from the failed status assertion."""
+    status = [
+        a for a in defect.get("failed_assertions", []) if str(a.get("id", "")).endswith("/status")
+    ]
+    actual = (defect.get("observed") or {}).get("status")
+    actual = status[0].get("actual", actual) if status else actual
+    expected = str(status[0].get("expected", "")) if status else ""
+    if isinstance(actual, int) and actual >= 500:
+        return "server_error"
+    if isinstance(actual, int) and 200 <= actual < 300 and expected[:1] == "4":
+        return "permission_bypass" if expected in ("401", "403") else "validation_gap"
+    return "wrong_value"
+
+
+def pr(defect: dict, strong_evidence: bool, rules: dict[str, bool]) -> dict:
+    """A defect's {score, parts, rules, pr}: pr only if score >= threshold and every hard rule
+    holds. `rules` maps each hard rule's name to whether it held, so the UI can show which failed."""
+    c = config()["pr"]
+    sev = severity(defect)
+    ev = "plus_planted_bug_or_property" if strong_evidence else "stable"
+    s = c["severity"][sev] * c["evidence"][ev]
+    return {"score": s, "parts": {sev: c["severity"][sev], ev: c["evidence"][ev]},
+            "threshold": c["threshold"], "rules": rules,
+            "pr": s >= c["threshold"] and all(rules.values())}  # fmt: skip

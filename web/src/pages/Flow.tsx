@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api, ok, type Execution, type ReviewItem, type RunDetail } from "../api/client";
 import { Approve } from "../panels/cases/Approve";
 import { ProductReport, type Product } from "../panels/report/Product";
+import { Delivery, type DeliveryBody } from "../panels/report/Delivery";
 import { Clarify } from "../panels/spec/Clarify";
 import { resolveItem } from "../flow/resolve";
 import { ApprovedTests, BuildResults, ClarifyHistory, Requirements, type CasesBody, type Criterion, type GateRow, type Verdict } from "../flow/Details";
@@ -60,6 +61,7 @@ const STEPS: { name: string; stages: string[] }[] = [
   { name: "Design and approve tests", stages: ["cases"] },
   { name: "Build and check", stages: ["generate", "gate", "env", "execute"] },
   { name: "Report", stages: ["triage", "report"] },
+  { name: "Fix and deliver", stages: ["retest", "deliver"] },  // no click (autonomy/001 F3)
 ];
 
 function elapsed(from?: string | null) {
@@ -132,6 +134,8 @@ export function Flow({ run }: { run: RunDetail }) {
   const rep = useArtifact<{ report: { product: Product; evidence: Record<string, unknown> } }>(report?.outputs.report);
   const retest = latest.get("retest");
   const ret = useArtifact<{ retests: never[] }>(retest?.status === "succeeded" ? retest.outputs.retest : undefined);
+  const deliverEx = latest.get("deliver");
+  const del = useArtifact<DeliveryBody>(deliverEx?.status === "succeeded" ? deliverEx.outputs.delivery : undefined);
   const criteria = Object.fromEntries((specOut.data?.body.criteria ?? []).map((c) => [c.id, c.title]));
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["reviews"] });
@@ -169,6 +173,7 @@ export function Flow({ run }: { run: RunDetail }) {
       <ProductReport product={rep.data.body.report.product} evidence={rep.data.body.report.evidence ?? {}}
         runId={run.id} retests={(ret.data?.body.retests ?? []) as never[]} />
     );
+    if (step === "Fix and deliver" && del.data?.body.defects) return <Delivery body={del.data.body} />;
     return null;
   };
   // a decision the happy path doesn't expect (no stop of its own): never leave it invisible
