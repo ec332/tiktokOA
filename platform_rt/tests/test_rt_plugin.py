@@ -110,6 +110,7 @@ def results(pytester, monkeypatch):
     out = pytester.path / "results.jsonl"
     monkeypatch.setenv("TP_RESULTS", str(out))
     monkeypatch.setenv("TP_TIMEOUT", "1")
+    monkeypatch.setenv("TP_API_BASE", "/api/v1")  # the env stage sets it; no default (L1)
     pytester.runpytest_subprocess(
         "-p", "platform_rt.plugin", "-p", "no:cacheprovider", "--continue-on-collection-errors"
     )

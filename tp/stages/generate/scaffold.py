@@ -10,7 +10,6 @@ from tp.core.hashing import sha256
 BINDING_START, BINDING_END = "    # >>> BINDING", "    # <<< BINDING"
 LOCKED_START, LOCKED_END = "    # >>> LOCKED sha256=", "    # <<< LOCKED"
 PLACEHOLDER = "    pass  # the binding goes here"
-REGISTRY = ("user", "superuser", "item", "inactive_user")  # env factories (cases design D6)
 ABSENT = "<absent>"  # platform_rt.ABSENT
 LENGTH = "_length_chars"
 STATUS = re.compile(r"[1-5](\d\d|xx)")
@@ -18,6 +17,15 @@ STATUS = re.compile(r"[1-5](\d\d|xx)")
 
 class ScaffoldError(Exception):
     pass
+
+
+def __getattr__(name: str):
+    """`REGISTRY`: the selected target's factory names, from its profile, not a literal (L1)."""
+    if name == "REGISTRY":
+        from tp.core import profile
+
+        return tuple(profile.load().data.value.get("factories") or ())
+    raise AttributeError(name)
 
 
 # ---- case_data (D6) -------------------------------------------------------------------
@@ -178,8 +186,9 @@ def locked_block(kind: str, observables: list[str]) -> str:
     return "\n".join(lines)
 
 
-def setup_lines(preconditions: list[str], registry: tuple[str, ...] = REGISTRY) -> list[str]:
+def setup_lines(preconditions: list[str], registry: tuple[str, ...] | None = None) -> list[str]:
     """registry: the target's precondition names (its data strategy's `factories()`, D15)."""
+    registry = __getattr__("REGISTRY") if registry is None else registry
     if unknown := [p for p in preconditions if p not in registry]:
         raise ScaffoldError(f"preconditions not in the fixture registry: {unknown}")
     lines, seen = [], set()
@@ -202,7 +211,7 @@ def _literal(name: str, value: dict) -> str:
 
 
 def scaffold(unit: dict, routes: list[str], openapi: dict, guards: str = "v2",
-             registry: tuple[str, ...] = REGISTRY, imports: tuple[str, ...] = ()) -> dict:  # fmt: skip
+             registry: tuple[str, ...] | None = None, imports: tuple[str, ...] = ()) -> dict:  # fmt: skip
     """-> {file, source (with the binding placeholder), lock_hash, params, observables}.
     imports: extra platform_rt names the target's data strategy offers (e.g. `eventually`)."""
     params = params_of(unit, route_fields(openapi, routes))
