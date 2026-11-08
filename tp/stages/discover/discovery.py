@@ -20,7 +20,7 @@ import httpx
 import yaml
 
 from tp.core import db, profile, secrets
-from tp.stages.discover import ai
+from tp.stages.discover import ai, dependencies, spec_base, ui_flows
 from tp.stages.env import blackbox as bb
 
 ROOT = Path(__file__).parents[3]
@@ -268,6 +268,7 @@ class Discovery:
         self.step_spec_check()
         self.step_cleanup()
         self.step_dependencies()
+        self.step_ui()
         self.step_resolver()
         return self.profile()
 
@@ -450,8 +451,8 @@ class Discovery:
             n, status, body = self.http("GET", path)
             if status == 200 and is_spec(body):
                 self.spec = body
-                self.values["spec"] = {"strategy": "served", "openapi": path,
-                                       "base": common_base(list(body["paths"]))}  # fmt: skip
+                base = spec_base.base(body, common_base(list(body["paths"])))  # C6 (P4)
+                self.values["spec"] = {"strategy": "served", "openapi": path, "base": base}
                 self.values["reach"]["health"] = path.split("?")[0]
                 self.mark(
                     "spec", "openapi", "clarify" if layer == "clarify" else "probed", layer, n
@@ -471,8 +472,8 @@ class Discovery:
                 "Where is the OpenAPI spec? Give a served path (e.g. /openapi.json) or a file "
                 "in the repo (e.g. api/openapi.yaml).", "spec")  # fmt: skip
         rel, self.spec = files[0]
-        self.values["spec"] = {"strategy": "repo_file", "openapi": rel,
-                               "base": common_base(list(self.spec["paths"]))}  # fmt: skip
+        base = spec_base.base(self.spec, common_base(list(self.spec["paths"])))  # C6 (P4)
+        self.values["spec"] = {"strategy": "repo_file", "openapi": rel, "base": base}
         self.mark("spec", "openapi", "clarify" if layer == "clarify" else "repo", layer)
         self.mark("spec", "base", "repo", "algorithm")
         for path, hl in [(p, "convention") for p in self.conventions("health_path")] + [
@@ -788,8 +789,9 @@ class Discovery:
         strs = [k for k, s in params.items() if s.get("type") == "string"]
         cands = [(c, "convention") for c in self.conventions("paging_param")
                  if all(c[k] in params for k in c if k != "style")]  # fmt: skip
+        page_ints = spec_base.paging_filter(ints)  # C6: P4 drops offset/limit here
         cands += [({"style": "page", "page": p, "size": s}, "algorithm")
-                  for s in ints for p in ints if p != s][:4]  # fmt: skip
+                  for s in page_ints for p in page_ints if p != s][:4]  # fmt: skip
         cands += [({"style": "token", "size": s, "token": t}, "algorithm")
                   for s in ints for t in strs][:4]  # fmt: skip
         seen = []
@@ -870,33 +872,10 @@ class Discovery:
             self.http("DELETE", path, headers=h)
 
     def step_dependencies(self) -> None:
-        """`needs_dependency` (D11): an operation that answered 5xx during discovery while the
-        container log names an env var the code reads (a string literal in tracked source) and
-        nothing supplies. Written to `checks.families.exclude`; otherwise the op stays in."""
-        self.exclude = []
-        if not self.errors_5xx:
-            return
-        _, log = self.probes.call("docker", "logs", lambda: self.stack.logs()[-50_000:])
-        names = set(re.findall(r"\b[A-Z][A-Z0-9]*_[A-Z0-9_]{2,}\b", log or ""))
-        supplied = set(self.app_env) | set(self.values["reach"].get("env") or {})
-        names -= supplied
-        if not names:
-            return
-        r = subprocess.run(["git", "ls-files"], cwd=self.src, capture_output=True, text=True,
-                           check=False)  # fmt: skip
-        read = set()
-        for f in r.stdout.splitlines():
-            p = self.src / f
-            if Path(f).suffix in ai.DOC_SUFFIXES or not p.is_file() or p.stat().st_size > 1_000_000:
-                continue
-            text = p.read_text(errors="replace")
-            read |= {n for n in names if f'"{n}"' in text or f"'{n}'" in text}
-        # shortcut: one log for the whole discovery, so every 5xx op is attributed to the first
-        # such variable; upgrade to per-request log windows when a target has two dependencies
-        for op, probe in dict(self.errors_5xx).items() if read else ():
-            var = min(read)
-            self.exclude.append({"op": op, "reason": f"needs_dependency: {var} is not set"})
-            self.mark("checks", f"exclude {op}", "probed", "algorithm", probe)
+        dependencies.run(self)  # C6: the body is P6's (docs/iteration3/P6-standins.md)
+
+    def step_ui(self) -> None:
+        ui_flows.run(self)  # C6: UI flows, proposed and verified at discover time (P7)
 
     # ---- resolver rules (blackbox/001 D6) ------------------------------------------------------
 
