@@ -223,6 +223,8 @@ def properties(spec, c, method, path, op):
     from schemathesis import checks
     from schemathesis.core import NotSet
 
+    if os.environ.get("TP_SAFE_MODE") and method.lower() != "get":  # random writes: external/001 E4
+        pytest.skip(f"NOT_RUN: safe mode (property checks run reads only): {method.upper()} {path}")
     operation = _schemathesis(spec)[path][method]
     scheme = os.environ.get("TP_AUTH_SCHEME", "Bearer")
     rec = record.current()

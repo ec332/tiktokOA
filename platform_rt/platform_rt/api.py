@@ -130,6 +130,10 @@ class Api:
         finally:
             if mutant is not None:
                 os.environ["MUTANT_UNDER_TEST"] = mutant
+        if rule := resp.headers.get("x-tp-blocked"):  # the safe-mode proxy refused to send it
+            import pytest
+
+            pytest.skip(f"NOT_RUN: safe mode ({rule}): {method.upper()} {resp.request.url.path}")
         _ledger(method, resp)
         rec.exchanges.append({
             "step": step, "setup": setup, "method": method.upper(), "path": resp.request.url.path,
