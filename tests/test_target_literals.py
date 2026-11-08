@@ -20,6 +20,8 @@ PATTERNS = [re.compile(p) for p in (
     r"backend/", r"/api/v1", r"/app/backend", r"alembic", r"FIRST_SUPERUSER", r"mailpit",
     r"BUG_[A-Z]", r"/items", r"full-stack-fastapi", r"(?i)paperless", r"(?i)\bmemos\b",
 )]  # fmt: skip
+# The Mailpit stand-in's own image and API (C8, standins/001 D8) are the platform's, not a target's.
+STANDIN_API = re.compile(r"axllent/mailpit|/api/v1/(chaos|messages)\b")
 
 
 def counts() -> dict[str, int]:
@@ -33,7 +35,9 @@ def counts() -> dict[str, int]:
             text = (ROOT / f).read_text()
         except UnicodeDecodeError, FileNotFoundError:
             continue
-        n = sum(any(p.search(line) for p in PATTERNS) for line in text.splitlines())
+        n = sum(
+            any(p.search(STANDIN_API.sub("", line)) for p in PATTERNS) for line in text.splitlines()
+        )
         if n:
             out[f] = n
     return out
