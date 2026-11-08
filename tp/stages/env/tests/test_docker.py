@@ -1,10 +1,28 @@
 """Real stacks (plan 3.2 E5, E7, E8). Brings up and tears down its own projects."""
 
+from types import SimpleNamespace
+
 import pytest
 
+from tp.core import contract, sut
 from tp.stages.env.service import EnvDown, Stack, _http
+from tp.stages.env.strategies import from_service
+from tp.stages.generate.stage import ensure_runner
 
 pytestmark = pytest.mark.docker
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _pinned_template():
+    """The seeded template at its pinned ref, not a branch target picked in the UI
+    (data/sut/target.json would drop the flags patch). Its runner image is rebuilt as a run
+    would (`ensure_runner`); the next run on a branch target rebuilds its own the same way."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(sut, "target", lambda: None)
+        contract.load()
+        strategies = from_service(contract.SERVICES["env"])
+        ensure_runner(SimpleNamespace(strategies=strategies, emit=lambda *a, **k: None))
+        yield
 
 
 @pytest.fixture(scope="module")
