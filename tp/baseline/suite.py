@@ -7,7 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from tp.core import sut
+from tp.core import profile, sut
 from tp.stages.gate import handlers
 from tp.stages.gate import mutants as mutant_src
 
@@ -109,14 +109,19 @@ def generate_mutants(env, work: Path, refs: list) -> dict:
     return {"files": files | h_files, "list": mutant_src.parse(work, cs["mutate"]) + h_ms}
 
 
+def tests_dir() -> str:
+    """The repo's own tests folder: the profile's `mutation.repo_prefix` + `tests`."""
+    return profile.load().mutation.value["repo_prefix"] + "tests"
+
+
 def sut_tests(src: Path, ref: str, dest: Path, with_tests: bool = True) -> Path:
-    """backend/tests at the upstream ref (git, so none of our added test files). Without
+    """The repo's tests folder at the upstream ref (git, so none of our added test files). Without
     with_tests: only conftest + helpers (the naive arm's fixtures)."""
     shutil.rmtree(dest, ignore_errors=True)
     dest.mkdir(parents=True)
-    tar = subprocess.run(["git", "-C", str(src), "archive", ref, "backend/tests"],
+    tar = subprocess.run(["git", "-C", str(src), "archive", ref, tests_dir()],
                          check=True, capture_output=True).stdout  # fmt: skip
-    subprocess.run(["tar", "-x", "-C", str(dest), "--strip-components=2"], input=tar,
+    subprocess.run(["tar", "-x", "-C", str(dest), f"--strip-components={len(Path(tests_dir()).parts)}"], input=tar,
                    check=True)  # fmt: skip
     if not with_tests:
         for f in dest.rglob("test_*.py"):

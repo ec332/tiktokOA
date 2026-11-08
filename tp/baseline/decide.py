@@ -3,8 +3,6 @@
 Every arm is reduced to per-node verdicts per variant: PASS (passed in every run), FAIL
 (failed in every run) or anything else (intermittent, skipped), plus its mutant kill count."""
 
-RACE = "BUG_FLAKE_RACE"  # timing bug; X5 isn't met, so it is reported apart from the headline
-
 
 def verdict(runs: list[dict[str, str]], node: str) -> str:
     seen = {r.get(node) for r in runs}
@@ -31,21 +29,24 @@ def validates(v: dict[str, dict[str, str]], fix: str) -> dict[str, list[str]]:
     return out
 
 
-def race(v: dict[str, dict[str, str]]) -> str:
+def race(v: dict[str, dict[str, str]], flag: str | None) -> str:
     """CONSISTENT / INTERMITTENT / no: the best any reference-passing node does on the race flag."""
-    got = {res for n, res in v.get(f"bug:{RACE}", {}).items() if v["reference"].get(n) == "PASS"}
+    got = {res for n, res in v.get(f"bug:{flag}", {}).items() if v["reference"].get(n) == "PASS"}
     return "CONSISTENT" if "FAIL" in got else "INTERMITTENT" if "MIXED" in got else "no"
 
 
-def row(arm: str, v: dict, fix: str, kills: int, mutants: int, extra: dict | None = None) -> dict:
-    flags = sorted(var[4:] for var in v if var.startswith("bug:") and var[4:] != RACE)
+def row(arm: str, v: dict, fix: str, kills: int, mutants: int, extra: dict | None = None,
+        race_flag: str | None = None) -> dict:  # fmt: skip
+    """race_flag: the timing bug (seeded `timing: true`); X5 isn't met, so it sits apart from
+    the headline."""
+    flags = sorted(var[4:] for var in v if var.startswith("bug:") and var[4:] != race_flag)
     val = validates(v, fix)
     found = sorted({b for bugs in val.values() for b in bugs if b in flags})
-    bug_nodes = sum(1 for b in val.values() if set(b) - {RACE})
+    bug_nodes = sum(1 for b in val.values() if set(b) - {race_flag})
     tests = len(v["reference"])
     return {"arm": arm, "tests": tests,
             "seeded_authored": f"{len(found)}/{len(flags)}", "seeded_found": found,
-            "seeded_blind": "— (not revealed)", "race": race(v),
+            "seeded_blind": "— (not revealed)", "race": race(v, race_flag),
             "real_bug": any("real" in b for b in val.values()),
             "kills": kills, "mutants": mutants, "strength": round(kills / mutants, 3),
             "bug_validating": bug_nodes,

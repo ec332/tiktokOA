@@ -23,7 +23,7 @@ def test_detection_rules_are_flips_across_variants():
     v = decide.verdicts(runs)
     assert v["bug:BUG_FLAKE_RACE"]["b"] == "MIXED"
     assert decide.validates(v, FIX) == {"a": ["BUG_TITLE_MAX"], "r": ["real"]}
-    row = decide.row("x", v, FIX, kills=3, mutants=134)
+    row = decide.row("x", v, FIX, kills=3, mutants=134, race_flag="BUG_FLAKE_RACE")
     assert row["seeded_authored"] == "1/2" and row["seeded_found"] == ["BUG_TITLE_MAX"]
     assert row["real_bug"] and row["race"] == "INTERMITTENT"
     assert (row["bug_validating"], row["tests"], row["strength"]) == (2, 4, 0.022)

@@ -14,7 +14,7 @@ from typing import Annotated
 import typer
 
 from tp.baseline import decide, propose, suite
-from tp.core import artifacts, contract, db, llm, sut
+from tp.core import artifacts, contract, db, llm, profile, sut
 from tp.stages.gate.decide import code_refs as decide_refs
 
 VERSION = "1.1.0"  # 1.1: handler mutants, blind bugs, assertion kills (design 003)
@@ -38,12 +38,14 @@ def _work(kind: str) -> Path:
 
 
 def _source(src: Path, ref: str) -> str:
-    """What the naive LLM sees (B5): upstream backend code at the pinned ref, none of our
-    patches (they contain settings.BUG_*), plus the test fixtures and helpers, not the tests."""
+    """What the naive LLM sees (B5): upstream app code at the pinned ref, none of our patches
+    (they contain the seeded flags), plus the test fixtures and helpers, not the tests. The
+    migrations folder (the parent of the profile's `state.migrations`) is left out."""
+    migrations = str(Path(profile.load().state.value["migrations"]).parent) + "/"
     files = subprocess.run(["git", "-C", str(src), "ls-tree", "-r", "--name-only", ref,
-                            "backend/app", "backend/tests"], check=True, capture_output=True,
-                           text=True).stdout.split()  # fmt: skip
-    keep = [f for f in files if f.endswith(".py") and "/alembic/" not in f
+                            profile.source_dir(), suite.tests_dir()], check=True,
+                           capture_output=True, text=True).stdout.split()  # fmt: skip
+    keep = [f for f in files if f.endswith(".py") and not f.startswith(migrations)
             and not Path(f).name.startswith("test_")]  # fmt: skip
     show = lambda f: subprocess.run(["git", "-C", str(src), "show", f"{ref}:{f}"], check=True,
                                     capture_output=True, text=True).stdout  # fmt: skip
@@ -137,17 +139,18 @@ def compare(naive_id: Annotated[str, typer.Option("--naive")],
                               "asserted": len(set(m["asserted"]) & (mm | handler)),
                               "killed": m["killed"]}  # fmt: skip
 
+    race_flag = next(iter(profile.timing_flags()), None)
     pv, pk, pm = _platform(fix, gate)
     h = gate["handlers"]
     rows = [decide.row("Platform", pv, fix, pk, pm, {
         "source": RUN_RECORDS, "handler_kills": h["killed"], "handlers": h["total"],
-        "seeded_blind": f"{reveal['detected']}/{reveal['count']}"})]  # fmt: skip
+        "seeded_blind": f"{reveal['detected']}/{reveal['count']}"}, race_flag)]  # fmt: skip
     typer.echo("SUT's own tests")
     m = suite.measure(env, suite.sut_tests(src, ref, work / "sut-tests"), work / "sut", muts,
                       typer.echo)  # fmt: skip
     k, extra = split(m)
     rows.append(decide.row("SUT's own tests", decide.verdicts(m["variants"]), fix, k, len(mm),
-                           extra))  # fmt: skip
+                           extra, race_flag))  # fmt: skip
     nt = artifacts.get(naive_id)
     # One sample by default: in M6 the three samples agreed on every bug column, and each arm
     # costs a full variant + mutant pass (user, 2026-11-02).
@@ -161,7 +164,7 @@ def compare(naive_id: Annotated[str, typer.Option("--naive")],
                                fix, k, len(mm), extra | {
                                    "cost_usd": s["cost_usd"], "generated": s["generated"],
                                    "dropped": len(s["dropped"]),
-                                   "repaired": len(s["repaired"])}))  # fmt: skip
+                                   "repaired": len(s["repaired"])}, race_flag))  # fmt: skip
     notes = [
         (f"Same variants ({', '.join(suite.variants())}) and mutants for every arm: mutmut's "
          f"{len(mm)} (crud/deps/security; 'Mutation strength') and {len(handler)} route-handler "
@@ -181,7 +184,7 @@ def compare(naive_id: Annotated[str, typer.Option("--naive")],
         (f"Naive: {nt.body['model']}, upstream source at {ref[:7]} without our patches, ≤"
          f"{nt.body['repairs']} repair rounds on reference, then failing tests dropped. "
          "Each sample is its own row."),
-        "Race flag (BUG_FLAKE_RACE) is outside the headline: a timing bug (execute X5).",
+        f"Race flag ({race_flag}) is outside the headline: a timing bug (execute X5).",
         ("Bias: the requirements, the seeded bugs and the platform's tests share one author, which "
          "favours the platform on 'seeded, authored'; 'seeded, blind' has no author."),
     ]  # fmt: skip
