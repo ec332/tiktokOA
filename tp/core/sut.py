@@ -65,8 +65,8 @@ def _overlay(cfg: dict, t: dict) -> None:
     cfg["repo"], cfg["ref"] = t["clone"], t["ref"]
     cfg["patches"] = [p for p in cfg["patches"] if seeded or p != "flags"]  # D12
     cfg["flags"] = cfg.get("flags", []) if seeded else []
-    if t.get("alembic_head"):  # D13
-        cfg["lifecycle"]["db_probe"]["expect"] = t["alembic_head"]
+    if t.get("migrations_head"):  # D13
+        cfg["lifecycle"]["db_probe"]["expect"] = t["migrations_head"]
     scope = cfg.setdefault("code_scope", {})
     if t.get("changed"):  # D14: the branch's changed lines, not the fixed file list
         scope["mutate"] = sorted(t["changed"])
@@ -74,7 +74,8 @@ def _overlay(cfg: dict, t: dict) -> None:
     cfg["target"] = t
 
 
-def _alembic_head(tree: Path, versions: str) -> str | None:
+def _migrations_head(tree: Path, versions: str) -> str | None:
+    """The single head among revision files in `versions` (`revision` / `down_revision` lines)."""
     revs, downs = set(), set()
     for f in (tree / versions).glob("*.py"):
         text = f.read_text()
@@ -128,7 +129,7 @@ def set_target(repo: str, branch: str, base: str, seeded: bool = False,
     t = {
         "repo": str(src), "branch": branch, "base": base, "ref": ref, "base_ref": base_ref,
         "clone": str(clone.resolve()), "seeded": seeded,
-        "alembic_head": _alembic_head(clone, raw["lifecycle"].get("migrations", "")),
+        "migrations_head": _migrations_head(clone, raw["lifecycle"].get("migrations", "")),
         "changed": _changed_lines(clone, base_ref, ref, exclude),
         "subject": _git(clone, "log", "-1", "--format=%s", ref).stdout.strip(),
         "warnings": warnings,

@@ -134,7 +134,7 @@ def test_target_clones_branch_and_overlays(tmp_path, monkeypatch):
     (root / "targets/app").mkdir(parents=True)
     (root / "targets/app/profile.yaml").write_text(PROFILE)
     t = sut.set_target(str(repo), "feature", "master", root=root)
-    assert t["alembic_head"] == "b2" and t["changed"] == {"app/models.py": [2]}
+    assert t["migrations_head"] == "b2" and t["changed"] == {"app/models.py": [2]}
     assert Path(t["clone"]) != repo and (Path(t["clone"]) / "app/alembic/versions/b2.py").exists()
     assert git(repo, "branch", "--show-current") == "master"  # the user's checkout untouched
     cfg = sut.load(root)
