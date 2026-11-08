@@ -94,3 +94,12 @@ def published_blackbox() -> dict:
     if "runner_blackbox" not in pub:
         raise ImageError("no black-box runner published: run `tp generate image`")
     return pub["runner_blackbox"]
+
+
+def published_browser() -> dict:
+    """The browser runner for UI flows (C4). P7 builds and publishes it as `runner_browser`."""
+    path = db.data_dir() / "published.json"
+    pub = json.loads(path.read_text()) if path.exists() else {}
+    if "runner_browser" not in pub:
+        raise ImageError("no browser runner published: P7 builds it (docs/iteration3/)")
+    return pub["runner_browser"]

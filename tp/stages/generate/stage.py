@@ -7,7 +7,7 @@ from pathlib import Path
 from tp.core import db
 from tp.core.contract import StageResult, register
 from tp.core.hashing import sha256
-from tp.stages.generate import ai, image, loop
+from tp.stages.generate import ai, image, loop, suite, ui
 from tp.stages.generate.cli import app as cli
 
 
@@ -41,10 +41,24 @@ def families_entry(routes: list[str] | None = None) -> dict:
            f"TP_FOCUS = {json.dumps(sorted(routes or []))}  # sampled first (checks/002)\n\n"
            "from platform_rt.families import pytest_generate_tests, test_generic  # noqa: E402, F401\n")  # fmt: skip
     return {"unit": "generic", "ac": None, "file": "test_tp_families.py", "status": "BOUND",
-            "generic": True, "source": src, "lock_hash": sha256(src)}  # fmt: skip
+            "kind": "generic", "generic": True, "source": src, "lock_hash": sha256(src)}  # fmt: skip
 
 
-def _runner(ctx) -> dict:
+def _families(ctx, opts: dict) -> list[dict]:
+    """Black-box targets only (checks/001), and not when a run is limited to some units."""
+    if ctx.strategies.reach.image("reference") is None and not opts.get("units"):
+        return [families_entry(opts.get("routes"))]
+    return []
+
+
+# C4 (docs/iteration3/W0-contracts.md): the fixed BOUND entries, in this order. Each provider is
+# `provider(ctx, opts) -> list[entry]`; the suites are P5's and the UI flows P7's.
+ENTRY_PROVIDERS = (_families, suite.entries, ui.entries)
+
+
+def _runner(ctx, tests: list[dict]) -> dict:
+    if any(t.get("kind") == "ui" for t in tests):  # C4: a UI flow runs in the browser runner
+        return image.published_browser()
     no_image = ctx.strategies.reach.image("reference") is None
     return image.published_blackbox() if no_image else image.published()
 
@@ -76,11 +90,12 @@ class GenerateStage:
         tests, ledger = loop.bind_all(ctx, units, criteria, openapi, workdir, guards, variant,
                                       int(opts.get("max_repairs", loop.MAX_REPAIRS)))  # fmt: skip
         state = {"cases": inputs["cases"].id, "signature": cases["signoff"]["hash"],
-                 "guards": guards, "variant": variant, "runner": _runner(ctx),
+                 "guards": guards, "variant": variant, "runner": None,
                  "openapi_hash": sha256(openapi), "tests": [tests[u["id"]] for u in units],
                  "ledger": ledger}  # fmt: skip
-        if ctx.strategies.reach.image("reference") is None and not opts.get("units"):
-            state["tests"].append(families_entry(opts.get("routes")))  # black-box only (checks/001)
+        for provider in ENTRY_PROVIDERS:
+            state["tests"] += provider(ctx, opts)
+        state["runner"] = _runner(ctx, state["tests"])
         items = [ctx.review.create("unbound", {"unit": t["unit"], "reason": t["reason"],
                                                "failures": t.get("failures", [])[:3],
                                                "source": t.get("source")})
