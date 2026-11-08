@@ -835,6 +835,33 @@ class SafeMode:
         m = method.upper()
         return m in READS or (m == "DELETE" and path in self.stack.owned())
 
+    def plan(self, doc: dict) -> list[dict]:
+        """Sign-off's planned writes (autonomy/001 F8): every write in the spec with the proxy's
+        verdict, worked out without sending anything. Mirrors platform_rt.proxy.Policy.decide;
+        test_planned_writes_agree_with_the_proxy holds the two together."""
+        deny = [d.lower() for d in safety_config().get("deny", [])]
+        paths, out = doc.get("paths", {}), []
+        for tpl, ops in paths.items():
+            for m, op in ops.items():
+                if m.upper() in READS or not isinstance(op, dict) or m.startswith("x-"):
+                    continue
+                words = [s.lower() for s in tpl.split("/") if s and not s.startswith("{")]
+                words += [str(s).lower() for k, v in op.items() if k.startswith("x-")
+                          and "scope" in k.lower() for s in (v if isinstance(v, list) else [v])]  # fmt: skip
+                hit = next((d for d in deny for w in words if d in w), None)
+                base = tpl.rstrip("/") + "/"
+                item = any(re.fullmatch(r"\{[^/}]+\}/?", c[len(base):]) and {"get", "delete"} <= set(o)
+                           for c, o in paths.items() if c.startswith(base))  # fmt: skip
+                if hit:
+                    verdict, rule = "blocked", f"deny category {hit!r}"
+                elif m.upper() == "POST":
+                    verdict, rule = (("create", "create, with the run prefix") if item else
+                                     ("blocked", "not a collection with read and delete on its items"))  # fmt: skip
+                else:
+                    verdict, rule = "own_items", "only on items this run created"
+                out.append({"op": f"{m.upper()} {tpl}", "verdict": verdict, "rule": rule})
+        return out
+
 
 class Spec:
     def __init__(self, stack: Stack):

@@ -116,3 +116,36 @@ def test_live_reach_lowers_k_and_rate_and_states_its_ceiling(live):
     assert (
         ceiling(names, {"settings": {"k": 3}, "rows": []}) == "Seen on the live system, stable 3/3"
     )
+
+
+def test_planned_writes_agree_with_the_proxy(monkeypatch):  # autonomy/001 F8
+    """Sign-off's static list says what the proxy will do, for every write in the spec."""
+    from platform_rt.proxy import Policy
+
+    spec = {"paths": {
+        "/api/items/": {"get": {}, "post": {}},
+        "/api/items/{id}/": {"get": {}, "put": {}, "delete": {}},
+        "/api/items/bulk_edit/": {"post": {}},
+        "/api/users/{id}/": {"get": {}, "delete": {}},
+        "/api/notes/": {"post": {}},
+        "/api/tasks/": {"post": {"x-required-scope": ["admin"]}},
+        "/api/tasks/{id}/": {"get": {}, "delete": {}},
+    }}  # fmt: skip
+    deny = ["user", "bulk", "admin"]
+    monkeypatch.setattr(bb, "safety_config", lambda: {"deny": deny})
+    plan = bb.SafeMode(None).plan(spec)
+    policy = Policy(spec, deny, "r")
+    for p in plan:
+        m, tpl = p["op"].split(" ", 1)
+        ok, rule = policy.decide(m, tpl.replace("{id}", "7"), json.dumps({"t": "tp-r-x"}).encode())
+        if p["verdict"] == "create":
+            assert ok and rule == "create", p
+        elif p["verdict"] == "own_items":
+            assert not ok and rule == "not created by this run", p  # allowed once the run made it
+        else:
+            assert not ok and rule == p["rule"], p
+    assert {p["op"]: p["verdict"] for p in plan} == {
+        "POST /api/items/": "create", "PUT /api/items/{id}/": "own_items",
+        "DELETE /api/items/{id}/": "own_items", "POST /api/items/bulk_edit/": "blocked",
+        "DELETE /api/users/{id}/": "blocked", "POST /api/notes/": "blocked",
+        "POST /api/tasks/": "blocked", "DELETE /api/tasks/{id}/": "own_items"}  # fmt: skip
