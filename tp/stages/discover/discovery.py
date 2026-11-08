@@ -21,6 +21,7 @@ import yaml
 
 from tp.core import db, profile, secrets
 from tp.stages.discover import ai, dependencies, spec_base, ui_flows
+from tp.stages.discover import reach as reach_mod
 from tp.stages.env import blackbox as bb
 
 ROOT = Path(__file__).parents[3]
@@ -352,14 +353,14 @@ class Discovery:
         src = self.stack.src
         self.src = src
         self.commit = self.stack.commit()
-        cands = self.composes(src)[: self.cfg["max_compose"]]
-        if not cands:
-            raise DiscoveryError("reach", "no compose file with a service publishing a port")
+        reach_mod.store_answers(self.slug, self.answers)
+        # no compose file: the root Dockerfile, as a one-service compose (reach/001 D4)
+        cands = self.composes(src)[: self.cfg["max_compose"]] or [(None, None, "app")]
         admin = admin_layer = None
         errors = []
         for path, raw, app in cands:
-            svc = raw["services"][app]
-            app_env = self.env_files(src, path, svc)
+            svc = raw["services"][app] if raw else {}
+            app_env = self.env_files(src, path, svc) if raw else {}
             if admin is None:
                 admin, admin_layer = self.admin_env(src, app_env)
             env: dict = {}
@@ -376,16 +377,36 @@ class Discovery:
             if admin:
                 env[admin["user"]] = self.cfg["admin_user"]
                 env[admin["password"]] = {"secret": "admin_password"}
-            port = str(svc["ports"][0]).rsplit(":", 1)[-1].split("/")[0]
+            if raw:
+                port = str(svc["ports"][0]).rsplit(":", 1)[-1].split("/")[0]
+                reach = {"strategy": "container", "ref": ref, "compose": path, "service": app,
+                         "port": int(port)}  # fmt: skip
+            else:
+                if (b := reach_mod.dockerfile(src)) is None:
+                    raise DiscoveryError(
+                        "reach", "no compose file with a service publishing a port, and no "
+                        "root Dockerfile")  # fmt: skip
+                if b["port"] is None:
+                    if not (given := self.answers.get("port", "").strip()):
+                        raise DiscoveryError("reach", "the root Dockerfile has no EXPOSE line",
+                                             "Which port does the app listen on?", "port")  # fmt: skip
+                    b["port"] = int(given)
+                reach = {"strategy": "container", "ref": ref, "build": b, "service": app,
+                         "port": b["port"]}  # fmt: skip
             image = str(svc.get("image", ""))
-            reach = {"strategy": "container", "ref": ref, "compose": path, "service": app,
-                     "port": int(port)}  # fmt: skip
             if image and bb.retag(image, "x") != image:
                 reach["image_tag_from"] = "ref"  # floating tag: test the image of the ref (P6f)
             reach["env"] = env
             self.values["reach"] = reach
             self.stack = self.new_stack()
-            n, out = self.probes.call("docker", f"up {path}", self._up)
+            try:
+                n, out = self.probes.call("docker", f"up {path or 'Dockerfile'}", self._up)
+            except bb.MissingValues as e:  # a value only a person can give (reach/001 D8)
+                name = e.names[0]
+                raise DiscoveryError(
+                    "reach", str(e), f"The compose file needs {name} and the repo gives no "
+                    "value. What should it be? (kept in the run's secrets, not the checkout)",
+                    f"var:{name}") from e  # fmt: skip
             if out["ok"]:
                 break
             errors.append(f"{path}: {out['error']}")
@@ -393,13 +414,14 @@ class Discovery:
             raise DiscoveryError("reach", f"no compose file came up: {errors}")
         self.app_env = app_env
         self.mark("reach", "ref", "repo", "algorithm", tag_probe)
-        for k in ("compose", "service", "port"):
+        for k in ("compose" if "compose" in reach else "build", "service", "port"):
             self.mark("reach", k, "repo", "algorithm", n)
         if admin:
             self.mark("reach", "env", {"exploration": "ai_proposed+verified", "clarify": "clarify"}
                       .get(admin_layer, "repo"), admin_layer, None)  # verified by the login  # fmt: skip
         self.admin = admin
-        self.emit("discover_reach", compose=reach["compose"], service=app, generated=gen)
+        self.emit("discover_reach", compose=reach.get("compose"), build=reach.get("build"),
+                  service=app, generated=gen)  # fmt: skip
 
     def _up(self) -> dict:
         try:

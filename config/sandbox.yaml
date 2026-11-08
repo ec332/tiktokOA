@@ -10,3 +10,6 @@ drop: [ports, restart, container_name, network_mode, privileged, cap_add, device
 # build: keys kept; anything else (additional_contexts, ssh, secrets, network, cache_from: local
 # paths) can reach the host and fails closed. The context must stay inside the checkout.
 build_keep: [context, dockerfile, args, target, labels]
+# The only host variables `docker compose` sees (reach/001 D1, H1), plus DOCKER_CONFIG (the real
+# ~/.docker) and the run's own values. No HOME: `${HOME}` in a repo's compose resolves to empty.
+compose_env: [PATH, DOCKER_HOST, DOCKER_CONTEXT, DOCKER_CERT_PATH, DOCKER_TLS_VERIFY]
