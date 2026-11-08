@@ -360,3 +360,60 @@ def test_fix_patch_is_built_by_code_and_checked():
     assert "does not parse" in problems[0]
     _, problems = propose.build_patch([{"file": "other.py", "find": "a", "replace": "b"}], files)
     assert problems == ["other.py: not one of the suspect files"]
+
+
+# ---- malformed path values (demo/005) --------------------------------------------------------
+
+OPENAPI = {
+    "paths": {
+        "/api/v1/items/{id}": {
+            "get": {"parameters": [{"$ref": "#/components/parameters/ItemId"}]},
+            "put": {"parameters": [{"name": "id", "in": "path",
+                                    "schema": {"anyOf": [{"type": "integer"}, {"type": "null"}]}}]},
+        },
+        "/api/v1/items/": {"get": {}},
+    },
+    "components": {"parameters": {"ItemId": {"name": "id", "in": "path",
+                                             "schema": {"type": "string", "format": "uuid"}}}},
+}  # fmt: skip
+
+
+def ex(method, path, status=422):
+    return {"step": 1, "setup": False, "method": method, "path": path, "query": {}, "json": None,
+            "status": status}  # fmt: skip
+
+
+def test_a_path_value_its_schema_refuses_is_named():
+    assert rules.malformed_path(ex("GET", "/api/v1/items/9999999"), OPENAPI) == (
+        "id=9999999 is not a valid uuid"
+    )
+    assert rules.malformed_path(ex("GET", "/api/v1/items/3f2a1b4c-0000-4000-8000-000000000000"),
+                                OPENAPI) is None  # fmt: skip
+    assert (
+        rules.malformed_path(ex("PUT", "/api/v1/items/abc"), OPENAPI)
+        == "id=abc is not a valid integer"
+    )
+    assert rules.malformed_path(ex("PUT", "/api/v1/items/12"), OPENAPI) is None
+    assert rules.malformed_path(ex("GET", "/api/v1/items/"), OPENAPI) is None  # no path params
+    assert rules.malformed_path(ex("GET", "/other/1"), OPENAPI) is None
+    assert rules.malformed_path(ex("GET", "/api/v1/items/1"), None) is None
+
+
+def test_a_refused_malformed_id_is_a_test_defect_not_a_product_one():
+    from tp.stages.triage.stage import _malformed
+
+    v = vd("TC-O5-1")
+    rows = rows_for(v)
+    for r in rows.values():
+        r["exchanges"] = [ex("GET", "/api/v1/items/9999999")]
+    fs = rules.findings([v], rows)
+    assert fs[0]["class"] == "PRODUCT_DEFECT"
+    _malformed(fs, rows, OPENAPI)
+    assert fs[0]["class"] == "TEST_DEFECT" and "id=9999999 is not a valid uuid" in fs[0]["rule"]
+    assert fs[0]["original_class"] == "PRODUCT_DEFECT"
+    # the server accepting a malformed id is still the server's problem
+    for r in rows.values():
+        r["exchanges"] = [ex("GET", "/api/v1/items/9999999", status=200)]
+    fs = rules.findings([v], rows)
+    _malformed(fs, rows, OPENAPI)
+    assert fs[0]["class"] == "PRODUCT_DEFECT"

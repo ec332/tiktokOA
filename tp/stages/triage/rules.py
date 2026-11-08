@@ -4,11 +4,16 @@ Order: ENV → DATA → FLAKY_TEST / INTERMITTENT_PRODUCT → TEST_DEFECT → SP
 → PRODUCT_DEFECT.
 Anything the rules leave open is INSUFFICIENT_EVIDENCE (the AI judge is M7)."""
 
+import re
+import uuid
+
 PRODUCT_SIDE = {"PRODUCT_ERROR", "ASSERTION", "CONTRACT"}
 TEST_SIDE = {"BINDING", "CONFORMANCE", "PLATFORM"}
 CLASSES = ("ENV", "DATA", "FLAKY_TEST", "INTERMITTENT_PRODUCT", "TEST_DEFECT", "SPEC_MISMATCH",
            "SPEC_GAP", "PRODUCT_DEFECT", "INSUFFICIENT_EVIDENCE")  # fmt: skip
 INFRA = {429, 502, 503, 504}  # rate limited or a gateway in front: the environment (checks/001 D8)
+MALFORMED = ("the test sent a path value its spec's parameter schema refuses ({}), and the "
+             "server refused it")  # fmt: skip
 
 
 def _origins(vd: dict, rows: dict) -> set:
@@ -70,6 +75,66 @@ def classify(vd: dict, ref: dict | None, rows: dict) -> tuple[str, str]:
     if v == "CONSISTENT_FAIL" and origins <= PRODUCT_SIDE:
         return "PRODUCT_DEFECT", "consistent failure on the SUT's responses"
     return "INSUFFICIENT_EVIDENCE", "no rule applies"
+
+
+def _bad(value: str, schema: dict) -> bool:
+    """The value can't satisfy the schema's type, format, pattern or enum."""
+    t, fmt = schema.get("type"), schema.get("format")
+    if t == "integer":
+        return not re.fullmatch(r"-?\d+", value)
+    if t == "number":
+        return not re.fullmatch(r"-?\d+(\.\d+)?", value)
+    if fmt == "uuid":
+        try:
+            uuid.UUID(value)
+        except ValueError:
+            return True
+    if (p := schema.get("pattern")) and not re.search(p, value):
+        return True
+    return "enum" in schema and value not in [str(e) for e in schema["enum"]]
+
+
+def malformed_path(ex: dict | None, openapi: dict | None) -> str | None:
+    """`name=value is not a valid <type>` when a path value of the request can't satisfy its
+    OpenAPI parameter schema, else None. Paths are matched as the spec writes them (full paths).
+    shortcut: a `servers` base path is not prepended; add it when a target's spec uses one."""
+    if not ex or not openapi:
+        return None
+    got = ex["path"].rstrip("/").split("/")
+    for route, ops in (openapi.get("paths") or {}).items():
+        op = ops.get(ex["method"].lower())
+        want = route.rstrip("/").split("/")
+        if (
+            not op
+            or len(want) != len(got)
+            or any(
+                w != g and not (w.startswith("{") and w.endswith("}")) for w, g in zip(want, got)
+            )
+        ):
+            continue
+        params = [_deref(openapi, p) for p in ops.get("parameters", []) + op.get("parameters", [])]
+        by_name = {p.get("name"): p for p in params if p.get("in") == "path"}
+        for w, g in zip(want, got):
+            if w.startswith("{") and (p := by_name.get(w[1:-1])):
+                schema = _deref(openapi, p.get("schema") or {})
+                schema = next((_deref(openapi, s) for s in schema.get("anyOf", [])
+                               if s.get("type") != "null"), schema)  # fmt: skip
+                if _bad(g, schema):
+                    kind = schema.get("format") or schema.get("type") or "value"
+                    return f"{w[1:-1]}={g} is not a valid {kind}"
+        return None
+    return None
+
+
+def _deref(spec: dict, node: dict) -> dict:
+    for _ in range(10):
+        ref = node.get("$ref", "") if isinstance(node, dict) else ""
+        if not ref.startswith("#/"):
+            return node
+        node = spec
+        for part in ref[2:].split("/"):
+            node = node.get(part, {})
+    return node
 
 
 def findings(verdicts: list[dict], rows: dict) -> list[dict]:

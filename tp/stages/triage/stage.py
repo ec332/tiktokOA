@@ -40,10 +40,11 @@ def _git_source(src: Path):
 
 
 def analyse(run_records: dict, rows: list, probes: list, logs: dict, spec: dict, read,
-            app_files: dict[str, str]) -> dict:  # fmt: skip
+            app_files: dict[str, str], openapi: dict | None = None) -> dict:  # fmt: skip
     """Everything up to the human decisions. Pure given its inputs."""
     idx = EvidenceIndex(rows, probes, logs)
     fs = rules.findings(run_records["verdicts"], idx.rows)
+    _malformed(fs, idx.rows, openapi)
     _spec_side(fs, idx.rows, (spec.get("index") or {}).get("from") == "openapi")
     ds = rules.defects(fs)
     criteria = {c["id"]: c for c in spec["criteria"]}
@@ -86,6 +87,26 @@ UNDECLARED = ("SPEC_MISMATCH", ("an assumed criterion failed on a status its spe
                                 "declare: server or spec is wrong"))  # fmt: skip
 
 
+def _malformed(fs: list[dict], rows: dict, openapi: dict | None) -> None:
+    """A product finding whose request put a value in the path that its parameter schema
+    refuses (an integer id on a UUID route), answered with a 4xx: the test is wrong, not the
+    server (demo/005)."""
+    for f in fs:
+        if f["class"] not in ("PRODUCT_DEFECT", "INTERMITTENT_PRODUCT"):
+            continue
+        row = next(
+            (rows[a] for a in f["evidence"] if rows.get(a, {}).get("outcome") == "failed"), {}
+        )
+        ex = rules.under_test(row)
+        if (
+            ex
+            and 400 <= (ex.get("status") or 0) < 500
+            and (why := rules.malformed_path(ex, openapi))
+        ):
+            f["original_class"], f["class"] = f["class"], "TEST_DEFECT"
+            f["rule"] = rules.MALFORMED.format(why)
+
+
 def _spec_side(fs: list[dict], rows: dict, from_openapi: bool) -> None:
     """checks/001 D7: an assumed criterion failing on a status its served spec declares is a
     wrong assumption, not a finding of any kind; on an undeclared one, server and spec disagree.
@@ -123,7 +144,9 @@ def _excerpt(eid: str, ev: dict) -> dict:
 
 class TriageStage:
     name = "triage"
-    version = f"1.1.0+p{propose.prompt_hash()}"  # 1.1: fix suggestions (M8 D14)
+    version = (
+        f"1.2.0+p{propose.prompt_hash()}"  # 1.1: fix suggestions (M8 D14); 1.2: malformed path
+    )
     consumes: dict[str, int] = {"run_records": 1, "gate_report": 1, "cases": 1, "spec": 1}  # noqa: RUF012
     produces: dict[str, int] = {"triage": 1}  # noqa: RUF012
 
@@ -143,7 +166,11 @@ class TriageStage:
                 if src
                 else {}
             )
-            state = analyse(rr, rows, probes, logs, inputs["spec"].body, read, app)
+            try:  # the served spec, for the malformed-path rule; without it the rule is skipped
+                openapi = ctx.strategies.spec.openapi("reference") if ctx.strategies else None
+            except Exception:  # noqa: BLE001  the stack may already be down
+                openapi = None
+            state = analyse(rr, rows, probes, logs, inputs["spec"].body, read, app, openapi)
             crit = {c["id"]: c for c in inputs["spec"].body["criteria"]}
             for d in state["defects"]:
                 if d["kind"] != "real" or not src:
