@@ -1,6 +1,7 @@
 """Retest with a scripted fake env (no Docker) driving the real executor: every verdict."""
 
 import copy
+import json
 from types import SimpleNamespace as NS
 
 import pytest
@@ -15,6 +16,8 @@ DEF, OK, PRE = "test_d.py::test_d[TC-D]", "test_ok.py::test_ok[TC-OK]", "test_p.
 FP = {"services": {"db": "s1", "backend": "b-ref"}, "images": {"db": "pg", "backend": "i-ref"},
       "sut": {"name": "x", "ref": "f4b", "patches": {"flags": "p1"}}, "flags": [],
       "seed_hash": "seed", "tools": {"docker": "27"}}  # fmt: skip
+
+PROFILE = NS(reach=NS(value={"app_service": "backend"}))
 
 
 @pytest.fixture(autouse=True)
@@ -35,8 +38,14 @@ def fp(variant: str) -> dict:
 class FakeEnv:
     """DEF fails on reference and on bug:X; PRE always fails; OK fails only if `regress`."""
 
-    def __init__(self, regress=False, db_image="pg", dead=False):
+    def __init__(self, regress=False, db_image="pg", dead=False, contract=False):
         self.regress, self.db_image, self.dead, self.ups = regress, db_image, dead, []
+        self.contract = contract  # the fix also changes the served contract of GET /d/{id} (M2)
+
+    def openapi(self, variant):
+        size = 50 if self.contract and variant.startswith("fixed:") else 100
+        return {"paths": {"/d/{id}": {"get": {"responses": {"200": {"$ref": "#/components/D"}}}}},
+                "components": {"D": {"maxItems": size}}}  # fmt: skip
 
     def up(self, variant):
         self.ups.append(variant)
@@ -74,11 +83,12 @@ def failing_run(before="reference", fingerprint=True):
     """A sealed before-run: DEF and PRE 3/3 failing on `before`."""
     b = artifacts.put("bound_tests", bound())
     folder = db.data_dir() / "runs" / "execute-1"
-    root = record.write(
-        folder, {"manifest.json": f'{{"bound_tests": "{b.id}"}}', "results.jsonl": ""}
-    )
+    row = {"id": "a1", "outcome": "failed",
+           "exchanges": [{"step": 1, "setup": False, "method": "GET", "path": "/d/7"}]}  # fmt: skip
+    root = record.write(folder, {"manifest.json": f'{{"bound_tests": "{b.id}"}}',
+                                 "results.jsonl": json.dumps(row) + "\n"})  # fmt: skip
     vd = lambda n, case, v: {"node": n, "case_id": case, "variant": before, "verdict": v,
-                             "dist": "3/3" if v != "PASS" else "0/3"}  # fmt: skip
+                             "dist": "3/3" if v != "PASS" else "0/3", "attempts": ["a1"]}  # fmt: skip
     return {"folder": "runs/execute-1", "root": root,
             "variants": {before: {"fingerprint": fp(before) if fingerprint else None}},
             "verdicts": [vd(DEF, "TC-D", "CONSISTENT_FAIL"), vd(OK, "TC-OK", "PASS"),
@@ -97,7 +107,7 @@ def run(
               "bound_tests": art(bound(changed)), "gate_report": art(gate),
               "run_options": art({"defect": defect or f"D-{before}/O-6", "after": after})}  # fmt: skip
     ctx = NS(env=env, strategies=from_service(env), emit=lambda *a, **kw: None,
-             review=NS(execution_id=2))  # fmt: skip
+             review=NS(execution_id=2), profile=PROFILE)  # fmt: skip
     res = RetestStage().run(ctx, inputs)
     assert res.status == "succeeded", res.reason
     return res.outputs["retest"]["retests"][0]
@@ -112,6 +122,17 @@ def test_own_patch_fix_is_confirmed_with_pre_existing_failures_kept_apart():  # 
     assert r["pre_existing"] == [{"node": PRE, "case_id": "TC-P", "before": "CONSISTENT_FAIL",
                                   "after": "CONSISTENT_FAIL"}]  # fmt: skip
     assert r["after"]["k"] == 5 and r["env_diff"] == []
+
+
+def test_a_contract_changing_fix_is_not_confirmed():  # DR-10, review M2 (harden/001 H4)
+    r = run(FakeEnv(contract=True), "fixed:fix-pagination")
+    assert r["verdict"] == "INCONCLUSIVE" and not r["closed"]
+    assert r["contract_diff"] == ["GET /d/{id}"] and r["fail_to_pass"][0]["after"] == "PASS"
+
+
+def test_an_app_service_not_named_backend_still_compares():  # review L1
+    rename = lambda f: json.loads(json.dumps(f).replace("backend", "api"))
+    assert decide.env_diff(rename(fp("reference")), rename(fp("fixed:f")), "api") == []
 
 
 def test_a_changed_test_is_refused_before_anything_runs():  # V1
@@ -153,16 +174,18 @@ def test_no_defect_option_is_a_no_op_in_the_pipeline():
 
 
 def test_env_diff_allows_only_code_and_flags():
-    assert decide.env_diff(fp("reference"), fp("fixed:f")) == []
-    assert decide.env_diff(fp("bug:B"), fp("reference")) == []
+    assert decide.env_diff(fp("reference"), fp("fixed:f"), "backend") == []
+    assert decide.env_diff(fp("bug:B"), fp("reference"), "backend") == []
     removed = fp("fixed:f")
-    assert decide.env_diff(removed, fp("reference")) == [
+    assert decide.env_diff(removed, fp("reference"), "backend") == [
         "sut.patches (a patch changed or was removed)"
     ]
     other = fp("reference") | {"seed_hash": "other"}
-    assert decide.env_diff(fp("reference"), other) == ["seed_hash"]
+    assert decide.env_diff(fp("reference"), other, "backend") == ["seed_hash"]
     rebuilt = fp("fixed:f") | {"runner": "sha256:looser-expect"}  # review gap 3
-    assert decide.env_diff(fp("reference") | {"runner": "sha256:r1"}, rebuilt) == ["runner"]
+    assert decide.env_diff(fp("reference") | {"runner": "sha256:r1"}, rebuilt, "backend") == [
+        "runner"
+    ]
 
 
 @pytest.mark.parametrize(
@@ -193,7 +216,7 @@ def test_auto_mode_retests_every_real_defect_whose_suggested_fix_applies():  # a
               "bound_tests": art(bound()), "gate_report": art(gate),
               "run_options": art({"stops": ["signoff"]})}  # fmt: skip
     ctx = NS(env=env, strategies=from_service(env), emit=lambda *a, **kw: None,
-             review=NS(execution_id=2))  # fmt: skip
+             review=NS(execution_id=2), profile=PROFILE)  # fmt: skip
     res = RetestStage().run(ctx, inputs)
     assert res.status == "succeeded", res.reason
     r, r2 = res.outputs["retest"]["retests"]

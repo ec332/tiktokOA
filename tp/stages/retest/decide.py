@@ -2,11 +2,13 @@
 Design: docs/status/retest/001."""
 
 import hashlib
+import json
+
+from platform_rt.api import route_matches
 
 K = 5  # fail→pass attempts (plan †)
 # shortcut: K is fixed; an intermittent defect with rate p needs K with (1-p)^K < 0.05. No such
 # defect exists yet (the race fails 3/3); compute K from the before-run's rate when one does.
-CODE_OR_FLAGS = {"flags", "images.backend", "services.backend"}  # may differ (D4)
 UNSURE = ("SUSPECT_ENV", "NOT_RUN")
 
 
@@ -36,12 +38,13 @@ def _flat(fp: dict) -> dict:
     return out
 
 
-def env_diff(before: dict | None, after: dict | None) -> list[str]:
-    """Fingerprint fields that differ beyond code and flags (D4). Empty = comparable."""
+def env_diff(before: dict | None, after: dict | None, app: str) -> list[str]:
+    """Fingerprint fields that differ beyond code and flags (D4). Empty = comparable.
+    app: the profile's app service, whose image and container may differ (L1)."""
     if not before or not after:
         return ["fingerprint missing: re-run execute (>= 1.1.0) for the failing run"]
     a, b = _flat(before), _flat(after)
-    keys = sorted((a.keys() | b.keys()) - CODE_OR_FLAGS - {"sut"})
+    keys = sorted((a.keys() | b.keys()) - {"flags", f"images.{app}", f"services.{app}", "sut"})
     out = [k for k in keys if a.get(k) != b.get(k)]
     sa, sb = dict(a.get("sut") or {}), dict(b.get("sut") or {})
     pa, pb = sa.pop("patches", {}), sb.pop("patches", {})
@@ -49,6 +52,42 @@ def env_diff(before: dict | None, after: dict | None) -> list[str]:
         out.append("sut (name/ref)")
     if any(pb.get(name) != h for name, h in pa.items()):  # patches may only be added
         out.append("sut.patches (a patch changed or was removed)")
+    return out
+
+
+def _resolved(spec: dict, node, depth: int = 0):
+    """`node` with every `$ref` followed. shortcut: a cycle stops at depth 50, unresolved."""
+    if depth > 50:
+        return node
+    if isinstance(node, dict) and isinstance(node.get("$ref"), str):
+        target = spec
+        for part in node["$ref"].lstrip("#/").split("/"):
+            target = target.get(part, {}) if isinstance(target, dict) else {}
+        return _resolved(spec, target, depth + 1)
+    if isinstance(node, dict):
+        return {k: _resolved(spec, v, depth + 1) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_resolved(spec, v, depth + 1) for v in node]
+    return node
+
+
+def contract_diff(before: dict, after: dict, calls: set[tuple[str, str]]) -> list[str]:
+    """Operations under test (`calls`: method, concrete path) whose served contract differs
+    between the before and after builds, `$ref`s resolved (DR-10, review M2). Strict: any change
+    counts. A call that matches no operation in the before spec is listed too (fail closed)."""
+    if not calls:
+        return ["no request under test was recorded, so the contract can't be compared"]
+    out = []
+    for method, path in sorted(calls):
+        tpl = next((t for t, ops in before.get("paths", {}).items() if method.lower() in ops
+                    and route_matches(f"{method} {t}", method, path)), None)  # fmt: skip
+        if tpl is None:
+            out.append(f"{method} {path}: not an operation of the before build's spec")
+            continue
+        b, a = (json.dumps(_resolved(s, s.get("paths", {}).get(tpl, {}).get(method.lower())),
+                           sort_keys=True) for s in (before, after))  # fmt: skip
+        if b != a:
+            out.append(f"{method} {tpl}")
     return out
 
 
@@ -65,6 +104,7 @@ def judge(
     after: dict[str, dict],
     changed: list[str],
     env: list[str],
+    contract: list[str] = (),
 ) -> dict:
     """before/after: node -> execute verdict on the before/after variant. Plan Stage 9 Verdict."""
 
@@ -96,7 +136,7 @@ def judge(
     ]
     if changed:
         verdict = "RETEST_INVALID"
-    elif not seen or env or unsure:
+    elif not seen or env or unsure or contract:  # a contract-changing fix proves nothing (M2)
         verdict = "INCONCLUSIVE"
     elif any(r["after"] != "PASS" for r in f2p):
         verdict = "NOT_FIXED"
@@ -112,6 +152,7 @@ def judge(
         "pass_to_pass": {"checked": len(passed_before), "regressions": regressions},
         "unsure": unsure,
         "pre_existing": pre_existing,
+        "contract_diff": list(contract),
     }
 
 

@@ -9,6 +9,7 @@ from tp.core.contract import StageResult, register
 from tp.stages.execute import record
 from tp.stages.execute.stage import ExecuteStage
 from tp.stages.retest import decide, feed
+from tp.stages.triage.rules import under_test
 
 
 class RetestStage:
@@ -100,16 +101,31 @@ class RetestStage:
             if isinstance(run, StageResult):
                 return run
         after_v = {v["node"]: v for v in run["verdicts"] if v["variant"] == after}
+        reach = ctx.profile.reach.value
         env = decide.env_diff(
             (rr["variants"].get(before_variant) or {}).get("fingerprint"),
             (run["variants"].get(after) or {}).get("fingerprint"),
+            reach.get("app_service") or reach.get("service"),
         )
         out["after"] |= {"folder": run["folder"], "root": run["root"], "k": run["k"],
                          "summary": run["summary"].get(after, {})}  # fmt: skip
         out["env_diff"] = env
-        out |= decide.judge(nodes, before, after_v, changed, env)
+        out |= decide.judge(nodes, before, after_v, changed, env,
+                            self._contract(ctx, folder, before, nodes, before_variant, after))  # fmt: skip
         ctx.emit("retest_verdict", defect=defect["id"], verdict=out["verdict"])
         return out
+
+    def _contract(self, ctx, folder, before: dict, nodes: list[str], b: str, a: str) -> list[str]:
+        """The defect's operations under test whose served contract the fix changed (M2)."""
+        rows = {r["id"]: r for r in record.rows(folder) if "id" in r}
+        calls = {(e["method"], e["path"]) for n in nodes for i in before[n].get("attempts", [])
+                 if rows.get(i, {}).get("outcome") not in (None, "passed")
+                 and (e := under_test(rows[i]))}  # fmt: skip
+        try:
+            specs = ctx.strategies.spec.openapi(b), ctx.strategies.spec.openapi(a)
+        except Exception as e:  # noqa: BLE001  any failure to serve the spec fails closed
+            return [f"spec not served: {type(e).__name__}: {e}"[:300]]
+        return decide.contract_diff(*specs, calls)
 
 
 STAGE = register(RetestStage(), cli=feed.app)
