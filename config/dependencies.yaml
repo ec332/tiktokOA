@@ -1,0 +1,32 @@
+# Outbound dependency discovery (P6, docs/status/standins/001). What matches is replaced by a
+# SIMULATED local stand-in (C8), and counts as wired only when a triggered call leaves a line
+# in the stand-in's journal (D4). No target names here.
+
+# Env var names the code reads (string literals in tracked source), first match wins.
+env:
+  - pattern: '^(SMTP|EMAIL|MAIL)_(HOST|SERVER)$'
+    kind: smtp
+    cite: "Django EMAIL_HOST, https://docs.djangoproject.com/en/stable/ref/settings/#email-host"
+  - pattern: 'WEBHOOK'
+    kind: http
+    cite: "a receiver URL by name (GitHub, Slack and Discord call it a webhook URL)"
+  - pattern: '_(URL|ENDPOINT)$'
+    kind: http
+    cite: "twelve-factor III, backing services as URLs in config, https://12factor.net/config"
+# Containerised or self-referencing services, never stood in for.
+deny: '(DATABASE|DB|REDIS|POSTGRES|PG|MYSQL|MONGO|AMQP|BROKER|CACHE|BASE|PUBLIC|SITE|FRONTEND|APP|SERVER|OPENAPI|SPEC)_(URL|HOST|ENDPOINT)$'
+# Guard knobs that let the SUT call a private host: set to the HTTP stand-in's host only.
+guard: '(ALLOW.*INTERNAL|PRIVATE.*ALLOWLIST)'
+# Request-body fields that register a receiver through the API (via: spec), case-insensitive.
+spec_field: '^(url|webhook|callback)(_?url)?$'
+# Code that sends mail or webhooks: asks the model for env names when no convention matched (D5).
+signals: '(smtplib|nodemailer|net/smtp|SmtpClient|webhook|sendmail)'
+max_triggers: 10  # POST operations called while verifying
+
+# The stand-ins (C5 reach.value.standins). `port` is the HTTP port the runner reads the journal
+# on. `image: runner` means the run's runner image (P2 picks the tag).
+standins:
+  http: {name: http, image: runner, port: 8000, journal: /__journal,
+         command: [python, -m, platform_rt.standin, "8000"]}
+  smtp: {name: mail, image: "axllent/mailpit:v1.33.1", port: 8025, journal: /api/v1/messages,
+         command: [--enable-chaos, --smtp, "0.0.0.0:25"]}  # port 25: the app's default stays right
