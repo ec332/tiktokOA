@@ -1,0 +1,13 @@
+# HOSTILE, synthetic (P2, docs/status/reach/001): the interpolation attacks of review H1, ported
+# from the fork-2 probe. The volume and env_file attacks are mutations of this file in
+# tests/test_p2_reach.py, because the rewrite refuses them before compose ever runs.
+services:
+  app:
+    build:
+      context: .
+      args: {K: "${ANTHROPIC_API_KEY}"}   # a build has network: this would send the key out
+    ports: ["8000:8000"]
+    environment:
+      LEAK: ${ANTHROPIC_API_KEY}
+      WHERE: ${HOME}
+    command: ["sh", "-c", "echo ${HOME}"]

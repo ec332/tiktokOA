@@ -1,0 +1,10 @@
+# Required values, synthetic (P2, docs/status/reach/001 D8): one of each kind of variable.
+services:
+  app:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?set a signing secret}   # secret-like: generated
+      GREETING: ${GREETING:?set a greeting}             # required: from .env.example
+      MODE: ${MODE:-prod}                               # has a default: compose's own
+      OPTIONAL: ${OPTIONAL}                             # bare, no value: empty, not asked
