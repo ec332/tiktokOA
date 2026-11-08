@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { api, ok, type Execution, type ReviewItem, type RunDetail } from "../api/client";
 import { Approve } from "../panels/cases/Approve";
 import { ProductReport, type Product } from "../panels/report/Product";
-import { Delivery, type DeliveryBody } from "../panels/report/Delivery";
+import { Delivery, type DeliveryBody } from "../panels/deliver/Delivery";
 import { Clarify } from "../panels/spec/Clarify";
 import { resolveItem } from "../flow/resolve";
 import { ApprovedTests, BuildResults, ClarifyHistory, Requirements, type CasesBody, type Criterion, type GateRow, type Verdict } from "../flow/Details";

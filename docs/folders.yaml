@@ -61,3 +61,5 @@ folders:
   # Stage D, discover (docs/status/discover/001)
   - {path: tp/stages/discover, owner: discover, milestone: I2}
   - {path: web/src/panels/discover, owner: discover, milestone: I2}
+  - {path: tp/stages/deliver, owner: deliver, milestone: I2}  # stage F (autonomy/001)
+  - {path: web/src/panels/deliver, owner: deliver, milestone: I2}
