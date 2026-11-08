@@ -3,15 +3,31 @@ reference`). The bindings are hand-written (a scripted model), so no API key is 
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
-from tp.core import contract
+from tp.core import contract, sut
 from tp.stages.env.strategies import from_service
 from tp.stages.generate import loop
+from tp.stages.generate.stage import ensure_runner
 
 pytestmark = pytest.mark.docker
 DATA = Path(__file__).parents[4] / "data"
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _pinned_template():
+    """The seeded template at its pinned ref, not a branch target picked in the UI
+    (data/sut/target.json would drop the flags patch). Its runner image is rebuilt as a run
+    would (`ensure_runner`); the next run on a branch target rebuilds its own the same way."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(sut, "target", lambda: None)
+        contract.load()
+        strategies = from_service(contract.SERVICES["env"])
+        ensure_runner(SimpleNamespace(strategies=strategies, emit=lambda *a, **k: None))
+        yield
+
 
 BINDINGS = {
     "TC-O6-2": 'api.get("/api/v1/items/", token=user["token"], params={"skip": data["skip"]})',
