@@ -7,7 +7,7 @@ from platform_rt.api import ConformanceError, route_matches
 from platform_rt.expect import ExpectationFailed, MissingObservation, SpecMismatch
 
 ORIGINS = ("ENV", "DATA", "BINDING", "CONTRACT", "PRODUCT_ERROR", "ASSERTION", "CONFORMANCE",
-           "PLATFORM", "TIMEOUT", "SPEC")  # fmt: skip
+           "PLATFORM", "TIMEOUT", "SPEC", "UI_ERROR")  # fmt: skip
 HERE = str(Path(__file__).parent)
 # By name: these come from libraries platform_rt does not import (sqlalchemy, the env factories).
 ENV_ERRORS = {"ConnectError", "ConnectTimeout", "ReadTimeout", "RemoteProtocolError",
@@ -17,6 +17,14 @@ DATA_ERRORS = {"FactoryError"}
 
 class TestTimeout(Exception):
     __test__ = False  # not a test class
+
+
+class UiPageError(Exception):
+    """An uncaught error in the page's own script during a UI flow: the product's side (C3)."""
+
+
+class LocatorError(Exception):
+    """A UI flow's locator matched nothing in time: the flow is wrong until shown otherwise (C3)."""
 
 
 def _names(exc: BaseException) -> set[str]:
@@ -108,6 +116,10 @@ def classify(phase: str, exc: BaseException, raised_in: str, exchanges: list[dic
         return "CONFORMANCE"
     if isinstance(exc, SpecMismatch):
         return "SPEC"
+    if isinstance(exc, UiPageError):  # raised inside platform_rt, so before the PLATFORM rule
+        return "UI_ERROR"
+    if isinstance(exc, LocatorError):
+        return "BINDING"
     expected = isinstance(exc, (ExpectationFailed, MissingObservation))
     if raised_in.startswith(HERE) and not expected:
         return "PLATFORM"

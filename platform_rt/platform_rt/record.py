@@ -22,6 +22,7 @@ class Recorder:
     nonce: str = field(default_factory=lambda: secrets.token_hex(3))
     retries: dict = field(default_factory=lambda: {"attempts": 0, "waited_s": 0.0})
     created: list = field(default_factory=list)  # this test's ledger entries (deleted at teardown)
+    fault: dict | None = None  # an injected dependency fault (C1): {standin, mode, value}
 
     def name(self, label: str = "x") -> str:
         """A resource name unique to this test execution (namespace state, blackbox D1)."""

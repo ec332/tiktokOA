@@ -10,6 +10,7 @@ import pytest
 
 from platform_rt import record
 from platform_rt.api import api
+from platform_rt.collect import KINDS, pytest_collect_file, suffix_of  # noqa: F401 (C3 hook)
 from platform_rt.origin import TestTimeout, classify, declared
 
 TIMEOUT = int(os.environ.get("TP_TIMEOUT", "60"))  # † seconds per test
@@ -33,11 +34,22 @@ def _write(rec: dict) -> None:
 
 
 def _case_id(item) -> str:
+    if cid := getattr(item, "tp_case_id", None):  # a collected file (C3) names its criterion
+        return cid
     params = getattr(getattr(item, "callspec", None), "params", {})
     if "case_id" in params:
         return params["case_id"]
     marker = item.get_closest_marker("tp_case")
     return marker.kwargs.get("id", item.nodeid) if marker else item.nodeid
+
+
+def _kind(item) -> str:
+    """C1: case | generic | suite | ui. Collectors set `tp_kind`; the generic families are
+    platform_rt's own test functions; any other test implements a signed case."""
+    if kind := getattr(item, "tp_kind", None):
+        return kind
+    fn = getattr(item, "function", None)
+    return "generic" if getattr(fn, "__module__", "").startswith("platform_rt.") else "case"
 
 
 def pytest_configure(config):
@@ -114,7 +126,7 @@ def pytest_runtest_makereport(item, call):
     if call.when == "teardown":
         failed = tp.get("failure")
         _write({
-            "nodeid": item.nodeid, "case_id": rec.tc,
+            "nodeid": item.nodeid, "case_id": rec.tc, "kind": _kind(item), "fault": rec.fault,
             "outcome": "failed" if failed else
                        ("skipped" if "skipped" in tp["phases"].values() else "passed"),
             "origin": failed and failed["origin"], "failure": failed,
@@ -127,7 +139,9 @@ def pytest_runtest_makereport(item, call):
 
 def pytest_collectreport(report):
     if report.failed:
-        _write({"nodeid": report.nodeid, "case_id": None, "outcome": "failed", "origin": "BINDING",
+        kind = KINDS.get(suffix_of(report.nodeid.split("::")[0]) or "", "case")
+        _write({"nodeid": report.nodeid, "case_id": None, "kind": kind, "fault": None,
+                "outcome": "failed", "origin": "BINDING",
                 "failure": {"phase": "collect", "origin": "BINDING",
                             "error": str(report.longrepr)[-2000:], "line": None},
                 "assertions": [], "observed": {}, "under_test": None, "exchanges": []})  # fmt: skip
