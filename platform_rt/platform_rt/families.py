@@ -13,7 +13,7 @@ import re
 
 import pytest
 
-from platform_rt import record
+from platform_rt import dependency, record
 from platform_rt.api import api
 from platform_rt.api import token as api_token
 from platform_rt.blackbox import eventually
@@ -22,6 +22,8 @@ from platform_rt.origin import resolve
 
 FAMILIES = ("properties", "auth_required", "unknown_id", "invalid_input", "read_back",
             "delete_final", "paging")  # build order = cut order (D15)  # fmt: skip
+# planned only when discovery wired a stand-in (standins/001); code in platform_rt/dependency.py
+DEPENDENCY = ("dependency_called", "dependency_failure_handled")
 DEFAULTS = {"id_style": "integer", "id_field": "id", "paging": None, "exclude": [],
             "per_family": 5, "examples": 10}  # fmt: skip
 METHODS = ("get", "post", "put", "patch", "delete")
@@ -107,6 +109,8 @@ def _eligible(family: str, spec: dict, c: dict) -> list[tuple[str, str]]:
                          and json_schema(spec, spec["paths"][r["collection"]]["post"])],
         "paging": [(m, p) for m, p, op in ops if m == "GET" and no_param(p) and c["paging"]
                    and _param_names(spec, op) & {c["paging"].get(k) for k in ("page", "size", "token")}],
+        "dependency_called": dependency.eligible(c),  # stand-ins (standins/001)
+        "dependency_failure_handled": dependency.eligible(c),
     }  # fmt: skip
     return pick[family]
 
@@ -118,7 +122,7 @@ def plan(spec: dict, c: dict, focus: list[str] = ()) -> list[tuple[str, str | No
     excluded = {e["op"]: e["reason"] for e in c["exclude"]}
     first = set(focus)
     return [(f"G:{fam}:{m} {p}", excluded.get(f"{m} {p}"))
-            for fam in FAMILIES
+            for fam in FAMILIES + DEPENDENCY
             for m, p in sorted(_eligible(fam, spec, c), key=lambda o: f"{o[0]} {o[1]}" not in first)
             [: c["per_family"]]]  # fmt: skip
 
@@ -348,7 +352,15 @@ def paging(spec, c, method, path, op):
                   "without a list of items")  # fmt: skip
 
 
-RUN = {f: globals()[f] for f in FAMILIES}
+def dependency_called(*a):
+    return dependency.dependency_called(*a)
+
+
+def dependency_failure_handled(*a):
+    return dependency.dependency_failure_handled(*a)
+
+
+RUN = {f: globals()[f] for f in FAMILIES + DEPENDENCY}
 _st_schema = None
 
 
