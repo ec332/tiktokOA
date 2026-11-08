@@ -45,6 +45,11 @@ def sandbox() -> dict:
     return yaml.safe_load(SANDBOX.read_text())
 
 
+def _discovery_platform() -> dict:
+    """The platform rules in config/discovery.yaml (the secret-name pattern is shared, P6e)."""
+    return yaml.safe_load((ROOT / "config" / "discovery.yaml").read_text())["platform"]
+
+
 def env_file(path: Path) -> dict[str, str]:
     out = {}
     for line in path.read_text().splitlines():
@@ -78,6 +83,59 @@ def retag(image: str, tag: str) -> str:
     return f"{name}:{tag}" if cur in FLOATING else image
 
 
+class MissingValues(Exception):
+    """Compose variables (or an env_file) with no value anywhere: a `setup` question (reach/001 D8).
+    Not a BlackboxError, so a bring-up attempt can't swallow it as a failed candidate."""
+
+    def __init__(self, names: list[str]):
+        super().__init__(
+            f"no value for {', '.join(names)}: supply one (it goes in the run's secrets)"
+        )
+        self.names = names
+
+
+EXAMPLES = (".env.example", ".env.sample")
+# ${X}, ${X:-d}, ${X?msg}, $X; `$$` is compose's escape (reach/001 D8)
+VAR = re.compile(r"(?<!\$)\$(?:\{([A-Za-z_]\w*)(:?[-?+])?[^}]*\}|([A-Za-z_]\w*))")
+RANK = ["required", "bare", "default"]
+
+
+def compose_vars(text: str) -> dict[str, str]:
+    """name -> required (`?`), bare (no value or default) or default (`-`/`+`)."""
+    out: dict[str, str] = {}
+    for m in VAR.finditer(text):
+        op = m[2] or ""
+        kind = "required" if "?" in op else "default" if op else "bare"
+        name = m[1] or m[3]
+        out[name] = min(out.get(name, kind), kind, key=RANK.index)
+    return out
+
+
+def _inside(path: Path, root: Path, what: str) -> Path:
+    """`path` resolved (symlinks followed) must stay inside `root` (H2)."""
+    if "$" in str(path):
+        raise BlackboxError(f"{what} {path}: `$` in a path is refused (H2)")
+    p = path.resolve()
+    if p != root and root not in p.parents:
+        raise BlackboxError(f"{what} {p} is outside the repo")
+    return p
+
+
+def _env_file(f, compose_dir: Path, root: Path) -> dict[str, str]:
+    """One `env_file` entry, read from inside the checkout; a missing one falls back to the
+    folder's .env.example/.env.sample, else it's a setup question (reach/001 D8)."""
+    name, required = (f["path"], f.get("required", True)) if isinstance(f, dict) else (f, True)
+    path = _inside(compose_dir / name, root, "env_file")
+    if path.is_file():
+        return env_file(path)
+    for ex in EXAMPLES:
+        if (alt := path.parent / ex).is_file():
+            return env_file(_inside(alt, root, "env_file"))
+    if required:
+        raise MissingValues([f"env_file {name}"])
+    return {}
+
+
 def _bind(src: str, run_dir: Path) -> str:
     dest = run_dir / "binds" / re.sub(r"[^\w.-]+", "_", src.strip("./~")).strip("_")
     dest.mkdir(parents=True, exist_ok=True)
@@ -87,6 +145,8 @@ def _bind(src: str, run_dir: Path) -> str:
 def _volumes(vols: list, run_dir: Path) -> list:
     out = []
     for v in vols:
+        if "$" in str(v.get("source", "") if isinstance(v, dict) else v.partition(":")[0]):
+            raise BlackboxError(f"volume {v}: `$` in a volume source is refused (H2)")
         if isinstance(v, dict):
             v = dict(v)
             if v.get("type") == "bind":
@@ -119,7 +179,7 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
         env = {}
         files = svc.get("env_file", [])
         for f in [files] if isinstance(files, str | dict) else files:
-            env |= env_file(compose_dir / (f["path"] if isinstance(f, dict) else f))
+            env |= _env_file(f, compose_dir, root)
         env = {k: v.replace("$", "$$") for k, v in env.items()}
         env |= _env_dict(svc.get("environment"))
         if name == app:
@@ -132,9 +192,11 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
                 raise BlackboxError(
                     f"service {name}: unsupported build keys {sorted(bad)} (sandbox)"
                 )
-            ctx_dir = (compose_dir / b.get("context", ".")).resolve()
-            if ctx_dir != root and root not in ctx_dir.parents:
-                raise BlackboxError(f"service {name}: build context {ctx_dir} is outside the repo")
+            ctx_dir = _inside(
+                compose_dir / b.get("context", "."), root, f"service {name}: build context"
+            )
+            if "dockerfile" in b:
+                _inside(ctx_dir / b["dockerfile"], root, f"service {name}: dockerfile")
             out["build"] = b | {"context": str(ctx_dir)}
             out["image"] = images[name]  # the per-commit cache tag (D4)
         elif name in images:
@@ -149,6 +211,15 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
         out |= {"networks": [RUN_NET], "labels": {"tp.project": run_dir.name},
                 "cpus": cfg["limits"]["cpus"], "mem_limit": cfg["limits"]["mem_limit"]}  # fmt: skip
         services[name] = out
+    for s in reach.get("standins") or []:  # C8: on the run network, started before the app
+        sname = f"tp-standin-{s['name']}"
+        services[sname] = {"image": s["image"], "networks": [RUN_NET],
+                           "labels": {"tp.project": run_dir.name},
+                           "cpus": cfg["limits"]["cpus"], "mem_limit": cfg["limits"]["mem_limit"]}  # fmt: skip
+        a = services[app]
+        a["depends_on"] = [*a.get("depends_on", []), sname]
+        a["environment"] = a.get("environment", {}) | {
+            k: _value(v, refs) for k, v in (s.get("env") or {}).items()}  # fmt: skip
     fwd = cfg["forwarder"]
     services[FORWARDER] = {
         "image": fwd["image"], "networks": [RUN_NET, EDGE_NET], "depends_on": [app],
@@ -173,14 +244,87 @@ def _parse(r: httpx.Response):
             return r.text[:2000]
 
 
-class Stack:
-    """One black-box target's compose project `tp_bb_<slug>` (reference variant only)."""
+def _slug(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", s.lower()).strip("_")
 
-    def __init__(self, p: TargetProfile):
-        self.p, self.r = p, p.reach.value
-        self.project = "tp_bb_" + re.sub(r"[^a-z0-9]+", "_", p.slug.lower()).strip("_")
+
+class Stack:
+    """One black-box target's compose project: `tp_bb_<slug>` for the reference, and
+    `tp_bb_<slug>__<variant>` for each variant, built from a patched copy (reach/001 D5-D7)."""
+
+    def __init__(self, p: TargetProfile, variant: str = "reference"):
+        self.p, self.r, self.variant_name = p, p.reach.value, variant
+        self.project = "tp_bb_" + _slug(p.slug)
+        if variant != "reference":
+            self.project += "__" + _slug(variant)[:40]
         self.dir = db.data_dir() / "env" / self.project
         self.file = self.dir / "compose.yml"
+        self.patches = self._patches(variant)
+        self._variants: dict[str, Stack] = {}
+
+    def _patches(self, variant: str) -> dict[str, Path]:
+        """`bug:A+B` (seeds) and `fixed:<patch>` -> patch files: the profile's patches/ folder,
+        or a `sha256:` patch artifact (the template's lookup, env/service.fix_patch)."""
+        kind, _, rest = variant.partition(":")
+        if variant == "reference":
+            return {}
+        if kind not in ("bug", "fixed") or not rest:
+            raise BlackboxError(
+                f"bad variant {variant!r}: use reference, bug:SEED[+SEED] or fixed:<patch>"
+            )
+        out = {}
+        for name in sorted(set(rest.split("+") if kind == "bug" else [rest])):
+            if name.startswith("sha256:"):
+                from tp.stages.env.service import fix_patch
+
+                out[name] = fix_patch(Path("."), name)
+            elif self.p.dir and (f := self.p.dir / "patches" / f"{name}.patch").is_file():
+                out[name] = f.resolve()
+            else:
+                raise BlackboxError(f"bad variant {variant!r}: no patches/{name}.patch")
+        return out
+
+    def variant(self, v: str) -> Stack:
+        if v == "reference":
+            return self
+        if v not in self._variants:
+            self._variants[v] = type(self)(self.p, v)
+        return self._variants[v]
+
+    @property
+    def token_secret(self) -> str:
+        """A variant has its own database, so its own login token."""
+        name = self.p.auth.value.get("token", {}).get("secret", "token")
+        return name if self.variant_name == "reference" else f"{name}@{self.variant_name}"
+
+    def tree(self) -> Path:
+        """The source to build: the clone, or (a variant) `git archive HEAD` plus its patches in
+        the env dir. The clone is never written (reach/001 D5)."""
+        if not self.patches:
+            return self.src
+        out = self.dir / "src"
+        if out.exists():
+            return out
+        tmp = self.dir / "src.tmp"
+        shutil.rmtree(tmp, ignore_errors=True)
+        tmp.mkdir(parents=True)
+        tar = subprocess.run(["git", "-C", str(self.src), "archive", "HEAD"], check=True,
+                             capture_output=True).stdout  # fmt: skip
+        subprocess.run(["tar", "-x", "-C", str(tmp)], input=tar, check=True)
+        self._git(tmp, "init", "-q")  # else `git apply` resolves paths against an enclosing repo
+        for name, patch in self.patches.items():
+            r = subprocess.run(["git", "apply", str(patch)], cwd=tmp, check=False,
+                               capture_output=True, text=True)  # fmt: skip
+            if r.returncode:
+                raise BlackboxError(
+                    f"patch {name} doesn't apply at {self.commit()[:12]}: {r.stderr[-300:]}"
+                )
+        shutil.rmtree(tmp / ".git")
+        tmp.rename(out)
+        return out
+
+    def patch_hashes(self) -> dict[str, str]:
+        return {n: sha256(f.read_text()) for n, f in self.patches.items()}
 
     # ---- checkout + compose file ----
 
@@ -228,19 +372,70 @@ class Stack:
     def commit(self) -> str:
         return self._git(self.src, "rev-parse", "HEAD")
 
+    def raw(self, tree: Path) -> tuple[dict, Path]:
+        """The repo's compose and its folder; Dockerfile reach (`reach.build`, C5) is a generated
+        one-service compose through the same rewrite (reach/001 D4)."""
+        if b := self.r.get("build"):
+            svc = {"build": {"context": b["context"], "dockerfile": b["dockerfile"]},
+                   "expose": [b["port"]]}  # fmt: skip
+            return {"services": {self.r["service"]: svc}}, tree
+        path = tree / self.r["compose"]
+        return yaml.safe_load(path.read_text()), path.parent
+
     def write(self) -> dict:
-        path = self.src / self.r["compose"]
-        raw = yaml.safe_load(path.read_text())
+        if self.patches and not any(
+            "build" in s for s in self.raw(self.src)[0]["services"].values()
+        ):
+            raise BlackboxError(f"{self.variant_name}: {self.p.slug} is image-only, so a variant "
+                                "can't be built; only targets built from source take one (DR-9)")  # fmt: skip
+        tree = self.tree()  # after the refusal: an image-only target is never patched
+        raw, compose_dir = self.raw(tree)
+        built = [n for n, s in raw["services"].items() if "build" in s]
         tag = self.commit()[:12]
-        images = {n: f"tp-{self.project.removeprefix('tp_bb_')}-{n}:{tag}"
-                  for n, s in raw["services"].items() if "build" in s}  # fmt: skip
+        if self.patches:  # a variant is a different build (reach/001 D3)
+            tag += "-" + sha256(self.patch_hashes())[:8]
+        base = self.project.removeprefix("tp_bb_").split("__")[0]
+        images = {n: f"tp-{base}-{n}:{tag}" for n in built}
         if self.r.get("image_tag_from") == "ref":
             images |= {n: self.pull_matching(s["image"]) for n, s in raw["services"].items()
                        if "build" not in s and retag(s["image"], "x") != s["image"]}  # fmt: skip
-        compose, self.refs = rewrite(raw, path.parent, self.dir, self.r, images, repo=self.src)
+        compose, self.refs = rewrite(raw, compose_dir, self.dir, self.r, images, repo=tree)
         self.dir.mkdir(parents=True, exist_ok=True)
-        self.file.write_text(yaml.safe_dump(compose, sort_keys=True))
+        text = yaml.safe_dump(compose, sort_keys=True)
+        self.values = self._values(text, compose_dir, tree)
+        self.file.write_text(text)
         return compose
+
+    def _values(self, text: str, compose_dir: Path, tree: Path) -> dict[str, str]:
+        """Compose variables with no value (reach/001 D8), passed as compose's process env, never
+        written to a file: answers and generated secrets from the slug's secret store, else the
+        repo's .env.example/.env.sample. A required one with none raises MissingValues; a bare one
+        with none stays empty, as compose has it."""
+        example = next((f for d in (compose_dir, tree) for ex in EXAMPLES
+                        if (f := d / ex).is_file()), None)  # fmt: skip
+        known = env_file(_inside(example, tree, "env example")) if example else {}
+        rx = re.compile(_discovery_platform()["secret_name"], re.IGNORECASE)
+        store, out, missing = secrets.load(self.p.slug), {}, []
+        for name, kind in compose_vars(text).items():
+            if kind == "default" or name.startswith(("TP_SECRET_", "COMPOSE_", "DOCKER_")):
+                continue
+            if name in store:
+                out[name] = store[name]
+            elif rx.search(name):
+                out[name] = secrets.get(self.p.slug, name, generate=True)
+            elif name in known:
+                out[name] = known[name]
+            elif kind == "required":
+                missing.append(name)
+        if missing:
+            raise MissingValues(missing)
+        return out
+
+    def compose_env(self) -> dict[str, str]:
+        """H1: a minimal environment, never the platform's own (reach/001 D1)."""
+        keep = {k: os.environ[k] for k in sandbox()["compose_env"] if k in os.environ}
+        cfg = os.environ.get("DOCKER_CONFIG", str(Path.home() / ".docker"))
+        return keep | {"DOCKER_CONFIG": cfg} | self.values | self._secret_env()
 
     def pull_matching(self, image: str) -> str:
         """The image at the checked-out tag: `v1.2.3`, else `1.2.3` (registries often drop the
@@ -261,11 +456,11 @@ class Stack:
                 for n in sorted(self.refs)}  # fmt: skip
 
     def compose(self, *args: str, check: bool = True, timeout: float | None = 300):
-        if not self.file.exists():
+        if not hasattr(self, "values"):
             self.write()
         cmd = ["docker", "compose", "-p", self.project, "-f", str(self.file), *args]
         r = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=timeout,
-                           env=os.environ | self._secret_env())  # fmt: skip
+                           env=self.compose_env())  # fmt: skip
         if check and r.returncode:
             raise BlackboxError(f"compose {' '.join(args[:2])}: {(r.stderr or r.stdout)[-800:]}")
         return r
@@ -291,7 +486,7 @@ class Stack:
         # in one (SQLite) would otherwise start with the last run's users (found in discover/004)
         shutil.rmtree(self.dir / "binds", ignore_errors=True)
         if "login" in self.p.auth.value:
-            secrets.forget(self.p.slug, self.p.auth.value.get("token", {}).get("secret", "token"))
+            secrets.forget(self.p.slug, self.token_secret)
         self.build()
         self.compose(
             "up", "-d", "--wait", "--wait-timeout", str(UP_TIMEOUT), timeout=UP_TIMEOUT + 60
@@ -319,13 +514,14 @@ class Stack:
         if failed := [p["name"] for p in probes if not p["ok"]]:
             raise BlackboxError(f"probes failed after bring-up: {failed}: {probes}")
         fingerprint = self.fingerprint()
-        return {"variant": "reference", "project": self.project, "flags": [],
+        return {"variant": self.variant_name, "project": self.project, "flags": [],
                 "spec_hash": sha256(fingerprint), "fingerprint": fingerprint, "probes": probes,
                 "base_url": self.base_url, "compose_file": str(self.file),
                 "reproduce": f"docker compose -p {self.project} -f {self.file} up -d --wait"}  # fmt: skip
 
     def down(self) -> None:
-        self.compose("down", "-v", "--remove-orphans", "-t", "10", check=False, timeout=120)
+        with contextlib.suppress(BlackboxError, MissingValues):  # unwritable: never up
+            self.compose("down", "-v", "--remove-orphans", "-t", "10", check=False, timeout=120)
 
     def ensure(self) -> None:
         if not all(p["ok"] for p in self.probe()):
@@ -404,8 +600,11 @@ class Stack:
             if built
             else "no build: images pulled at the tested tag",
         }  # fmt: skip (D5)
-        return {"compose": sha256(text), "images": images, "commit": self.commit(),
-                "ref": self.r["ref"], "network": network}  # fmt: skip
+        out = {"compose": sha256(text), "images": images, "commit": self.commit(),
+               "ref": self.r["ref"], "network": network}  # fmt: skip
+        if self.patches:  # the labelled seed or fix this build carries (DR-9, DR-10)
+            out["patches"] = self.patch_hashes()
+        return out
 
     # ---- the runner ----
 
@@ -679,6 +878,10 @@ def families_config(p: TargetProfile) -> dict:
             if decision in ("confirm", "reject"):
                 sec["observed_open"] = []  # out_of_scope leaves them spec-side
         out["secured"] = sec
+    if standins := p.reach.value.get("standins"):  # C8 addition (reach/001 D9): journal addresses
+        out["standins"] = [{"name": s["name"], "kind": s["kind"], "journal": s.get("journal"),
+                            "url": f"http://tp-standin-{s['name']}:{s['port']}"}
+                           for s in standins]  # fmt: skip
     return out
 
 
@@ -760,7 +963,7 @@ class TokenHeaderAuth:
 
     def principal(self, role: str = "admin", variant: str = "reference") -> dict:
         scheme, slug = self.v.get("scheme", "Bearer"), self.p.slug
-        name = self.v.get("token", {}).get("secret", "token")
+        name = (self.stack or Stack(self.p)).token_secret
         if (token := secrets.load(slug).get(name)) is None or _jwt_expired(token):
             login = self.v["login"]
             body = _resolve(slug, login["body"])
@@ -787,25 +990,25 @@ class Reach:
         self.stack = stack
 
     def provision(self, variant: str = "reference", expect: str | None = None) -> dict:
-        return self.stack.up()
+        return self.stack.variant(variant).up()
 
     def ensure(self, variant: str = "reference") -> None:
-        self.stack.ensure()
+        self.stack.variant(variant).ensure()
 
     def probe(self, variant: str = "reference") -> list[dict]:
-        return self.stack.probe()
+        return self.stack.variant(variant).probe()
 
     def guard(self, variant: str = "reference") -> None:
-        if bad := [p for p in self.stack.probe() if not p["ok"]]:
+        if bad := [p for p in self.stack.variant(variant).probe() if not p["ok"]]:
             from tp.stages.env.service import EnvDown
 
             raise EnvDown("; ".join(f"{p['name']}: {p['raw'][:200]}" for p in bad))
 
     def teardown(self, variant: str = "reference") -> None:
-        self.stack.down()
+        self.stack.variant(variant).down()
 
     def logs(self, variant: str = "reference") -> str:
-        return self.stack.logs()
+        return self.stack.variant(variant).logs()
 
     def image(self, variant: str = "reference") -> str | None:
         return None  # the runner is the generic black-box image
@@ -940,7 +1143,7 @@ class Checks:
         self.stack = stack
 
     def run(self, tests: Path, out: Path, variant: str = "reference", **kw) -> dict:
-        return self.stack.pytest(tests, out, variant, **kw)
+        return self.stack.variant(variant).pytest(tests, out, variant, **kw)
 
 
 IMPLS = {("reach", "container"): Reach, ("reach", "external"): ExternalReach,
