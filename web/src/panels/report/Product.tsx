@@ -20,7 +20,7 @@ type Improve = { kind: string; title: string; detail: string; ac: string | null 
 export type Product = {
   summary: Record<string, number | null>;
   defects: Defect[]; causes?: Defect[]; problematic_tests: Test[]; improve: Improve[];
-  rules: { clarify: string[]; cases: string[]; templates: string[] | null; gate: Record<string, unknown> | null; routes: string[] };
+  rules: { clarify: string[]; cases: string[]; templates: string[] | null; gate: Record<string, unknown> | null; routes: string[]; scan?: { commit?: string; subject?: string; whole_spec?: string } | null };
 };
 type Retest = { defect: string; verdict?: string; after: { variant: string }; tests_changed?: boolean; reason?: string };
 
@@ -213,6 +213,7 @@ export function ProductReport({ product, evidence, runId, retests }: {
         <summary style={{ cursor: "pointer", fontWeight: 600 }}>Rules used in this run</summary>
         <div style={{ fontSize: 13, display: "grid", gap: 4, marginTop: 8 }}>
           <div>Routes: {r.routes.length ? r.routes.join(", ") : "whole API"}</div>
+          {r.scan && <div>Scan of {r.scan.commit?.slice(0, 7) ?? "the target"}{r.scan.subject ? `: ${r.scan.subject}` : ""}{r.scan.whole_spec ? ` (${r.scan.whole_spec})` : ""}</div>}
           <div>Clarification rules added: {r.clarify.length ? r.clarify.join("; ") : "none (defaults only)"}</div>
           <div>Case rules added: {r.cases.length ? r.cases.join("; ") : "none"}</div>
           <div>Templates: {r.templates ? r.templates.join(", ") : "all"}</div>

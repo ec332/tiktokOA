@@ -128,5 +128,6 @@ def build(spec: dict, cases: dict, gate: dict, tri: dict, opts: dict) -> dict:
             "templates": opts.get("templates"),
             "gate": gate.get("settings"),
             "routes": opts.get("routes", []),
+            "scan": opts.get("scan"),  # autonomy/001 F9: what the Scan covered, and why
         },
     }
