@@ -26,7 +26,7 @@ def _is_flag(node: ast.AST) -> bool:
 
 
 def _points(body: list[ast.stmt]) -> list[ast.AST]:
-    """Mutation points in source order. The body of a pure flag gate (`if settings.BUG_X:`) is
+    """Mutation points in source order. The body of a pure flag gate (`if settings.<FLAG>:`) is
     skipped: with the flag off it never runs, so its mutants would all be equivalent."""
     out: list[ast.AST] = []
 
