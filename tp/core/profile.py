@@ -134,6 +134,12 @@ def seeded_bytes(root: Path = Path(".")) -> bytes:
     return (target_dir(root) / name).read_bytes() if name else b""
 
 
+def timing_flags(root: Path = Path(".")) -> dict[str, str]:
+    """Planted bugs marked `timing: true` in the seeded file -> their not-covered note."""
+    seeded = yaml.safe_load(seeded_bytes(root)) or {}
+    return {f: v.get("not_covered", "") for f, v in seeded.items() if v.get("timing")}
+
+
 def parse(raw: dict, slug: str, where: Path | None = None) -> TargetProfile:
     t = raw.get("target") or {}
     if missing := [k for k in ("name", "repo") if k not in t] + (
