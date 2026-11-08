@@ -75,8 +75,13 @@ def create(execution_id: int, kind: str, payload: dict) -> int:
     return cur.lastrowid
 
 
-def list_(status: str | None = None, execution_id: int | None = None) -> list[dict]:
+def list_(status: str | None = None, execution_id: int | None = None,
+          active: bool = False) -> list[dict]:  # fmt: skip
+    """active: leave out items of cancelled runs (kept open so a resume continues there)."""
     q, args = "SELECT * FROM review_items WHERE 1=1", []
+    if active:
+        q += (" AND stage_execution NOT IN (SELECT e.id FROM stage_executions e JOIN pipeline_runs"
+              " p ON p.id = e.run_id WHERE p.status = 'cancelled')")  # fmt: skip
     if status:
         q, args = q + " AND status=?", [*args, status]
     if execution_id is not None:

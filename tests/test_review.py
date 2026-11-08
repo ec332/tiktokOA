@@ -117,3 +117,10 @@ def test_other_choice_needs_and_keeps_free_text():
         review.resolve(i, "pick", "po", detail={"choice": "other"})
     item = review.resolve(i, "pick", "po", detail={"choice": "other", "text": "0 to 100 inclusive"})
     assert item["detail"] == {"choice": "other", "text": "0 to 100 inclusive"}
+
+
+def test_a_cancelled_runs_items_stay_open_but_leave_the_active_list(data):
+    run_id, item = _blocked_signoff()
+    runner.cancel(run_id)
+    assert [i["id"] for i in review.list_(status="open")] == [item["id"]]  # still resumable
+    assert review.list_(status="open", active=True) == []

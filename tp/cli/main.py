@@ -170,7 +170,8 @@ def stage_run(
 
 @review_app.command("list")
 def review_list(status: str = "open"):
-    for item in review.list_(status=None if status == "all" else status):
+    """Open items by default, without those of cancelled runs (`--status all` shows every item)."""
+    for item in review.list_(status=None if status == "all" else status, active=status != "all"):
         typer.echo(
             f"{item['id']:<4} {item['kind']:<18} {item['status']:<9} "
             f"exec #{item['stage_execution']}  options={','.join(item['options'])}  "
