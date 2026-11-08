@@ -27,7 +27,7 @@ Rehearsed end to end on 2026-11-08 (one sample, Claude Haiku 5.5, Docker runs un
 | 2 | `tp target add http://localhost:8010 --live --secret token=$TOKEN` → `tp run --target localhost-8010` → `tp target clean` | r-0041, r-0046 | A Paperless the platform didn't start and can't control (started by hand on the same machine; only URL + token). Safe mode, ceiling **"Seen on the live system"**, 0 leftovers, issue drafts with curl reproductions (`$TOKEN` placeholder) |
 | 3 | `tp target add https://github.com/usememos/memos` → `tp run --target memos` | r-0043, r-0044 | Spec declares no security: auth found by probing, first admin created, resource-name IDs and token paging detected. 19 verified, 0 clarify, 0 overrides |
 | 4 | `tp target add https://github.com/usememos/memos --no-conventions` | r-0045 | Same fields by exploration alone: 18/19 values equal, 4 fields move from the convention layer to algorithm/exploration. Side by side on the Targets page |
-| 5 | `tp watch --target fastapi-template` on the template fork → push → Scan → draft PR | r-0037/38; see `docs/status/demo/` | Draft PRs with a failing test and a retest-proven fix: ec332/full-stack-fastapi-template#1, #2 |
+| 5 | `tp watch --target fastapi-template` on the template fork → push → Scan → draft PR | r-0047 (rehearsal, publishing off); r-0037 (published) | Push `1880e2a` → watch → Scan → Clarify + Sign-off → retest → deliver with no further click. 3 defects fixed and retest-proven, each passing every PR rule except `publishing_on`. Published the same way: draft PRs ec332/full-stack-fastapi-template#1, #2 (failing test + fix) |
 
 **Why this generalises (step 6):**
 
