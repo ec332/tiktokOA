@@ -116,7 +116,7 @@ def build(files: dict[str, str], api_base: str) -> dict:
 
 
 def route_key(method: str, path: str) -> str:
-    """`GET /api/v1/items/{id}` -> comparable form: method + path with params as {}."""
+    """`GET /api/things/{id}` -> comparable form: method + path with params as {}."""
     return f"{method.upper()} " + re.sub(r"\{[^}]*\}", "{}", path.rstrip("/") or "/")
 
 
