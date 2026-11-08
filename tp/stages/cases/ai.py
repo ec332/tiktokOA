@@ -10,7 +10,6 @@ from tp.stages.cases import calculators
 
 HERE = Path(__file__).parent
 MODEL, EFFORT = "claude-haiku-5-5", "medium"  # smallest model that does the job (spec status 004)
-FACTORIES = ["user", "superuser", "item", "inactive_user"]  # env stage factories (env E5)
 
 
 def catalogue() -> dict[str, dict]:
@@ -88,7 +87,7 @@ def draft(
              "resolution": c.get("resolution"), "suspected_defect": c.get("suspected_defect", False),
              "status": c["status"], "minimum": minimum[c["id"]],
              **({"gaps": c["gaps"]} if c.get("gaps") else {})} for c in criteria]  # fmt: skip
-    p = _prompt("drafter", FACTORIES=", ".join(factories or FACTORIES),
+    p = _prompt("drafter", FACTORIES=", ".join(factories or []),
                 TEMPLATES=yaml.safe_dump([t for n, t in catalogue().items()
                                           if templates is None or n in templates],
                                          sort_keys=False),

@@ -6,6 +6,7 @@ Resuming after review = calling run() again on the same execution with decisions
 """
 
 import json
+from pathlib import Path
 
 from tp.core import artifacts, contract, db, events, labels, llm, review, strategies
 from tp.core import profile as target_profile
@@ -70,8 +71,12 @@ def start_run(
                 "INSERT INTO stage_executions (run_id, stage, status) VALUES (?,?,?)",
                 (run_id, name, "pending"),
             )
+    target = _pin_target(options) if pipeline != ["discover"] else None
+    if target and not stub and (other := busy(Path(target).name)):
+        raise ValueError(f"target busy: {other} holds {Path(target).name}; "
+                         f"`tp cancel` it, or wait for it to finish (L3)")  # fmt: skip
     events.emit(run_id, None, "run_created", mode=mode, stub=stub)
-    if pipeline != ["discover"] and (target := _pin_target(options)):
+    if target:
         events.emit(
             run_id, None, "run_target", path=target
         )  # every stage runs on it (discover/006)
@@ -204,6 +209,24 @@ def _pin_target(options: dict) -> str | None:
     return str(d.resolve()) if (d / "profile.yaml").exists() else None
 
 
+def busy(slug: str, but: int | None = None) -> str | None:
+    """A run other than `but` that holds this target (L3, the rule of discover/006): running, or
+    waiting for review after its env stage brought the stack up. A crashed run stays `running`
+    until it is cancelled, which `GET /runs` shows (harden/001 H1). Stub runs touch no target."""
+    for r in list_runs(500):
+        if r["id"] == but or r["stub"] or r["status"] not in ("running", "awaiting_review"):
+            continue
+        if stages(r["id"]) == ["discover"] or (t := run_target(r["id"])) is None:
+            continue
+        if Path(t).name != slug:
+            continue
+        env = next((e for e in reversed(get_run(r["id"])["executions"]) if e["stage"] == "env"),
+                   None)  # fmt: skip
+        if r["status"] == "running" or (env and env["status"] == "succeeded"):
+            return r["name"]
+    return None
+
+
 def run_target(run_id: int) -> str | None:
     return next((e["payload"]["path"] for e in events.since(run_id) if e["kind"] == "run_target"),
                 None)  # fmt: skip
@@ -220,6 +243,8 @@ def _execute_one(
     run_id: int, ex_id: int, overrides: dict[str, str] | None, from_run: int | None
 ) -> dict:
     run = get_run(run_id)
+    if not run["stub"] and (t := run_target(run_id)) and (other := busy(Path(t).name, run_id)):
+        return _fail(run_id, ex_id, f"target busy: {other} holds {Path(t).name} (L3)")
     ex = next(e for e in run["executions"] if e["id"] == ex_id)
     stage = contract.resolve(ex["stage"], stub=run["stub"])
     available = heads(from_run if from_run is not None else run_id) | (overrides or {})

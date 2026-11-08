@@ -3,14 +3,18 @@
 The runner's only route out: every request a test sends, Schemathesis included, passes `Policy`
 before it reaches the live system. Deny by default:
 
-- reads are allowed;
+- the request target must be origin-form (`/…`): an absolute URL would leave for any host (H3);
+- method overrides are stripped, and `_method` refuses the request (M3);
+- reads are allowed outside the deny categories (M4);
 - a create only on a spec collection whose item path has both GET and DELETE, outside the deny
   categories, with the run prefix in its JSON body;
-- update and delete only on items this proxy saw the run create (its ledger, on disk);
+- update and delete only on items this proxy saw the run create (its ledger, on disk): a 201, or
+  a 2xx whose body carries the run prefix (M1);
 - anything else answers 599 with `X-TP-Blocked: <rule>` and never leaves.
 
 Run as `python -m platform_rt.proxy` with $TP_UPSTREAM, $TP_OPENAPI_FILE, $TP_LEDGER, $TP_RUN,
-$TP_ID_FIELD and $TP_SAFETY (`{"deny": [...]}`). Prints `ready` once listening.
+$TP_ID_FIELD, $TP_SAFETY (`{"deny": [...]}`) and, optionally, $TP_UPSTREAM_HOST (the `Host` the
+live system expects, L4). Prints `ready` once listening.
 """
 
 import json
@@ -27,6 +31,19 @@ READS = {"GET", "HEAD", "OPTIONS"}
 BLOCKED = 599
 HOP = {"host", "content-length", "connection", "transfer-encoding", "keep-alive",
        "content-encoding", "upgrade", "proxy-connection"}  # fmt: skip
+OVERRIDES = {"x-http-method-override", "x-http-method", "x-method-override"}  # M3
+
+
+def _has_method(target: str, body: bytes) -> bool:
+    """`_method` anywhere a framework might read it: query, form body, top-level JSON key (M3)."""
+    query = httpx.URL(target).params
+    try:
+        parsed = json.loads(body or b"null")
+    except ValueError:
+        parsed = None
+    if parsed is None and body:
+        parsed = dict(httpx.QueryParams(body.decode("latin-1")))  # a form body
+    return "_method" in query or (isinstance(parsed, dict) and "_method" in parsed)
 
 
 def _strings(v):
@@ -92,9 +109,10 @@ class Policy:
 
     def decide(self, method: str, path: str, body: bytes = b"") -> tuple[bool, str]:
         method = method.upper()
-        if method in READS:
-            return True, "read"
         found = self._op(method, path)
+        if method in READS:  # deny words on reads too: GET /logout or an export trigger acts (M4)
+            word = self._denied(*found) if found else self._denied(path, {})
+            return (False, f"deny category {word!r}") if word else (True, "read")
         if found is None:
             return False, "not in the spec"
         tpl, op = found
@@ -123,6 +141,8 @@ class Policy:
                 parsed = json.loads(body or b"null")
             except ValueError:
                 parsed = None
+            if status != 201 and not any(s.startswith(self.prefix) for s in _strings(parsed)):
+                return  # a get-or-create answering 200 with an existing item isn't ours (M1)
             rid = parsed.get(self.id_field) if isinstance(parsed, dict) else None
             entry = {"path": path, "id": rid, "location": location}
             if (item := self.item_path(entry)) is None:
@@ -144,19 +164,27 @@ class Policy:
                     f.write(json.dumps(line) + "\n")
 
 
-def server(policy: Policy, upstream: httpx.Client, port: int = 8000) -> ThreadingHTTPServer:
+def server(policy: Policy, upstream: httpx.Client, port: int = 8000,
+           host: str | None = None) -> ThreadingHTTPServer:  # fmt: skip
     class Handler(BaseHTTPRequestHandler):
         def _any(self):
             body = self.rfile.read(int(self.headers.get("content-length") or 0))
             path = self.path.split("?")[0]
-            ok, rule = policy.decide(self.command, path, body)
+            if not self.path.startswith("/") or self.path.startswith("//"):
+                ok, rule = False, "not an origin-form request target"  # httpx ignores base_url (H3)
+            elif _has_method(self.path, body):
+                ok, rule = False, "_method override"
+            else:
+                ok, rule = policy.decide(self.command, path, body)
             if not ok:
                 self.send_response(BLOCKED)
                 self.send_header("X-TP-Blocked", rule)
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return
-            headers = {k: v for k, v in self.headers.items() if k.lower() not in HOP}
+            headers = {k: v for k, v in self.headers.items() if k.lower() not in HOP | OVERRIDES}
+            if host:
+                headers["Host"] = host
             try:
                 r = upstream.request(self.command, self.path, content=body, headers=headers)
             except httpx.HTTPError as e:
@@ -186,7 +214,8 @@ def serve(port: int = 8000) -> None:
     policy = Policy(spec, json.loads(os.environ.get("TP_SAFETY") or "{}").get("deny", []),
                     os.environ["TP_RUN"], os.environ.get("TP_ID_FIELD") or "id",
                     os.environ.get("TP_LEDGER"))  # fmt: skip
-    srv = server(policy, httpx.Client(base_url=os.environ["TP_UPSTREAM"], timeout=60), port)
+    srv = server(policy, httpx.Client(base_url=os.environ["TP_UPSTREAM"], timeout=60), port,
+                 os.environ.get("TP_UPSTREAM_HOST"))  # fmt: skip
     print("ready", flush=True)
     srv.serve_forever()
 

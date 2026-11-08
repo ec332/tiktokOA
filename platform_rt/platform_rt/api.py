@@ -48,7 +48,7 @@ def conforms(exchange: dict, case_data: dict) -> list[str]:
 
 
 def route_matches(route: str, method: str, path: str) -> bool:
-    """`GET /api/v1/items/{id}` matches GET /api/v1/items/3f2a…"""
+    """`GET /api/notes/{id}` matches GET /api/notes/3f2a…"""
     r_method, _, r_path = route.partition(" ")
     want, got = r_path.split("/"), path.split("/")
     return (
@@ -192,7 +192,7 @@ class Api:
             with open(f) as fh:
                 return json.load(fh)
         path = os.environ.get("TP_OPENAPI_PATH") or (
-            os.environ.get("TP_API_BASE", "/api/v1") + "/openapi.json"
+            os.environ.get("TP_API_BASE", "") + "/openapi.json"  # the env stage sets it
         )
         return self.client.get(path).json()
 
