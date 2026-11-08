@@ -11,6 +11,7 @@ into a sandbox, reached only over HTTP. No target names here: everything comes f
 """
 
 import base64
+import contextlib
 import json
 import os
 import re
@@ -439,7 +440,6 @@ class Stack:
         run_env = {
             "TP_MODE": "blackbox", "TP_RESULTS": "/work/out/results.jsonl",
             "TP_LEDGER": "/work/out/ledger.jsonl",
-            "TP_BASE_URL": f"http://{self.r['service']}:{self.r['port']}",
             "TP_API_BASE": self.p.spec.value.get("base", ""),
             "TP_OPENAPI_PATH": self.p.spec.value["openapi"],
             "TP_AUTH_SCHEME": who["scheme"],
@@ -458,25 +458,37 @@ class Stack:
                                                 "body": _placeholders(login["body"])})  # fmt: skip
             secret_env["TP_SECRET_ADMIN_PASSWORD"] = secrets.get(self.p.slug, "admin_password",
                                                                  generate=True)  # fmt: skip
-        cmd = ["docker", "run", "--rm", "--network", f"{self.project}_{RUN_NET}",
-               "-v", f"{tests.resolve()}:/work/tests:ro", "-v", f"{out.resolve()}:/work/out",
-               "-v", f"{(self.dir / 'openapi.json').resolve()}:/work/openapi.json:ro"]  # fmt: skip
-        cmd += [a for k, v in sorted(run_env.items()) for a in ("-e", f"{k}={v}")]
-        cmd += [a for k in sorted(secret_env) for a in ("-e", k)]  # value from our env, not argv
-        cmd += [runner, "python", "-m", "pytest", "-p", "platform_rt.blackbox", "-p",
-                "no:cacheprovider", "-q", "--continue-on-collection-errors",
-                "--rootdir=/work/tests", "--junitxml=/work/out/junit.xml", "/work/tests", *args]  # fmt: skip
-        r = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=RUN_TIMEOUT,
-                           env=os.environ | secret_env)  # fmt: skip
+        with self.egress(runner, run_env) as (network, base_url):
+            run_env["TP_BASE_URL"] = base_url
+            cmd = ["docker", "run", "--rm", "--network", network,
+                   "-v", f"{tests.resolve()}:/work/tests:ro", "-v", f"{out.resolve()}:/work/out",
+                   "-v", f"{(self.dir / 'openapi.json').resolve()}:/work/openapi.json:ro"]  # fmt: skip
+            cmd += [a for k, v in sorted(run_env.items()) for a in ("-e", f"{k}={v}")]
+            cmd += [
+                a for k in sorted(secret_env) for a in ("-e", k)
+            ]  # value from our env, not argv
+            cmd += [runner, "python", "-m", "pytest", "-p", "platform_rt.blackbox", "-p",
+                    "no:cacheprovider", "-q", "--continue-on-collection-errors",
+                    "--rootdir=/work/tests", "--junitxml=/work/out/junit.xml", "/work/tests", *args]  # fmt: skip
+            r = subprocess.run(cmd, check=False, capture_output=True, text=True,
+                               timeout=RUN_TIMEOUT, env=os.environ | secret_env)  # fmt: skip
         log = secrets.redact((r.stdout + r.stderr)[-4000:])
         results = [json.loads(ln) for ln in (out / "results.jsonl").read_text().splitlines()] \
             if (out / "results.jsonl").exists() else []  # fmt: skip
-        cleanup = self.cleanup(out / "ledger.jsonl")
+        cleanup = self.cleanup(self.ledger_file(out))
         (out / "cleanup.json").write_text(json.dumps(cleanup, indent=1))
         if r.returncode not in (0, 1) and not results:
             raise BlackboxError(f"runner pytest exited {r.returncode}: {log[-1500:]}")
         return {"returncode": r.returncode, "results": results, "junit": str(out / "junit.xml"),
                 "output": log, "cleanup": {k: len(v) for k, v in cleanup.items()}}  # fmt: skip
+
+    def egress(self, runner: str, run_env: dict):
+        """The runner's network and base URL: the run network, straight to the app service."""
+        return contextlib.nullcontext((f"{self.project}_{RUN_NET}",
+                                       f"http://{self.r['service']}:{self.r['port']}"))  # fmt: skip
+
+    def ledger_file(self, out: Path) -> Path:
+        return out / "ledger.jsonl"
 
     def cleanup(self, ledger: Path) -> dict[str, list]:
         """Delete what the tests created, newest first, best effort (D1). Leftovers are listed,
@@ -507,6 +519,139 @@ class Stack:
         return out
 
 
+# ---- external reach (docs/status/external/001) ------------------------------------------------
+
+READS = {"GET", "HEAD", "OPTIONS"}
+LOOPBACK = {"localhost", "127.0.0.1", "::1"}
+
+
+def safety_config() -> dict:
+    return yaml.safe_load((ROOT / "config" / "safety.yaml").read_text())
+
+
+class ExternalStack(Stack):
+    """Reach `external` (E1, E3, E6): a running system the platform didn't start and can't
+    control, reached only by URL + supplied token. No checkout, compose, logs or exec on it.
+    Platform-side requests are reads and deletes of what runs created (`SafeMode`); the runner's
+    go through the safe-mode proxy (platform_rt.proxy), its only route out. Docker here only
+    runs the platform's own runner and proxy."""
+
+    def __init__(self, p: TargetProfile):
+        super().__init__(p)
+        self.project = "tp_ext_" + self.project.removeprefix("tp_bb_")
+        self.dir = db.data_dir() / "env" / self.project
+        self.file = self.dir / "compose.yml"  # never written
+        self.ledger = self.dir / "ledger.jsonl"  # the proxy's, kept across runs (E3)
+
+    @property
+    def src(self) -> Path:
+        raise BlackboxError("external reach has no checkout: its spec must be served")
+
+    def compose(self, *args: str, **kw):
+        raise BlackboxError("external reach: the platform doesn't manage this system")
+
+    def commit(self) -> str:
+        return self.p.commit_tested
+
+    @property
+    def base_url(self) -> str:
+        return self.r["url"].rstrip("/")
+
+    def up(self) -> dict:
+        before = self.cleanup(self.ledger)  # what an earlier, crashed or killed run left behind
+        probes = self.probe()
+        if failed := [p["name"] for p in probes if not p["ok"]]:
+            raise BlackboxError(f"probes failed on {self.base_url}: {failed}: {probes}")
+        fingerprint = self.fingerprint()
+        return {"variant": "reference", "project": self.project, "flags": [],
+                "spec_hash": sha256(fingerprint), "fingerprint": fingerprint, "probes": probes,
+                "base_url": self.base_url, "cleanup_before": {k: len(v) for k, v in before.items()},
+                "reproduce": f"curl {self.base_url}{self.r.get('health') or ''}"}  # fmt: skip
+
+    def down(self) -> None:
+        pass  # nothing of ours to tear down
+
+    def build(self) -> list[str]:
+        return []
+
+    def logs(self) -> str:
+        return ""
+
+    def fingerprint(self) -> dict:
+        return {"url": self.base_url, "commit": self.commit(),
+                "spec": sha256(json.dumps(self.openapi(), sort_keys=True)),  # changes on redeploy
+                "network": {"run": "runner on an internal network, out only through the "
+                                   "safe-mode proxy",
+                            "build": "none: the system was already running"}}  # fmt: skip
+
+    def http(self, method: str, path: str, **kw) -> tuple[int, object]:
+        if not SafeMode(self).allow(method, path):
+            raise BlackboxError(f"NOT_RUN: safe mode: {method} {path} (the platform itself "
+                                "only reads, and deletes what runs created)")  # fmt: skip
+        return super().http(method, path, **kw)
+
+    def owned(self) -> set[str]:
+        """Item paths runs created and haven't deleted yet, from the ledger."""
+        if not self.ledger.exists() or not (cached := self.dir / "openapi.json").exists():
+            return set()
+        spec = json.loads(cached.read_text())
+        entries = [json.loads(ln) for ln in self.ledger.read_text().splitlines() if ln]
+        gone = {json.dumps({k: v for k, v in e.items() if k != "deleted_by_test"}, sort_keys=True)
+                for e in entries if e.get("deleted_by_test")}  # fmt: skip
+        return {t for e in entries if not e.get("deleted_by_test")
+                and json.dumps(e, sort_keys=True) not in gone and (t := delete_path(spec, e))}  # fmt: skip
+
+    def cleanup(self, ledger: Path) -> dict[str, list]:
+        out = super().cleanup(ledger)
+        if ledger.exists():  # keep only what is still out there, for the next run to retry
+            keep = [{k: v for k, v in e.items() if k != "status"}
+                    for e in out["failed"] + out["unknown_delete_route"]]  # fmt: skip
+            ledger.write_text("".join(json.dumps(e) + "\n" for e in keep))
+        return out
+
+    def ledger_file(self, out: Path) -> Path:
+        return self.ledger
+
+    @contextlib.contextmanager
+    def egress(self, runner: str, run_env: dict):
+        """Start the safe-mode proxy on an internal network shared with the runner; only the
+        proxy also joins the default bridge, so it is the runner's one way out."""
+        net, name = f"{self.project}_run", f"{self.project}_proxy"
+        url = httpx.URL(self.base_url)
+        if url.host in LOOPBACK:  # the proxy runs in a container: loopback is the host's
+            url = url.copy_with(host="host.docker.internal")
+        self.ledger.parent.mkdir(parents=True, exist_ok=True)
+        self.ledger.touch()
+        run_env["TP_SAFE_MODE"] = "1"
+        env = {"TP_UPSTREAM": str(url), "TP_OPENAPI_FILE": "/work/openapi.json",
+               "TP_LEDGER": "/work/ledger.jsonl", "TP_RUN": run_env.get("TP_RUN", "local"),
+               "TP_ID_FIELD": run_env.get("TP_ID_FIELD", "id"),
+               "TP_SAFETY": json.dumps(safety_config())}  # fmt: skip
+        subprocess.run(
+            ["docker", "network", "create", "--internal", net], check=False, capture_output=True
+        )  # fmt: skip  (already there: fine)
+        subprocess.run(["docker", "rm", "-f", name], check=False, capture_output=True)
+        cmd = ["docker", "run", "-d", "--rm", "--name", name, "--network", net,
+               "-v", f"{(self.dir / 'openapi.json').resolve()}:/work/openapi.json:ro",
+               "-v", f"{self.ledger.resolve()}:/work/ledger.jsonl"]  # fmt: skip
+        cmd += [a for k, v in sorted(env.items()) for a in ("-e", f"{k}={v}")]
+        cmd += [runner, "python", "-m", "platform_rt.proxy"]
+        try:
+            for step in (cmd, ["docker", "network", "connect", "bridge", name]):
+                r = subprocess.run(step, check=False, capture_output=True, text=True, timeout=120)
+                if r.returncode:
+                    raise BlackboxError(f"safe-mode proxy: {(r.stderr or r.stdout)[-500:]}")
+            t0 = time.monotonic()
+            while "ready" not in subprocess.run(["docker", "logs", name], check=False,
+                                                capture_output=True, text=True).stdout:  # fmt: skip
+                if time.monotonic() - t0 > 30:
+                    raise BlackboxError("safe-mode proxy never became ready")
+                time.sleep(0.5)
+            yield net, f"http://{name}:8000"
+        finally:
+            subprocess.run(["docker", "rm", "-f", name], check=False, capture_output=True)
+
+
 def families_config(p: TargetProfile) -> dict:
     """$TP_FAMILIES for platform_rt.families (checks/001): the data conventions (ID field and
     style, paging) from `data`, the family knobs (per_family, examples, rate, exclude) from
@@ -514,7 +659,7 @@ def families_config(p: TargetProfile) -> dict:
     `confirm_observed` answer applied: confirm = intended, so public; reject = a hole, so secured."""
     d = p.data.value
     out = {"id_field": d.get("id_field", "id"), "id_style": d.get("id_style", "integer"),
-           "paging": d.get("paging"), "rate": 5, "per_family": 5, "examples": 10, "exclude": []
+           "paging": d.get("paging"), "rate": 2 if p.reach.strategy == "external" else 5, "per_family": 5, "examples": 10, "exclude": []
            } | (p.checks.value.get("families") or {})  # fmt: skip
     if sec := p.auth.value.get("secured"):
         from tp.core import review
@@ -669,6 +814,28 @@ class Reach:
         return None  # the exec allow-list is stage D (D7)
 
 
+class ExternalReach(Reach):
+    live = True  # a system the platform doesn't own: gate K and the ceiling read this (E7, E8)
+
+    def provision(self, variant: str = "reference", expect: str | None = None) -> dict:
+        if variant != "reference":
+            raise BlackboxError(f"external reach can't deploy {variant}: redeploy the system "
+                                "yourself, then retest with after=reference")  # fmt: skip
+        return self.stack.up()
+
+
+class SafeMode:
+    """Safety for external reach, platform side (E1): reads, and deletes of items runs created.
+    The runner's requests are checked by the proxy's fuller policy (platform_rt.proxy)."""
+
+    def __init__(self, stack: ExternalStack):
+        self.stack = stack
+
+    def allow(self, method: str, path: str, target_id: str | None = None) -> bool:
+        m = method.upper()
+        return m in READS or (m == "DELETE" and path in self.stack.owned())
+
+
 class Spec:
     def __init__(self, stack: Stack):
         self.stack = stack
@@ -749,7 +916,8 @@ class Checks:
         return self.stack.pytest(tests, out, variant, **kw)
 
 
-IMPLS = {("reach", "container"): Reach, ("spec", "served"): Spec, ("spec", "repo_file"): Spec,
+IMPLS = {("reach", "container"): Reach, ("reach", "external"): ExternalReach,
+         ("safety", "safe_mode"): SafeMode, ("spec", "served"): Spec, ("spec", "repo_file"): Spec,
          ("data", "spec_derived"): SpecDerivedData, ("state", "namespace"): NamespaceState,
          ("mutation", "none"): NoMutation, ("checks", "pytest_cases"): Checks}  # fmt: skip
 
@@ -758,7 +926,9 @@ _STACKS: dict[str, Stack] = {}  # one per profile slug per process, shared by it
 
 
 def strategy(concern: str, name: str, p: TargetProfile):
-    stack = _STACKS.setdefault(p.slug, Stack(p))
+    stack = _STACKS.setdefault(
+        p.slug, (ExternalStack if p.reach.strategy == "external" else Stack)(p)
+    )
     if concern == "auth":
         return make_auth(p, stack)
     return IMPLS[(concern, name)](stack)
