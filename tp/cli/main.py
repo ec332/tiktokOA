@@ -7,6 +7,7 @@ from typing import Annotated
 import typer
 
 from tp.cli import sut as sut_cli
+from tp.cli import watch as watch_cli
 from tp.core import artifacts, contract, review, runner
 
 app = typer.Typer(no_args_is_help=True)
@@ -17,6 +18,8 @@ app.add_typer(stage_app, name="stage")
 app.add_typer(review_app, name="review")
 app.add_typer(artifact_app, name="artifact")
 app.add_typer(sut_cli.app, name="sut")
+app.command("scan")(watch_cli.scan_cmd)  # autonomy/001 F9
+app.command("watch")(watch_cli.watch_cmd)
 contract.load()
 for _name, _cli in contract.CLIS.items():
     app.add_typer(_cli, name=_name)
@@ -74,6 +77,9 @@ def run(
     replay: Annotated[bool, typer.Option(help="LLM calls from llm_cache/ only")] = False,
     mode: Annotated[str, typer.Option(help="live | record | replay")] = "live",
     unattended: Annotated[bool, typer.Option(help="Apply default review decisions")] = False,
+    focused: Annotated[
+        bool, typer.Option(help="Wait only at Clarify and Sign-off (--no-focused: every review)")
+    ] = True,
     story: Annotated[Path | None, typer.Option(help="A full user story (markdown file)")] = None,
     brief: Annotated[str | None, typer.Option(help="A vague feature description")] = None,
     flows: Annotated[str | None, typer.Option(help="Cases scope, e.g. FLOW-items-crud,…")] = None,
@@ -106,6 +112,8 @@ def run(
         )
         inputs["requirements"] = artifacts.put("requirements", req).id
     options = _options(flows, fresh, opt) | ({"profile": target} if target else {})
+    if focused:
+        options["stops"] = review.FOCUSED_STOPS
     run_id = runner.start_run(_mode(mode, replay), stub, unattended, inputs, options)
     result = runner.advance(run_id)
     _print_run(result)
