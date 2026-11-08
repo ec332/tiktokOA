@@ -206,7 +206,12 @@ class CasesStage:
                 u = build.build_unit(c, old["flow"], kind, r, state["attention"], siblings)
                 if u is None:
                     continue
-                u |= {"score": old["score"], "priority": old["priority"], "quality": "revised"}
+                u |= {
+                    "score": old["score"],
+                    "score_parts": old.get("score_parts", {}),
+                    "priority": old["priority"],
+                    "quality": "revised",
+                }
                 u["id"] = old["id"]
                 build.assign_point_ids(u)
                 state["units"][state["units"].index(old)] = u
@@ -237,6 +242,10 @@ class CasesStage:
             "round": state["round"],
             "scope": state.get("scope"),
         }  # fmt: skip
+        if plan := getattr(
+            getattr(ctx, "strategies", None) and ctx.strategies.safety, "plan", None
+        ):
+            payload["planned_writes"] = plan(ctx.strategies.spec.openapi())  # autonomy/001 F8
         return StageResult.awaiting_review([ctx.review.create("signoff", payload)])
 
     def _finish(self, ctx, state, path, signed: bool) -> StageResult:
@@ -250,7 +259,8 @@ class CasesStage:
                    "carried_forward": sorted(state["carried"])}  # fmt: skip
         body = {k: state[k] for k in ("spec", "sut", "flows", "minimum", "deferred", "attention",
                                       "not_tested")}  # fmt: skip
-        body |= {"cases": [{k: v for k, v in u.items() if k != "score"} for u in state["units"]],
+        body |= {"cases": [{k: v for k, v in u.items() if k not in ("score", "score_parts")}
+                           for u in state["units"]],
                  "signoff": signoff}  # fmt: skip
         path.unlink(missing_ok=True)
         ctx.emit("cases_signed" if signed else "cases_unsigned", hash=signoff["hash"],

@@ -236,7 +236,7 @@ def rank(units: list[dict], criteria: dict[str, dict], findings: list[dict],
             "rule_interaction": u["ac"] in interacting,
             "acceptance": u["technique"] == "acceptance",
         })  # fmt: skip
-        u["score"], u["priority"] = s["score"], s["priority"]
+        u["score"], u["score_parts"], u["priority"] = s["score"], s["parts"], s["priority"]
     order = {t: i for i, t in enumerate(TECHNIQUE_ORDER)}
     units.sort(key=lambda u: (-u["score"], order[u["technique"]], u["ac"]))
 
@@ -291,12 +291,14 @@ def line(u: dict) -> dict:
         exp = f"{len(u['rows'])} rows"
     else:
         exp = f"{u['expected']['value']} [{u['expected']['oracle']}]"
-    body = {k: v for k, v in u.items() if k not in ("score",)}
+    body = {k: v for k, v in u.items() if k not in ("score", "score_parts")}
     text = f"{u['priority']} {u['technique']}: {u['purpose']} → {exp}. Catches: {u['defect_hypothesis']}"
     # title + one sentence for the approve list (M8 cases D15); the hash covers the whole unit
+    # score: shown at Sign-off, not hashed (autonomy/001 F7)
     return {"id": u["id"], "text": text, "flow": u["flow"], "hash": sha256(body),
             "title": u["purpose"], "summary": u["defect_hypothesis"], "ac": u["ac"],
-            "technique": u["technique"], "priority": u["priority"]}  # fmt: skip
+            "technique": u["technique"], "priority": u["priority"],
+            "score": {"score": u.get("score"), "parts": u.get("score_parts", {})}}  # fmt: skip
 
 
 # ---- product-owner decisions (cases/012) -------------------------------------------------

@@ -5,7 +5,12 @@ import { resolveItem } from "../../flow/resolve";
 
 /** Stop 2 of the happy path (M8 cases D16): tick the tests to generate; title + one sentence.
  *  Grouped by priority, then requirement; P2 starts collapsed (cases/010 P2'). */
-type Line = { id: string; title?: string; summary?: string; ac?: string; text: string; priority?: string };
+type Line = { id: string; title?: string; summary?: string; ac?: string; text: string; priority?: string;
+  score?: { score: number; parts: Record<string, number> } };
+type PlannedWrite = { op: string; verdict: "create" | "own_items" | "blocked"; rule: string };
+/** Why a line is pre-selected at its priority (autonomy/001 F7): "score 12 = suspected defect 7 + …". */
+const breakdown = (s?: Line["score"]) => s && Object.keys(s.parts).length
+  ? `score ${s.score} = ${Object.entries(s.parts).map(([k, v]) => `${k.replace(/_/g, " ")} ${v}`).join(" + ")}` : "";
 
 const PRIORITY_LABEL: Record<string, string> = {
   P0: "P0 · likely defects", P1: "P1 · the feature", P2: "P2 · other checks",
@@ -31,6 +36,7 @@ export function Approve({ item, criteria, onDone }: { item: ReviewItem; criteria
     setOff(s);
   };
   const notes = (item.payload.attention as string[] | undefined) ?? [];
+  const writes = (item.payload.planned_writes as PlannedWrite[] | undefined) ?? [];
   // a test that contradicts one of your answers is never buried in the notes (cases/012 D2)
   const conflicts = notes.filter((a) => a.includes("but you decided"));
   const attention = notes.filter((a) => !conflicts.includes(a));
@@ -46,6 +52,17 @@ export function Approve({ item, criteria, onDone }: { item: ReviewItem; criteria
         <details style={{ marginBottom: 8 }}>
           <summary className="warn" style={{ cursor: "pointer", fontSize: 13 }}>{attention.length} note{attention.length === 1 ? "" : "s"} from the test design check</summary>
           <ul style={{ fontSize: 13, margin: "4px 0" }}>{attention.map((a, i) => <li key={i}>{a}</li>)}</ul>
+        </details>
+      )}
+      {writes.length > 0 && (
+        <details style={{ marginBottom: 8 }}>
+          <summary style={{ cursor: "pointer", fontSize: 13 }}>
+            <strong>Planned writes on the live system</strong>{" "}
+            <span className="muted">{writes.filter((w) => w.verdict !== "blocked").length} allowed, {writes.filter((w) => w.verdict === "blocked").length} blocked by safe mode</span>
+          </summary>
+          <ul style={{ fontSize: 13, margin: "4px 0" }}>{writes.map((w) => (
+            <li key={w.op}><span className="mono">{w.op}</span>: <span className={w.verdict === "blocked" ? "warn" : ""}>{w.rule}</span></li>
+          ))}</ul>
         </details>
       )}
       {[...byPriority.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([p, ls]) => {
@@ -68,7 +85,8 @@ export function Approve({ item, criteria, onDone }: { item: ReviewItem; criteria
                 {gl.map((l) => (
                   <label key={l.id} className="tline">
                     <input type="checkbox" checked={!off.has(l.id)} onChange={() => toggle([l.id], off.has(l.id))} />
-                    <span><span className="t">{l.title ?? l.text}</span>{l.summary && <span className="s"> — catches {l.summary}</span>}</span>
+                    <span><span className="t">{l.title ?? l.text}</span>{l.summary && <span className="s"> — catches {l.summary}</span>}
+                      {breakdown(l.score) && <span className="muted" style={{ fontSize: 12 }}> · {breakdown(l.score)}</span>}</span>
                   </label>
                 ))}
               </div>
