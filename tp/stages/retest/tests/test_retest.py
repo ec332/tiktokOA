@@ -173,3 +173,31 @@ def test_a_defect_not_reproduced_in_the_failing_run_proves_nothing(cases):
     r = run(env, "fixed:fix-pagination", cases=cases)
     assert r["verdict"] == "INCONCLUSIVE" and not r["reproduced"] and not r["closed"]
     assert env.ups == []
+
+
+def test_auto_mode_retests_every_real_defect_whose_suggested_fix_applies():  # autonomy/001 F3
+    art = lambda body: NS(body=body, id="sha256:x")
+    gate = {"rows": [{"node": n, "case_id": n.split("[")[1][:-1], "status": "ADMITTED"}
+                     for n in (DEF, OK, PRE)]}  # fmt: skip
+    real = {"id": "D-reference/O-6", "variant": "reference", "ac": "O-6", "kind": "real",
+            "class": "PRODUCT_DEFECT", "cases": ["TC-D"],
+            "suggestion": {"applies": True, "patch": "--- a/x\n+++ b/x\n"}}  # fmt: skip
+    skipped = [real | {"id": "no-fix", "suggestion": {"applies": False}},
+               real | {"id": "spec", "class": "SPEC_MISMATCH"},
+               real | {"id": "seeded", "kind": "seeded"}]  # fmt: skip
+    # two applying fixes in one execution: its run folder is write-once (bug seen live, r-0037)
+    other = real | {"id": "D-reference/O-7", "suggestion": {"applies": True, "patch": "--- a/y\n"}}
+    env = FakeEnv()
+    inputs = {"run_records": art(failing_run()),
+              "triage": art({"defects": [real, other, *skipped]}),
+              "bound_tests": art(bound()), "gate_report": art(gate),
+              "run_options": art({"stops": ["signoff"]})}  # fmt: skip
+    ctx = NS(env=env, strategies=from_service(env), emit=lambda *a, **kw: None,
+             review=NS(execution_id=2))  # fmt: skip
+    res = RetestStage().run(ctx, inputs)
+    assert res.status == "succeeded", res.reason
+    r, r2 = res.outputs["retest"]["retests"]
+    assert r["defect"] == "D-reference/O-6" and r["verdict"] == "FIXED_CONFIRMED"
+    assert r2["defect"] == "D-reference/O-7" and r2["verdict"] == "FIXED_CONFIRMED"
+    assert r["after"]["variant"] == f"fixed:{r['fix_patch']}"
+    assert artifacts.get(r["fix_patch"]).body["patch"] == real["suggestion"]["patch"]
