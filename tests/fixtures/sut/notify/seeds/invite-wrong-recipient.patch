@@ -1,0 +1,11 @@
+--- a/app.py	2026-11-08 23:31:09
++++ b/app.py	2026-11-08 23:31:09
+@@ -145,7 +145,7 @@
+     if not (host := os.environ.get("SMTP_HOST")):
+         return 503, {"error": "email is not configured"}
+     msg = EmailMessage()
+-    msg["From"], msg["To"] = f"{sender}@notify.invalid", email
++    msg["From"], msg["To"] = f"{sender}@notify.invalid", f"{sender}@notify.invalid"  # SEEDED
+     msg["Subject"] = f"{sender} invited you to notify"
+     msg.set_content(f"{sender} invited you to keep notes on notify.")
+     try:

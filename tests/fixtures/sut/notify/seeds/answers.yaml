@@ -1,0 +1,8 @@
+# Known answers for the notify fixture (W0 C10, DR-8). SYNTHETIC: the clean app passes every new
+# check, and each seed is a labelled, deliberate defect that exactly the named check must catch.
+clean: []
+seeds:
+  webhook-drops-body: [dependency_called]          # P6: the note never reaches NOTIFY_URL
+  webhook-blocks: [dependency_failure_handled]     # P6: a slow receiver holds up note creation
+  invite-wrong-recipient: [dependency_called]      # P6: the invite email goes to the sender
+  page-error: [ui_flow]                            # P7: an uncaught page error, so UI_ERROR

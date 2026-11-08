@@ -1,0 +1,10 @@
+--- a/app.py	2026-11-08 23:31:09
++++ b/app.py	2026-11-08 23:31:09
+@@ -118,6 +118,7 @@
+   $("status").textContent = s === 201 ? "Saved" : "Not saved";
+   $("text").value = ""; await refresh();
+ });
++$("compose").addEventListener("submit", () => window.notes.render());  // SEEDED DEFECT
+ </script></body></html>"""
+ 
+ 

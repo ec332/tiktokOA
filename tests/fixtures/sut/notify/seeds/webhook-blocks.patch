@@ -1,0 +1,16 @@
+--- a/app.py	2026-11-08 23:31:09
++++ b/app.py	2026-11-08 23:31:09
+@@ -132,11 +132,11 @@
+         req = urllib.request.Request(url, data=json.dumps(payload).encode(), method="POST",
+                                      headers={"Content-Type": JSON})  # fmt: skip
+         try:
+-            urllib.request.urlopen(req, timeout=2).close()
++            urllib.request.urlopen(req).close()  # SEEDED DEFECT: no timeout
+         except OSError as e:
+             print(f"notify: {url}: {e}", file=sys.stderr, flush=True)
+ 
+-    threading.Thread(target=send, daemon=True).start()
++    send()  # SEEDED DEFECT (synthetic fixture): sent inline, holding up the request
+ 
+ 
+ def invite(sender: str, email: str) -> tuple[int, dict]:

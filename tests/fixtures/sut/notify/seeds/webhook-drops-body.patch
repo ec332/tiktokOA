@@ -1,0 +1,11 @@
+--- a/app.py	2026-11-08 23:31:09
++++ b/app.py	2026-11-08 23:31:09
+@@ -126,7 +126,7 @@
+     receiver never holds up the request that created the note."""
+     if not (url := os.environ.get("NOTIFY_URL")):
+         return
+-    payload = {"event": "note.created", "note": note}
++    payload = {}  # SEEDED DEFECT (synthetic fixture): the note is never sent
+ 
+     def send():
+         req = urllib.request.Request(url, data=json.dumps(payload).encode(), method="POST",
