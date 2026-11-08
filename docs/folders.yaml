@@ -65,7 +65,6 @@ folders:
   - {path: web/src/panels/deliver, owner: deliver, milestone: I2}
   # Iteration 3 (I3): parallel components (docs/status/contracts/001). Code in an existing stage's
   # folder keeps that owner, and its commits carry that owner's tag; these are the new paths.
-  - {path: tp/core/labels.py, owner: contracts, milestone: I3}  # W0, C2
   - {path: platform_rt/platform_rt/collect.py, owner: contracts, milestone: I3}  # W0, C3
   - {path: tests/fixtures/sut, owner: contracts, milestone: I3}  # W0, C10 (the notify fixture)
   - {path: tests/test_contracts.py, owner: contracts, milestone: I3}
