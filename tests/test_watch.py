@@ -2,6 +2,9 @@
 
 import subprocess
 
+import pytest
+import typer
+
 from tp.cli import watch
 
 
@@ -33,6 +36,12 @@ def test_a_new_head_on_the_fork_starts_one_scan(tmp_path):
     second = watch.tick(state, str(repo), "feature", started.append)
     assert started == [first, second] and second != first
     assert git("rev-parse", "feature", cwd=repo).strip() == second  # fetched before the Scan
+    git("checkout", "-q", "feature", cwd=repo)  # the branch checked out: refused, nothing started
+    git("commit", "-q", "--allow-empty", "-m", "three", cwd=dev)
+    git("push", "-q", "origin", "HEAD:feature", cwd=dev)
+    with pytest.raises(typer.BadParameter, match="checkout --detach"):
+        watch.tick(state, str(repo), "feature", started.append)
+    assert started == [first, second]
 
 
 def test_every_parses_seconds_minutes_hours():

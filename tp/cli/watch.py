@@ -64,6 +64,11 @@ def tick(state: Path, repo: str, branch: str, start) -> str | None:
     if head == seen:
         return None
     # shortcut: the watched branch must not be checked out in `repo` (fetch can't move it then)
+    current = subprocess.run(["git", "-C", repo, "symbolic-ref", "-q", "--short", "HEAD"],
+                             capture_output=True, text=True, check=False).stdout.strip()  # fmt: skip
+    if current == branch:
+        raise typer.BadParameter(f"{branch} is checked out in {repo}, so a fetch can't move it: "
+                                 f"run `git -C {repo} checkout --detach`")  # fmt: skip
     _git(repo, "fetch", "-q", "origin", f"+refs/heads/{branch}:refs/heads/{branch}")
     start(head)
     state.parent.mkdir(parents=True, exist_ok=True)
