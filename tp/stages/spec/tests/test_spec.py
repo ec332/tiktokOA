@@ -321,6 +321,37 @@ def test_brief_path_and_rejecting_observed_behaviour_asks_what_should_happen(mod
     assert o2["status"] == "assumed" and o2["review_needed"]
 
 
+def test_a_round_2_question_an_earlier_answer_settles_is_assumed_not_asked(model, monkeypatch):
+    seen = []
+
+    def writer(prompt, model_, params):  # scripted: settles any question once something is decided
+        if params["schema"] != ai.WRITER_SCHEMA:
+            return fake_model(prompt, model_, params)
+        done = json.loads(prompt.split("<decided>")[1].split("</decided>")[0])
+        seen.append(done)
+        body, usage = fake_model(prompt, model_, params)
+        out = json.loads(body)
+        for q in out["questions"]:
+            q["settled_by"] = done[0]["key"] if done else ""
+        return json.dumps(out), usage
+
+    monkeypatch.setattr(llm, "anthropic_provider", writer)
+    run_id = _start(text="Test paging through items.", kind="brief")
+    co = next(i for i in review.list_(status="open") if i["kind"] == "confirm_observed")
+    for item in review.list_(status="open"):
+        review.resolve(item["id"], "reject" if item["id"] == co["id"] else "defer", "po")
+    runner.resume(co["id"])
+    assert not [i for i in review.list_(status="open") if i["kind"] == "question"]  # not asked
+    assert seen[0] == [] and seen[-1]  # round 1 saw no decisions, round 2 saw round 1's
+    ex, spec = _spec(run_id)
+    assert ex["status"] == "succeeded", ex["reason"]
+    settled = [d for d in spec["decisions"] if d.get("settled_by")]
+    assert len(settled) == 1 and settled[0]["assumed"]
+    assert settled[0]["settled_by"] in {d["key"] for d in spec["decisions"]} - {settled[0]["key"]}
+    o2 = next(c for c in spec["criteria"] if c["id"] == "O-2")
+    assert o2["status"] == "assumed" and o2["review_needed"]  # flagged for a human to check
+
+
 def test_questions_filter_caps_and_requires_two_options():
     crit = {"C-1": {"id": "C-1", "title": "t", "given": "g", "when": "w", "then": "x",
                     "status": "draft"}}  # fmt: skip

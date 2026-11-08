@@ -183,10 +183,20 @@ class SpecStage:
                                        "answer": q["answer"]["text"], "assumed": False,
                                        "reused": True})  # fmt: skip
             ctx.emit("spec_answer_reused", key=q["key"], from_item=q["answer"]["item"])
-        written = ai.write_questions(ctx.llm, asked) if asked else []
+        decided = {d["key"]: d for d in state["decisions"]}
+        written = ai.write_questions(ctx.llm, asked, list(decided.values())) if asked else []
         state["pending"] = []
         for q in questions.phrase(written, asked):
             state["asked"].append(q["key"])
+            if q["settled_by"] in decided:  # an earlier answer settles it: assume, don't ask
+                text = next(c["text"] for c in q["choices"] if c["id"] == q["recommended"]) \
+                    if q["recommended"] else questions.HUMAN  # fmt: skip
+                if ch := questions.apply_answer(crit.get(q.get("criterion", "")), q, text, True):
+                    state["history"].append({"version": state["version"], "changes": [ch]})
+                state["decisions"].append({"key": q["key"], "about": q["about"], "answer": text,
+                                           "assumed": True, "settled_by": q["settled_by"]})  # fmt: skip
+                ctx.emit("spec_question_settled", key=q["key"], by=q["settled_by"])
+                continue
             payload = {k: q[k] for k in ("key", "criterion", "kind", "about", "changes", "text",
                                          "choices", "recommended")}  # fmt: skip
             payload |= {"round": state["round"], "scope": scope}

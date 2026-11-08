@@ -95,13 +95,16 @@ def phrase(written: list[dict], asked: list[dict]) -> list[dict]:
         ids = [c.get("id") for c in w.get("choices", [])] if w else []
         if w and len(ids) >= 2 and len(set(ids)) == len(ids) and w.get("recommended") in ids:
             choices, rec, text = w["choices"], w["recommended"], w["text"]
+            settled = w.get("settled_by") or ""
         else:
+            settled = ""
             choices = [{"id": chr(97 + i), "text": o} for i, o in enumerate(q["options"][:4])]
             rec, text = None, f"{q['why']} ({q['about']})"
         # never pre-select a non-answer (spec/011 H2): first real choice, else none
         real = [ch["id"] for ch in choices if ch.get("text") not in (HUMAN, OUT_OF_SCOPE)]
         rec = rec if rec in real else (real[0] if real else None)
-        out.append({**q, "text": text, "choices": choices, "recommended": rec})
+        out.append({**q, "text": text, "choices": choices, "recommended": rec,
+                    "settled_by": settled})  # fmt: skip
     return out
 
 

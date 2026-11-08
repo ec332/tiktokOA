@@ -111,6 +111,7 @@ WRITER_SCHEMA = _obj(
                     "text": STR,
                     "choices": {"type": "array", "items": _obj({"id": STR, "text": STR})},
                     "recommended": STR,
+                    "settled_by": STR,
                 }
             ),
         }
@@ -178,8 +179,12 @@ def investigate(llm, kind: str, requirements: str, criteria, index, source, flag
     return _call(llm, p, INVESTIGATE_MODEL, INVESTIGATE_SCHEMA, INVESTIGATE_EFFORT, 32000)
 
 
-def write_questions(llm, questions: list[dict]) -> list[dict]:
+def write_questions(llm, questions: list[dict], decided: list[dict] | None = None) -> list[dict]:
+    """decided: this run's answers so far ({key, about, answer}); the writer keeps its
+    recommendations consistent with them and marks questions they already settle (demo/006)."""
     view = [{k: q[k] for k in ("key", "about", "why", "options", "criterion_text")}
             for q in questions]  # fmt: skip
-    p = _prompt("question_writer", QUESTIONS=json.dumps(view, indent=1))
+    done = [{k: d[k] for k in ("key", "about", "answer")} for d in decided or []]
+    p = _prompt("question_writer", QUESTIONS=json.dumps(view, indent=1),
+                DECIDED=json.dumps(done, indent=1))  # fmt: skip
     return _call(llm, p, WRITER_MODEL, WRITER_SCHEMA, "low")["questions"]
