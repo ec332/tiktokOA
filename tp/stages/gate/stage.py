@@ -26,6 +26,16 @@ def _node_args(nodes) -> list[str]:
     return ["/work/tests/" + n for n in sorted(nodes)]
 
 
+LIVE_K = 3  # stability runs on a system the platform doesn't own: fewer writes (external/001 E7)
+
+
+def settings(ctx, opts: dict) -> dict:
+    out = decide.settings(opts)
+    if getattr(ctx.strategies.reach, "live", False) and "k" not in (opts.get("gate") or {}):
+        out["k"] = LIVE_K
+    return out
+
+
 class GateStage:
     name = "gate"
     version = f"1.1.0+p{ai.version_hash()}"  # 1.1: handler mutants (K8)
@@ -54,7 +64,7 @@ class GateStage:
                     "criteria": {c["id"]: {k: c.get(k) for k in ("status", "human_judgement")}
                                  for c in spec["criteria"]},
                     "signed": bool(cases.get("signoff", {}).get("signed")),
-                    "refs": decide.code_refs(spec), "settings": decide.settings(opts),
+                    "refs": decide.code_refs(spec), "settings": settings(ctx, opts),
                     "in_scope": sorted({c["ac"] for c in cases.get("cases", [])})}  # fmt: skip
         if opts.get("admit", "v2") == "v1":
             return self._v1(ctx, work, ctx_info)
