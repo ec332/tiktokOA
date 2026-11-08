@@ -7,7 +7,7 @@ Anything the rules leave open is INSUFFICIENT_EVIDENCE (the AI judge is M7)."""
 import re
 import uuid
 
-PRODUCT_SIDE = {"PRODUCT_ERROR", "ASSERTION", "CONTRACT"}
+PRODUCT_SIDE = {"PRODUCT_ERROR", "ASSERTION", "CONTRACT", "UI_ERROR"}  # UI_ERROR: W0 C7
 TEST_SIDE = {"BINDING", "CONFORMANCE", "PLATFORM"}
 CLASSES = ("ENV", "DATA", "FLAKY_TEST", "INTERMITTENT_PRODUCT", "TEST_DEFECT", "SPEC_MISMATCH",
            "SPEC_GAP", "PRODUCT_DEFECT", "INSUFFICIENT_EVIDENCE")  # fmt: skip
@@ -16,9 +16,19 @@ MALFORMED = ("the test sent a path value its spec's parameter schema refuses ({}
              "server refused it")  # fmt: skip
 
 
+def _origin(row: dict) -> str | None:
+    """Under an injected dependency fault (W0 C7), a timeout talking to the SUT is the SUT failing
+    to absorb the fault we injected on purpose: the product's side, not the environment's."""
+    return "PRODUCT_ERROR" if row.get("origin") == "ENV" and row.get("fault") else row.get("origin")
+
+
 def _origins(vd: dict, rows: dict) -> set:
-    return {rows[a].get("origin") for a in vd["attempts"]
+    return {_origin(rows[a]) for a in vd["attempts"]
             if a in rows and rows[a].get("outcome") not in (None, "passed")}  # fmt: skip
+
+
+def _faulted(vd: dict, rows: dict) -> bool:
+    return any(rows[a].get("fault") for a in vd["attempts"] if a in rows)
 
 
 def under_test(row: dict) -> dict | None:
@@ -48,7 +58,8 @@ def classify(vd: dict, ref: dict | None, rows: dict) -> tuple[str, str]:
         return "ENV", "a failing attempt's origin is ENV"
     if "DATA" in origins:
         return "DATA", "a failing attempt's origin is DATA (setup/factory)"
-    if (statuses := _statuses(vd, rows)) and statuses <= INFRA:
+    # a gateway status under an injected fault is the SUT's answer to it, not the environment (C7)
+    if not _faulted(vd, rows) and (statuses := _statuses(vd, rows)) and statuses <= INFRA:
         return "ENV", f"the target answered {sorted(statuses)}: rate limited or a gateway error"
     if v == "INTERMITTENT":
         if origins and origins <= TEST_SIDE:
