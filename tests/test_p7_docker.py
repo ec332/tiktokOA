@@ -23,7 +23,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from tp.stages.discover import ui_flows
+from tp.stages.discover import dependencies, ui_flows
 from tp.stages.discover.discovery import Probes
 from tp.stages.gate import decide
 from tp.stages.generate import image
@@ -149,6 +149,8 @@ class Llm:
 def discover(app: App, monkeypatch) -> types.SimpleNamespace:
     monkeypatch.setattr(gen_ui, "build_image", lambda: {"digest": BROWSER})
     monkeypatch.setattr(ui_flows.secrets, "get", lambda slug, name: PW)
+    # the App is one container started fresh per fixture: already the state `restart` gives
+    monkeypatch.setattr(dependencies, "restart", lambda d: None)
     d = types.SimpleNamespace(llm=Llm(), probes=Probes(), slug="notify", prov={}, emitted=[],
                               spec=app.http("GET", "/openapi.json")[1],
                               cfg={"model": "claude-haiku-5-5", "admin_user": "tpadmin"},
