@@ -80,16 +80,20 @@ def brief(raw: dict) -> str:
     return raw["brief"] + (f"\n\nSettled answers (domain pack):{answers}" if answers else "")
 
 
-def onboard(impl: dict) -> str | None:
-    """The implementation's discovered profile folder, discovering it at the pinned ref unless a
-    profile at that commit exists (D8). None when discovery didn't finish."""
+def onboard(impl: dict, pack: str) -> str | None:
+    """The implementation's discovered profile folder, discovering it at the pinned ref with the
+    pack's spec (one spec judges every implementation, DR-5) unless a profile at that commit with
+    that spec exists (D8). None when discovery didn't finish."""
     from tp.stages.discover.stage import files
 
     profile = files(slug(impl))[0]
-    if profile.exists() and yaml.safe_load(profile.read_text()).get("commit_tested") == impl["ref"]:
-        return str(profile.parent)
-    run = runner.advance(runner.start_run(
-        "live", options={"target": f"{impl['repo']}@{impl['ref']}"}, pipeline=["discover"]))  # fmt: skip
+    if profile.exists():
+        p = yaml.safe_load(profile.read_text())
+        if p.get("commit_tested") == impl["ref"] and p["spec"]["value"].get("strategy") == "pack_file" \
+                and p["spec"]["value"]["openapi"].startswith(f"{pack}/"):  # fmt: skip
+            return str(profile.parent)
+    opts = {"target": f"{impl['repo']}@{impl['ref']}", "answers": {"spec": f"pack:{pack}"}}
+    run = runner.advance(runner.start_run("live", options=opts, pipeline=["discover"]))
     typer.echo(f"onboard {slug(impl)}: {run['name']} {run['status']}")
     return str(profile.parent) if run["status"] == "succeeded" else None
 
@@ -108,7 +112,7 @@ def run(
         typer.echo("\n".join(f"pack {d.name}: {p}" for p in problems), err=True)
         raise typer.Exit(1)
     impls = select(raw["implementations"], targets)
-    paths = [onboard(i) for i in impls]
+    paths = [onboard(i, d.name) for i in impls]
     if None in paths:
         typer.echo("resolve the discovery reviews (tp review list), then run this again", err=True)
         raise typer.Exit(1)

@@ -199,7 +199,7 @@ def test_compare_refuses_runs_of_different_tests(data):
 def test_pack_run_onboards_runs_the_first_then_transfers_to_the_rest(data, monkeypatch):
     paths = {"aspnetcore-realworld-example-app": _target(data, "a"),
              "express-bookshelf-realworld-example-app": _target(data, "b")}  # fmt: skip
-    monkeypatch.setattr(pack_cli, "onboard", lambda impl: paths[pack_cli.slug(impl)])
+    monkeypatch.setattr(pack_cli, "onboard", lambda impl, pack: paths[pack_cli.slug(impl)])
     started, transferred = [], []
     real_start = runner.start_run
 

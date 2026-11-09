@@ -441,3 +441,57 @@ def test_a_ref_request_body_gives_login_candidates_and_a_create_body():
     assert set(example(spec, body_schema(spec, create)[0], 1)["article"]) == {
         "title", "description", "body"}  # fmt: skip
     assert "article" in json_schema(spec, create)["properties"]
+
+
+def test_a_pack_spec_answer_wins_over_the_apps_own_served_spec():
+    """aspnetcore serves its own spec: the pack's must judge it all the same (integration/006)."""
+    from tp.stages.discover import discovery
+
+    d = discovery.Discovery("https://example.invalid/x/y", "v1", None, discovery.Probes(),
+                            answers={"spec": "pack:realworld"})  # fmt: skip
+    d.conventions = lambda kind: {"spec_path": ["/swagger/v1/swagger.json"]}.get(kind, [])
+    d.values, d.new_stack, seen = {"reach": {}}, lambda: None, []
+
+    class S:
+        def http(self, m, path, **kw):
+            seen.append(path)
+            return (200, {"articles": []}) if path == "/api/articles" else (404, {})
+
+    d.stack = S()
+    d.step_spec()
+    assert d.values["spec"]["strategy"] == "pack_file" and "/swagger/v1/swagger.json" not in seen
+
+
+def test_pack_onboarding_pins_the_pack_spec_and_rediscovers_a_served_profile(data, monkeypatch):
+    import yaml
+
+    from tp.cli import pack as pack_cli
+    from tp.stages.discover.stage import files
+
+    impl = {"repo": "https://github.com/o/app", "ref": "a" * 40}
+    started = []
+    monkeypatch.setattr(pack_cli.runner, "start_run", lambda *a, **kw: started.append(kw) or 1)
+    monkeypatch.setattr(
+        pack_cli.runner, "advance", lambda r: {"name": "r-0001", "status": "failed"}
+    )
+    prof = files(pack_cli.slug(impl))[0]
+    prof.parent.mkdir(parents=True)
+    prof.write_text(yaml.safe_dump({"commit_tested": "a" * 40, "spec": {"value": {
+        "strategy": "served", "openapi": "/swagger/v1/swagger.json"}}}))  # fmt: skip
+    assert pack_cli.onboard(impl, "realworld") is None  # served: discovered again, with the pack
+    assert started[0]["options"]["answers"] == {"spec": "pack:realworld"}
+    prof.write_text(yaml.safe_dump({"commit_tested": "a" * 40, "spec": {"value": {
+        "strategy": "pack_file", "openapi": "realworld/spec/openapi.yml"}}}))  # fmt: skip
+    assert pack_cli.onboard(impl, "realworld") == str(prof.parent) and len(started) == 1
+
+
+def test_a_failed_attempt_that_met_a_429_is_not_a_definite_result():
+    """express-bookshelf allows 20 auth requests per 15 minutes: its 429s in setup steps were
+    counted as product failures (integration/006)."""
+    from tp.stages.execute.stage import throttled
+
+    hit = {"outcome": "failed", "exchanges": [{"status": 429}, {"status": 401}]}
+    assert throttled(hit)
+    assert not throttled(hit | {"outcome": "passed"})
+    assert not throttled(hit | {"fault": {"mode": "status"}})  # an injected fault's answer (C7)
+    assert not throttled({"outcome": "failed", "exchanges": [{"status": 500}]})
