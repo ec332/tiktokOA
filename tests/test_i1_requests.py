@@ -65,3 +65,57 @@ def test_the_pack_spec_is_the_vendored_one_with_its_base():
     rel, spec = spec_base.pack_spec("realworld")
     assert rel == "realworld/spec/openapi.yml" and "servers" not in spec
     assert discovery.common_base(list(spec["paths"])) == "/api"
+
+
+class _D:
+    """A scripted discovery (K5) for the stand-in helpers: a login answer and a model."""
+
+    def __init__(self, answer=None, src=None):
+        self.values = {"auth": {"login": {"path": "/api/auth/signin", "json": True, "body": {}}}}
+        self.answer, self.src, self.calls, self.emitted = answer, src, [], []
+        self.cfg = {"model": "claude-haiku-5-5"}
+        self.llm = self
+
+    def resolve_body(self, b):
+        return b
+
+    def http(self, method, path, **kw):
+        self.calls.append((method, path))
+        return 1, 200, {"user": {"name": "users/7", "username": "tpadmin"}, "accessToken": "x" * 40}
+
+    def call(self, prompt, **kw):
+        self.prompt = prompt
+        return self.answer
+
+    def emit(self, kind, **kw):
+        self.emitted.append((kind, kw))
+
+
+def test_a_registration_path_is_filled_from_the_principals_own_login_answer():
+    """Memos registers webhooks at POST /api/users/{user}/webhooks (integration/002)."""
+    from tp.stages.discover import dependencies as dep
+
+    got = dep.concrete(_D(), "/api/users/{user}/webhooks")
+    assert got == ["/api/users/7/webhooks", "/api/users/tpadmin/webhooks"]  # running picks one
+    assert dep.concrete(_D(), "/api/hooks") == ["/api/hooks"]  # no parameter: no login call
+
+
+def test_a_refused_registration_asks_the_model_for_the_guard_once(tmp_path):
+    import json
+    import subprocess
+
+    from tp.stages.discover import dependencies as dep
+
+    (tmp_path / "main.go").write_text('viper.SetEnvPrefix("memos")\nflags.StringSlice('
+                                      '"webhook-private-network-allowlist", nil, "")\n')  # fmt: skip
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    answer = json.dumps({"candidates": [{"env": "MEMOS_WEBHOOK_PRIVATE_NETWORK_ALLOWLIST",
+                                         "kind": "http", "quote": "SetEnvPrefix"}]})  # fmt: skip
+    cfg = dep.config()
+    d = _D(answer, tmp_path)
+    refused = [{"via": "spec", "refused": True}]
+    assert dep.guard_names(d, cfg, refused, []) == ["MEMOS_WEBHOOK_PRIVATE_NETWORK_ALLOWLIST"]
+    assert "webhook-private-network-allowlist" in d.prompt  # the model sees the code's lines
+    assert dep.guard_names(d, cfg, refused, ["ALREADY_SET"]) == []  # a guard is set: no call
+    assert dep.guard_names(d, cfg, [{"via": "spec"}], []) == []  # nothing refused: no call
