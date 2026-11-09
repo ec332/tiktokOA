@@ -249,6 +249,13 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
     return out | ({"volumes": volumes} if volumes else {}), refs
 
 
+def _same(svc: dict, built: bool) -> dict:
+    out = {k: v for k, v in svc.items() if k != "labels" and not (built and k == "image")}
+    if built:
+        out["build"] = {k: v for k, v in svc["build"].items() if k != "context"}
+    return out
+
+
 def _runner_image() -> str:
     """`image: runner` (config/dependencies.yaml): the black-box runner with this platform_rt."""
     from tp.stages.generate import image  # lazy: generate builds and publishes it
@@ -633,9 +640,12 @@ class Stack:
                                check=False, capture_output=True, text=True)  # fmt: skip
             images[n] = r.stdout.strip()
         built = sorted(n for n, svc in compose["services"].items() if "build" in svc)
-        # a built service's tag differs per variant by design; `images` and `commit` cover it
-        same = {**compose, "services": {n: {k: v for k, v in svc.items() if k != "image" or n not in built}
-                                        for n, svc in compose["services"].items()}}  # fmt: skip
+        # what differs per variant by design: a built service's tag and source copy (`images`,
+        # `commit` and the patch hashes cover them) and the project label, the only label set
+        same = {
+            **compose,
+            "services": {n: _same(svc, n in built) for n, svc in compose["services"].items()},
+        }
         text = yaml.safe_dump(same, sort_keys=True).replace(str(self.dir), "<env>")
         network = {
             "run": "none: an internal network, reached inbound through a forwarder",
