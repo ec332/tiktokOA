@@ -119,3 +119,30 @@ def test_a_refused_registration_asks_the_model_for_the_guard_once(tmp_path):
     assert "webhook-private-network-allowlist" in d.prompt  # the model sees the code's lines
     assert dep.guard_names(d, cfg, refused, ["ALREADY_SET"]) == []  # a guard is set: no call
     assert dep.guard_names(d, cfg, [{"via": "spec"}], []) == []  # nothing refused: no call
+
+
+def test_an_unnamed_element_and_a_binary_body():
+    """Memos: a rich-text editor with no accessible name, and protobuf over Connect
+    (integration/002). A binary body is never kept, so a password in one can't leak."""
+    import types
+
+    import pytest
+
+    from platform_rt import record, ui
+
+    ok = {
+        "name": "create_memo",
+        "steps": [{"goto": "/"}, {"fill": {"role": "textbox", "value": "x"}}],
+    }
+    assert ui.parse(ok) is ok
+    with pytest.raises(ui.FlowError):
+        ui.parse({"name": "f", "steps": [{"fill": {"role": "textbox", "name": " ", "value": "x"}}]})
+    record.start("f.ui.yaml::f[U:f]", "U:f")
+    body = b"\x0a\x18tp-r1-abc-ui\x12\x09pw-secret"
+    req = types.SimpleNamespace(method="POST", url="http://memos.test/memos.api.MemoService/CreateMemo",
+                                headers={"content-type": "application/proto"}, post_data=body.decode(),
+                                post_data_buffer=body)  # fmt: skip
+    resp = types.SimpleNamespace(request=req, status=200, headers={}, body=lambda: b"")
+    got = ui._http(resp, "tp-r1-abc-ui")
+    assert got["json"] == "<binary, 25 bytes; carries tp-r1-abc-ui>"
+    assert "pw-secret" not in str(got)
