@@ -46,3 +46,22 @@ def test_a_named_target_neither_reads_nor_swaps_the_env(tmp_path, monkeypatch):
     assert build.run_facts(None, str(d))["target"]["slug"] == "other"
     assert runner._pin_target({"profile": str(d)}) == str(d.resolve())
     assert profile.os.environ["TP_TARGET"] == "the-live-run"
+
+
+def test_a_servers_base_the_paths_lack_is_put_in_front_of_them():
+    """RealWorld: `servers` /api, paths /articles; requests go out as the paths say (P4 R2)."""
+    from tp.stages.discover import spec_base
+
+    spec = {"servers": [{"url": "https://api.example.test/api"}], "paths": {"/articles": {}}}
+    assert spec_base.with_base(spec) == {"paths": {"/api/articles": {}}}  # the host is dropped too
+    full = {"servers": [{"url": "/api"}], "paths": {"/api/articles": {}}}
+    assert spec_base.with_base(full) is full  # already there: unchanged
+    assert spec_base.with_base({"paths": {"/a": {}}}) == {"paths": {"/a": {}}}  # no base
+
+
+def test_the_pack_spec_is_the_vendored_one_with_its_base():
+    from tp.stages.discover import discovery, spec_base
+
+    rel, spec = spec_base.pack_spec("realworld")
+    assert rel == "realworld/spec/openapi.yml" and "servers" not in spec
+    assert discovery.common_base(list(spec["paths"])) == "/api"
