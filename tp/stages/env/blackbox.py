@@ -136,6 +136,13 @@ def _env_file(f, compose_dir: Path, root: Path) -> dict[str, str]:
     return {}
 
 
+def _source(v, compose_dir: Path) -> Path | None:
+    """A relative bind source, resolved; None for named volumes and absolute or `~` sources."""
+    src = (v.get("source", "") if v.get("type") == "bind" else "") if isinstance(v, dict) else (
+        v.partition(":")[0] if ":" in v else "")  # fmt: skip
+    return (compose_dir / src).resolve() if src[:1] == "." else None
+
+
 def _bind(src: str, run_dir: Path) -> str:
     dest = run_dir / "binds" / re.sub(r"[^\w.-]+", "_", src.strip("./~")).strip("_")
     dest.mkdir(parents=True, exist_ok=True)
@@ -204,7 +211,10 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
         elif reach.get("image_tag_from") == "ref":
             out["image"] = retag(svc["image"], reach["ref"])
         if "volumes" in svc:
-            out["volumes"] = _volumes(svc["volumes"], run_dir)
+            vols = svc["volumes"]
+            if "build" in svc:  # a dev mount of the build context would hide the built image
+                vols = [v for v in vols if _source(v, compose_dir) != ctx_dir]
+            out["volumes"] = _volumes(vols, run_dir)
         dep = out.get("depends_on")
         if isinstance(dep, dict):
             out["depends_on"] = list(dep)  # health conditions need the dropped `restart` loops
