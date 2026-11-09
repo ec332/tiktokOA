@@ -562,8 +562,13 @@ class Discovery:
             users = sorted((k for k, v in props.items() if USERISH.search(k)
                             and v.get("type") == "string" and not v.get("readOnly")),
                            key=lambda k: (k.lower() != "username", "user" not in k.lower()))  # fmt: skip
+            # an email field gets an address, and a sign-up gets every email field it has
+            # (RealWorld: username plus email; its log-in: email only; integration/002)
+            mail = f"{self.cfg['admin_user']}@example.test"
+            is_mail = lambda k: "email" in k.lower() or props[k].get("format") == "email"
             if users:
-                body[users[0]] = self.cfg["admin_user"]
+                body[users[0]] = mail if is_mail(users[0]) else self.cfg["admin_user"]
+            body |= {k: mail for k in users if is_mail(k) and k not in body}
             for k in s.get("required", []):
                 if k not in body and not props.get(k, {}).get("readOnly"):
                     if (v := example(self.spec, props.get(k, {}), 1)) is None:
@@ -589,8 +594,8 @@ class Discovery:
             if m != "POST" or PARAM.search(path):
                 continue
             schema, enc = body_schema(self.spec, op)
-            if not any(deref(self.spec, v).get("type") == "string"
-                       for v in response_schema(self.spec, op).get("properties", {}).values()):  # fmt: skip
+            resp = response_schema(self.spec, op)
+            if resp and not self._has_string(resp):  # undeclared: running decides (a sign-up)
                 continue
             if body := self.login_body(schema):
                 hit = any(p.search(path + " " + op.get("operationId", "")) for p in pats)
@@ -598,6 +603,14 @@ class Discovery:
                 out.append((path, body, enc, layer))
         rank = {"clarify": 0, "convention": 1, "algorithm": 2}
         return sorted(out, key=lambda c: rank[c[3]])
+
+    def _has_string(self, schema: dict, depth: int = 2) -> bool:
+        """A string field, nested ones too (`{"user": {"token": …}}`, integration/002)."""
+        for v in (schema.get("properties") or {}).values():
+            v = deref(self.spec, v)
+            if v.get("type") == "string" or (depth and self._has_string(v, depth - 1)):
+                return True
+        return False
 
     def prefixes(self) -> list[tuple[str, str]]:
         """Header prefixes to try: conventions, then the spec's own http schemes."""
