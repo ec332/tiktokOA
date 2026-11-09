@@ -378,6 +378,9 @@ class Discovery:
             if admin:
                 env[admin["user"]] = self.cfg["admin_user"]
                 env[admin["password"]] = {"secret": "admin_password"}
+            # values the app reads but its compose doesn't name (integration/002): a setup answer
+            pairs = (p.partition("=") for p in self.answers.get("app_env", "").split())
+            env |= {k: v for k, _, v in pairs}
             if raw:
                 port = str(svc["ports"][0]).rsplit(":", 1)[-1].split("/")[0]
                 reach = {"strategy": "container", "ref": ref, "compose": path, "service": app,
@@ -412,7 +415,11 @@ class Discovery:
                 break
             errors.append(f"{path}: {out['error']}")
         else:
-            raise DiscoveryError("reach", f"no compose file came up: {errors}")
+            raise DiscoveryError(
+                "reach", f"no compose file came up: {errors}", "The app didn't come up (its log "
+                "is in the detail). Does it need environment values its compose file doesn't set? "
+                "Give them as NAME=value pairs, space-separated; they go in the profile, so no "
+                "secrets.", "app_env")  # fmt: skip
         self.app_env = app_env
         self.mark("reach", "ref", "repo", "algorithm", tag_probe)
         for k in ("compose" if "compose" in reach else "build", "service", "port"):
@@ -438,7 +445,8 @@ class Discovery:
             except httpx.HTTPError, bb.BlackboxError:
                 pass
             time.sleep(2)
-        return {"ok": False, "error": "GET / never answered below 500"}
+        log = self.stack.logs()[-300:]  # what a person needs to answer `app_env`
+        return {"ok": False, "error": f"GET / never answered below 500; app log: {log}"}
 
     # ---- spec --------------------------------------------------------------------------------
 
@@ -473,7 +481,7 @@ class Discovery:
         for path, layer in served + [(p, "convention") for p in self.conventions("spec_path")]:
             n, status, body = self.http("GET", path)
             if status == 200 and is_spec(body):
-                self.spec = body
+                self.spec = body = spec_base.with_base(body)
                 base = spec_base.base(body, common_base(list(body["paths"])))  # C6 (P4)
                 self.values["spec"] = {"strategy": "served", "openapi": path, "base": base}
                 self.values["reach"]["health"] = path.split("?")[0]
@@ -484,19 +492,24 @@ class Discovery:
                 self.mark("reach", "health", "probed", "algorithm", n)
                 self.stack = self.new_stack()
                 return
-        files = self.spec_files()
-        layer = "algorithm"
-        if answer and not answer.startswith("/"):
-            files = [(f, d) for f, d in files if f == answer]
-            layer = "clarify"
-        if not files:
-            raise DiscoveryError(
-                "spec", "no served spec at a convention path and no OpenAPI file in the repo",
-                "Where is the OpenAPI spec? Give a served path (e.g. /openapi.json) or a file "
-                "in the repo (e.g. api/openapi.yaml).", "spec")  # fmt: skip
-        rel, self.spec = files[0]
+        if answer.startswith("pack:"):  # a domain pack's vendored spec (domains/002 R3)
+            rel, self.spec = spec_base.pack_spec(answer.removeprefix("pack:"))
+            strategy, layer = "pack_file", "clarify"
+        else:
+            files = self.spec_files()
+            layer = "algorithm"
+            if answer and not answer.startswith("/"):
+                files = [(f, d) for f, d in files if f == answer]
+                layer = "clarify"
+            if not files:
+                raise DiscoveryError(
+                    "spec", "no served spec at a convention path and no OpenAPI file in the repo",
+                    "Where is the OpenAPI spec? Give a served path (e.g. /openapi.json), a file in "
+                    "the repo (e.g. api/openapi.yaml), or a domain pack's (pack:<name>).", "spec")  # fmt: skip
+            rel, self.spec = files[0][0], spec_base.with_base(files[0][1])
+            strategy = "repo_file"
         base = spec_base.base(self.spec, common_base(list(self.spec["paths"])))  # C6 (P4)
-        self.values["spec"] = {"strategy": "repo_file", "openapi": rel, "base": base}
+        self.values["spec"] = {"strategy": strategy, "openapi": rel, "base": base}
         self.mark("spec", "openapi", "clarify" if layer == "clarify" else "repo", layer)
         self.mark("spec", "base", "repo", "algorithm")
         for path, hl in [(p, "convention") for p in self.conventions("health_path")] + [
@@ -874,7 +887,7 @@ class Discovery:
         fingerprint (P5); a served spec comes from the running code and needs no check. The
         samples are the authenticated answers plus anonymous ones that weren't refused: a
         refusal comes before routing, so it can't tell a real route from a missing one (006)."""
-        if self.values["spec"]["strategy"] != "repo_file":
+        if self.values["spec"]["strategy"] not in ("repo_file", "pack_file"):
             return
         base = self.values["spec"]["base"]
         n, status, body = self.http(
