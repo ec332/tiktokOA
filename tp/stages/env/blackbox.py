@@ -216,9 +216,6 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
             if "build" in svc:  # a dev mount of the build context would hide the built image
                 vols = [v for v in vols if _source(v, compose_dir) != ctx_dir]
             out["volumes"] = _volumes(vols, run_dir)
-        dep = out.get("depends_on")
-        if isinstance(dep, dict):
-            out["depends_on"] = list(dep)  # health conditions need the dropped `restart` loops
         out |= {"networks": [RUN_NET], "labels": {"tp.project": run_dir.name},
                 "cpus": cfg["limits"]["cpus"], "mem_limit": cfg["limits"]["mem_limit"]}  # fmt: skip
         services[name] = out
@@ -236,7 +233,9 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
                 "command": [f"TCP-LISTEN:{fwd['port']},fork,reuseaddr", f"TCP:{sname}:{s['port']}"],
                 "ports": [f"127.0.0.1::{fwd['port']}"]}  # fmt: skip
         a = services[app]
-        a["depends_on"] = [*a.get("depends_on", []), sname]
+        dep = a.get("depends_on", [])  # the mapping form keeps its conditions (service_healthy)
+        a["depends_on"] = dep | {sname: {"condition": "service_started"}} if isinstance(dep, dict) \
+            else [*dep, sname]  # fmt: skip
         a["environment"] = a.get("environment", {}) | {
             k: _value(v, refs) for k, v in (s.get("env") or {}).items()}  # fmt: skip
     services[FORWARDER] = {
