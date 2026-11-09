@@ -103,7 +103,7 @@ def _http(resp) -> dict:
         sent = req.post_data
     except Exception:  # noqa: BLE001 — a binary body: not recorded
         sent = None
-    try:  # a server-sent stream (Memos' live refresh) never ends: body() would wait forever
+    try:  # a server-sent stream (a live-refresh feed) never ends: body() would wait forever
         stream = "text/event-stream" in (resp.headers.get("content-type") or "")
         raw = b"" if stream else resp.body()
     except Exception:  # noqa: BLE001 — unavailable after a redirect or once the page moved on
