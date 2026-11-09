@@ -333,3 +333,42 @@ def test_an_id_inside_an_envelope_is_found_and_read_back(tmp_path, monkeypatch):
     _ledger("POST", resp)
     assert json.loads((tmp_path / "ledger.jsonl").read_text())["id"] == "how-to"
     assert dig(created, "article.author.username") == "u" and dig(created, "id") is None
+
+
+def test_a_sign_up_that_answers_once_is_the_bootstrap_and_the_log_in_is_the_login(
+    tmp_path, monkeypatch
+):
+    """RealWorld's POST /api/users answers a token once, then 422: kept as the login, the runner
+    couldn't log in again when the 5-minute token expires (integration/004)."""
+    from tp.stages.discover import discovery
+
+    monkeypatch.setenv("TP_DATA", str(tmp_path))
+    s = {"type": "string"}
+    body = lambda *ks: {"content": {"application/json": {"schema": {"type": "object",
+         "properties": {"user": {"type": "object", "properties": {k: s for k in ks}}}}}}}  # fmt: skip
+    spec = {"paths": {"/api/user": {"get": {}},
+                      "/api/users/login": {"post": {"requestBody": body("email", "password")}},
+                      "/api/users": {"post": {"requestBody": body("username", "email", "password")}}}}  # fmt: skip
+    d = discovery.Discovery("https://example.invalid/x/y", "v1", None, discovery.Probes())
+    d.spec, d.admin = spec, None
+    conv = {"signin_op_pattern": ["login"], "auth_prefix": ["Token"]}
+    d.conventions = lambda kind: conv.get(kind, [])
+    users = set()
+
+    class S:
+        def http(self, m, path, **kw):
+            if m == "GET":
+                ok = kw.get("headers", {}).get("Authorization") == "Token " + "t" * 20
+                return (200, {}) if ok else (401, {})
+            u = kw["json"]["user"]
+            if path == "/api/users":
+                if u["email"] in users:
+                    return 422, {"errors": {"email": ["taken"]}}
+                users.add(u["email"])
+                return 201, {"user": {"token": "t" * 20}}
+            return (200, {"user": {"token": "t" * 20}}) if u["email"] in users else (401, {})
+
+    d.stack = S()
+    d.step_auth()
+    a = d.values["auth"]
+    assert a["login"]["path"] == "/api/users/login" and a["bootstrap"]["path"] == "/api/users"
