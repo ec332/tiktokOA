@@ -15,6 +15,17 @@ from tp.stages.discover import ai
 ROUNDS = 3  # one proposal and at most two repairs (D5)
 WRITES = ("POST", "PUT", "PATCH")
 MAX_READS = 5
+STOP = {
+    "api",
+    "create",
+    "new",
+    "add",
+    "post",
+    "save",
+    "service",
+    "v1",
+    "v2",
+}  # not what a read names
 SCHEMA = {
     "type": "object",
     "properties": {"steps": {"type": "array", "items": {
@@ -117,7 +128,11 @@ def verify(d, steps: list[dict], out: dict) -> tuple[dict | None, str]:
         return None, "the steps ran, but no 2xx write carried the typed value"
     op = _template(d.spec, create["method"], create["path"])
     reads = [p for p, ops in d.spec.get("paths", {}).items() if "get" in ops and "{" not in p]
-    for path in sorted(reads, key=lambda p: p != op)[:MAX_READS]:
+    # the create's own path first, then reads that share a word with it (CreateNote -> /api/notes)
+    words = set(re.findall(r"[a-z]{3,}", re.sub(r"([a-z])([A-Z])", r"\1 \2", op).lower())) - STOP
+    for path in sorted(reads, key=lambda p: (p != op, not any(w in p.lower() for w in words)))[
+        :MAX_READS
+    ]:
         n, status, body = d.http("GET", path, headers=d.auth_headers())
         if status == 200 and unique in json.dumps(body):
             break
