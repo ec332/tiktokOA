@@ -42,6 +42,17 @@ WIRING_PROMPT = (
     "candidates if the code doesn't show one.\n\n{snippets}"
 )
 
+# A refused registration (integration/002): which knob lets the server reach a private host?
+GUARD_PROMPT = (
+    "This server refused to register a webhook whose URL points at a private network host. For "
+    "testing, the webhook goes to a local stand-in on a private network. Which environment "
+    "variable, read at start-up, lists the private hosts webhooks may reach (an allowlist, not a "
+    "switch that turns the protection off)? Give the full variable name the process reads, "
+    "including any prefix the configuration library adds, and quote the line that shows it. "
+    "Return no candidates if the code doesn't show one.\n\n{snippets}"
+)
+IDENT = re.compile(r"(^|_)(id|name|username)$", re.IGNORECASE)
+
 
 def _disc():
     from tp.stages.discover import discovery  # it imports this module: the spec helpers, lazily
@@ -108,7 +119,9 @@ def candidates(d, cfg: dict) -> tuple[list[dict], list[str], list[str]]:
         kind = next((e["kind"] for e in cfg["env"] if re.search(e["pattern"], n)), None)
         if kind and not re.search(cfg["deny"], n):
             cands.append({"kind": kind, "via": "env", "key": n, "layer": "convention"})
-    for m, p, op in _posts(d):
+    for m, p, op in _disc().ops(d.spec):  # a registration may sit under the caller's own path
+        if m != "POST":
+            continue
         props = (_disc().body_schema(d.spec, op)[0] or {}).get("properties") or {}
         for k in props:
             if re.search(cfg["spec_field"], k, re.IGNORECASE):
@@ -164,6 +177,15 @@ def standins(d) -> None:
     d.values["reach"]["standins"] = sts
     restart(d)
     verify(d, cands, sts, cfg)
+    if new := guard_names(d, cfg, cands, guards):  # proposed, then verified like the rest (DR-1)
+        guards += new
+        sts = plan(cands, guards, ports, cfg)
+        d.values["reach"]["standins"] = sts
+        restart(d)
+        verify(d, cands, sts, cfg)
+        if any(c["status"] == "wired" for c in cands):
+            for g in new:
+                d.mark("checks", f"guard {g}", "ai_proposed+verified", "exploration", None)
     wired = {c["key"] for c in cands if c["status"] == "wired"}
     for s in sts:  # an unwired name keeps its own value: only wired ones point at a stand-in
         s["env"] = {k: v for k, v in s["env"].items() if k in wired or k in guards or k in ports}
@@ -247,11 +269,16 @@ def verify(d, cands: list[dict], sts: list[dict], cfg: dict) -> None:
                 c["reason"] = f"no valid body for {c['op']}"
                 continue
             body[c["key"]] = f"http://{_host(http)}:{http['port']}/{c['key'].lower()}"
-            _, status, _ = d.http("POST", c["op"].split(" ", 1)[1], headers=h, json_body=body)
+            status = 0
+            for path in concrete(d, c["op"].split(" ", 1)[1]):
+                _, status, _ = d.http("POST", path, headers=h, json_body=body)
+                if 200 <= status < 300:
+                    break
             if not 200 <= status < 300:
                 c["reason"] = f"registering the stand-in through {c['op']} answered {status}"
+                c["refused"] = 400 <= status < 500 and status not in (401, 403, 404)
                 continue
-            c["setup"] = {"op": c["op"], "body": body}
+            c["setup"] = {"op": f"POST {path}", "body": body}
             setups.add(c["op"])
     skip = setups | set(getattr(d, "public", []))
     tried = 0
@@ -261,6 +288,8 @@ def verify(d, cands: list[dict], sts: list[dict], cfg: dict) -> None:
         ):
             break
         if f"{m} {p}" in skip or p == (d.values["auth"].get("bootstrap") or {}).get("path"):
+            continue
+        if re.search(cfg.get("trigger_deny", "$^"), p):
             continue
         body = _body(d, op, 100 + i)
         if body is None:
@@ -295,3 +324,49 @@ def _await(d, s: dict, before: list, tries: int = 3) -> list:
             time.sleep(0.5)
         after = journal(d, s)
     return after
+
+
+def concrete(d, path: str) -> list[str]:
+    """`path` with its parameters filled from the signed-in principal's own login answer
+    (`users/1` -> `1`), one candidate per value; running picks the one that answers 2xx.
+    shortcut: one value for every parameter, and the run-time principal is assumed to get the
+    same id (the first user of a fresh stack); store the rule, not the path, when that breaks."""
+    if not PARAM.search(path):
+        return [path]
+    login = d.values["auth"].get("login")
+    if not login:
+        return []
+    sent = d.resolve_body(login["body"])
+    _, _, who = d.http("POST", login["path"], **({"json_body": sent} if login.get("json")
+                                                  else {"data": sent}))  # fmt: skip
+    vals = dict.fromkeys(str(v).rsplit("/", 1)[-1] for k, v in _scalars(who) if IDENT.search(k))
+    return [PARAM.sub(v, path) for v in list(vals)[:5] if v]
+
+
+def _scalars(x, key: str = ""):
+    if isinstance(x, dict):
+        for k, v in x.items():
+            yield from _scalars(v, k)
+    elif isinstance(x, list):
+        for v in x:
+            yield from _scalars(v, key)
+    elif isinstance(x, str | int) and not isinstance(x, bool):
+        yield key, x
+
+
+def guard_names(d, cfg: dict, cands: list[dict], guards: list[str]) -> list[str]:
+    """One model call (D5), only when a `via: spec` registration was refused with no guard set:
+    the env names of the server's private-destination allowlist. Only a later wiring counts."""
+    if guards or d.llm is None or not any(c.get("refused") for c in cands):
+        return []
+    lines = [f"{f}: {ln.strip()[:200]}" for f, t in _code(d.src) for ln in t.splitlines()
+             if re.search(cfg["guard_signals"], ln)][:400]  # fmt: skip
+    if not lines:
+        return []
+    got = ai._json(d.llm.call(GUARD_PROMPT.format(snippets="\n".join(lines)),
+                              model=d.cfg["model"], schema=WIRING_SCHEMA, max_tokens=1000))  # fmt: skip
+    names = [
+        c["env"] for c in got["candidates"] if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", c["env"])
+    ]
+    d.emit("discover_guard", proposed=names)
+    return names[:2]
