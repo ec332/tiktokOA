@@ -24,7 +24,7 @@ from tp.stages.generate import ui as gen_ui
 
 pytest_plugins = ["pytester"]
 
-BASE = "http://app:8080"
+BASE = "http://notify.test:8080"  # dotted: page_base() keeps it
 # The notify page as a fake Playwright page: sign-in reveals the note form, saving POSTs the
 # note; the `page-error` seed throws in the page's script on save (as seeds/page-error.patch).
 FAKE = """
@@ -190,6 +190,15 @@ def test_only_role_and_name_locators_and_known_placeholders_parse(flow, why):
         ui.parse(flow)
 
 
+def test_a_one_label_host_is_reached_by_its_ip(monkeypatch):
+    monkeypatch.setattr(ui.socket, "gethostbyname", lambda host: {"app": "172.18.0.5"}[host])
+    for given, page in [("http://app:8080", "http://172.18.0.5:8080"),
+                        ("http://notify.test:8080/", "http://notify.test:8080"),
+                        ("http://localhost:1", "http://localhost:1")]:  # fmt: skip
+        monkeypatch.setenv("TP_BASE_URL", given)
+        assert ui.page_base() == page
+
+
 def test_the_bound_flow_parses():
     assert ui.parse(yaml.safe_load(gen_ui.entry(FLOW)["source"])) == FLOW
 
@@ -280,7 +289,7 @@ from platform_rt.api import api
 
 APP = fake.App(os.environ.get("P7_SEED") or None, os.environ.get("P7_SAVE", "Save note"))
 ui.browser = contextlib.contextmanager(lambda: (yield fake.Page(APP)))
-api.use(httpx.Client(base_url="http://app:8080", transport=httpx.MockTransport(
+api.use(httpx.Client(base_url="http://notify.test:8080", transport=httpx.MockTransport(
     lambda r: httpx.Response(200, json={"items": APP.notes}))))
 """
 
