@@ -1,0 +1,21 @@
+# The RealWorld (Conduit) domain pack (C9; docs/status/domains/001). One spec, several
+# implementations: the reference runs the full pipeline, the others run its sealed tests (DR-5).
+spec:
+  path: spec/openapi.yml  # vendored with its MIT licence (spec/LICENSE); D2
+  sha: c5d1cfc6fad0d4c93d3294248e6521849255e17c084e5673204228154e80939b  # sha256 of the file
+  source: https://github.com/gothinkster/realworld/blob/25588846c314b15a5e427ffe816e6b4af7be68c7/specs/api/openapi.yml
+brief: >-
+  Conduit, a Medium-style blogging API: people sign up and log in, write and edit articles,
+  follow authors, favourite articles and comment on them.
+# Settled answers from the spec, appended to the brief (D7). Anything else the spec stage asks
+# still waits for a person.
+answers:
+  - "Protected operations take the header `Authorization: Token <jwt>`; the token comes from POST /users or POST /users/login."
+  - "Article lists page with the `offset` and `limit` query parameters (limit defaults to 20)."
+  - "A validation error answers 422 with a body `{\"errors\": {\"<field>\": [\"<message>\"]}}`."
+suites: []  # scope-down 2026-11-09: P5 is cut, so the Hurl suite is not vendored
+implementations:  # pinned by I1 step 0 (docs/status/integration/001 §4)
+  - repo: https://github.com/realworld-apps/aspnetcore-realworld-example-app
+    ref: 9345f18abf36b778abe2f290467ba432bf1f7e5c  # C#, compose
+  - repo: https://github.com/tanem/express-bookshelf-realworld-example-app
+    ref: 68e7d4b46e2c2ef016d174e3715dad0f78e63007  # JavaScript, compose with Postgres
