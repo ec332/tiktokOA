@@ -201,11 +201,10 @@ def _pin_target(options: dict) -> str | None:
     """The target this run is for: `run_options.profile` (a path or slug, e.g. from the New run
     page), else the one TP_TARGET selects now; absolute, so a resume or retry from another
     process uses the same profile. None when nothing resolves (a discover-only run)."""
-    with target_profile.selected(options.get("profile")):
-        try:
-            d = target_profile.target_dir()
-        except target_profile.ProfileError:
-            return None
+    try:  # no env swap: start_run also runs on API threads beside a live run
+        d = target_profile.target_dir(t=options.get("profile") or None)
+    except target_profile.ProfileError:
+        return None
     return str(d.resolve()) if (d / "profile.yaml").exists() else None
 
 

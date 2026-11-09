@@ -281,7 +281,6 @@ class Claim(BaseModel):
 @app.get("/runs/{run_id}/claim", response_model=Claim)
 def run_claim(run_id: int):
     """The header the run page shows: the same function the report's header uses."""
-    from tp.core import profile
     from tp.stages.report import build
 
     get_run(run_id)
@@ -289,8 +288,7 @@ def run_claim(run_id: int):
     body = {k: artifacts.get(heads[k]).body if k in heads else None
             for k in ("cases", "gate_report", "run_records")}  # fmt: skip
     target = runner.run_target(run_id)
-    with profile.selected(target):
-        facts = build.run_facts(body["run_records"])
+    facts = build.run_facts(body["run_records"], target)  # no env swap beside a live run
     if not target:  # a run with no pinned target claims none
         facts["target"] = None
     strategies = (facts["target"] or {}).get("strategies", {})

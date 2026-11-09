@@ -27,3 +27,22 @@ def test_a_dev_mount_of_the_build_context_is_dropped(tmp_path):
     vols = out["services"]["app"]["volumes"]
     assert vols[0] == "/home/node/app/node_modules"  # anonymous volumes stay
     assert vols[1].endswith("/run/binds/seed.sql:/seed.sql") and len(vols) == 2  # other binds move
+
+
+def test_a_named_target_neither_reads_nor_swaps_the_env(tmp_path, monkeypatch):
+    """/claim and start_run run on API threads beside a live run: they pass the target, never
+    swap TP_TARGET, which the run's own stages read (integration/002, review finding 1)."""
+    import shutil
+
+    from tp.core import profile, runner
+    from tp.stages.report import build
+
+    d = tmp_path / "other"
+    d.mkdir()
+    shutil.copy("targets/fastapi-template/profile.yaml", d / "profile.yaml")
+    monkeypatch.setenv("TP_TARGET", "the-live-run")
+    monkeypatch.setattr(profile, "selected", None)  # any env swap here would now crash
+    assert profile.load(t=str(d)).slug == "other"
+    assert build.run_facts(None, str(d))["target"]["slug"] == "other"
+    assert runner._pin_target({"profile": str(d)}) == str(d.resolve())
+    assert profile.os.environ["TP_TARGET"] == "the-live-run"
