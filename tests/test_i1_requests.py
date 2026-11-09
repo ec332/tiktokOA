@@ -495,3 +495,29 @@ def test_a_failed_attempt_that_met_a_429_is_not_a_definite_result():
     assert not throttled(hit | {"outcome": "passed"})
     assert not throttled(hit | {"fault": {"mode": "status"}})  # an injected fault's answer (C7)
     assert not throttled({"outcome": "failed", "exchanges": [{"status": 500}]})
+
+
+def test_generate_reads_ref_parameters_and_bodies_of_the_pack_spec():
+    """r-0078 failed at generate with KeyError 'in': the pack spec's parameters are `$ref`s
+    (integration/006)."""
+    from tp.stages.discover import spec_base
+    from tp.stages.generate.scaffold import route_fields
+
+    _, spec = spec_base.pack_spec("realworld")
+    fields = route_fields(spec, ["GET /api/articles", "POST /api/articles"])
+    assert {"limit", "offset", "article"} <= set(fields)
+
+
+def test_the_models_excerpt_carries_ref_bodies_and_parameters():
+    """The excerpt carried only components/schemas: a pack spec's body was a bare `$ref` to
+    components/requestBodies the model never saw (integration/006)."""
+    import json
+
+    from tp.stages.discover import spec_base
+    from tp.stages.generate.ai import excerpt
+
+    _, spec = spec_base.pack_spec("realworld")
+    ex = json.loads(excerpt(spec, ["GET /api/articles", "POST /api/articles"]))
+    assert "#/components/requestBodies" not in json.dumps(ex)
+    assert "#/components/parameters" not in json.dumps(ex)
+    assert "NewArticle" in ex["schemas"]  # the body's own schema, reached through the inline
