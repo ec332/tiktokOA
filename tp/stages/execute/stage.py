@@ -98,6 +98,7 @@ class ExecuteStage:
         files = {
             "results.jsonl": "".join(json.dumps(r) + "\n" for r in run.results),
             "probes.json": json.dumps(run.probes, indent=1),
+            "dependencies.json": json.dumps(_dependencies(run.results), indent=1),
             "manifest.json": json.dumps(
                 {
                     "execution": ex,
@@ -234,3 +235,11 @@ def _cli():
 
 
 STAGE = register(ExecuteStage(), cli=_cli())
+
+
+def _dependencies(results: list[dict]) -> dict:
+    """`dependencies.json` (standins/001 D9, request R2): what each dependency check saw. The twin
+    of `platform_rt.dependency.ledger`, which the host can't import (platform_rt is runner-side)."""
+    return {r["case_id"]: {"outcome": r["outcome"], "fault": r.get("fault"),
+                           "received": (r.get("observed") or {}).get("received", [])}
+            for r in results if str(r.get("case_id")).startswith("G:dependency_")}  # fmt: skip
