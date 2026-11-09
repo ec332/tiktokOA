@@ -26,6 +26,7 @@ import yaml
 from tp.core import db, secrets
 from tp.core.hashing import sha256
 from tp.core.profile import TargetProfile
+from tp.stages.discover import spec_base
 
 ROOT = Path(__file__).parents[3]
 SANDBOX = ROOT / "config" / "sandbox.yaml"
@@ -652,12 +653,14 @@ class Stack:
         <env dir>/openapi.json, which the runner reads (TP_OPENAPI_FILE)."""
         cached = self.dir / "openapi.json"
         s = self.p.spec.value
-        if s["strategy"] == "repo_file":
-            body = yaml.safe_load((self.src / s["openapi"]).read_text())
+        if s["strategy"] in ("repo_file", "pack_file"):  # a pack's spec lives in packs/ (C9)
+            root = spec_base.PACKS if s["strategy"] == "pack_file" else self.src
+            body = yaml.safe_load((root / s["openapi"]).read_text())
         else:
             status, body = self.http("GET", s["openapi"])
             if status != 200 or not isinstance(body, dict):
                 raise BlackboxError(f"spec {s['openapi']}: {status}")
+        body = spec_base.with_base(body)  # the paths carry the base, as discovery saw them (R2)
         self.dir.mkdir(parents=True, exist_ok=True)
         cached.write_text(json.dumps(body))
         return body
@@ -1013,7 +1016,12 @@ class TokenHeaderAuth:
             body = _resolve(slug, login["body"])
             kw = {"json": body} if login.get("json") else {"data": body}
             status, resp = (self.stack or Stack(self.p)).http("POST", login["path"], **kw)
-            if status != 200 or not isinstance(resp, dict) or login["token_field"] not in resp:
+            # any 2xx, as discovery's try_login (a sign-up answering 201 with a token, domains/002 R1)
+            if (
+                not 200 <= status < 300
+                or not isinstance(resp, dict)
+                or login["token_field"] not in resp
+            ):
                 raise BlackboxError(f"login {login['path']}: {status}")
             token = secrets.put(slug, name, str(resp[login["token_field"]]))
         return {"scheme": scheme, "token": token}
@@ -1192,6 +1200,7 @@ class Checks:
 
 IMPLS = {("reach", "container"): Reach, ("reach", "external"): ExternalReach,
          ("safety", "safe_mode"): SafeMode, ("spec", "served"): Spec, ("spec", "repo_file"): Spec,
+         ("spec", "pack_file"): Spec,
          ("data", "spec_derived"): SpecDerivedData, ("state", "namespace"): NamespaceState,
          ("mutation", "none"): NoMutation, ("checks", "pytest_cases"): Checks}  # fmt: skip
 
