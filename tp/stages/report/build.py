@@ -53,12 +53,12 @@ def ceiling(strategies: dict, gate: dict) -> str | None:
     return "Stable, property-checked" if props else "Stable"
 
 
-def run_facts(rr: dict | None) -> dict:
+def run_facts(rr: dict | None, t: str | None = None) -> dict:
     """What the artifacts don't hold (cohesion/001 D8): the target (C2 isolation, C5
     dependencies) from the profile the runner selected for this run, and the run's sealed
     records (C2 basis) and `dependencies.json` (standins/001 D9). Missing pieces stay empty."""
     try:
-        p = profile.load()
+        p = profile.load(t=t)
         target = {"slug": p.slug, "reach": p.reach.strategy, "isolation": labels.isolation(p),
                   "dependencies": p.checks.value.get("dependencies") or [],
                   "strategies": {c: f.strategy for c, f in p.fields.items()}}  # fmt: skip
