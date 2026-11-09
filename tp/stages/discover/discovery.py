@@ -644,6 +644,13 @@ class Discovery:
         for field, tok in tokens:
             for prefix, player in prefixes:
                 vn, ok, _ = self.http("GET", check, headers={"Authorization": f"{prefix} {tok}"})
+                if ok == 200 and layer == "algorithm":
+                    # not named like a sign-in: a sign-up answers once (409/422 the second time),
+                    # so the runner couldn't log in again when the token expires. A bootstrap.
+                    _, again, _ = self.http("POST", path, **({"data": sent} if enc == "form" else
+                                                             {"json_body": sent}))  # fmt: skip
+                    if not 200 <= again < 300:
+                        return "created"
                 if ok == 200:
                     if self.probes.replay is None:  # a replayed token is the placeholder
                         secrets.put(self.slug, "token", tok)  # so the probe log redacts it
