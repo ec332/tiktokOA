@@ -1,6 +1,8 @@
 """W0 contract C6: discovery calls its iteration 3 hooks in a fixed order, and the hook stubs
 leave the profile exactly as before (docs/iteration3/W0-contracts.md)."""
 
+from types import SimpleNamespace
+
 from tp.stages.discover import dependencies, discovery, ui_flows
 
 ORDER = ["reach", "spec", "auth", "data", "secured", "spec_check", "cleanup", "dependencies",
@@ -27,6 +29,7 @@ def test_the_hook_steps_delegate_to_their_modules(monkeypatch):
     assert seen == [("dependencies", d), ("ui", d)]
 
 
-def test_the_stubs_change_nothing_until_p7_fills_them():
-    # P4 filled spec_base (domains/002 R4); tests/test_p4_pack.py covers it
-    assert ui_flows.run(object()) is None
+def test_the_ui_hook_proposes_nothing_without_a_model():
+    # P4 and P7 filled the hooks (domains/002 R4, browser/002 R4); their own tests cover them
+    d = SimpleNamespace(llm=None)
+    assert ui_flows.run(d) is None and not hasattr(d, "ui_flows")

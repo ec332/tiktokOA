@@ -924,6 +924,8 @@ class Discovery:
         if deps := getattr(self, "dependencies", []):  # C5, standins/002 request R1
             self.values["checks"]["dependencies"] = deps
             fam["dependencies"] = [x for x in deps if x["status"] == "wired"]
+        if flows := getattr(self, "ui_flows", []):  # C5, browser/002 request R1
+            self.values["checks"]["ui"] = flows
         for c in ("state", "mutation", "safety", "checks"):
             self.mark(c, "strategy", "resolver", "algorithm")
 

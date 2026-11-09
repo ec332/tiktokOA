@@ -133,9 +133,7 @@ def verify(d, steps: list[dict], out: dict) -> tuple[dict | None, str]:
 
 
 def run(d) -> None:
-    if (
-        getattr(d, "llm", None) is None
-    ):  # no model, no proposal (W0's stub test passes a bare object)
+    if d.llm is None:  # no model, no proposal
         return
     d.ui_flows = []
     if why := _skip(d):
