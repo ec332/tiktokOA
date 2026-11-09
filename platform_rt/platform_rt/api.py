@@ -73,13 +73,20 @@ def _summary(e: dict) -> str:
             f"token={'yes' if e['auth'] else 'no'}")  # fmt: skip
 
 
+def dig(body, field: str):
+    """A dotted field (`user.token`, `article.slug`) in a JSON answer; None when it isn't there."""
+    for k in field.split("."):
+        body = body.get(k) if isinstance(body, dict) else None
+    return body
+
+
 def _ledger(method: str, resp: httpx.Response) -> None:
     """$TP_LEDGER: every created resource, so namespace state can delete it at end of run (D1)."""
     path = os.environ.get("TP_LEDGER")
     if not path or method.upper() != "POST" or not resp.is_success:
         return
     body = _parse(resp)
-    rid = body.get(os.environ.get("TP_ID_FIELD") or "id") if isinstance(body, dict) else None
+    rid = dig(body, os.environ.get("TP_ID_FIELD") or "id")
     entry = {"path": resp.request.url.path, "id": rid, "location": resp.headers.get("location")}
     if rid is None and entry["location"] is None:  # e.g. an async create answering a task id:
         entry["untracked"] = str(body)[:120]  # listed as a leftover, never silently missed

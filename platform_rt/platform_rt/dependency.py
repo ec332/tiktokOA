@@ -120,7 +120,7 @@ def dependency_failure_handled(spec, c, method, path, op):
                 f"{'/'.join(map(str, GRACEFUL))} is the graceful answer")  # fmt: skip
     res = next((x for x in f.resources(spec) if x["collection"] == path), None)
     created = f._json(r) if r.is_success else None
-    if res and isinstance(created, dict) and (rid := created.get(c["id_field"])) is not None:
+    if res and isinstance(created, dict) and (rid := f.dig(created, c["id_field"])) is not None:
         read = f._send("GET", f._fill(res["item"], rid))
         if read.status_code != 200:
             f._fail("read_back", f"GET {read.request.url.path} answered {read.status_code} "

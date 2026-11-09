@@ -14,7 +14,7 @@ import re
 import pytest
 
 from platform_rt import dependency, record
-from platform_rt.api import api
+from platform_rt.api import api, dig
 from platform_rt.api import token as api_token
 from platform_rt.blackbox import eventually
 from platform_rt.expect import ExpectationFailed, SpecMismatch
@@ -213,7 +213,7 @@ def _create(spec: dict, c: dict, collection: str) -> tuple[dict, str]:
     if not r.is_success:
         pytest.skip(f"no_valid_body: POST {collection} answered {r.status_code}")
     created = _json(r)
-    rid = created.get(c["id_field"]) if isinstance(created, dict) else None
+    rid = dig(created, c["id_field"])
     if rid is None:
         pytest.skip(f"async_create: POST {collection} answered no {c['id_field']!r}")
     return body, _fill(res["item"], rid)

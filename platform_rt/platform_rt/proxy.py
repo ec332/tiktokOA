@@ -25,7 +25,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import httpx
 
-from platform_rt.api import route_matches
+from platform_rt.api import dig, route_matches
 
 READS = {"GET", "HEAD", "OPTIONS"}
 BLOCKED = 599
@@ -143,7 +143,7 @@ class Policy:
                 parsed = None
             if status != 201 and not any(s.startswith(self.prefix) for s in _strings(parsed)):
                 return  # a get-or-create answering 200 with an existing item isn't ours (M1)
-            rid = parsed.get(self.id_field) if isinstance(parsed, dict) else None
+            rid = dig(parsed, self.id_field)
             entry = {"path": path, "id": rid, "location": location}
             if (item := self.item_path(entry)) is None:
                 return
