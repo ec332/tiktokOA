@@ -422,3 +422,21 @@ def test_with_a_pack_spec_the_specs_own_anonymous_read_is_the_health_path(monkey
     d.stack = S()
     d.step_spec()
     assert d.values["reach"]["health"] == "/api/articles"  # /api/user and the feed need a token
+
+
+def test_a_ref_request_body_gives_login_candidates_and_a_create_body():
+    """The pack spec's bodies are `$ref: #/components/requestBodies/…`: unread, express-bookshelf
+    had no login candidate and no create body (integration/004)."""
+    from platform_rt.families import json_schema
+    from tp.stages.discover import spec_base
+    from tp.stages.discover.discovery import Discovery, body_schema, example
+
+    _, spec = spec_base.pack_spec("realworld")
+    d = Discovery.__new__(Discovery)
+    d.spec, d.answers, d.cfg = spec, {}, {"admin_user": "tpadmin"}
+    d.conventions = lambda kind: ["login"] if kind == "signin_op_pattern" else []
+    assert {c[0] for c in d.logins()} == {"/api/users/login", "/api/users"}
+    create = spec["paths"]["/api/articles"]["post"]
+    assert set(example(spec, body_schema(spec, create)[0], 1)["article"]) == {
+        "title", "description", "body"}  # fmt: skip
+    assert "article" in json_schema(spec, create)["properties"]
