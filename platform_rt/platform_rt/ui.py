@@ -67,10 +67,12 @@ def parse(flow) -> dict:
         ((kind, arg),) = step.items()
         want = ARGS[kind]
         ok = (isinstance(arg, str) and arg.startswith("/")) if want is None else (
-            isinstance(arg, dict) and set(arg) == want
+            isinstance(arg, dict) and set(arg) in (want, want - {"name"})  # name: optional
             and all(isinstance(v, (str, int)) and not isinstance(v, bool) for v in arg.values()))  # fmt: skip
         if ok and kind in ("fill", "click"):
-            ok = bool(ROLE.fullmatch(arg["role"]) and str(arg["name"]).strip())
+            ok = bool(
+                ROLE.fullmatch(arg["role"]) and ("name" not in arg or str(arg["name"]).strip())
+            )
         if not ok:
             raise FlowError(f"step {i + 1}: {kind} takes "
                             + ("a path" if want is None else str(sorted(want))))  # fmt: skip
@@ -96,13 +98,28 @@ def _json(raw):
         return raw.decode(errors="replace")[:2000] if isinstance(raw, bytes) else raw
 
 
-def _http(resp) -> dict:
-    """A Playwright response as an HTTP exchange of the usual shape (plugin records them all)."""
+def _target(arg: dict) -> str:
+    """How a step's element is written down: role and name, or the role's first element."""
+    return f'{arg["role"]} "{arg["name"]}"' if "name" in arg else f"first {arg['role']}"
+
+
+def _http(resp, unique: str = "") -> dict:
+    """A Playwright response as an HTTP exchange of the usual shape (plugin records them all).
+    A binary request body (protobuf, say) is never kept, as it can't be redacted by key: only its
+    size, and whether it carries this execution's typed value (integration/002)."""
     req, url = resp.request, httpx.URL(resp.request.url)
-    try:
-        sent = req.post_data
-    except Exception:  # noqa: BLE001 — a binary body: not recorded
-        sent = None
+    ctype = (req.headers.get("content-type") or "").lower()
+    if not ctype or "json" in ctype or "form" in ctype or ctype.startswith("text/"):
+        try:
+            sent = req.post_data
+        except Exception:  # noqa: BLE001 — undecodable: not recorded
+            sent = None
+    else:  # by its type, not by whether it decodes: small protobuf bodies are valid UTF-8
+        raw_sent = req.post_data_buffer or b""
+        sent = json.dumps(
+            f"<binary, {len(raw_sent)} bytes"
+            + (f"; carries {unique}>" if unique and unique.encode() in raw_sent else ">")
+        )
     try:  # a server-sent stream (a live-refresh feed) never ends: body() would wait forever
         stream = "text/event-stream" in (resp.headers.get("content-type") or "")
         raw = b"" if stream else resp.body()
@@ -117,7 +134,7 @@ def _http(resp) -> dict:
 def _ui(kind: str, arg) -> None:
     """A UI action as an exchange step (`kind: ui`). Status 0: no HTTP answer (classify needs an
     int). A filled value is kept as written, so a placeholder never becomes its secret."""
-    target = arg if kind == "goto" else f'{arg["role"]} "{arg["name"]}"'
+    target = arg if kind == "goto" else _target(arg)
     record.current().exchanges.append({
         "step": record.current().next_step(), "setup": False, "kind": "ui", "method": "UI",
         "path": f"{kind} {target}", "query": {}, "json": {"value": arg["value"]} if kind == "fill"
@@ -140,7 +157,7 @@ class Run:
 
     def drain(self) -> None:
         while self.pending:
-            self.rec.exchanges.append(_http(self.pending.pop(0)))
+            self.rec.exchanges.append(_http(self.pending.pop(0), self.unique))
 
     def page_errors(self) -> None:
         if self.errors:
@@ -153,7 +170,11 @@ class Run:
             if kind == "goto":
                 self.page.goto(self.base + arg, wait_until="domcontentloaded", timeout=ms)
                 return
-            loc = self.page.get_by_role(arg["role"], name=arg["name"], exact=True)
+            loc = (
+                self.page.get_by_role(arg["role"], name=arg["name"], exact=True)
+                if "name" in arg
+                else self.page.get_by_role(arg["role"]).first
+            )
             if kind == "fill":
                 loc.fill(self.value(arg["value"]), timeout=ms)
             else:
@@ -166,7 +187,7 @@ class Run:
             msg = str(e).splitlines()[0][:300]
             if kind == "goto":
                 raise httpx.ConnectError(f"goto {arg}: {msg}") from e  # ENV: the SUT didn't answer
-            raise LocatorError(f'{kind} {arg["role"]} "{arg["name"]}": {msg}') from e
+            raise LocatorError(f"{kind} {_target(arg)}: {msg}") from e
 
     def expect_request(self, arg: dict) -> None:
         route, hit = f"{arg['method']} {arg['path']}", None
