@@ -229,6 +229,9 @@ def token() -> str | None:
         )
     )
     kw = {"json": body} if spec.get("json") else {"data": body}
-    tok = str(api.client.post(spec["path"], **kw).json()[spec["token_field"]])
+    tok = api.client.post(spec["path"], **kw).json()
+    for k in spec["token_field"].split("."):  # dotted: `user.token` (the host's blackbox._dig)
+        tok = tok[k]
+    tok = str(tok)
     os.environ["TP_SECRET_TOKEN"] = tok
     return tok
