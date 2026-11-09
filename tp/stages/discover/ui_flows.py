@@ -32,7 +32,9 @@ PROMPT = (
     "creates one new item through the page.\n"
     'Steps: {{"action": "goto", "path": "/"}}, {{"action": "fill", "role": ..., "name": ..., '
     '"value": ...}}, {{"action": "click", "role": ..., "name": ...}}. Find elements only by their '
-    "ARIA role and their accessible name, exactly as the snapshot shows them.\n"
+    "ARIA role and their accessible name, exactly as the snapshot shows them. An element with "
+    "no accessible name (a textbox with only a placeholder, say): leave name out, and the first "
+    "element with that role is used.\n"
     'Start with a goto to "/". Sign in with the username "{user}" and the password '
     '"$TP_SECRET_ADMIN_PASSWORD": type these strings exactly. Then type "$TP_UNIQUE" as the new '
     "item's text, and submit it. Controls that appear only after sign-in are not in the "
@@ -80,7 +82,7 @@ def _step(s: dict) -> dict:
     a = s.get("action")
     if a == "goto":
         return {"goto": s.get("path") or "/"}
-    loc = {"role": s.get("role"), "name": s.get("name")}
+    loc = {"role": s.get("role")} | ({"name": n} if (n := s.get("name")) else {})
     return {"fill": loc | {"value": s.get("value")}} if a == "fill" else {"click": loc}
 
 
