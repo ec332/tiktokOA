@@ -116,7 +116,7 @@ def _inside(path: Path, root: Path, what: str) -> Path:
     """`path` resolved (symlinks followed) must stay inside `root` (H2)."""
     if "$" in str(path):
         raise BlackboxError(f"{what} {path}: `$` in a path is refused (H2)")
-    p = path.resolve()
+    p, root = path.resolve(), root.resolve()  # a relative root (TP_DATA defaults to `data`)
     if p != root and root not in p.parents:
         raise BlackboxError(f"{what} {p} is outside the repo")
     return p
