@@ -73,7 +73,10 @@ class Discover:
             return StageResult.failed(
                 f"setup question skipped: {skipped[-1]['payload']['question']}"
             )
-        answers = {i["payload"]["key"]: i["detail"]["text"] for i in asked}
+        # settled answers given with the run (a domain pack's `spec`), then a person's
+        answers = opts.get("answers", {}) | {
+            i["payload"]["key"]: i["detail"]["text"] for i in asked
+        }
         kind = discovery.LiveDiscovery if opts.get("live") else discovery.Discovery
         d = kind(url, ref, ctx.llm, discovery.Probes(), not nc, ctx.emit, answers)
         profile_path, log_path = files(d.slug, nc)

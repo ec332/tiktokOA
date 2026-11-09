@@ -489,7 +489,9 @@ class Discovery:
     def step_spec(self) -> None:
         answer = self.answers.get("spec", "").strip()
         served = [(answer, "clarify")] if answer.startswith("/") else []
-        for path, layer in served + [(p, "convention") for p in self.conventions("spec_path")]:
+        # a domain pack's spec wins over the app's own: one spec judges every implementation (DR-5)
+        conv = [] if answer.startswith("pack:") else self.conventions("spec_path")
+        for path, layer in served + [(p, "convention") for p in conv]:
             n, status, body = self.http("GET", path)
             if status == 200 and is_spec(body):
                 self.spec = body = spec_base.with_base(body)
