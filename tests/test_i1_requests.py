@@ -388,3 +388,17 @@ def test_a_file_in_a_relative_checkout_is_inside_it(tmp_path, monkeypatch):
     assert bb._inside(root / ".env.example", root, "env example").name == ".env.example"
     with pytest.raises(bb.BlackboxError):
         bb._inside(root / "../y", root, "env example")
+
+
+def test_a_health_condition_is_kept_so_the_app_waits_for_its_database(tmp_path):
+    """express-bookshelf exited on ECONNREFUSED: the rewrite flattened `condition:
+    service_healthy`, so the app started before Postgres was ready (integration/004)."""
+    dep = {"db": {"condition": "service_healthy"}}
+    compose = {"services": {"app": {"image": "x:1", "depends_on": dep},
+                            "db": {"image": "d", "healthcheck": {"test": ["CMD", "true"]}}}}  # fmt: skip
+    reach = {"service": "app", "port": 80, "standins": [HTTP]}
+    out, _ = bb.rewrite(compose, tmp_path, tmp_path / "run", reach,
+                        {"tp-standin-http": "tp-runner-blackbox:abc"})  # fmt: skip
+    assert out["services"]["app"]["depends_on"] == dep | {
+        "tp-standin-http": {"condition": "service_started"}}  # fmt: skip
+    assert out["services"]["db"]["healthcheck"] == {"test": ["CMD", "true"]}
