@@ -789,16 +789,15 @@ class Discovery:
             self.mark("data", "id_field", "probed", "algorithm", n)
             if blayer == "clarify":
                 self.mark("data", "body", "clarify", "clarify", n)
-            first = self.path_id(created[field], transform)
+            first = self.path_id(bb._dig(created, field), transform)
             self.created.append(PARAM.sub(first, item, count=1))
             self.item = (item, first)
             body2 = body if blayer == "clarify" else example(self.spec, schema, 2)
             _, s2, second = self.http("POST", coll, headers=h, json_body=body2)
-            if 200 <= s2 < 300 and isinstance(second, dict) and field in second:
-                self.created.append(
-                    PARAM.sub(self.path_id(second[field], transform), item, count=1)
-                )
-                paging = self.paging(coll, field, h)
+            if 200 <= s2 < 300 and (id2 := bb._dig(second, field)) is not None:
+                self.created.append(PARAM.sub(self.path_id(id2, transform), item, count=1))
+                # list items come without the create answer's envelope (`article.slug` -> `slug`)
+                paging = self.paging(coll, field.split(".", 1)[-1], h)
             else:
                 paging = None
             data["paging"] = paging[0] if paging else None
@@ -821,16 +820,20 @@ class Discovery:
 
     def id_field(self, item: str, created: dict, h: dict):
         """Each scalar of the create response as the item path parameter: verbatim, then (strings
-        with `/`) its last segment (P2). -> (field, style, transform, probe) or None."""
+        with `/`) its last segment (P2); then the scalars of an envelope (`{"article": {...}}`)
+        as a dotted field (`article.slug`). -> (field, style, transform, probe) or None."""
         param = PARAM.search(item).group()[1:-1]
         cands = []
-        for k, v in created.items():
+        fields = [(0, k, k, v) for k, v in created.items()]
+        fields += [(1, f"{k}.{k2}", k2, v2) for k, v in created.items() if isinstance(v, dict)
+                   for k2, v2 in v.items()]  # fmt: skip
+        for depth, k, leaf, v in fields:
             if isinstance(v, bool) or not isinstance(v, int | str) or v == "":
                 continue
-            cands.append((0, k != param, k, v, "verbatim"))
+            cands.append((depth, 0, leaf != param, k, v, "verbatim"))
             if isinstance(v, str) and "/" in v:
-                cands.append((1, k != param, k, v, "suffix"))
-        for _, _, k, v, how in sorted(cands, key=lambda c: c[:2]):
+                cands.append((depth, 1, leaf != param, k, v, "suffix"))
+        for *_, k, v, how in sorted(cands, key=lambda c: c[:3]):
             n, status, body = self.http("GET", PARAM.sub(self.path_id(v, how), item, count=1),
                                         headers=h, template=item)  # fmt: skip
             if status == 200:
@@ -873,7 +876,7 @@ class Discovery:
                 q2 = {pg["size"]: 1, pg["token"]: tok}
             _, s2, b2 = self.http("GET", coll, headers=h, params=q2)
             two = items(b2)
-            if s2 == 200 and len(two) == 1 and two[0].get(field) != one[0].get(field):
+            if s2 == 200 and len(two) == 1 and bb._dig(two[0], field) != bb._dig(one[0], field):
                 return pg, layer, n
         return None
 
@@ -1029,7 +1032,7 @@ class LiveDiscovery(Discovery):
             field, style, transform, n = found
             data |= {"id_field": field, "id_style": style}
             self.mark("data", "id_field", "probed", "algorithm", n)
-            self.item = (item, self.path_id(listed[0][field], transform))
+            self.item = (item, self.path_id(bb._dig(listed[0], field), transform))
             paging = self.paging(coll, field, h)  # needs two items already there
             data["paging"] = paging[0] if paging else None
             if paging:
