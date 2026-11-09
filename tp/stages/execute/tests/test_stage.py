@@ -86,6 +86,14 @@ def test_trace_run_id_and_shuffle_on_the_last_attempt(fx):
     assert "TP_SHUFFLE" in env.calls[2][1] and "TP_SHUFFLE" not in env.calls[0][1]
 
 
+def test_a_variants_run_id_is_safe_inside_an_email_or_an_id(fx):
+    """`bug:x` in TP_RUN made `tp-x1.bug:x.a1-…@example.test`, which an app rejects (I1)."""
+    env = FakeEnv(fx["records"])
+    _run(fx, env, ["reference", "bug:BUG_ITEMS_TITLE_TRUNCATED"])
+    runs = {e["TP_RUN"] for _, e in env.calls}
+    assert "x1.bug_BUG_ITEMS_TITLE_TRUNCATED.a1" in runs and not any(":" in r for r in runs)
+
+
 def test_seeded_variant_consistent_fail_and_variant_stack_torn_down(fx):
     env = FakeEnv(fx["records"])
     body = _run(fx, env, ["reference", "bug:BUG_OWNERSHIP_UPDATE"]).outputs["run_records"]

@@ -79,7 +79,7 @@ class ExecuteStage:
                                  "fingerprint_mismatch": mismatch,
                                  "fingerprint": spec.get("fingerprint")}  # fmt: skip
             for a in range(1, k + 1):
-                env = {"TP_RUN": f"x{ex}.{variant}.a{a}"}
+                env = {"TP_RUN": f"x{ex}.{_safe(variant)}.a{a}"}  # names go into emails, ids
                 if a == k and k >= 3:
                     env["TP_SHUFFLE"] = str(seed)  # the order check rides on the last attempt (D4)
                 if not run.batch(variant, f"{variant}/a{a}", tests, env, list(rows), "main",
@@ -138,7 +138,7 @@ class ExecuteStage:
         for target in targets:
             for i in range(1, decide.ESCALATE_K + 1):
                 tag = f"o{i}" if target == variant else f"o{i}-for-{variant}"
-                env = {"TP_RUN": f"x{run.ex}.{target}.{tag}"}
+                env = {"TP_RUN": f"x{run.ex}.{_safe(target)}.{tag}"}
                 if not run.batch(target, f"{target}/{tag}", obs, env, flaky, f"obs:{variant}"):
                     break
 
