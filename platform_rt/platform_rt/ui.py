@@ -35,6 +35,7 @@ PLACEHOLDER = re.compile(r"\$(TP_[A-Z_]+)")
 PLACEHOLDERS = {"TP_UNIQUE", "TP_SECRET_ADMIN_PASSWORD"}
 NAME = re.compile(r"[a-z][a-z0-9_]{0,63}")
 ROLE = re.compile(r"[a-z]+")
+OPTIONAL_MS = 2000  # how long an optional click waits for its element to show
 API_TYPES = ("document", "fetch", "xhr")  # the responses recorded as HTTP exchanges
 
 
@@ -66,9 +67,12 @@ def parse(flow) -> dict:
             raise FlowError(f"step {i + 1}: one of {sorted(ARGS)}, as a one-key map")
         ((kind, arg),) = step.items()
         want = ARGS[kind]
+        extra = {"optional"} if kind == "click" else set()  # a click on what may not show
         ok = (isinstance(arg, str) and arg.startswith("/")) if want is None else (
-            isinstance(arg, dict) and set(arg) in (want, want - {"name"})  # name: optional
-            and all(isinstance(v, (str, int)) and not isinstance(v, bool) for v in arg.values()))  # fmt: skip
+            isinstance(arg, dict) and set(arg) - extra in (want, want - {"name"})  # name: optional
+            and arg.get("optional", True) is True
+            and all(isinstance(v, (str, int)) and not isinstance(v, bool)
+                    for k, v in arg.items() if k != "optional"))  # fmt: skip
         if ok and kind in ("fill", "click"):
             ok = bool(
                 ROLE.fullmatch(arg["role"]) and ("name" not in arg or str(arg["name"]).strip())
@@ -177,6 +181,10 @@ class Run:
             )
             if kind == "fill":
                 loc.fill(self.value(arg["value"]), timeout=ms)
+            elif arg.get("optional"):  # a dialog shown only sometimes (a first-use welcome)
+                with contextlib.suppress(Exception):
+                    loc.wait_for(state="visible", timeout=OPTIONAL_MS)
+                    loc.click(timeout=ms)
             else:
                 loc.click(timeout=ms)
         except Exception as e:

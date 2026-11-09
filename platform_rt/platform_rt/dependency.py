@@ -87,7 +87,11 @@ def dependency_called(spec, c, method, path, op):
     f._no_5xx("trigger", r)
     if not r.is_success:
         pytest.skip(f"trigger_refused: {method} {path} answered {r.status_code}")
-    want = [v for v in body.values() if isinstance(v, str)]
+    # only what this test made unique: enum constants (`PRIVATE`) may reach the receiver as a
+    # number, so they prove nothing either way (integration/002)
+    want = [v for v in body.values() if isinstance(v, str) and rec.name("") in v]
+    if not want:
+        pytest.skip(f"no_unique_value: {method} {path} sends no value unique to this test")
     got = eventually(lambda: received(c, dep), lambda g: all(v in json.dumps(g) for v in want))
     mine = [g for g in got if any(v in json.dumps(g) for v in want)]
     rec.observed["received"] = mine or got[-3:]  # redacted with the record (D9)
