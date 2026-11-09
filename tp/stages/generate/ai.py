@@ -5,6 +5,8 @@ import json
 import re
 from pathlib import Path
 
+from tp.stages.generate import scaffold as S
+
 HERE = Path(__file__).parent
 MODEL, EFFORT = "claude-haiku-5-5", "low"  # smallest model first (memory: minimal LLM cost)
 SCHEMA = {"type": "object", "additionalProperties": False, "required": ["binding", "cannot_bind"],
@@ -39,6 +41,16 @@ def _prompt(name: str, **fields) -> str:
     return text
 
 
+def _inline(openapi: dict, key: str, v):
+    """A `$ref` to components/parameters, requestBodies or responses, replaced by its target: the
+    excerpt carries only components/schemas (a domain pack's spec uses all four)."""
+    if key == "parameters":
+        return [S._resolve(openapi, p) for p in v]
+    if key == "responses":
+        return {c: S._resolve(openapi, x) for c, x in v.items()}
+    return S._resolve(openapi, v)
+
+
 def excerpt(openapi: dict, routes: list[str]) -> str:
     """The routes' operations plus the component schemas they reference."""
     ops, refs = {}, set()
@@ -46,7 +58,8 @@ def excerpt(openapi: dict, routes: list[str]) -> str:
         method, _, path = route.partition(" ")
         op = openapi.get("paths", {}).get(path, {}).get(method.lower())
         if op:
-            ops[route] = {k: op[k] for k in ("parameters", "requestBody", "responses") if k in op}
+            op = ops[route] = {k: _inline(openapi, k, op[k])
+                               for k in ("parameters", "requestBody", "responses") if k in op}  # fmt: skip
             refs |= set(re.findall(r"#/components/schemas/(\w+)", json.dumps(op)))
     schemas = openapi.get("components", {}).get("schemas", {})
     for _ in range(3):  # schemas referencing schemas

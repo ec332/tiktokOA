@@ -51,9 +51,11 @@ def route_fields(openapi: dict, routes: list[str]) -> dict[str, dict]:
         if not op:
             continue
         for p in op.get("parameters", []):
-            if p["in"] == "query":
+            p = _resolve(openapi, p)  # a $ref parameter (components/parameters)
+            if p.get("in") == "query":
                 fields.setdefault(p["name"], p.get("schema", {}))
-        body = op.get("requestBody", {}).get("content", {}).get("application/json", {})
+        body = _resolve(openapi, op.get("requestBody", {})).get("content", {})
+        body = body.get("application/json", {})
         if "schema" in body:
             for name, schema in _resolve(openapi, body["schema"]).get("properties", {}).items():
                 fields.setdefault(name, schema)
