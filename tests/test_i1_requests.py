@@ -146,3 +146,29 @@ def test_an_unnamed_element_and_a_binary_body():
     got = ui._http(resp, "tp-r1-abc-ui")
     assert got["json"] == "<binary, 25 bytes; carries tp-r1-abc-ui>"
     assert "pw-secret" not in str(got)
+
+
+def test_the_read_back_tries_the_reads_named_like_the_create_first():
+    """Memos creates over RPC (CreateMemo) and reads over REST (/api/memos), the 7th GET."""
+    from tp.stages.discover import ui_flows
+
+    spec = {"paths": {f"/api/a{i}": {"get": {}} for i in range(6)} | {"/api/memos": {"get": {}}}}
+    asked = []
+
+    class D:
+        def http(self, method, path, headers=None):
+            asked.append(path)
+            return 1, 200, {"memos": [{"content": "tp-u-ui"}]} if path == "/api/memos" else {}
+
+        def auth_headers(self):
+            return {}
+
+        def mark(self, *a):
+            pass
+
+    D.spec = spec
+    out = {"unique": "tp-u-ui", "exchanges": [{"method": "POST", "status": 200, "path":
+           "/memos.api.MemoService/CreateMemo", "json": "<binary, 25 bytes; carries tp-u-ui>"}]}  # fmt: skip
+    flow, _ = ui_flows.verify(D(), [{"goto": "/"}], out)
+    assert asked == ["/api/memos"] and flow["steps"][-1] == {
+        "read_back": {"path": "/api/memos", "contains": "$TP_UNIQUE"}}  # fmt: skip
