@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import type { ReviewItem } from "../../api/client";
+import { Labels } from "../../components/bits";
 import { resolveItem } from "../../flow/resolve";
 
 /** Stop 2 of the happy path (M8 cases D16): tick the tests to generate; title + one sentence.
@@ -8,6 +9,8 @@ import { resolveItem } from "../../flow/resolve";
 type Line = { id: string; title?: string; summary?: string; ac?: string; text: string; priority?: string;
   score?: { score: number; parts: Record<string, number> } };
 type PlannedWrite = { op: string; verdict: "create" | "own_items" | "blocked"; rule: string };
+/** What runs besides these tests: read-only, not signed (DR-11, cohesion/001 D3). */
+type AlsoRuns = { kind: "generic" | "ui" | "suite"; id: string; text: string; basis: string };
 /** Why a line is pre-selected at its priority (autonomy/001 F7): "score 12 = suspected defect 7 + …". */
 const breakdown = (s?: Line["score"]) => s && Object.keys(s.parts).length
   ? `score ${s.score} = ${Object.entries(s.parts).map(([k, v]) => `${k.replace(/_/g, " ")} ${v}`).join(" + ")}` : "";
@@ -37,6 +40,7 @@ export function Approve({ item, criteria, onDone }: { item: ReviewItem; criteria
   };
   const notes = (item.payload.attention as string[] | undefined) ?? [];
   const writes = (item.payload.planned_writes as PlannedWrite[] | undefined) ?? [];
+  const also = (item.payload.also_runs as AlsoRuns[] | undefined) ?? [];
   // a test that contradicts one of your answers is never buried in the notes (cases/012 D2)
   const conflicts = notes.filter((a) => a.includes("but you decided"));
   const attention = notes.filter((a) => !conflicts.includes(a));
@@ -62,6 +66,17 @@ export function Approve({ item, criteria, onDone }: { item: ReviewItem; criteria
           </summary>
           <ul style={{ fontSize: 13, margin: "4px 0" }}>{writes.map((w) => (
             <li key={w.op}><span className="mono">{w.op}</span>: <span className={w.verdict === "blocked" ? "warn" : ""}>{w.rule}</span></li>
+          ))}</ul>
+        </details>
+      )}
+      {also.length > 0 && (
+        <details style={{ marginBottom: 8 }}>
+          <summary style={{ cursor: "pointer", fontSize: 13 }}>
+            <strong>Also runs</strong>{" "}
+            <span className="muted">{also.length} fixed check{also.length === 1 ? "" : "s"}, not drafted by the model; listed, not signed</span>
+          </summary>
+          <ul style={{ fontSize: 13, margin: "4px 0" }}>{also.map((a) => (
+            <li key={a.id}><Labels labels={[a.basis]} /> {a.text}</li>
           ))}</ul>
         </details>
       )}

@@ -4,7 +4,7 @@ signed off line by line."""
 import json
 from pathlib import Path
 
-from tp.core import artifacts, db, review
+from tp.core import artifacts, db, profile, review
 from tp.core.contract import StageResult, register
 from tp.core.hashing import sha256
 from tp.stages.cases import ai, build, signals
@@ -35,6 +35,36 @@ def _known_preconditions(units: list[dict], factories: list[str] | None) -> list
             u["steps"] = [f"Given: {p.replace('_', ' ')}" for p in unknown] + u["steps"]
             notes.append(f"{u['ac']}: preconditions {unknown} are not factories; moved to steps")
     return notes
+
+
+def _default_flows(flows: tuple[str, ...]) -> tuple[str, ...] | None:
+    """The stage's default scope, when the target's profile names those flows; otherwise every
+    flow the spec holds (a black-box profile names none, so its flows are path segments)."""
+    named = {f for _, f in profile.load().spec.value.get("flows") or []}
+    return flows if named & set(flows) else None
+
+
+def also_runs() -> list[dict]:
+    """What runs besides the case tests, for Sign-off to list read-only (DR-11, cohesion/001 D3):
+    the generic families on a black-box target (one not on the in-process harness, the rule of
+    env/strategies.py:145), the dependency families per wired dependency, and the UI flows."""
+    from tp.stages.report.build import CLAIMS
+
+    p = profile.load()
+    checks = p.checks.value
+    out = []
+    if p.state.strategy != "transaction":
+        out += [{"kind": "generic", "id": f, "text": f"{f}: {claim}", "basis": "real"}
+                for f, claim in CLAIMS.items() if not f.startswith("dependency_")]  # fmt: skip
+    for d in (checks.get("families") or {}).get("dependencies") or []:
+        out += [{"kind": "generic", "id": f"{f}:{d['name']}", "basis": "simulated",
+                 "text": f"{f}: {d['name']} ({d['kind']}) through {d.get('trigger')}, "
+                         f"on the stand-in tp-standin-{d['name']}: {CLAIMS[f]}"}
+                for f in ("dependency_called", "dependency_failure_handled")]  # fmt: skip
+    out += [{"kind": "ui", "id": f"U:{u['name']}", "basis": "real",
+             "text": f"UI flow {u['name']}: {len(u.get('steps') or [])} steps"}
+            for u in checks.get("ui") or []]  # fmt: skip
+    return out
 
 
 def approved_hashes(scope: dict | None) -> set[str]:
@@ -71,8 +101,9 @@ class CasesStage:
             iteration = artifacts.get(opts["iteration"]).body if opts.get("iteration") else None
             if iteration and iteration["spec"] != inputs["spec"].id:
                 return StageResult.failed("iteration was fed from another spec (design 006)")
-            # a run focused on routes (M8) tests every flow its spec holds
-            flows = opts.get("flows") or (None if opts.get("routes") else self.flows)
+            # a run focused on routes (M8), or a Scan, tests every flow its spec holds
+            whole = opts.get("routes") or opts.get("scan")
+            flows = opts.get("flows") or (None if whole else _default_flows(self.flows))
             state = self._draft(ctx, inputs["spec"], tuple(flows) if flows else None, iteration,
                                 opts.get("templates"), (opts.get("rules") or {}).get("cases"))  # fmt: skip
             state["scope"] = None if opts.get("fresh") else {"sut_ref": state["sut"]["ref"]}
@@ -121,7 +152,7 @@ class CasesStage:
             else:
                 scope.append(c | {"flow": flow} | ({"gaps": gaps[c["id"]]} if iteration else {}))
         if iteration or flows is None:
-            flows = tuple(sorted({c["flow"] for c in scope}))
+            flows = tuple(sorted({c["flow"] for c in scope}, key=str))  # a criterion may have none
         minimum = {c["id"]: [t for t in signals.minimum_templates(c)
                              if templates is None or t in templates] for c in scope}  # fmt: skip
         # the product owner's answers override criterion text that disagrees (cases/012 D1)
@@ -158,7 +189,7 @@ class CasesStage:
                 "criteria": {c["id"]: c for c in scope},
                 "minimum": minimum, "drafts": drafts, "units": units, "deferred": deferred,
                 "attention": attention, "not_tested": not_tested, "approved": [], "carried": [],
-                "round": 1}  # fmt: skip
+                "also_runs": also_runs(), "round": 1}  # fmt: skip
 
     @staticmethod
     def _changed(ctx) -> dict[str, list[int]]:
@@ -239,6 +270,7 @@ class CasesStage:
             "worked_examples": [{"id": u["id"], "field": u["boundary"]["field"], "points": u["points"]}
                                 for u in state["units"] if "points" in u and u["id"] in ids],
             "not_tested": state["not_tested"] if state["round"] == 1 else [],
+            "also_runs": state.get("also_runs", []),  # read-only: not signed (cohesion/001 D3)
             "round": state["round"],
             "scope": state.get("scope"),
         }  # fmt: skip
