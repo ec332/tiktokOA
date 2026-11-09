@@ -53,10 +53,10 @@ class TargetProfile:
         raise AttributeError(concern)
 
 
-def active_slug(root: Path = Path(".")) -> str:
+def active_slug(root: Path = Path("."), t: str | None = None) -> str:
     """TP_TARGET if set, else the only folder under targets/. A TP_TARGET holding a `/` is a
     path to a target folder (blackbox D13), e.g. a test fixture: its slug is the folder name."""
-    if slug := os.environ.get("TP_TARGET"):
+    if slug := os.environ.get("TP_TARGET") if t is None else t:
         return Path(slug).name if "/" in slug else slug
     found = sorted(p.name for p in (root / TARGETS).glob("*/profile.yaml") for p in [p.parent])
     if len(found) != 1:
@@ -71,12 +71,13 @@ def _discovered(slug: str) -> Path:
     return db.data_dir() / TARGETS / slug
 
 
-def target_dir(root: Path = Path(".")) -> Path:
+def target_dir(root: Path = Path("."), t: str | None = None) -> Path:
     """TP_TARGET as a path, else targets/<slug>/ (hand-written), else the discovered profile of
-    that slug (discover/006: `TP_TARGET=<slug>` finds data/targets/<slug>)."""
-    if "/" in (t := os.environ.get("TP_TARGET", "")):
+    that slug (discover/006: `TP_TARGET=<slug>` finds data/targets/<slug>). `t` instead of
+    TP_TARGET: for threads beside a run, which must not swap the process's env (integration/002)."""
+    if "/" in (t := os.environ.get("TP_TARGET", "") if t is None else t):
         return root / t
-    slug = active_slug(root)
+    slug = active_slug(root, t or None)
     hand = root / TARGETS / slug
     if not (hand / "profile.yaml").exists() and (_discovered(slug) / "profile.yaml").exists():
         return _discovered(slug)
@@ -162,8 +163,8 @@ def parse(raw: dict, slug: str, where: Path | None = None) -> TargetProfile:
                          fields, where)  # fmt: skip
 
 
-def load(root: Path = Path(".")) -> TargetProfile:
-    d = target_dir(root)
+def load(root: Path = Path("."), t: str | None = None) -> TargetProfile:
+    d = target_dir(root, t)
     path = d / "profile.yaml"
     if not path.exists():
         raise ProfileError(f"no profile at {path}")
