@@ -65,7 +65,7 @@ class RunDetail(Run):
 
 class Requirements(BaseModel):
     kind: Literal["story", "brief"]
-    text: str = Field(min_length=1)
+    text: str  # a blank brief is a Scan of the whole verified spec (cohesion/001 D2)
 
 
 class RunRules(BaseModel):
@@ -219,12 +219,18 @@ def list_runs(focused: bool = False):
 def create_run(body: RunCreate):
     try:
         inputs = {}
-        if body.requirements:
-            req = body.requirements.model_dump()
-            inputs["requirements"] = artifacts.put("requirements", req).id
         options = {k: v for k, v in (("flows", body.flows), ("fresh", body.fresh),
                                      ("routes", body.routes), ("templates", body.templates),
                                      ("gate", body.gate), ("profile", body.profile)) if v}  # fmt: skip
+        if body.requirements:
+            req = body.requirements.model_dump()
+            if not req["text"].strip():
+                if req["kind"] == "story":
+                    raise ValueError("a story needs its text; leave a brief empty for a Scan")
+                # the same Scan as `tp scan` with no branch (tp/cli/watch.py:49)
+                req["text"] = "Scan of the whole verified spec"
+                options["scan"] = {"whole_spec": "an empty brief: the whole verified spec"}
+            inputs["requirements"] = artifacts.put("requirements", req).id
         if body.profile and body.profile not in {c["path"] for c in profile_choices()} | {
             c["slug"] for c in profile_choices()
         }:
@@ -246,6 +252,51 @@ def get_run(run_id: int):
         return runner.get_run(run_id)
     except KeyError:
         raise HTTPException(404, "run not found")
+
+
+class Count(BaseModel):
+    n: int
+    d: int | None
+    ids: list[str]
+
+
+class Blocked(BaseModel):
+    why: str
+    cases: Count
+
+
+class Claim(BaseModel):
+    """The claim-first header (cohesion/001 D5): what a run claims and what it rests on."""
+
+    target: str | None
+    reach: str | None
+    isolation: int | None  # 0 isolated, 1 partly isolated (stand-ins), 2 live and local (DR-3)
+    isolation_words: str | None
+    ceiling: str | None
+    ran: Count | None  # None until the gate has rows
+    blocked: list[Blocked]
+    basis: dict[str, Count]  # real | simulated | pre-generated | not recorded
+
+
+@app.get("/runs/{run_id}/claim", response_model=Claim)
+def run_claim(run_id: int):
+    """The header the run page shows: the same function the report's header uses."""
+    from tp.core import profile
+    from tp.stages.report import build
+
+    get_run(run_id)
+    heads = runner.heads(run_id)
+    body = {k: artifacts.get(heads[k]).body if k in heads else None
+            for k in ("cases", "gate_report", "run_records")}  # fmt: skip
+    target = runner.run_target(run_id)
+    with profile.selected(target):
+        facts = build.run_facts(body["run_records"])
+    if not target:  # a run with no pinned target claims none
+        facts["target"] = None
+    strategies = (facts["target"] or {}).get("strategies", {})
+    records = {r["id"]: r for r in facts["records"]}
+    return build.claim(facts["target"], body["gate_report"], body["run_records"], body["cases"],
+                       records, strategies)  # fmt: skip
 
 
 @app.post("/runs/{run_id}/stages/{name}/rerun", response_model=Run)

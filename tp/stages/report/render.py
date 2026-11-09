@@ -57,11 +57,61 @@ def _evidence(eid: str, ev: dict) -> str:
     return f'<details class=ev id="{e(eid)}"><summary><code>{e(eid)}</code> {e(title)}</summary>{body}</details>'
 
 
+def claim_line(c: dict) -> str:
+    """The claim-first header as one line of text (cohesion/001 D5); the run page builds the same."""
+    if c.get("ran") is None:
+        ran = "not run yet"
+    else:
+        blocked = "; ".join(f"{b['why']} {_n(b['cases'])}" for b in c["blocked"])
+        ran = f"ran {c['ran']['n']} of {c['ran']['d']}" + (
+            f"; blocked ▸ {blocked}" if blocked else ""
+        )
+    level = (
+        "" if c.get("isolation") is None else f"isolation {c['isolation']} ({c['isolation_words']})"
+    )
+    rests = ", ".join(f"{k} {_n(v)}" for k, v in c.get("basis", {}).items())
+    parts = [
+        c.get("target") or "no target",
+        c.get("reach") or "",
+        level,
+        c.get("ceiling") or "",
+        ran,
+    ]
+    return " · ".join(x for x in parts if x) + (f" · rests on: {rests}" if rests else "")
+
+
 def _claim(h: dict) -> str:
+    out = f"<p class=claim><b>{e(claim_line(h['claim']))}</b></p>" if h.get("claim") else ""
     if not h.get("ceiling"):
-        return ""
+        return out
     ran = ", ".join(f"{k}={v}" for k, v in h["strategies"].items())
-    return f"<p>Strongest claim: <b>{e(h['ceiling'])}</b> <span class=muted>· strategies: {e(ran)}</span></p>"
+    return (
+        out
+        + f"<p>Strongest claim: <b>{e(h['ceiling'])}</b> <span class=muted>· strategies: {e(ran)}</span></p>"
+    )
+
+
+def _ledger_html(deps: list[dict]) -> str:
+    """Every outbound dependency discovery found: tested (simulated) or not, with the reason (c3)."""
+    if not deps:
+        return ""
+    rows = []
+    for d in deps:
+        if d["status"] == "tested":
+            checks = " · ".join(f"<code>{e(c['case'])}</code> {e(c['outcome'])}"
+                                + (f" (fault {e(c['fault']['mode'])} {e(str(c['fault']['value']))})" if c.get("fault") else "")
+                                for c in d["checks"])  # fmt: skip
+            what = (f"<span class=label>simulated</span> on <code>{e(d['standin'])}</code>: {checks}"
+                    f"<details><summary>received ({len(d['received'])})</summary><pre>{e(json.dumps(d['received'], indent=1))}</pre></details>")  # fmt: skip
+        else:
+            what = f"not tested: {e(d['reason'])}"
+        rows.append(
+            f"<tr><td>{e(d['name'])}</td><td>{e(d['kind'])}</td><td>{e(str(d.get('via')))} <code>{e(str(d.get('key')))}</code></td><td>{what}</td></tr>"
+        )
+    return ("<section><h2>Outbound dependencies</h2><p class=muted>Every dependency discovery found. A tested one "
+            "ran against a local stand-in, so its result is simulated, never a real third party.</p><table><thead>"
+            "<tr><th>dependency</th><th>kind</th><th>found by</th><th>result</th></tr></thead><tbody>"
+            + "".join(rows) + "</tbody></table></section>")  # fmt: skip
 
 
 def _checks_html(c: dict) -> str:
@@ -118,7 +168,7 @@ def html(r: dict) -> str:
         obs = d.get("observed") or {}
         q = "&".join(f"{k}={v}" for k, v in (obs.get("query") or {}).items())
         rc = d.get("root_cause") or {}
-        parts.append(f"""<article class=card><h3>{e(d["ac"])} · {e(d["title"] or "")} <span class=label>{e(kind)}</span></h3>
+        parts.append(f"""<article class=card><h3>{e(d["ac"])} · {e(d["title"] or "")} <span class=label>{e(kind)}</span> <span class=label>basis: {e(str(d.get("basis") or "not recorded"))}</span></h3>
 <p><b>Expected</b> {e(str(d["expected"]))} · <b>observed</b> <code>{e(obs.get("method", ""))} {e(obs.get("path", ""))}{"?" + e(q) if q else ""} → {e(str(obs.get("status", "")))}</code>
 {("· <b>root cause</b> <code>" + e(rc.get("cls", "")) + ": " + e(rc.get("msg", "")) + "</code>") if rc else ""}</p>
 <p>cases {_num(d["cases"])} · decided by <b>{e(str(dec.get("by")))}</b> ({e(str(dec.get("decision")))}{(": " + e(dec["reason"])) if dec.get("reason") else ""}) · retest: {e(d["retest"])}</p>
@@ -160,6 +210,7 @@ def html(r: dict) -> str:
     parts.append("</tbody></table></section>")
 
     parts.append(_checks_html(r["checks"]))
+    parts.append(_ledger_html(r.get("dependencies", [])))
 
     rows = [
         ("Seeded detected (authored)", _num(sc["seeded_authored"])),
@@ -197,10 +248,10 @@ def html(r: dict) -> str:
     )
 
     parts.append(
-        "<section><h2>Traceability</h2><table><thead><tr><th>requirement</th><th>criterion</th><th>case</th><th>assertions</th><th>gate</th><th>verdict (reference)</th><th>evidence</th></tr></thead><tbody>"
+        "<section><h2>Traceability</h2><table><thead><tr><th>requirement</th><th>criterion</th><th>case</th><th>assertions</th><th>gate</th><th>verdict (reference)</th><th>basis</th><th>evidence</th></tr></thead><tbody>"
     )
     parts += [
-        f"<tr><td>{e(', '.join(t['req']))}</td><td>{e(t['ac'])}</td><td>{e(t['case'])}</td><td>{e(', '.join(t['assertions']))}</td><td>{e(t['gate'])}</td><td>{e(str(t['verdict']))} {e(str(t['dist']))}</td><td><code>{e(str(t['evidence']))}</code></td></tr>"
+        f"<tr><td>{e(', '.join(t['req']))}</td><td>{e(t['ac'])}</td><td>{e(t['case'])}</td><td>{e(', '.join(t['assertions']))}</td><td>{e(t['gate'])}</td><td>{e(str(t['verdict']))} {e(str(t['dist']))}</td><td>{e(str(t.get('basis') or 'not recorded'))}</td><td><code>{e(str(t['evidence']))}</code></td></tr>"
         for t in r["traceability"]
     ]
     parts.append("</tbody></table></section>")
@@ -272,6 +323,7 @@ def summary_md(r: dict) -> str:
             if (n := r["header"].get("network"))
             else []
         ),  # fmt: skip (blackbox D5)
+        *([f"**{claim_line(c)}**"] if (c := r["header"].get("claim")) else []),
         *([f"Strongest claim: {h}."] if (h := r["header"].get("ceiling")) else []),
         "",
         "## P0 — defects",
@@ -309,6 +361,13 @@ def summary_md(r: dict) -> str:
         out += [f"- `{g['group']}`: {(g['observed'] or {}).get('request')} → {(g['observed'] or {}).get('status')}"
                 f"{' (' + ', '.join(g['observed']['checks']) + ')' if (g['observed'] or {}).get('checks') else ''}"
                 for g in c["spec_mismatch"]]  # fmt: skip
+    if deps := r.get("dependencies"):
+        out += ["", "## Outbound dependencies"] + [
+            f"- {d['name']} ({d['kind']}): tested, simulated on {d['standin']}: "
+            + ", ".join(f"{c['case']} {c['outcome']}" for c in d["checks"])
+            + f"; received {len(d['received'])}" if d["status"] == "tested"
+            else f"- {d['name']} ({d['kind']}): not tested: {d['reason']}" for d in deps
+        ]  # fmt: skip
     out += [
         "",
         "## Scorecard",

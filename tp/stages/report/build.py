@@ -1,5 +1,10 @@
 """Aggregator, Worklist, Scorecard, Traceability, Coverage, Uncovered, AIDecisions (design
-D1–D7). Pure: report.json from artifact bodies only. Every number is num(n, d, ids)."""
+D1–D7). Pure given its inputs: artifact bodies, plus what `run_facts` reads from the run's sealed
+folder and its target profile (cohesion/001 D8). Every number is num(n, d, ids)."""
+
+import json
+
+from tp.core import db, labels, profile
 
 P0_CLASSES = ("PRODUCT_DEFECT", "INTERMITTENT_PRODUCT")
 ADMITTED = ("ADMITTED", "ADMITTED_REDUNDANT", "ADMITTED_UNMEASURED")
@@ -14,7 +19,12 @@ CLAIMS = {
     "read_back": "declared fields round-trip from create to read",
     "delete_final": "a read after delete: never 2xx",
     "paging": "out-of-range paging or a bad token: never 5xx; a 2xx is a page",
+    # on a local stand-in (simulated, C2), when discovery wired one (standins/001 D7)
+    "dependency_called": "the trigger reaches the dependency's stand-in with what it was sent",
+    "dependency_failure_handled": "with the dependency failing: in time, never a bare 5xx",
 }
+NOT_RAN = ("NOT_RUN", "SUSPECT_ENV")  # verdicts with no trusted execution behind them
+ISOLATION = {0: "isolated", 1: "partly isolated (stand-ins)", 2: "live and local"}  # DR-3
 SPEC_MISMATCH_SHOWN = 10  # groups listed before the rest are only counted (checks/001 D6)
 
 
@@ -43,21 +53,119 @@ def ceiling(strategies: dict, gate: dict) -> str | None:
     return "Stable, property-checked" if props else "Stable"
 
 
+def run_facts(rr: dict | None) -> dict:
+    """What the artifacts don't hold (cohesion/001 D8): the target (C2 isolation, C5
+    dependencies) from the profile the runner selected for this run, and the run's sealed
+    records (C2 basis) and `dependencies.json` (standins/001 D9). Missing pieces stay empty."""
+    try:
+        p = profile.load()
+        target = {"slug": p.slug, "reach": p.reach.strategy, "isolation": labels.isolation(p),
+                  "dependencies": p.checks.value.get("dependencies") or [],
+                  "strategies": {c: f.strategy for c, f in p.fields.items()}}  # fmt: skip
+    except profile.ProfileError:
+        target = None
+    folder = db.data_dir() / rr["folder"] if (rr or {}).get("folder") else None
+    res = folder / "results.jsonl" if folder else None
+    dep = folder / "dependencies.json" if folder else None
+    return {"target": target,
+            "records": [json.loads(x) for x in res.read_text().splitlines() if x.strip()]
+            if res and res.exists() else [],
+            "seen": json.loads(dep.read_text()) if dep and dep.exists() else {}}  # fmt: skip
+
+
+def basis(attempts: list[str], records: dict[str, dict]) -> str | None:
+    """One result's basis (C2) over the records of its attempts; None when none is at hand."""
+    got = {labels.basis(records[a]) for a in attempts if a in records}
+    return next((b for b in ("simulated", "pre-generated", "real") if b in got), None)
+
+
+def claim(target: dict | None, gate: dict | None, rr: dict | None, cases: dict | None,
+          records: dict[str, dict], strategies: dict | None = None) -> dict:  # fmt: skip
+    """The claim-first header (cohesion/001 D5): target · reach · isolation · ceiling · what ran
+    (N of M; blocked ▸ why), and what the results rest on. One function for the report and the
+    run page. `ran` is None until the gate has rows."""
+    t = target or {}
+    out = {"target": t.get("slug"), "reach": t.get("reach"), "isolation": t.get("isolation"),
+           "isolation_words": ISOLATION.get(t.get("isolation")),
+           "ceiling": ceiling(strategies or {}, gate or {"rows": []}),
+           "ran": None, "blocked": [], "basis": {}}  # fmt: skip
+    rows = (gate or {}).get("rows") or []
+    if not rows:
+        return out
+    ref = {v["case_id"]: v for v in (rr or {}).get("verdicts", []) if v["variant"] == "reference"}
+    why: dict[str, list[str]] = {}
+    ran = []
+    for r in rows:
+        v = ref.get(r["case_id"])
+        if r["status"] == "EXCLUDED":
+            reason = f"excluded: {(r.get('excluded') or 'unknown').split(':')[0]}"
+        elif r["status"] in ("REJECTED", "UNBOUND"):
+            reason = "rejected at the gate" if r["status"] == "REJECTED" else "not bound"
+        elif v is None or v["verdict"] in NOT_RAN:
+            reason = f"not run: {v['verdict'] if v else 'no verdict'}"
+        else:
+            ran.append(r["case_id"])
+            continue
+        why.setdefault(reason, []).append(r["case_id"])
+    bound = {r["unit"] for r in rows if r.get("unit")}
+    if unbound := sorted(c["id"] for c in (cases or {}).get("cases", []) if c["id"] not in bound):
+        why.setdefault("signed case not bound to a test", []).extend(unbound)
+    total = len(rows) + len(unbound)
+    by_basis: dict[str, list[str]] = {}
+    for cid in ran:
+        by_basis.setdefault(basis(ref[cid]["attempts"], records) or "not recorded", []).append(cid)
+    return out | {"ran": num(len(ran), total, ran),
+                  "blocked": [{"why": k, "cases": num(len(v), total, v)} for k, v in sorted(why.items())],
+                  "basis": {k: num(len(v), len(ran), v) for k, v in sorted(by_basis.items())}}  # fmt: skip
+
+
+def ledger(dependencies: list[dict], seen: dict[str, dict]) -> list[dict]:
+    """The dependency ledger (c3, cohesion/001 D9): every outbound dependency discovery found,
+    tested (simulated: the stand-in, each check's outcome and what it received) or not tested,
+    with the reason."""
+    out = []
+    for d in dependencies:
+        mine = {k: v for k, v in seen.items() if d.get("trigger") and k.endswith(f":{d['trigger']}")
+                and k.startswith("G:dependency_")}  # fmt: skip
+        entry = {k: d.get(k) for k in ("name", "kind", "via", "key", "trigger")}
+        if d.get("status") == "wired" and mine:
+            called = next((v for k, v in mine.items() if k.startswith("G:dependency_called:")), {})
+            out.append(entry | {"status": "tested", "basis": "simulated",
+                                "standin": f"tp-standin-{d['name']}",
+                                "checks": [{"case": k, "outcome": v["outcome"], "fault": v.get("fault")}
+                                           for k, v in sorted(mine.items())],
+                                "received": called.get("received", [])})  # fmt: skip
+        else:
+            reason = d.get("reason") if d.get("status") != "wired" else None
+            out.append(entry | {"status": "not tested",
+                                "reason": reason or "wired, but no dependency check ran on it in this run"})  # fmt: skip
+    return out
+
+
 def build(spec: dict, cases: dict, gate: dict, rr: dict, tri: dict, decisions: list[dict],
           labels: list[str], bound_tests: dict | None = None,
-          strategies: dict | None = None, timing: dict | None = None) -> dict:  # fmt: skip
+          strategies: dict | None = None, timing: dict | None = None,
+          facts: dict | None = None) -> dict:  # fmt: skip
     criteria = {c["id"]: c for c in spec["criteria"]}
     case_by_id = {c["id"]: c for c in cases["cases"]}
     verdicts = rr["verdicts"]
     ref = {v["case_id"]: v for v in verdicts if v["variant"] == "reference"}
     defects = tri["defects"]
+    facts = run_facts(rr) if facts is None else facts
+    records = {r["id"]: r for r in facts["records"]}
+    deps = (facts["target"] or {}).get("dependencies") or []
     return {
         "header": _header(rr, tri, decisions, labels, cases)
-        | {"strategies": strategies or {}, "ceiling": ceiling(strategies or {}, gate)},
-        "worklist": _worklist(criteria, case_by_id, gate, tri, verdicts, bound_tests),
+        | {
+            "strategies": strategies or {},
+            "ceiling": ceiling(strategies or {}, gate),
+            "claim": claim(facts["target"], gate, rr, cases, records, strategies),
+        },
+        "worklist": _worklist(criteria, case_by_id, gate, tri, verdicts, bound_tests, records),
         "checks": _checks(gate, tri),
+        "dependencies": ledger(deps, facts["seen"]),
         "scorecard": _scorecard(criteria, case_by_id, gate, rr, tri),
-        "traceability": _traceability(criteria, case_by_id, ref, gate),
+        "traceability": _traceability(criteria, case_by_id, ref, gate, records),
         "coverage": _coverage(case_by_id, ref),
         "uncovered": _uncovered(spec, cases, gate, timing or {}),
         "ai_decisions": _ai(spec, cases, gate, tri, decisions),
@@ -127,7 +235,7 @@ def _checks(gate, tri):
     }
 
 
-def _worklist(criteria, case_by_id, gate, tri, verdicts, bound_tests=None):
+def _worklist(criteria, case_by_id, gate, tri, verdicts, bound_tests=None, records=None):
     p0 = []
     for d in tri["defects"]:
         if d["class"] not in P0_CLASSES:
@@ -139,6 +247,7 @@ def _worklist(criteria, case_by_id, gate, tri, verdicts, bound_tests=None):
                    "observed": d.get("observed"), "cases": num(len(d["cases"]), None, d["cases"]),
                    "root_cause": d.get("root_cause"), "suspects": d["suspects"], "evidence": d["evidence"],
                    "decision": d.get("decision") or {"by": "rules", "decision": "seeded (ground truth known)"},
+                   "basis": basis([x for x in d["evidence"] if "#" not in x], records or {}),
                    "retest": "not retested (M5)"})  # fmt: skip
     p0.sort(key=lambda x: (x["kind"] != "real", x["defect"]))
     rows = gate["rows"]
@@ -238,7 +347,7 @@ def _scorecard(criteria, case_by_id, gate, rr, tri):
     }
 
 
-def _traceability(criteria, case_by_id, ref, gate):
+def _traceability(criteria, case_by_id, ref, gate, records=None):
     out = []
     for r in gate["rows"]:
         c = criteria.get(r["ac"], {})
@@ -246,6 +355,7 @@ def _traceability(criteria, case_by_id, ref, gate):
         out.append({"req": [s.get("lines") or f"{s.get('file')}:{s.get('line')}" for s in c.get("sources", [])],
                     "ac": r["ac"], "case": r["case_id"], "assertions": v.get("assertions") or [f"{r['case_id']}/*"],
                     "gate": r["status"], "verdict": v.get("verdict"), "dist": v.get("dist"),
+                    "basis": basis(v.get("attempts") or [], records or {}),
                     "evidence": (v.get("attempts") or [None])[0]})  # fmt: skip
     return out
 
@@ -331,6 +441,9 @@ POSITIONS = {
     "review_item",
     "shuffle_seed",
     "observed",  # a copied request/response (evidence): its numbers are data, not report counts
+    "received",  # what a stand-in received (evidence, cohesion/001 D9)
+    "fault",  # the injected fault: a status or a delay, not a count
+    "isolation",  # a level (DR-3), not a count
 }  # positions and ids, not counts
 
 

@@ -59,6 +59,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/runs/{run_id}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Run Claim
+         * @description The header the run page shows: the same function the report's header uses.
+         */
+        get: operations["run_claim_runs__run_id__claim_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/runs/{run_id}/stages/{name}/rerun": {
         parameters: {
             query?: never;
@@ -526,6 +546,44 @@ export interface components {
              */
             schema_version: number;
         };
+        /** Blocked */
+        Blocked: {
+            /** Why */
+            why: string;
+            cases: components["schemas"]["Count"];
+        };
+        /**
+         * Claim
+         * @description The claim-first header (cohesion/001 D5): what a run claims and what it rests on.
+         */
+        Claim: {
+            /** Target */
+            target: string | null;
+            /** Reach */
+            reach: string | null;
+            /** Isolation */
+            isolation: number | null;
+            /** Isolation Words */
+            isolation_words: string | null;
+            /** Ceiling */
+            ceiling: string | null;
+            ran: components["schemas"]["Count"] | null;
+            /** Blocked */
+            blocked: components["schemas"]["Blocked"][];
+            /** Basis */
+            basis: {
+                [key: string]: components["schemas"]["Count"];
+            };
+        };
+        /** Count */
+        Count: {
+            /** N */
+            n: number;
+            /** D */
+            d: number | null;
+            /** Ids */
+            ids: string[];
+        };
         /** DefectDecision */
         DefectDecision: {
             /**
@@ -979,6 +1037,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_claim_runs__run_id__claim_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Claim"];
                 };
             };
             /** @description Validation Error */
