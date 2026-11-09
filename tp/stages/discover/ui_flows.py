@@ -32,7 +32,7 @@ SCHEMA = {
         "type": "object",
         "properties": {"action": {"enum": ["goto", "fill", "click"]}, "path": {"type": "string"},
                        "role": {"type": "string"}, "name": {"type": "string"},
-                       "value": {"type": "string"}},
+                       "value": {"type": "string"}, "optional": {"type": "boolean"}},
         "required": ["action"], "additionalProperties": False}}},
     "required": ["steps"],
     "additionalProperties": False,
@@ -45,7 +45,8 @@ PROMPT = (
     '"value": ...}}, {{"action": "click", "role": ..., "name": ...}}. Find elements only by their '
     "ARIA role and their accessible name, exactly as the snapshot shows them. An element with "
     "no accessible name (a textbox with only a placeholder, say): leave name out, and the first "
-    "element with that role is used.\n"
+    "element with that role is used. A dialog that may or may not show (a welcome or a tour): "
+    'dismiss it with a click marked "optional": true, which is skipped when it does not show.\n'
     'Start with a goto to "/". Sign in with the username "{user}" and the password '
     '"$TP_SECRET_ADMIN_PASSWORD": type these strings exactly. Then type "$TP_UNIQUE" as the new '
     "item's text, and submit it. Controls that appear only after sign-in are not in the "
@@ -94,7 +95,9 @@ def _step(s: dict) -> dict:
     if a == "goto":
         return {"goto": s.get("path") or "/"}
     loc = {"role": s.get("role")} | ({"name": n} if (n := s.get("name")) else {})
-    return {"fill": loc | {"value": s.get("value")}} if a == "fill" else {"click": loc}
+    if a == "fill":
+        return {"fill": loc | {"value": s.get("value")}}
+    return {"click": loc | ({"optional": True} if s.get("optional") else {})}
 
 
 def _propose(d, snapshot: str, feedback: str) -> list[dict]:
@@ -156,6 +159,9 @@ def run(d) -> None:
     if why := _skip(d):
         d.emit("discover_ui", flow=None, reason=why)
         return
+    from tp.stages.discover import dependencies
+
+    dependencies.restart(d)  # propose from the state a run starts in: a fresh stack, no data
     image = None
     if d.probes.replay is None:  # a replay needs no image: every browser run is in the log
         from tp.stages.generate import ui as gen_ui
