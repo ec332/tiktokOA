@@ -197,3 +197,17 @@ def test_a_guard_knob_is_not_listed_as_an_untested_dependency():
     seen = {"G:dependency_called:POST /api/notes": {"outcome": "passed", "received": [{}]}}
     (row,) = build.ledger(deps, seen)
     assert row["status"] == "tested" and row["guards"] == ["WEBHOOK_ALLOWLIST"]
+
+
+def test_a_seeded_black_box_build_and_its_clean_build_are_comparable():
+    """The black-box fingerprint in retest's shape (integration/002): a seed is a flag, a fix a
+    sut patch, so bug:<seed> -> reference diffs nothing but what the seed was."""
+    from tp.stages.retest import decide
+
+    base = {"compose": "c1", "images": {"app": "i1", "db": "d"}, "commit": "abc", "ref": "v1"}
+    bug = base | {"images": {"app": "i2", "db": "d"}, "flags": ["webhook-drops-body:p1"]}
+    assert decide.env_diff(bug, base, "app") == []
+    fixed = base | {"sut": {"patches": {"fix": "p9"}}}
+    assert decide.env_diff(base, fixed, "app") == []  # a fix patch may be added
+    assert decide.env_diff(fixed, base | {"sut": {"patches": {"fix": "p8"}}}, "app") == [
+        "sut.patches (a patch changed or was removed)"]  # fmt: skip
