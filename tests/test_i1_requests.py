@@ -267,3 +267,14 @@ def test_a_generated_secret_is_plain_and_also_a_32_byte_base64_key(tmp_path, mon
     monkeypatch.setenv("TP_DATA", str(tmp_path))
     v = secrets.get("t", "jwt_key", generate=True)
     assert v.isalnum() and len(base64.b64decode(v, validate=True)) >= 32
+
+
+def test_a_nested_token_field_is_found_and_read_back():
+    """RealWorld answers a log-in with {"user": {"token": …}} (integration/002)."""
+    from tp.stages.discover.discovery import _fields
+    from tp.stages.env.blackbox import _dig
+
+    resp = {"user": {"email": "a@example.test", "token": "t" * 40}}
+    assert ("user.token", "t" * 40) in list(_fields(resp))
+    assert _dig(resp, "user.token") == "t" * 40 and _dig(resp, "token") is None
+    assert _dig({"access_token": "x"}, "access_token") == "x"  # top level, as before
