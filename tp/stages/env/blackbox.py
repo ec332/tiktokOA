@@ -373,9 +373,10 @@ class Stack:
         ref = self.r["ref"]
         if not (path / ".git").exists():
             path.parent.mkdir(parents=True, exist_ok=True)
-            self._git(path.parent, "clone", "-q", "--depth", "1", "--branch", ref,
-                      self.p.repo, path.name)  # fmt: skip
-        elif self._at(path) != ref:  # an existing clone of another ref (discover/006)
+            commit = re.fullmatch(r"[0-9a-f]{40}", ref)  # `--branch` takes no sha: fetched below
+            self._git(path.parent, "clone", "-q", "--depth", "1",
+                      *([] if commit else ["--branch", ref]), self.p.repo, path.name)  # fmt: skip
+        if self._at(path) != ref:  # another ref's clone (discover/006), or a pinned commit (C9)
             if self._git(path, "status", "--porcelain"):
                 raise BlackboxError(f"{path} has local changes; it can't be moved to {ref}")
             tag = self._remote_tag(path, ref)
