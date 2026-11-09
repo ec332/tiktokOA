@@ -32,8 +32,10 @@ def _faulted(vd: dict, rows: dict) -> bool:
 
 
 def under_test(row: dict) -> dict | None:
-    """The exchange a failing record asserted on (its last test request if none was marked)."""
-    steps = [e for e in row.get("exchanges", []) if not e.get("setup")]
+    """The exchange a failing record asserted on (its last test request if none was marked).
+    A UI action (`kind: ui`) is a step, not a request: a flow that failed before it marked one
+    falls back to its last HTTP exchange (integration/002; C7 still reads the origin)."""
+    steps = [e for e in row.get("exchanges", []) if not e.get("setup") and e.get("kind") != "ui"]
     return next(
         (e for e in steps if e["step"] == row.get("under_test")), steps[-1] if steps else None
     )
