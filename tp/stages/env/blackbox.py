@@ -249,6 +249,13 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
     return out | ({"volumes": volumes} if volumes else {}), refs
 
 
+def _dig(resp, field: str):
+    """A dotted token field (`user.token`) in a login answer; None when it isn't there."""
+    for k in field.split("."):
+        resp = resp.get(k) if isinstance(resp, dict) else None
+    return resp
+
+
 def _same(svc: dict, built: bool) -> dict:
     out = {k: v for k, v in svc.items() if k != "labels" and not (built and k == "image")}
     if built:
@@ -1039,13 +1046,10 @@ class TokenHeaderAuth:
             kw = {"json": body} if login.get("json") else {"data": body}
             status, resp = (self.stack or Stack(self.p)).http("POST", login["path"], **kw)
             # any 2xx, as discovery's try_login (a sign-up answering 201 with a token, domains/002 R1)
-            if (
-                not 200 <= status < 300
-                or not isinstance(resp, dict)
-                or login["token_field"] not in resp
-            ):
+            tok = _dig(resp, login["token_field"])
+            if not 200 <= status < 300 or tok is None:
                 raise BlackboxError(f"login {login['path']}: {status}")
-            token = secrets.put(slug, name, str(resp[login["token_field"]]))
+            token = secrets.put(slug, name, str(tok))
         return {"scheme": scheme, "token": token}
 
 
