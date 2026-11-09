@@ -522,9 +522,15 @@ class Discovery:
         self.values["spec"] = {"strategy": strategy, "openapi": rel, "base": base}
         self.mark("spec", "openapi", "clarify" if layer == "clarify" else "repo", layer)
         self.mark("spec", "base", "repo", "algorithm")
-        for path, hl in [(p, "convention") for p in self.conventions("health_path")] + [
-            ("/", "algorithm")
-        ]:
+        # then the spec's own reads without parameters: an anonymous 200 says the app is up
+        reads = [
+            (p, "algorithm") for m, p, _ in ops(self.spec) if m == "GET" and not PARAM.search(p)
+        ]
+        for path, hl in (
+            [(p, "convention") for p in self.conventions("health_path")]
+            + [("/", "algorithm")]
+            + reads[:5]
+        ):
             n, status, _ = self.http("GET", path)
             if status == 200:
                 self.values["reach"]["health"] = path
