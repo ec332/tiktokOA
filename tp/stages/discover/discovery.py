@@ -106,7 +106,7 @@ def ops(spec: dict):
 def body_schema(spec: dict, op: dict) -> tuple[dict, str | None]:
     """-> (the request body schema, the encoding to send): form when the spec accepts it (the
     platform's token login posts forms), else JSON."""
-    content = (op.get("requestBody") or {}).get("content") or {}
+    content = deref(spec, op.get("requestBody")).get("content") or {}  # a $ref body (RealWorld)
     for ctype, enc in (("application/x-www-form-urlencoded", "form"),
                        ("application/json", "json")):  # fmt: skip
         if ctype in content:
@@ -117,6 +117,7 @@ def body_schema(spec: dict, op: dict) -> tuple[dict, str | None]:
 def response_schema(spec: dict, op: dict) -> dict:
     for code, r in sorted((op.get("responses") or {}).items()):
         if str(code).startswith("2"):
+            r = deref(spec, r)  # a $ref response (components/responses)
             return deref(
                 spec, ((r.get("content") or {}).get("application/json") or {}).get("schema")
             )
