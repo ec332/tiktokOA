@@ -15,6 +15,7 @@ import contextlib
 import json
 import os
 import re
+import socket
 import sys
 from pathlib import Path
 
@@ -39,6 +40,17 @@ API_TYPES = ("document", "fetch", "xhr")  # the responses recorded as HTTP excha
 
 class FlowError(ValueError):
     """A flow that isn't valid IR (a proposal is model output, so it is checked here)."""
+
+
+def page_base() -> str:
+    """$TP_BASE_URL for the browser. Chromium treats a one-label host as a TLD, and upgrades the
+    HSTS-preloaded ones (`app`, `dev`, ...) to HTTPS, so a service name is reached by its IP.
+    shortcut: the page's Host header is then the IP; map a dotted alias with
+    --host-resolver-rules when a target checks Host."""
+    url = httpx.URL(os.environ["TP_BASE_URL"].rstrip("/"))
+    if "." in url.host or url.host == "localhost" or ":" in url.host:
+        return str(url)
+    return str(url.copy_with(host=socket.gethostbyname(url.host)))
 
 
 def timeout_s() -> float:
@@ -115,7 +127,7 @@ def _ui(kind: str, arg) -> None:
 class Run:
     def __init__(self, page):
         self.page, self.rec = page, record.current()
-        self.base = os.environ["TP_BASE_URL"].rstrip("/")
+        self.base = page_base().rstrip("/")
         self.unique, self.errors, self.pending = self.rec.name("ui"), [], []
         page.on("pageerror", lambda e: self.errors.append(str(e)))
         page.on("response", lambda r: self.pending.append(r)
@@ -260,7 +272,7 @@ def main(mode: str, stdin: str) -> dict:
     """`snapshot`: the start page's aria snapshot. `run`: a flow (JSON) -> what running showed."""
     with browser() as page:
         if mode == "snapshot":
-            page.goto(os.environ["TP_BASE_URL"].rstrip("/") + "/", wait_until="domcontentloaded",
+            page.goto(page_base().rstrip("/") + "/", wait_until="domcontentloaded",
                       timeout=timeout_s() * 1000)  # fmt: skip
             with contextlib.suppress(Exception):  # an app's script renders it: wait for a control
                 page.locator("input, button, textarea").first.wait_for(timeout=timeout_s() * 1000)
