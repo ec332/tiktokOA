@@ -439,6 +439,9 @@ def runner(monkeypatch):
     monkeypatch.setattr(ui_flows.subprocess, "run", fake_run)
     monkeypatch.setattr(gen_ui, "build_image", lambda: {"digest": "sha256:browser"})
     monkeypatch.setattr(ui_flows.secrets, "get", lambda slug, name: "pw-very-secret")
+    from tp.stages.discover import dependencies
+
+    monkeypatch.setattr(dependencies, "restart", lambda d: None)  # a real stack's step (I1)
     return script, cmds
 
 

@@ -172,3 +172,17 @@ def test_the_read_back_tries_the_reads_named_like_the_create_first():
     flow, _ = ui_flows.verify(D(), [{"goto": "/"}], out)
     assert asked == ["/api/memos"] and flow["steps"][-1] == {
         "read_back": {"path": "/api/memos", "contains": "$TP_UNIQUE"}}  # fmt: skip
+
+
+def test_an_optional_click_parses_and_nothing_else_may_be_optional():
+    """A first-use welcome dialog shows only on a fresh account (Memos, integration/002)."""
+    import pytest
+
+    from platform_rt import ui
+
+    skip = {"click": {"role": "button", "name": "Skip", "optional": True}}
+    assert ui.parse({"name": "f", "steps": [{"goto": "/"}, skip]})
+    for bad in ({"click": {"role": "button", "name": "Skip", "optional": "yes"}},
+                {"fill": {"role": "textbox", "value": "x", "optional": True}}):  # fmt: skip
+        with pytest.raises(ui.FlowError):
+            ui.parse({"name": "f", "steps": [bad]})
