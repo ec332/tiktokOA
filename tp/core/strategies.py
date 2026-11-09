@@ -26,7 +26,7 @@ class Reach(Protocol):  # container | external (stage E)
     def exec(self, cmd: list[str], **kw) -> str | None: ...  # None: no exec on this reach
 
 
-class Spec(Protocol):  # served | repo_file | code_routes
+class Spec(Protocol):  # served | repo_file | pack_file | code_routes
     def openapi(self, variant: str = "reference") -> dict: ...
 
 
