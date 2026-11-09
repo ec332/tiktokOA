@@ -632,8 +632,11 @@ class Stack:
             r = subprocess.run(["docker", "image", "inspect", "--format", "{{.Id}}", s["image"]],
                                check=False, capture_output=True, text=True)  # fmt: skip
             images[n] = r.stdout.strip()
-        text = self.file.read_text().replace(str(self.dir), "<env>")
         built = sorted(n for n, svc in compose["services"].items() if "build" in svc)
+        # a built service's tag differs per variant by design; `images` and `commit` cover it
+        same = {**compose, "services": {n: {k: v for k, v in svc.items() if k != "image" or n not in built}
+                                        for n, svc in compose["services"].items()}}  # fmt: skip
+        text = yaml.safe_dump(same, sort_keys=True).replace(str(self.dir), "<env>")
         network = {
             "run": "none: an internal network, reached inbound through a forwarder",
             "build": f"unrestricted outbound while building {', '.join(built)}"
@@ -642,8 +645,15 @@ class Stack:
         }  # fmt: skip (D5)
         out = {"compose": sha256(text), "images": images, "commit": self.commit(),
                "ref": self.r["ref"], "network": network}  # fmt: skip
-        if self.patches:  # the labelled seed or fix this build carries (DR-9, DR-10)
-            out["patches"] = self.patch_hashes()
+        if self.patches:  # the labelled seed or fix this build carries (DR-9, DR-10), in the
+            # shape retest's env diff reads: a seed is a flag; a fix is a sut patch, only added
+            hashes = self.patch_hashes()
+            if self.variant_name.startswith("bug:"):
+                out["flags"] = sorted(
+                    f"{n}:{h}" for n, h in hashes.items()
+                )  # a list, as the template's
+            else:
+                out["sut"] = {"patches": hashes}
         return out
 
     # ---- the runner ----
