@@ -300,3 +300,36 @@ def test_a_realworld_shaped_sign_up_and_log_in_are_both_candidates():
     assert got["/api/users/login"]["email"] == "tpadmin@example.test"
     assert got["/api/users"] | {"password": None} == {"username": "tpadmin",
                                                       "email": "tpadmin@example.test", "password": None}  # fmt: skip
+
+
+def test_an_id_inside_an_envelope_is_found_and_read_back(tmp_path, monkeypatch):
+    """RealWorld answers a create with {"article": {"slug": …}} (integration/004)."""
+    import json
+
+    import httpx
+    from platform_rt.api import _ledger, dig
+
+    from platform_rt import record
+    from tp.stages.discover import discovery
+
+    d = discovery.Discovery("https://example.invalid/x/y", "v1", None, discovery.Probes())
+    seen = []
+
+    class S:
+        def http(self, m, path, **kw):
+            seen.append(path)
+            return (200, {}) if path == "/api/articles/how-to" else (404, {})
+
+    d.stack = S()
+    created = {"article": {"title": "How to", "slug": "how-to", "author": {"username": "u"}}}
+    assert d.id_field("/api/articles/{slug}", created, {})[:3] == ("article.slug", "string",
+                                                                   "verbatim")  # fmt: skip
+    assert seen == ["/api/articles/how-to"]  # the leaf named like the path parameter first
+
+    monkeypatch.setenv("TP_LEDGER", str(tmp_path / "ledger.jsonl"))
+    monkeypatch.setenv("TP_ID_FIELD", "article.slug")
+    record.start("t::x", "x")
+    resp = httpx.Response(201, json=created, request=httpx.Request("POST", "http://h/api/articles"))
+    _ledger("POST", resp)
+    assert json.loads((tmp_path / "ledger.jsonl").read_text())["id"] == "how-to"
+    assert dig(created, "article.author.username") == "u" and dig(created, "id") is None
