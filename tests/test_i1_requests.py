@@ -234,3 +234,26 @@ def test_a_ui_action_is_never_the_request_under_test():
                           "status": 0}]}  # fmt: skip
     assert under_test(row)["path"] == "/api/notes"
     assert under_test({"exchanges": [row["exchanges"][0]]}) is None
+
+
+def test_a_pinned_commit_is_cloned_and_checked_out(tmp_path, monkeypatch):
+    """C9 pins implementations by commit; `git clone --branch` takes no sha (integration/002)."""
+    import subprocess
+    import types
+
+    from tp.stages.env import blackbox as bb
+
+    up = tmp_path / "up"
+    up.mkdir()
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@example.test"]
+    for text in ("a", "b"):
+        (up / "f").write_text(text)
+        subprocess.run(["git", "init", "-q"], cwd=up, check=True)
+        subprocess.run([*git, "add", "f"], cwd=up, check=True)
+        subprocess.run([*git, "commit", "-qm", text], cwd=up, check=True)
+    first = subprocess.run(["git", "rev-parse", "HEAD~1"], cwd=up, capture_output=True,
+                           text=True, check=True).stdout.strip()  # fmt: skip
+    monkeypatch.setenv("TP_DATA", str(tmp_path / "data"))
+    st = bb.Stack.__new__(bb.Stack)
+    st.p, st.r = types.SimpleNamespace(slug="x", repo=f"file://{up}"), {"ref": first}
+    assert st._at(st.src) == first and (st.src / "f").read_text() == "a"
