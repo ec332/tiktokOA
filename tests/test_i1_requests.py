@@ -257,3 +257,13 @@ def test_a_pinned_commit_is_cloned_and_checked_out(tmp_path, monkeypatch):
     st = bb.Stack.__new__(bb.Stack)
     st.p, st.r = types.SimpleNamespace(slug="x", repo=f"file://{up}"), {"ref": first}
     assert st._at(st.src) == first and (st.src / "f").read_text() == "a"
+
+
+def test_a_generated_secret_is_plain_and_also_a_32_byte_base64_key(tmp_path, monkeypatch):
+    import base64
+
+    from tp.core import secrets
+
+    monkeypatch.setenv("TP_DATA", str(tmp_path))
+    v = secrets.get("t", "jwt_key", generate=True)
+    assert v.isalnum() and len(base64.b64decode(v, validate=True)) >= 32
