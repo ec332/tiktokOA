@@ -278,3 +278,25 @@ def test_a_nested_token_field_is_found_and_read_back():
     assert ("user.token", "t" * 40) in list(_fields(resp))
     assert _dig(resp, "user.token") == "t" * 40 and _dig(resp, "token") is None
     assert _dig({"access_token": "x"}, "access_token") == "x"  # top level, as before
+
+
+def test_a_realworld_shaped_sign_up_and_log_in_are_both_candidates():
+    """Nested bodies, nested answers, an undeclared sign-up answer (integration/002)."""
+    from tp.stages.discover.discovery import Discovery
+
+    s = {"type": "string"}
+    body = lambda *ks: {"content": {"application/json": {"schema": {"type": "object",  # noqa: E731
+         "properties": {"user": {"type": "object", "properties": {k: s for k in ks}}}}}}}  # fmt: skip
+    ok = {"200": {"content": {"application/json": {"schema": {"type": "object", "properties": {
+          "user": {"type": "object", "properties": {"token": s}}}}}}}}  # fmt: skip
+    spec = {"paths": {"/api/users/login": {"post": {"requestBody": body("email", "password"),
+                                                    "responses": ok}},
+                      "/api/users": {"post": {"requestBody": body("username", "email", "password"),
+                                              "responses": {"201": {}}}}}}  # fmt: skip
+    d = Discovery.__new__(Discovery)
+    d.spec, d.answers, d.cfg = spec, {}, {"admin_user": "tpadmin"}
+    d.conventions = lambda kind: ["login"] if kind == "signin_op_pattern" else []
+    got = {c[0]: c[1]["user"] for c in d.logins()}
+    assert got["/api/users/login"]["email"] == "tpadmin@example.test"
+    assert got["/api/users"] | {"password": None} == {"username": "tpadmin",
+                                                      "email": "tpadmin@example.test", "password": None}  # fmt: skip
