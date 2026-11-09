@@ -39,21 +39,8 @@ def split(target: str) -> tuple[str, str | None]:
 def busy(slug: str) -> str | None:
     """A run on this target that may hold its stack (discover/006): discovery shares the compose
     project, clone and stored token with it, so starting would tear down that run's environment.
-    Running, or waiting for review after its env stage brought the stack up."""
-    from pathlib import Path
-
-    for r in runner.list_runs(500):
-        if r["status"] not in ("running", "awaiting_review") or runner.stages(r["id"]) == [
-            "discover"
-        ]:
-            continue
-        if (t := runner.run_target(r["id"])) is None or Path(t).name != slug:
-            continue
-        env = next((e for e in reversed(runner.get_run(r["id"])["executions"])
-                    if e["stage"] == "env"), None)  # fmt: skip
-        if r["status"] == "running" or (env and env["status"] == "succeeded"):
-            return r["name"]
-    return None
+    One rule with the run lock (harden/002 request 2)."""
+    return runner.busy(slug)
 
 
 def asked_before(d) -> bool:

@@ -316,9 +316,10 @@ class Discovery:
         files = svc.get("env_file", [])
         env = {}
         for f in [files] if isinstance(files, str | dict) else files:
-            p = (src / compose_path).parent / (f["path"] if isinstance(f, dict) else f)
-            if p.exists():
-                env |= bb.env_file(p)
+            try:  # inside the checkout only (H2, reach/002 request 2)
+                env |= bb._env_file(f, (src / compose_path).parent, src.resolve())
+            except bb.MissingValues:
+                pass  # step_reach asks for it (reach/001 D8)
         return env | {k: v for k, v in bb._env_dict(svc.get("environment")).items()}
 
     def admin_env(self, src: Path, app_env: dict[str, str]) -> tuple[dict | None, str]:
@@ -907,6 +908,9 @@ class Discovery:
         self.values["safety"] = {"strategy": "unrestricted"}
         fam = dict(self.cfg["families"]) | {"exclude": self.exclude}
         self.values["checks"] = {"strategy": "pytest_cases", "families": fam}
+        if deps := getattr(self, "dependencies", []):  # C5, standins/002 request R1
+            self.values["checks"]["dependencies"] = deps
+            fam["dependencies"] = [x for x in deps if x["status"] == "wired"]
         for c in ("state", "mutation", "safety", "checks"):
             self.mark(c, "strategy", "resolver", "algorithm")
 
