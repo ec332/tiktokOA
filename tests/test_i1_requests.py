@@ -402,3 +402,23 @@ def test_a_health_condition_is_kept_so_the_app_waits_for_its_database(tmp_path):
     assert out["services"]["app"]["depends_on"] == dep | {
         "tp-standin-http": {"condition": "service_started"}}  # fmt: skip
     assert out["services"]["db"]["healthcheck"] == {"test": ["CMD", "true"]}
+
+
+def test_with_a_pack_spec_the_specs_own_anonymous_read_is_the_health_path(monkeypatch):
+    """express-bookshelf answers no convention health path and no `/`: its spec's `GET /api/tags`
+    does (integration/004)."""
+    from tp.stages.discover import discovery
+
+    d = discovery.Discovery("https://example.invalid/x/y", "v1", None, discovery.Probes(),
+                            answers={"spec": "pack:realworld"})  # fmt: skip
+    d.conventions = lambda kind: ["/health"] if kind == "health_path" else []
+    d.values = {"reach": {}}
+    d.new_stack = lambda: None
+
+    class S:
+        def http(self, m, path, **kw):
+            return (200, {"tags": []}) if path in ("/api/articles", "/api/tags") else (404, {})
+
+    d.stack = S()
+    d.step_spec()
+    assert d.values["reach"]["health"] == "/api/articles"  # /api/user and the feed need a token
