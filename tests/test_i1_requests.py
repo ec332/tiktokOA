@@ -428,6 +428,7 @@ def test_a_ref_request_body_gives_login_candidates_and_a_create_body():
     """The pack spec's bodies are `$ref: #/components/requestBodies/…`: unread, express-bookshelf
     had no login candidate and no create body (integration/004)."""
     from platform_rt.families import json_schema
+
     from tp.stages.discover import spec_base
     from tp.stages.discover.discovery import Discovery, body_schema, example
 
