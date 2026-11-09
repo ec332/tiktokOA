@@ -46,7 +46,9 @@ def get(slug: str, name: str, generate: bool = False) -> str:
         return v
     if not generate:
         raise KeyError(f"no secret {name!r} for {slug}")
-    return put(slug, name, _rand.token_urlsafe(18))
+    # 44 hex chars: plain in env vars and URLs, and also base64 of 33 bytes, which apps that read
+    # a key as base64 of at least 32 random bytes accept (integration/002)
+    return put(slug, name, _rand.token_hex(22))
 
 
 def env_name(name: str) -> str:
