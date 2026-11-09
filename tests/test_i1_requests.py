@@ -223,3 +223,14 @@ def test_what_differs_per_variant_by_design_is_out_of_the_compose_hash():
     assert bb._same(ref, True) == bb._same(var, True)
     assert bb._same(ref, True) != bb._same(var | {"environment": {"A": "2"}}, True)  # real change
     assert bb._same({"image": "db:1", "labels": {}}, False) == {"image": "db:1"}  # pulled: kept
+
+
+def test_a_ui_action_is_never_the_request_under_test():
+    from tp.stages.triage.rules import under_test
+
+    row = {"exchanges": [{"step": 1, "kind": "ui", "method": "UI", "path": "goto /", "status": 0},
+                         {"step": 2, "method": "POST", "path": "/api/notes", "status": 201},
+                         {"step": 3, "kind": "ui", "method": "UI", "path": 'click button "Save"',
+                          "status": 0}]}  # fmt: skip
+    assert under_test(row)["path"] == "/api/notes"
+    assert under_test({"exchanges": [row["exchanges"][0]]}) is None
