@@ -8,7 +8,7 @@ from tp.stages.generate import image, stage, suite, ui
 
 def _ctx(own_image: str | None):
     reach = SimpleNamespace(image=lambda variant: own_image)
-    return SimpleNamespace(strategies=SimpleNamespace(reach=reach))
+    return SimpleNamespace(strategies=SimpleNamespace(reach=reach), profile=None)
 
 
 def test_providers_are_the_families_then_suites_then_ui_flows():

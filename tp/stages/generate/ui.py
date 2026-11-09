@@ -24,8 +24,9 @@ def entry(flow: dict) -> dict:
 
 def entries(ctx, opts: dict) -> list[dict]:
     """Not when a run is limited to some units, as for the families (generate/stage.py)."""
-    profile = getattr(ctx, "profile", None)  # W0's stub test passes a ctx without one
-    flows = [] if opts.get("units") or profile is None else profile.checks.value.get("ui") or []
+    flows = (
+        [] if opts.get("units") or ctx.profile is None else ctx.profile.checks.value.get("ui") or []
+    )
     if flows:
         build_image()
     return [entry(f) for f in flows]
