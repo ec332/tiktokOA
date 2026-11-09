@@ -186,3 +186,14 @@ def test_an_optional_click_parses_and_nothing_else_may_be_optional():
                 {"fill": {"role": "textbox", "value": "x", "optional": True}}):  # fmt: skip
         with pytest.raises(ui.FlowError):
             ui.parse({"name": "f", "steps": [bad]})
+
+
+def test_a_guard_knob_is_not_listed_as_an_untested_dependency():
+    from tp.stages.report import build
+
+    deps = [{"name": "http", "kind": "http", "via": "spec", "key": "url", "status": "wired",
+             "trigger": "POST /api/notes"},
+            {"name": "http", "kind": "http", "via": "guard", "key": "WEBHOOK_ALLOWLIST", "status": "wired"}]  # fmt: skip
+    seen = {"G:dependency_called:POST /api/notes": {"outcome": "passed", "received": [{}]}}
+    (row,) = build.ledger(deps, seen)
+    assert row["status"] == "tested" and row["guards"] == ["WEBHOOK_ALLOWLIST"]
