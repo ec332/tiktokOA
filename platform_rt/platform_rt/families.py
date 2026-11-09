@@ -71,7 +71,8 @@ def _ordered(spec: dict) -> list[tuple[str, str, dict]]:
 
 
 def json_schema(spec: dict, op: dict) -> dict | None:
-    s = (op.get("requestBody") or {}).get("content", {}).get("application/json", {}).get("schema")
+    body = resolve(spec, op.get("requestBody") or {})  # a $ref body (components/requestBodies)
+    s = body.get("content", {}).get("application/json", {}).get("schema")
     return resolve(spec, s) if s else None
 
 
