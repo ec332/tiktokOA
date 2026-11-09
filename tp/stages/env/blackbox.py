@@ -211,16 +211,23 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
         out |= {"networks": [RUN_NET], "labels": {"tp.project": run_dir.name},
                 "cpus": cfg["limits"]["cpus"], "mem_limit": cfg["limits"]["mem_limit"]}  # fmt: skip
         services[name] = out
+    fwd = cfg["forwarder"]
     for s in reach.get("standins") or []:  # C8: on the run network, started before the app
         sname = f"tp-standin-{s['name']}"
-        services[sname] = {"image": s["image"], "networks": [RUN_NET],
+        services[sname] = {"image": images.get(sname, s["image"]), "networks": [RUN_NET],
                            "labels": {"tp.project": run_dir.name},
                            "cpus": cfg["limits"]["cpus"], "mem_limit": cfg["limits"]["mem_limit"]}  # fmt: skip
+        if s.get("command"):  # standins/001 D3, request R3
+            services[sname]["command"] = s["command"]
+        if s.get("port"):  # the host reads its journal through this (standins/002 request R4)
+            services[f"{FORWARDER}-{s['name']}"] = {
+                "image": fwd["image"], "networks": [RUN_NET, EDGE_NET], "depends_on": [sname],
+                "command": [f"TCP-LISTEN:{fwd['port']},fork,reuseaddr", f"TCP:{sname}:{s['port']}"],
+                "ports": [f"127.0.0.1::{fwd['port']}"]}  # fmt: skip
         a = services[app]
         a["depends_on"] = [*a.get("depends_on", []), sname]
         a["environment"] = a.get("environment", {}) | {
             k: _value(v, refs) for k, v in (s.get("env") or {}).items()}  # fmt: skip
-    fwd = cfg["forwarder"]
     services[FORWARDER] = {
         "image": fwd["image"], "networks": [RUN_NET, EDGE_NET], "depends_on": [app],
         "command": [f"TCP-LISTEN:{fwd['port']},fork,reuseaddr", f"TCP:{app}:{reach['port']}"],
@@ -229,6 +236,19 @@ def rewrite(compose: dict, compose_dir: Path, run_dir: Path, reach: dict, images
     volumes = {k: {} for k in compose.get("volumes") or {}}
     out = {"services": services, "networks": {RUN_NET: {"internal": True}, EDGE_NET: {}}}
     return out | ({"volumes": volumes} if volumes else {}), refs
+
+
+def _runner_image() -> str:
+    """`image: runner` (config/dependencies.yaml): the black-box runner with this platform_rt."""
+    from tp.stages.generate import image  # lazy: generate builds and publishes it
+
+    try:
+        pub = image.published_blackbox()
+    except image.ImageError:
+        pub = {}
+    return (pub if pub.get("platform_rt") == image.rt_version() else image.build_blackbox())[
+        "image"
+    ]
 
 
 # ---- the stack ------------------------------------------------------------------------------
@@ -399,6 +419,8 @@ class Stack:
         if self.r.get("image_tag_from") == "ref":
             images |= {n: self.pull_matching(s["image"]) for n, s in raw["services"].items()
                        if "build" not in s and retag(s["image"], "x") != s["image"]}  # fmt: skip
+        images |= {f"tp-standin-{st['name']}": _runner_image()
+                   for st in self.r.get("standins") or [] if st.get("image") == "runner"}  # fmt: skip
         compose, self.refs = rewrite(raw, compose_dir, self.dir, self.r, images, repo=tree)
         self.dir.mkdir(parents=True, exist_ok=True)
         text = yaml.safe_dump(compose, sort_keys=True)
@@ -533,10 +555,17 @@ class Stack:
 
     @property
     def base_url(self) -> str:
+        return self._host_url(FORWARDER)
+
+    def standin_url(self, name: str) -> str:
+        """A stand-in's HTTP port from the host, for discovery's journal reads (request R4)."""
+        return self._host_url(f"{FORWARDER}-{name}")
+
+    def _host_url(self, service: str) -> str:
         port = str(sandbox()["forwarder"]["port"])
-        out = self.compose("port", FORWARDER, port, check=False).stdout.strip()
+        out = self.compose("port", service, port, check=False).stdout.strip()
         if not out:
-            raise BlackboxError(f"{self.project} is not up: no forwarder port")
+            raise BlackboxError(f"{self.project} is not up: no {service} port")
         return f"http://{out.replace('0.0.0.0', '127.0.0.1')}"
 
     client: httpx.Client | None = None  # a test's scripted transport; else the forwarder
@@ -822,10 +851,15 @@ class ExternalStack(Stack):
         self.ledger.parent.mkdir(parents=True, exist_ok=True)
         self.ledger.touch()
         run_env["TP_SAFE_MODE"] = "1"
-        env = {"TP_UPSTREAM": str(url), "TP_OPENAPI_FILE": "/work/openapi.json",
-               "TP_LEDGER": "/work/ledger.jsonl", "TP_RUN": run_env.get("TP_RUN", "local"),
-               "TP_ID_FIELD": run_env.get("TP_ID_FIELD", "id"),
-               "TP_SAFETY": json.dumps(safety_config())}  # fmt: skip
+        env = {
+            "TP_UPSTREAM": str(url),
+            "TP_OPENAPI_FILE": "/work/openapi.json",
+            "TP_LEDGER": "/work/ledger.jsonl",
+            "TP_RUN": run_env.get("TP_RUN", "local"),
+            "TP_ID_FIELD": run_env.get("TP_ID_FIELD", "id"),
+            "TP_SAFETY": json.dumps(safety_config()),
+            "TP_UPSTREAM_HOST": httpx.URL(self.base_url).netloc.decode(),
+        }  # fmt: skip  (L4)
         subprocess.run(
             ["docker", "network", "create", "--internal", net], check=False, capture_output=True
         )  # fmt: skip  (already there: fine)
