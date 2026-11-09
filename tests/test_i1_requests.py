@@ -285,7 +285,7 @@ def test_a_realworld_shaped_sign_up_and_log_in_are_both_candidates():
     from tp.stages.discover.discovery import Discovery
 
     s = {"type": "string"}
-    body = lambda *ks: {"content": {"application/json": {"schema": {"type": "object",  # noqa: E731
+    body = lambda *ks: {"content": {"application/json": {"schema": {"type": "object",
          "properties": {"user": {"type": "object", "properties": {k: s for k in ks}}}}}}}  # fmt: skip
     ok = {"200": {"content": {"application/json": {"schema": {"type": "object", "properties": {
           "user": {"type": "object", "properties": {"token": s}}}}}}}}  # fmt: skip
