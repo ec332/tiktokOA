@@ -187,8 +187,17 @@ class _Run:
                 )
                 continue
             status = "RAN" if healthy and trusted else "SUSPECT_ENV"
+            if status == "RAN" and throttled(r):
+                status, r = "SUSPECT_ENV", r | {"reason": "ENV: rate limited (429)"}
             self.results.append(self._row(n, variant, batch, lane, status=status, **r))
         return healthy and error is None
+
+
+def throttled(r: dict) -> bool:
+    """A failed attempt that met a 429 anywhere (a setup sign-in too): the target's rate limit,
+    not its behaviour, so not a definite result. An injected fault's answers stay the SUT's (C7)."""
+    return (r.get("outcome") not in (None, "passed") and not r.get("fault")
+            and any(e.get("status") == 429 for e in r.get("exchanges") or []))  # fmt: skip
 
 
 def _verdicts(results: list[dict], rows: dict) -> list[dict]:
