@@ -44,11 +44,18 @@ class Req:
         self.headers = {"authorization": "Bearer t"} if auth else {}
 
 
+class Blocked(BaseException):  # a real browser's body() of an event stream never returns
+    pass
+
+
 class Resp:
-    def __init__(self, req, status, body):
+    def __init__(self, req, status, body, ctype="application/json"):
         self.request, self.status, self._body = req, status, body
+        self.headers = {"content-type": ctype}
 
     def body(self):
+        if self.headers["content-type"] == "text/event-stream":
+            raise Blocked("body() of an event stream")
         return self._body.encode() if isinstance(self._body, str) else json.dumps(self._body).encode()
 
 
@@ -120,6 +127,8 @@ class Loc:
             app.signed_in = True
             page.emit("response", Resp(Req("POST", "http://app:8080/api/login", body), 200,
                                        {"username": "tpadmin", "token": "session-token-123"}))
+            page.emit("response", Resp(Req("GET", "http://app:8080/api/sse"), 200, None,
+                                       "text/event-stream"))  # live refresh (Memos)
             return
         note = {"id": len(app.notes) + 1, "text": app.fields.get("Note")}
         if app.status < 300:
@@ -215,7 +224,8 @@ def test_a_clean_flow_records_actions_and_responses_without_secrets(env):
         'fill textbox "Note"', 'click button "Save note"']  # fmt: skip
     assert all(e["status"] == 0 and e["method"] == "UI" for e in ui_steps)
     assert [(e["method"], e["path"], e["status"]) for e in http] == [
-        ("GET", "/", 200), ("POST", "/api/login", 200), ("POST", "/api/notes", 201),
+        ("GET", "/", 200), ("POST", "/api/login", 200), ("GET", "/api/sse", 200),
+        ("POST", "/api/notes", 201),
         ("GET", "/api/notes", 200)]  # fmt: skip
     text = json.dumps(rec.exchanges)
     assert "pw-very-secret" not in text and "session-token-123" not in text  # redacted
