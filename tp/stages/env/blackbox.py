@@ -672,7 +672,8 @@ class Stack:
         in as env vars (D9); creates are logged to out/ledger.jsonl and deleted afterwards (D1)."""
         from tp.stages.generate import image
 
-        runner = image.published_blackbox()["digest"]
+        ui = next(tests.rglob("*.ui.yaml"), None) is not None  # C4: flows need the browser (R2)
+        runner = (image.published_browser() if ui else image.published_blackbox())["digest"]
         out.mkdir(parents=True, exist_ok=True)
         for f in ("results.jsonl", "junit.xml", "ledger.jsonl"):
             (out / f).unlink(missing_ok=True)
