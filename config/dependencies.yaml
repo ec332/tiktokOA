@@ -21,7 +21,12 @@ guard: '(ALLOW.*INTERNAL|PRIVATE.*ALLOWLIST)'
 spec_field: '^(url|webhook|callback)(_?url)?$'
 # Code that sends mail or webhooks: asks the model for env names when no convention matched (D5).
 signals: '(smtplib|nodemailer|net/smtp|SmtpClient|webhook|sendmail)'
+# Lines shown to the model when a registration is refused (integration/002): allowlists and how
+# the configuration library names env vars
+guard_signals: '(?i)(private|allow.?list|reserved|ssrf|SetEnvPrefix|EnvKeyReplacer|AutomaticEnv|env_prefix)'
 max_triggers: 10  # POST operations called while verifying
+# never called as a trigger: they would end discovery's own session or remove data
+trigger_deny: '(?i)(sign.?out|log.?out|revoke|delete)'
 
 # The stand-ins (C5 reach.value.standins). `port` is the HTTP port the runner reads the journal
 # on. `image: runner` means the run's runner image (P2 picks the tag).
