@@ -6,6 +6,8 @@ from typing import Annotated
 
 import typer
 
+from tp.cli import compare as compare_cli
+from tp.cli import pack as pack_cli
 from tp.cli import sut as sut_cli
 from tp.cli import watch as watch_cli
 from tp.core import artifacts, contract, review, runner
@@ -18,6 +20,8 @@ app.add_typer(stage_app, name="stage")
 app.add_typer(review_app, name="review")
 app.add_typer(artifact_app, name="artifact")
 app.add_typer(sut_cli.app, name="sut")
+app.add_typer(pack_cli.app, name="pack")  # P4 (domains/001)
+app.command("compare")(compare_cli.compare)
 app.command("scan")(watch_cli.scan_cmd)  # autonomy/001 F9
 app.command("watch")(watch_cli.watch_cmd)
 contract.load()
