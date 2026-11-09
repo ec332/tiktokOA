@@ -169,6 +169,46 @@
         }
       }
     },
+    "/runs/{run_id}/claim": {
+      "get": {
+        "summary": "Run Claim",
+        "description": "The header the run page shows: the same function the report's header uses.",
+        "operationId": "run_claim_runs__run_id__claim_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Claim"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/runs/{run_id}/stages/{name}/rerun": {
       "post": {
         "summary": "Rerun Stage",
@@ -1326,6 +1366,152 @@
         ],
         "title": "ArtifactUpload"
       },
+      "Blocked": {
+        "properties": {
+          "why": {
+            "type": "string",
+            "title": "Why"
+          },
+          "cases": {
+            "$ref": "#/components/schemas/Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "why",
+          "cases"
+        ],
+        "title": "Blocked"
+      },
+      "Claim": {
+        "properties": {
+          "target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          },
+          "reach": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reach"
+          },
+          "isolation": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isolation"
+          },
+          "isolation_words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isolation Words"
+          },
+          "ceiling": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ceiling"
+          },
+          "ran": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Count"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "blocked": {
+            "items": {
+              "$ref": "#/components/schemas/Blocked"
+            },
+            "type": "array",
+            "title": "Blocked"
+          },
+          "basis": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Count"
+            },
+            "type": "object",
+            "title": "Basis"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target",
+          "reach",
+          "isolation",
+          "isolation_words",
+          "ceiling",
+          "ran",
+          "blocked",
+          "basis"
+        ],
+        "title": "Claim",
+        "description": "The claim-first header (cohesion/001 D5): what a run claims and what it rests on."
+      },
+      "Count": {
+        "properties": {
+          "n": {
+            "type": "integer",
+            "title": "N"
+          },
+          "d": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "D"
+          },
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "n",
+          "d",
+          "ids"
+        ],
+        "title": "Count"
+      },
       "DefectDecision": {
         "properties": {
           "decision": {
@@ -1539,7 +1725,6 @@
           },
           "text": {
             "type": "string",
-            "minLength": 1,
             "title": "Text"
           }
         },
