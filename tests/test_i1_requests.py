@@ -211,3 +211,15 @@ def test_a_seeded_black_box_build_and_its_clean_build_are_comparable():
     assert decide.env_diff(base, fixed, "app") == []  # a fix patch may be added
     assert decide.env_diff(fixed, base | {"sut": {"patches": {"fix": "p8"}}}, "app") == [
         "sut.patches (a patch changed or was removed)"]  # fmt: skip
+
+
+def test_what_differs_per_variant_by_design_is_out_of_the_compose_hash():
+    from tp.stages.env import blackbox as bb
+
+    ref = {"image": "app:sha", "build": {"context": "/repo", "dockerfile": "Dockerfile"},
+           "labels": {"tp.project": "tp_bb_x"}, "environment": {"A": "1"}}  # fmt: skip
+    var = ref | {"image": "app:sha-0d12", "build": {"context": "<env>/src", "dockerfile": "Dockerfile"},
+                 "labels": {"tp.project": "tp_bb_x__bug_y"}}  # fmt: skip
+    assert bb._same(ref, True) == bb._same(var, True)
+    assert bb._same(ref, True) != bb._same(var | {"environment": {"A": "2"}}, True)  # real change
+    assert bb._same({"image": "db:1", "labels": {}}, False) == {"image": "db:1"}  # pulled: kept
