@@ -372,3 +372,19 @@ def test_a_sign_up_that_answers_once_is_the_bootstrap_and_the_log_in_is_the_logi
     d.step_auth()
     a = d.values["auth"]
     assert a["login"]["path"] == "/api/users/login" and a["bootstrap"]["path"] == "/api/users"
+
+
+def test_a_file_in_a_relative_checkout_is_inside_it(tmp_path, monkeypatch):
+    """TP_DATA defaults to the relative `data`: the repo's .env.example was refused as outside
+    the repo (integration/004, express-bookshelf)."""
+    from pathlib import Path
+
+    import pytest
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data/sut/x").mkdir(parents=True)
+    (tmp_path / "data/sut/x/.env.example").write_text("A=1\n")
+    root = Path("data/sut/x")
+    assert bb._inside(root / ".env.example", root, "env example").name == ".env.example"
+    with pytest.raises(bb.BlackboxError):
+        bb._inside(root / "../y", root, "env example")
