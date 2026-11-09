@@ -137,6 +137,16 @@ def is_spec(body) -> bool:
         and ("openapi" in body or "swagger" in body)  # fmt: skip
 
 
+def _fields(resp: dict, prefix: str = "", depth: int = 2):
+    """(dotted path, value) of an answer's fields, nested ones too: RealWorld answers a log-in
+    with `{"user": {"token": …}}`, so its token field is `user.token` (integration/002)."""
+    for k, v in resp.items():
+        if isinstance(v, dict) and depth:
+            yield from _fields(v, f"{prefix}{k}.", depth - 1)
+        else:
+            yield f"{prefix}{k}", v
+
+
 def common_base(paths: list[str]) -> str:
     """The longest common segment prefix of the spec's paths, parameters excluded (P6d)."""
     parts = [p.strip("/").split("/") for p in paths]
@@ -612,7 +622,7 @@ class Discovery:
                                                       {"json_body": sent}))  # fmt: skip
         if not (200 <= status < 300 and isinstance(resp, dict)):
             return None
-        tokens = [(f, t) for f, t in resp.items() if isinstance(t, str) and len(t) >= 16]
+        tokens = [(f, t) for f, t in _fields(resp) if isinstance(t, str) and len(t) >= 16]
         if not prefixes and tokens:  # no convention, no spec scheme: ask exploration, once
             if not hasattr(self, "ai_prefixes"):
                 self.ai_prefixes = [(p, "exploration") for p in ai.auth_prefix(
