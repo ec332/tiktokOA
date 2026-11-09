@@ -1,7 +1,7 @@
 """W0 contract C6: discovery calls its iteration 3 hooks in a fixed order, and the hook stubs
 leave the profile exactly as before (docs/iteration3/W0-contracts.md)."""
 
-from tp.stages.discover import dependencies, discovery, spec_base, ui_flows
+from tp.stages.discover import dependencies, discovery, ui_flows
 
 ORDER = ["reach", "spec", "auth", "data", "secured", "spec_check", "cleanup", "dependencies",
          "ui", "resolver"]  # fmt: skip
@@ -27,7 +27,6 @@ def test_the_hook_steps_delegate_to_their_modules(monkeypatch):
     assert seen == [("dependencies", d), ("ui", d)]
 
 
-def test_the_stubs_change_nothing_until_p4_and_p7_fill_them():
-    assert spec_base.base({"paths": {}, "servers": [{"url": "/api"}]}, "/v1") == "/v1"
-    assert spec_base.paging_filter(["offset", "limit", "page"]) == ["offset", "limit", "page"]
+def test_the_stubs_change_nothing_until_p7_fills_them():
+    # P4 filled spec_base (domains/002 R4); tests/test_p4_pack.py covers it
     assert ui_flows.run(object()) is None
