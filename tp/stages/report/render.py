@@ -365,7 +365,9 @@ def summary_md(r: dict) -> str:
         out += ["", "## Outbound dependencies"] + [
             f"- {d['name']} ({d['kind']}): tested, simulated on {d['standin']}: "
             + ", ".join(f"{c['case']} {c['outcome']}" for c in d["checks"])
-            + f"; received {len(d['received'])}" if d["status"] == "tested"
+            + f"; received {len(d['received'])}"
+            + (f"; reached through {', '.join(d['guards'])}" if d.get("guards") else "")
+            if d["status"] == "tested"
             else f"- {d['name']} ({d['kind']}): not tested: {d['reason']}" for d in deps
         ]  # fmt: skip
     out += [

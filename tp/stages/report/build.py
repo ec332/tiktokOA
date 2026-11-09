@@ -124,7 +124,8 @@ def ledger(dependencies: list[dict], seen: dict[str, dict]) -> list[dict]:
     tested (simulated: the stand-in, each check's outcome and what it received) or not tested,
     with the reason."""
     out = []
-    for d in dependencies:
+    guards = [d["key"] for d in dependencies if d.get("via") == "guard"]
+    for d in (d for d in dependencies if d.get("via") != "guard"):  # a guard is a knob, not one
         mine = {k: v for k, v in seen.items() if d.get("trigger") and k.endswith(f":{d['trigger']}")
                 and k.startswith("G:dependency_")}  # fmt: skip
         entry = {k: d.get(k) for k in ("name", "kind", "via", "key", "trigger")}
@@ -134,7 +135,8 @@ def ledger(dependencies: list[dict], seen: dict[str, dict]) -> list[dict]:
                                 "standin": f"tp-standin-{d['name']}",
                                 "checks": [{"case": k, "outcome": v["outcome"], "fault": v.get("fault")}
                                            for k, v in sorted(mine.items())],
-                                "received": called.get("received", [])})  # fmt: skip
+                                "received": called.get("received", []),
+                                "guards": guards})  # fmt: skip
         else:
             reason = d.get("reason") if d.get("status") != "wired" else None
             out.append(entry | {"status": "not tested",
