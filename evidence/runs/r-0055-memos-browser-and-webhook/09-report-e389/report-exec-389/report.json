@@ -1,0 +1,1911 @@
+{
+ "header": {
+  "network": {
+   "build": "no build: images pulled at the tested tag",
+   "run": "none: an internal network, reached inbound through a forwarder"
+  },
+  "labels": [
+   "real",
+   "unsigned"
+  ],
+  "run_records": "sha256:4c0c01bc3ab7c4fd70621198ef517e05e286412562ce57f5b12a476911003fea",
+  "execution": 387,
+  "variants": {
+   "reference": {
+    "fingerprint": {
+     "commit": "b40d8a7b573774c52b022c8d6537d6baf2129dc0",
+     "compose": "513c4bf76c0b1ffb415b7aa8e07309bf4d6c1c3b4911b7d65e73a62ebbb01639",
+     "images": {
+      "memos": "sha256:087e7dc6b76b31fcd1107a5767398b2a310ced209adb791efd8760c745dc8034",
+      "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-standin-http": "sha256:f9b07c99778b8c8c9f6f4f6c764303db970246030e858abf276a733afc38aba6"
+     },
+     "network": {
+      "build": "no build: images pulled at the tested tag",
+      "run": "none: an internal network, reached inbound through a forwarder"
+     },
+     "ref": "26.11.0"
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "docker compose -p tp_bb_memos -f data/env/tp_bb_memos/compose.yml up -d --wait",
+    "shuffle_seed": 4712287,
+    "spec_hash": "ea6bc55ef96d046f8d1a6b6af7e1d90280c87a67b59bbe4e8b2f35a9fc79ed5c"
+   }
+  },
+  "k": 3,
+  "sut": {
+   "name": "memos",
+   "ref": "b40d8a7b573774c52b022c8d6537d6baf2129dc0"
+  },
+  "cases_signed": false,
+  "unattended_decisions": {
+   "n": 19,
+   "d": 19,
+   "ids": [
+    "review:553",
+    "review:554",
+    "review:555",
+    "review:556",
+    "review:557",
+    "review:558",
+    "review:559",
+    "review:560",
+    "review:561",
+    "review:562",
+    "review:563",
+    "review:564",
+    "review:565",
+    "review:566",
+    "review:567",
+    "review:568",
+    "review:569",
+    "review:570",
+    "review:571"
+   ]
+  },
+  "strategies": {
+   "reach": "container",
+   "spec": "repo_file",
+   "auth": "token_header",
+   "data": "spec_derived",
+   "state": "namespace",
+   "mutation": "none",
+   "safety": "unrestricted",
+   "checks": "pytest_cases"
+  },
+  "ceiling": "Stable, property-checked",
+  "claim": {
+   "target": "memos",
+   "reach": "container",
+   "isolation": 1,
+   "isolation_words": "partly isolated (stand-ins)",
+   "ceiling": "Stable, property-checked",
+   "ran": {
+    "n": 37,
+    "d": 42,
+    "ids": [
+     "G:auth_required:DELETE /api/attachments/{attachment}",
+     "G:auth_required:GET /api/attachments",
+     "G:auth_required:GET /api/attachments/{attachment}",
+     "G:auth_required:PATCH /api/attachments/{attachment}",
+     "G:auth_required:POST /api/attachments",
+     "G:delete_final:POST /api/attachments",
+     "G:delete_final:POST /api/memos",
+     "G:delete_final:POST /api/spaces",
+     "G:dependency_called:POST /api/memos",
+     "G:dependency_failure_handled:POST /api/memos",
+     "G:invalid_input:POST /api/attachments",
+     "G:invalid_input:POST /api/identity-providers",
+     "G:invalid_input:POST /api/memos",
+     "G:invalid_input:POST /api/spaces",
+     "G:invalid_input:POST /api/users",
+     "G:paging:GET /api/attachments",
+     "G:paging:GET /api/memos",
+     "G:paging:GET /api/spaces",
+     "G:paging:GET /api/users",
+     "G:properties:GET /api/attachments",
+     "G:properties:GET /api/attachments/{attachment}",
+     "G:properties:GET /api/identity-providers",
+     "G:properties:POST /api/attachments",
+     "G:properties:POST /api/identity-providers",
+     "G:read_back:POST /api/attachments",
+     "G:read_back:POST /api/memos",
+     "G:read_back:POST /api/spaces",
+     "G:unknown_id:GET /api/attachments/{attachment}",
+     "G:unknown_id:GET /api/identity-providers/{identity-provider}",
+     "G:unknown_id:GET /api/memos/{memo}",
+     "G:unknown_id:GET /api/spaces/{space}",
+     "G:unknown_id:GET /api/users/{user}",
+     "TC-C1-1",
+     "TC-C1-2",
+     "TC-C2-1",
+     "TC-O8-1",
+     "U:create_creatememo"
+    ]
+   },
+   "blocked": [
+    {
+     "why": "excluded: no_valid_body",
+     "cases": {
+      "n": 4,
+      "d": 42,
+      "ids": [
+       "G:delete_final:POST /api/identity-providers",
+       "G:delete_final:POST /api/users",
+       "G:read_back:POST /api/identity-providers",
+       "G:read_back:POST /api/users"
+      ]
+     }
+    },
+    {
+     "why": "signed case not bound to a test",
+     "cases": {
+      "n": 1,
+      "d": 42,
+      "ids": [
+       "TC-C3-1"
+      ]
+     }
+    }
+   ],
+   "basis": {
+    "real": {
+     "n": 36,
+     "d": 37,
+     "ids": [
+      "G:auth_required:DELETE /api/attachments/{attachment}",
+      "G:auth_required:GET /api/attachments",
+      "G:auth_required:GET /api/attachments/{attachment}",
+      "G:auth_required:PATCH /api/attachments/{attachment}",
+      "G:auth_required:POST /api/attachments",
+      "G:delete_final:POST /api/attachments",
+      "G:delete_final:POST /api/memos",
+      "G:delete_final:POST /api/spaces",
+      "G:dependency_called:POST /api/memos",
+      "G:invalid_input:POST /api/attachments",
+      "G:invalid_input:POST /api/identity-providers",
+      "G:invalid_input:POST /api/memos",
+      "G:invalid_input:POST /api/spaces",
+      "G:invalid_input:POST /api/users",
+      "G:paging:GET /api/attachments",
+      "G:paging:GET /api/memos",
+      "G:paging:GET /api/spaces",
+      "G:paging:GET /api/users",
+      "G:properties:GET /api/attachments",
+      "G:properties:GET /api/attachments/{attachment}",
+      "G:properties:GET /api/identity-providers",
+      "G:properties:POST /api/attachments",
+      "G:properties:POST /api/identity-providers",
+      "G:read_back:POST /api/attachments",
+      "G:read_back:POST /api/memos",
+      "G:read_back:POST /api/spaces",
+      "G:unknown_id:GET /api/attachments/{attachment}",
+      "G:unknown_id:GET /api/identity-providers/{identity-provider}",
+      "G:unknown_id:GET /api/memos/{memo}",
+      "G:unknown_id:GET /api/spaces/{space}",
+      "G:unknown_id:GET /api/users/{user}",
+      "TC-C1-1",
+      "TC-C1-2",
+      "TC-C2-1",
+      "TC-O8-1",
+      "U:create_creatememo"
+     ]
+    },
+    "simulated": {
+     "n": 1,
+     "d": 37,
+     "ids": [
+      "G:dependency_failure_handled:POST /api/memos"
+     ]
+    }
+   }
+  }
+ },
+ "worklist": {
+  "P0": [],
+  "P1": [
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-C3-1",
+    "ac": "C-3",
+    "closes_it": "bind TC-C3-1: The only route provided is DELETE /api/memos/{memo}. No route or factory creates a note or person, so there is no way to obtain a memo id owned by the admin caller to delete. Deleting an unknown id would not test the creator-deletes-own-note behaviour."
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "C-3",
+    "case": null,
+    "closes_it": "TC-C3-1"
+   }
+  ],
+  "P2": {
+   "findings": [],
+   "quarantine": [],
+   "redundant": {
+    "n": 0,
+    "d": 41,
+    "ids": []
+   },
+   "mutation_strength": "not measured"
+  },
+  "P3": [
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-1",
+    "case": null,
+    "why": "People can write short notes"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-2",
+    "case": null,
+    "why": "People can edit notes they have written"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-8",
+    "case": null,
+    "why": "Edit can rewrite creation and update timestamps"
+   }
+  ]
+ },
+ "checks": {
+  "families": {
+   "properties": {
+    "claim": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:properties:GET /api/attachments",
+      "G:properties:GET /api/attachments/{attachment}",
+      "G:properties:GET /api/identity-providers",
+      "G:properties:POST /api/attachments",
+      "G:properties:POST /api/identity-providers"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 5,
+      "d": 5,
+      "ids": [
+       "G:properties:GET /api/attachments",
+       "G:properties:GET /api/attachments/{attachment}",
+       "G:properties:GET /api/identity-providers",
+       "G:properties:POST /api/attachments",
+       "G:properties:POST /api/identity-providers"
+      ]
+     }
+    }
+   },
+   "auth_required": {
+    "claim": "no or invalid credentials: never 2xx on a secured operation, never 5xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:auth_required:DELETE /api/attachments/{attachment}",
+      "G:auth_required:GET /api/attachments",
+      "G:auth_required:GET /api/attachments/{attachment}",
+      "G:auth_required:PATCH /api/attachments/{attachment}",
+      "G:auth_required:POST /api/attachments"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 5,
+      "d": 5,
+      "ids": [
+       "G:auth_required:DELETE /api/attachments/{attachment}",
+       "G:auth_required:GET /api/attachments",
+       "G:auth_required:GET /api/attachments/{attachment}",
+       "G:auth_required:PATCH /api/attachments/{attachment}",
+       "G:auth_required:POST /api/attachments"
+      ]
+     }
+    }
+   },
+   "unknown_id": {
+    "claim": "an ID that doesn't exist: never 2xx, never 5xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:unknown_id:GET /api/attachments/{attachment}",
+      "G:unknown_id:GET /api/identity-providers/{identity-provider}",
+      "G:unknown_id:GET /api/memos/{memo}",
+      "G:unknown_id:GET /api/spaces/{space}",
+      "G:unknown_id:GET /api/users/{user}"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 5,
+      "d": 5,
+      "ids": [
+       "G:unknown_id:GET /api/attachments/{attachment}",
+       "G:unknown_id:GET /api/identity-providers/{identity-provider}",
+       "G:unknown_id:GET /api/memos/{memo}",
+       "G:unknown_id:GET /api/spaces/{space}",
+       "G:unknown_id:GET /api/users/{user}"
+      ]
+     }
+    }
+   },
+   "invalid_input": {
+    "claim": "a body its schema forbids: 4xx, never 5xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:invalid_input:POST /api/attachments",
+      "G:invalid_input:POST /api/identity-providers",
+      "G:invalid_input:POST /api/memos",
+      "G:invalid_input:POST /api/spaces",
+      "G:invalid_input:POST /api/users"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 4,
+      "d": 5,
+      "ids": [
+       "G:invalid_input:POST /api/attachments",
+       "G:invalid_input:POST /api/identity-providers",
+       "G:invalid_input:POST /api/spaces",
+       "G:invalid_input:POST /api/users"
+      ]
+     },
+     "SPEC_MISMATCH": {
+      "n": 1,
+      "d": 5,
+      "ids": [
+       "G:invalid_input:POST /api/memos"
+      ]
+     }
+    }
+   },
+   "read_back": {
+    "claim": "declared fields round-trip from create to read",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:read_back:POST /api/attachments",
+      "G:read_back:POST /api/identity-providers",
+      "G:read_back:POST /api/memos",
+      "G:read_back:POST /api/spaces",
+      "G:read_back:POST /api/users"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 3,
+      "d": 5,
+      "ids": [
+       "G:read_back:POST /api/attachments",
+       "G:read_back:POST /api/memos",
+       "G:read_back:POST /api/spaces"
+      ]
+     },
+     "EXCLUDED": {
+      "n": 2,
+      "d": 5,
+      "ids": [
+       "G:read_back:POST /api/identity-providers",
+       "G:read_back:POST /api/users"
+      ]
+     }
+    }
+   },
+   "delete_final": {
+    "claim": "a read after delete: never 2xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:delete_final:POST /api/attachments",
+      "G:delete_final:POST /api/identity-providers",
+      "G:delete_final:POST /api/memos",
+      "G:delete_final:POST /api/spaces",
+      "G:delete_final:POST /api/users"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 3,
+      "d": 5,
+      "ids": [
+       "G:delete_final:POST /api/attachments",
+       "G:delete_final:POST /api/memos",
+       "G:delete_final:POST /api/spaces"
+      ]
+     },
+     "EXCLUDED": {
+      "n": 2,
+      "d": 5,
+      "ids": [
+       "G:delete_final:POST /api/identity-providers",
+       "G:delete_final:POST /api/users"
+      ]
+     }
+    }
+   },
+   "paging": {
+    "claim": "out-of-range paging or a bad token: never 5xx; a 2xx is a page",
+    "cases": {
+     "n": 4,
+     "d": null,
+     "ids": [
+      "G:paging:GET /api/attachments",
+      "G:paging:GET /api/memos",
+      "G:paging:GET /api/spaces",
+      "G:paging:GET /api/users"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 4,
+      "d": 4,
+      "ids": [
+       "G:paging:GET /api/attachments",
+       "G:paging:GET /api/memos",
+       "G:paging:GET /api/spaces",
+       "G:paging:GET /api/users"
+      ]
+     }
+    }
+   },
+   "dependency_called": {
+    "claim": "the trigger reaches the dependency's stand-in with what it was sent",
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:dependency_called:POST /api/memos"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 1,
+      "d": 1,
+      "ids": [
+       "G:dependency_called:POST /api/memos"
+      ]
+     }
+    }
+   },
+   "dependency_failure_handled": {
+    "claim": "with the dependency failing: in time, never a bare 5xx",
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:dependency_failure_handled:POST /api/memos"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 1,
+      "d": 1,
+      "ids": [
+       "G:dependency_failure_handled:POST /api/memos"
+      ]
+     }
+    }
+   }
+  },
+  "excluded": {
+   "no_valid_body": {
+    "n": 4,
+    "d": 41,
+    "ids": [
+     "G:delete_final:POST /api/identity-providers",
+     "G:delete_final:POST /api/users",
+     "G:read_back:POST /api/identity-providers",
+     "G:read_back:POST /api/users"
+    ]
+   }
+  },
+  "spec_mismatch": [
+   {
+    "group": "G:invalid_input:POST /api/memos",
+    "claim": "a body its schema forbids: 4xx, never 5xx",
+    "findings": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "F-reference/G:invalid_input:POST /api/memos"
+     ]
+    },
+    "rule": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "observed": {
+     "error": "SpecMismatch: [missing required fields:2xx] POST /api/memos accepted a body its spec forbids (missing required fields): 200",
+     "request": "POST /api/memos",
+     "status": 200
+    }
+   }
+  ],
+  "spec_mismatch_more": {
+   "n": 0,
+   "d": 1,
+   "ids": []
+  }
+ },
+ "dependencies": [
+  {
+   "name": "http",
+   "kind": "http",
+   "via": "spec",
+   "key": "url",
+   "trigger": "POST /api/memos",
+   "status": "tested",
+   "basis": "simulated",
+   "standin": "tp-standin-http",
+   "checks": [
+    {
+     "case": "G:dependency_called:POST /api/memos",
+     "outcome": "passed",
+     "fault": null
+    },
+    {
+     "case": "G:dependency_failure_handled:POST /api/memos",
+     "outcome": "passed",
+     "fault": {
+      "standin": "http",
+      "mode": "delay",
+      "value": 8.0
+     }
+    }
+   ],
+   "received": [
+    {
+     "n": 10,
+     "at": 1794203041.6441302,
+     "method": "POST",
+     "path": "/url",
+     "headers": {
+      "Host": "tp-standin-http:8000",
+      "User-Agent": "Go-http-client/1.1",
+      "Content-Length": "385",
+      "Content-Type": "application/json",
+      "Webhook-Id": "msg_0ec7132c-9967-41eb-87f5-65889db670db",
+      "Webhook-Signature": "<masked>",
+      "Webhook-Timestamp": "1794203041",
+      "Accept-Encoding": "gzip"
+     },
+     "body": "{\"url\":\"http://tp-standin-http:8000/url\",\"activityType\":\"memos.memo.created\",\"creator\":\"users/tpadmin\",\"memo\":{\"name\":\"memos/dJxchy7jfzpGqZmB8SkTZz\",\"creator\":\"users/tpadmin\",\"content\":\"tp-x387.reference.a3-fa10fc-content\",\"visibility\":1,\"state\":1,\"property\":{},\"snippet\":\"tp-x387.reference.a3-fa10fc-content\",\"create_time\":{\"seconds\":1794203041},\"update_time\":{\"seconds\":1794203041}}}"
+    }
+   ]
+  },
+  {
+   "name": "http",
+   "kind": "http",
+   "via": "guard",
+   "key": "MEMOS_WEBHOOK_PRIVATE_NETWORK_ALLOWLIST",
+   "trigger": null,
+   "status": "not tested",
+   "reason": "wired, but no dependency check ran on it in this run"
+  }
+ ],
+ "scorecard": {
+  "seeded_authored": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "seeded_per_flag": [],
+  "seeded_blind": "not run (M7)",
+  "real_defects": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "mutation_strength": "not measured",
+  "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits mostly under the test data, so this measures authentication more than the item rules",
+  "mutation_per_criterion": {
+   "C-1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-2": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:DELETE /api/attachments/{attachment}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:GET /api/attachments": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:GET /api/attachments/{attachment}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:PATCH /api/attachments/{attachment}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:POST /api/attachments": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/attachments": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/identity-providers": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/memos": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/spaces": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:dependency_called:POST /api/memos": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:dependency_failure_handled:POST /api/memos": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/attachments": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/identity-providers": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/memos": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/spaces": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/attachments": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/memos": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/spaces": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/attachments": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/attachments/{attachment}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/identity-providers": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/attachments": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/identity-providers": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/attachments": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/identity-providers": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/memos": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/spaces": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/attachments/{attachment}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/identity-providers/{identity-provider}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/memos/{memo}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/spaces/{space}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/users/{user}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-8": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "U:create_creatememo": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "triage_correct_seeded": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "localisation": {
+   "top1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top3": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top5": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "fail_before_pass_after": "not run (M5)",
+  "criteria_without_admitted_test": {
+   "n": 1,
+   "d": 5,
+   "ids": [
+    "C-3"
+   ]
+  }
+ },
+ "traceability": [
+  {
+   "req": [],
+   "ac": "U:create_creatememo",
+   "case": "U:create_creatememo",
+   "assertions": [
+    "U:create_creatememo/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/U:create_creatememo"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-1",
+   "case": "TC-C1-1",
+   "assertions": [
+    "TC-C1-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C1-1"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-1",
+   "case": "TC-C1-2",
+   "assertions": [
+    "TC-C1-2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C1-2"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-2",
+   "case": "TC-C2-1",
+   "assertions": [
+    "TC-C2-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C2-1"
+  },
+  {
+   "req": [
+    "openapi/api/memos/{memo}/PATCH.yaml:17"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-1",
+   "assertions": [
+    "TC-O8-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O8-1"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:DELETE /api/attachments/{attachment}",
+   "case": "G:auth_required:DELETE /api/attachments/{attachment}",
+   "assertions": [
+    "G:auth_required:DELETE /api/attachments/{attachment}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:DELETE /api/attachments/{attachment}"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:GET /api/attachments/{attachment}",
+   "case": "G:auth_required:GET /api/attachments/{attachment}",
+   "assertions": [
+    "G:auth_required:GET /api/attachments/{attachment}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:GET /api/attachments/{attachment}"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:GET /api/attachments",
+   "case": "G:auth_required:GET /api/attachments",
+   "assertions": [
+    "G:auth_required:GET /api/attachments/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:GET /api/attachments"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:PATCH /api/attachments/{attachment}",
+   "case": "G:auth_required:PATCH /api/attachments/{attachment}",
+   "assertions": [
+    "G:auth_required:PATCH /api/attachments/{attachment}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:PATCH /api/attachments/{attachment}"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:POST /api/attachments",
+   "case": "G:auth_required:POST /api/attachments",
+   "assertions": [
+    "G:auth_required:POST /api/attachments/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:POST /api/attachments"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/attachments",
+   "case": "G:delete_final:POST /api/attachments",
+   "assertions": [
+    "G:delete_final:POST /api/attachments/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:delete_final:POST /api/attachments"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/identity-providers",
+   "case": "G:delete_final:POST /api/identity-providers",
+   "assertions": [
+    "G:delete_final:POST /api/identity-providers/*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "basis": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/memos",
+   "case": "G:delete_final:POST /api/memos",
+   "assertions": [
+    "G:delete_final:POST /api/memos/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:delete_final:POST /api/memos"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/spaces",
+   "case": "G:delete_final:POST /api/spaces",
+   "assertions": [
+    "G:delete_final:POST /api/spaces/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:delete_final:POST /api/spaces"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/users",
+   "case": "G:delete_final:POST /api/users",
+   "assertions": [
+    "G:delete_final:POST /api/users/*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "basis": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:dependency_called:POST /api/memos",
+   "case": "G:dependency_called:POST /api/memos",
+   "assertions": [
+    "G:dependency_called:POST /api/memos/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:dependency_called:POST /api/memos"
+  },
+  {
+   "req": [],
+   "ac": "G:dependency_failure_handled:POST /api/memos",
+   "case": "G:dependency_failure_handled:POST /api/memos",
+   "assertions": [
+    "G:dependency_failure_handled:POST /api/memos/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "simulated",
+   "evidence": "ex:reference/a1/G:dependency_failure_handled:POST /api/memos"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/attachments",
+   "case": "G:invalid_input:POST /api/attachments",
+   "assertions": [
+    "G:invalid_input:POST /api/attachments/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/attachments"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/identity-providers",
+   "case": "G:invalid_input:POST /api/identity-providers",
+   "assertions": [
+    "G:invalid_input:POST /api/identity-providers/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/identity-providers"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/memos",
+   "case": "G:invalid_input:POST /api/memos",
+   "assertions": [
+    "missing required fields:2xx"
+   ],
+   "gate": "SPEC_MISMATCH",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/memos"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/spaces",
+   "case": "G:invalid_input:POST /api/spaces",
+   "assertions": [
+    "G:invalid_input:POST /api/spaces/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/spaces"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/users",
+   "case": "G:invalid_input:POST /api/users",
+   "assertions": [
+    "G:invalid_input:POST /api/users/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/users"
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/attachments",
+   "case": "G:paging:GET /api/attachments",
+   "assertions": [
+    "G:paging:GET /api/attachments/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:paging:GET /api/attachments"
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/memos",
+   "case": "G:paging:GET /api/memos",
+   "assertions": [
+    "G:paging:GET /api/memos/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:paging:GET /api/memos"
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/spaces",
+   "case": "G:paging:GET /api/spaces",
+   "assertions": [
+    "G:paging:GET /api/spaces/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:paging:GET /api/spaces"
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/users",
+   "case": "G:paging:GET /api/users",
+   "assertions": [
+    "G:paging:GET /api/users/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:paging:GET /api/users"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/attachments/{attachment}",
+   "case": "G:properties:GET /api/attachments/{attachment}",
+   "assertions": [
+    "G:properties:GET /api/attachments/{attachment}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:GET /api/attachments/{attachment}"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/attachments",
+   "case": "G:properties:GET /api/attachments",
+   "assertions": [
+    "G:properties:GET /api/attachments/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:GET /api/attachments"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/identity-providers",
+   "case": "G:properties:GET /api/identity-providers",
+   "assertions": [
+    "G:properties:GET /api/identity-providers/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:GET /api/identity-providers"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/attachments",
+   "case": "G:properties:POST /api/attachments",
+   "assertions": [
+    "G:properties:POST /api/attachments/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:POST /api/attachments"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/identity-providers",
+   "case": "G:properties:POST /api/identity-providers",
+   "assertions": [
+    "G:properties:POST /api/identity-providers/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:POST /api/identity-providers"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/attachments",
+   "case": "G:read_back:POST /api/attachments",
+   "assertions": [
+    "G:read_back:POST /api/attachments/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:read_back:POST /api/attachments"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/identity-providers",
+   "case": "G:read_back:POST /api/identity-providers",
+   "assertions": [
+    "G:read_back:POST /api/identity-providers/*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "basis": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/memos",
+   "case": "G:read_back:POST /api/memos",
+   "assertions": [
+    "G:read_back:POST /api/memos/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:read_back:POST /api/memos"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/spaces",
+   "case": "G:read_back:POST /api/spaces",
+   "assertions": [
+    "G:read_back:POST /api/spaces/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:read_back:POST /api/spaces"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/users",
+   "case": "G:read_back:POST /api/users",
+   "assertions": [
+    "G:read_back:POST /api/users/*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "basis": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/attachments/{attachment}",
+   "case": "G:unknown_id:GET /api/attachments/{attachment}",
+   "assertions": [
+    "G:unknown_id:GET /api/attachments/{attachment}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/attachments/{attachment}"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/identity-providers/{identity-provider}",
+   "case": "G:unknown_id:GET /api/identity-providers/{identity-provider}",
+   "assertions": [
+    "G:unknown_id:GET /api/identity-providers/{identity-provider}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/identity-providers/{identity-provider}"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/memos/{memo}",
+   "case": "G:unknown_id:GET /api/memos/{memo}",
+   "assertions": [
+    "G:unknown_id:GET /api/memos/{memo}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/memos/{memo}"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/spaces/{space}",
+   "case": "G:unknown_id:GET /api/spaces/{space}",
+   "assertions": [
+    "G:unknown_id:GET /api/spaces/{space}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/spaces/{space}"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/users/{user}",
+   "case": "G:unknown_id:GET /api/users/{user}",
+   "assertions": [
+    "G:unknown_id:GET /api/users/{user}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/users/{user}"
+  }
+ ],
+ "coverage": {
+  "by": "case technique (boundary \u2192 boundary; error_exception/error_guessing \u2192 exception; rest \u2192 normal)",
+  "normal": {
+   "n": 36,
+   "d": 37,
+   "ids": [
+    "G:auth_required:DELETE /api/attachments/{attachment}",
+    "G:auth_required:GET /api/attachments",
+    "G:auth_required:GET /api/attachments/{attachment}",
+    "G:auth_required:PATCH /api/attachments/{attachment}",
+    "G:auth_required:POST /api/attachments",
+    "G:delete_final:POST /api/attachments",
+    "G:delete_final:POST /api/memos",
+    "G:delete_final:POST /api/spaces",
+    "G:dependency_called:POST /api/memos",
+    "G:dependency_failure_handled:POST /api/memos",
+    "G:invalid_input:POST /api/attachments",
+    "G:invalid_input:POST /api/identity-providers",
+    "G:invalid_input:POST /api/memos",
+    "G:invalid_input:POST /api/spaces",
+    "G:invalid_input:POST /api/users",
+    "G:paging:GET /api/attachments",
+    "G:paging:GET /api/memos",
+    "G:paging:GET /api/spaces",
+    "G:paging:GET /api/users",
+    "G:properties:GET /api/attachments",
+    "G:properties:GET /api/attachments/{attachment}",
+    "G:properties:GET /api/identity-providers",
+    "G:properties:POST /api/attachments",
+    "G:properties:POST /api/identity-providers",
+    "G:read_back:POST /api/attachments",
+    "G:read_back:POST /api/memos",
+    "G:read_back:POST /api/spaces",
+    "G:unknown_id:GET /api/attachments/{attachment}",
+    "G:unknown_id:GET /api/identity-providers/{identity-provider}",
+    "G:unknown_id:GET /api/memos/{memo}",
+    "G:unknown_id:GET /api/spaces/{space}",
+    "G:unknown_id:GET /api/users/{user}",
+    "TC-C1-1",
+    "TC-C2-1",
+    "TC-O8-1",
+    "U:create_creatememo"
+   ]
+  },
+  "boundary": {
+   "n": 0,
+   "d": 37,
+   "ids": []
+  },
+  "exception": {
+   "n": 1,
+   "d": 37,
+   "ids": [
+    "TC-C1-2"
+   ]
+  }
+ },
+ "uncovered": {
+  "criteria_out_of_scope": [
+   {
+    "criterion": "O-1",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-2",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-3",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-4",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-5",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-6",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-7",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-9",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-10",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-11",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-12",
+    "reason": "out of scope in the spec"
+   }
+  ],
+  "deferred": [],
+  "skipped_templates": [
+   "C-2: dropped a drafted table: expected '4xx' is not traceable to C-2 (spec allows ['2xx'])",
+   "C-3: dropped a drafted table: expected '4xx' is not traceable to C-3 (spec allows ['2xx'])",
+   "O-8: dropped a drafted case: expected '4xx' is not traceable to O-8 (spec allows ['2xx'])",
+   "O-8: dropped a drafted case: expected '4xx' is not traceable to O-8 (spec allows ['2xx'])",
+   "O-8: dropped a drafted case: expected '4xx' is not traceable to O-8 (spec allows ['2xx'])",
+   "O-8: dropped a drafted case: expected '4xx' is not traceable to O-8 (spec allows ['2xx'])",
+   "C-1: preconditions ['person'] are not factories; moved to steps",
+   "C-1: preconditions ['person', 'note'] are not factories; moved to steps",
+   "C-2: preconditions ['person', 'note'] are not factories; moved to steps",
+   "C-3: preconditions ['person', 'note'] are not factories; moved to steps",
+   "O-8: preconditions ['person', 'memo'] are not factories; moved to steps",
+   "O-8: minimum template error_guessing neither used nor skipped with a reason",
+   "C-1: criterion is assumed, not confirmed: check its cases",
+   "C-2: criterion is assumed, not confirmed: check its cases",
+   "O-8: criterion is assumed, not confirmed: check its cases"
+  ],
+  "assumed": [
+   "C-1",
+   "C-2",
+   "O-8"
+  ],
+  "unbound_cases": [
+   "TC-C3-1"
+  ],
+  "behaviour_with_no_requirement": [
+   "POST /api/ai:transcribe  (openapi/api/ai:transcribe/POST.yaml:1)",
+   "GET /api/attachments  (openapi/api/attachments/GET.yaml:1)",
+   "POST /api/attachments  (openapi/api/attachments/POST.yaml:1)",
+   "DELETE /api/attachments/{attachment}  (openapi/api/attachments/{attachment}/DELETE.yaml:1)",
+   "GET /api/attachments/{attachment}  (openapi/api/attachments/{attachment}/GET.yaml:1)",
+   "PATCH /api/attachments/{attachment}  (openapi/api/attachments/{attachment}/PATCH.yaml:1)",
+   "POST /api/attachments:batchDelete  (openapi/api/attachments:batchDelete/POST.yaml:1)",
+   "POST /api/attachments:upload  (openapi/api/attachments:upload/POST.yaml:1)",
+   "GET /api/auth/me  (openapi/api/auth/me/GET.yaml:1)",
+   "POST /api/auth/refresh  (openapi/api/auth/refresh/POST.yaml:1)",
+   "POST /api/auth/signin  (openapi/api/auth/signin/POST.yaml:1)",
+   "POST /api/auth/signout  (openapi/api/auth/signout/POST.yaml:1)",
+   "GET /api/identity-providers  (openapi/api/identity-providers/GET.yaml:1)",
+   "POST /api/identity-providers  (openapi/api/identity-providers/POST.yaml:1)",
+   "DELETE /api/identity-providers/{identity-provider}  (openapi/api/identity-providers/{identity-provider}/DELETE.yaml:1)",
+   "GET /api/identity-providers/{identity-provider}  (openapi/api/identity-providers/{identity-provider}/GET.yaml:1)",
+   "PATCH /api/identity-providers/{identity-provider}  (openapi/api/identity-providers/{identity-provider}/PATCH.yaml:1)",
+   "GET /api/instance/configuration  (openapi/api/instance/configuration/GET.yaml:1)",
+   "GET /api/instance/profile  (openapi/api/instance/profile/GET.yaml:1)",
+   "POST /api/instance/settings/notification:testEmail  (openapi/api/instance/settings/notification:testEmail/POST.yaml:1)",
+   "POST /api/instance/settings:batchGet  (openapi/api/instance/settings:batchGet/POST.yaml:1)",
+   "GET /api/instance/stats  (openapi/api/instance/stats/GET.yaml:1)",
+   "GET /api/instance/{instance}/*  (openapi/api/instance/{instance}/*/GET.yaml:1)",
+   "PATCH /api/instance/{instance}/*  (openapi/api/instance/{instance}/*/PATCH.yaml:1)",
+   "GET /api/memos  (openapi/api/memos/GET.yaml:1)",
+   "GET /api/memos/-/linkMetadata  (openapi/api/memos/-/linkMetadata/GET.yaml:1)",
+   "POST /api/memos/-/linkMetadata:batchGet  (openapi/api/memos/-/linkMetadata:batchGet/POST.yaml:1)",
+   "GET /api/memos/{memo}  (openapi/api/memos/{memo}/GET.yaml:1)",
+   "GET /api/memos/{memo}/attachments  (openapi/api/memos/{memo}/attachments/GET.yaml:1)",
+   "PATCH /api/memos/{memo}/attachments  (openapi/api/memos/{memo}/attachments/PATCH.yaml:1)",
+   "GET /api/memos/{memo}/comments  (openapi/api/memos/{memo}/comments/GET.yaml:1)",
+   "POST /api/memos/{memo}/comments  (openapi/api/memos/{memo}/comments/POST.yaml:1)",
+   "GET /api/memos/{memo}/reactions  (openapi/api/memos/{memo}/reactions/GET.yaml:1)",
+   "POST /api/memos/{memo}/reactions  (openapi/api/memos/{memo}/reactions/POST.yaml:1)",
+   "DELETE /api/memos/{memo}/reactions/{reaction}  (openapi/api/memos/{memo}/reactions/{reaction}/DELETE.yaml:1)",
+   "GET /api/memos/{memo}/relations  (openapi/api/memos/{memo}/relations/GET.yaml:1)",
+   "PATCH /api/memos/{memo}/relations  (openapi/api/memos/{memo}/relations/PATCH.yaml:1)",
+   "GET /api/memos/{memo}/shares  (openapi/api/memos/{memo}/shares/GET.yaml:1)",
+   "POST /api/memos/{memo}/shares  (openapi/api/memos/{memo}/shares/POST.yaml:1)",
+   "DELETE /api/memos/{memo}/shares/{share}  (openapi/api/memos/{memo}/shares/{share}/DELETE.yaml:1)",
+   "GET /api/shares/{shareToken}/memo  (openapi/api/shares/{shareToken}/memo/GET.yaml:1)",
+   "GET /api/spaces  (openapi/api/spaces/GET.yaml:1)",
+   "POST /api/spaces  (openapi/api/spaces/POST.yaml:1)",
+   "DELETE /api/spaces/{space}  (openapi/api/spaces/{space}/DELETE.yaml:1)",
+   "GET /api/spaces/{space}  (openapi/api/spaces/{space}/GET.yaml:1)",
+   "PATCH /api/spaces/{space}  (openapi/api/spaces/{space}/PATCH.yaml:1)",
+   "GET /api/spaces/{space}/invitations  (openapi/api/spaces/{space}/invitations/GET.yaml:1)",
+   "POST /api/spaces/{space}/invitations  (openapi/api/spaces/{space}/invitations/POST.yaml:1)",
+   "DELETE /api/spaces/{space}/invitations/{invitation}  (openapi/api/spaces/{space}/invitations/{invitation}/DELETE.yaml:1)",
+   "GET /api/spaces/{space}/invitations/{invitation}  (openapi/api/spaces/{space}/invitations/{invitation}/GET.yaml:1)",
+   "POST /api/spaces/{space}/invitations/{invitation}:accept  (openapi/api/spaces/{space}/invitations/{invitation}:accept/POST.yaml:1)",
+   "POST /api/spaces/{space}/invitations/{invitation}:decline  (openapi/api/spaces/{space}/invitations/{invitation}:decline/POST.yaml:1)",
+   "GET /api/spaces/{space}/members  (openapi/api/spaces/{space}/members/GET.yaml:1)",
+   "DELETE /api/spaces/{space}/members/{member}  (openapi/api/spaces/{space}/members/{member}/DELETE.yaml:1)",
+   "GET /api/spaces/{space}/members/{member}  (openapi/api/spaces/{space}/members/{member}/GET.yaml:1)",
+   "PATCH /api/spaces/{space}/members/{member}  (openapi/api/spaces/{space}/members/{member}/PATCH.yaml:1)",
+   "GET /api/users  (openapi/api/users/GET.yaml:1)",
+   "POST /api/users  (openapi/api/users/POST.yaml:1)",
+   "DELETE /api/users/{user}  (openapi/api/users/{user}/DELETE.yaml:1)",
+   "GET /api/users/{user}  (openapi/api/users/{user}/GET.yaml:1)",
+   "PATCH /api/users/{user}  (openapi/api/users/{user}/PATCH.yaml:1)",
+   "GET /api/users/{user}/linkedIdentities  (openapi/api/users/{user}/linkedIdentities/GET.yaml:1)",
+   "POST /api/users/{user}/linkedIdentities  (openapi/api/users/{user}/linkedIdentities/POST.yaml:1)",
+   "DELETE /api/users/{user}/linkedIdentities/{linkedIdentity}  (openapi/api/users/{user}/linkedIdentities/{linkedIdentity}/DELETE.yaml:1)",
+   "GET /api/users/{user}/linkedIdentities/{linkedIdentity}  (openapi/api/users/{user}/linkedIdentities/{linkedIdentity}/GET.yaml:1)",
+   "GET /api/users/{user}/notifications  (openapi/api/users/{user}/notifications/GET.yaml:1)",
+   "DELETE /api/users/{user}/notifications/{notification}  (openapi/api/users/{user}/notifications/{notification}/DELETE.yaml:1)",
+   "PATCH /api/users/{user}/notifications/{notification}  (openapi/api/users/{user}/notifications/{notification}/PATCH.yaml:1)",
+   "GET /api/users/{user}/personalAccessTokens  (openapi/api/users/{user}/personalAccessTokens/GET.yaml:1)",
+   "POST /api/users/{user}/personalAccessTokens  (openapi/api/users/{user}/personalAccessTokens/POST.yaml:1)",
+   "DELETE /api/users/{user}/personalAccessTokens/{personalAccessToken}  (openapi/api/users/{user}/personalAccessTokens/{personalAccessToken}/DELETE.yaml:1)",
+   "GET /api/users/{user}/settings  (openapi/api/users/{user}/settings/GET.yaml:1)",
+   "GET /api/users/{user}/settings/{setting}  (openapi/api/users/{user}/settings/{setting}/GET.yaml:1)",
+   "PATCH /api/users/{user}/settings/{setting}  (openapi/api/users/{user}/settings/{setting}/PATCH.yaml:1)",
+   "GET /api/users/{user}/spaceInvitations  (openapi/api/users/{user}/spaceInvitations/GET.yaml:1)",
+   "GET /api/users/{user}/stats  (openapi/api/users/{user}/stats/GET.yaml:1)",
+   "GET /api/users/{user}/usage  (openapi/api/users/{user}/usage/GET.yaml:1)",
+   "GET /api/users/{user}/views  (openapi/api/users/{user}/views/GET.yaml:1)",
+   "POST /api/users/{user}/views  (openapi/api/users/{user}/views/POST.yaml:1)",
+   "DELETE /api/users/{user}/views/{view}  (openapi/api/users/{user}/views/{view}/DELETE.yaml:1)",
+   "GET /api/users/{user}/views/{view}  (openapi/api/users/{user}/views/{view}/GET.yaml:1)",
+   "PATCH /api/users/{user}/views/{view}  (openapi/api/users/{user}/views/{view}/PATCH.yaml:1)",
+   "GET /api/users/{user}/webhooks  (openapi/api/users/{user}/webhooks/GET.yaml:1)",
+   "POST /api/users/{user}/webhooks  (openapi/api/users/{user}/webhooks/POST.yaml:1)",
+   "DELETE /api/users/{user}/webhooks/{webhook}  (openapi/api/users/{user}/webhooks/{webhook}/DELETE.yaml:1)",
+   "PATCH /api/users/{user}/webhooks/{webhook}  (openapi/api/users/{user}/webhooks/{webhook}/PATCH.yaml:1)",
+   "GET /api/users/{user}/webhooks/{webhook}:getSigningSecret  (openapi/api/users/{user}/webhooks/{webhook}:getSigningSecret/GET.yaml:1)",
+   "GET /api/users/{user}:getStats  (openapi/api/users/{user}:getStats/GET.yaml:1)",
+   "POST /api/users/{user}:importMemos  (openapi/api/users/{user}:importMemos/POST.yaml:1)",
+   "POST /api/users:batchGet  (openapi/api/users:batchGet/POST.yaml:1)"
+  ],
+  "seeded_race": ""
+ },
+ "ai_decisions": {
+  "spec_answers": {
+   "n": 7,
+   "d": null,
+   "ids": [
+    "2af543c40b12ec44",
+    "2bbe6881a2c66292",
+    "347623e029713b60",
+    "d44cd9b087661530",
+    "d5bfa4ec14feb563",
+    "ea5067d30e31ad1d",
+    "ea87cf01af688b16"
+   ]
+  },
+  "spec_assumed": {
+   "n": 7,
+   "d": 7,
+   "ids": [
+    "2af543c40b12ec44",
+    "2bbe6881a2c66292",
+    "347623e029713b60",
+    "d44cd9b087661530",
+    "d5bfa4ec14feb563",
+    "ea5067d30e31ad1d",
+    "ea87cf01af688b16"
+   ]
+  },
+  "cases_llm_drafted": {
+   "n": 5,
+   "d": 5,
+   "ids": [
+    "TC-C1-1",
+    "TC-C1-2",
+    "TC-C2-1",
+    "TC-C3-1",
+    "TC-O8-1"
+   ]
+  },
+  "cases_signoff": {
+   "signed": false,
+   "approved": {
+    "n": 0,
+    "d": 5,
+    "ids": []
+   }
+  },
+  "gate_equivalence": {
+   "equivalent": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "resolution": "not confirmed by a person; counted as survivors"
+  },
+  "triage": "no AI in M4 (rules only; the AI judge is M7)",
+  "overrides": [],
+  "review_decisions": [
+   {
+    "item": 553,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 554,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 555,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 556,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 557,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 558,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 559,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 560,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 561,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 562,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 563,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 564,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 565,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 566,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 567,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 568,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 569,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 570,
+    "kind": "signoff",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 571,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   }
+  ]
+ },
+ "evidence": {},
+ "defects": [],
+ "product": {
+  "summary": {
+   "tests": 41,
+   "admitted": 36,
+   "defects": 0,
+   "problematic": 1,
+   "improve": 11,
+   "approved": 0,
+   "proposed": 5
+  },
+  "defects": [],
+  "causes": [],
+  "problematic_tests": [
+   {
+    "case": "G:invalid_input:POST /api/memos",
+    "title": "G:invalid_input:POST /api/memos",
+    "summary": "",
+    "ac": "G:invalid_input:POST /api/memos",
+    "criterion": "",
+    "status": "SPEC_MISMATCH",
+    "reason": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "evidence": [
+     "ex:reference/a1/G:invalid_input:POST /api/memos"
+    ],
+    "source": "execute",
+    "count": 1
+   }
+  ],
+  "improve": [
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for C-3",
+    "detail": "People can delete notes they have written",
+    "ac": "C-3"
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "Ignore them and set update_time to the server time on edit",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: empty_content",
+    "detail": "Reject empty content with a client error",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: max_content_length",
+    "detail": "The instance content limit value from configuration",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: duplicate_memo_id",
+    "detail": "Reject with an already-exists error",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: empty_update_mask",
+    "detail": "Reject with a client error",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: timestamp_in_mask",
+    "detail": "Reject create_time and update_time in the mask",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: admin_override",
+    "detail": "Only the creator may edit and delete",
+    "ac": null
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-1 is still an assumption",
+    "detail": "People can write short notes",
+    "ac": "C-1"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-2 is still an assumption",
+    "detail": "People can edit notes they have written",
+    "ac": "C-2"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-8 is still an assumption",
+    "detail": "Edit can rewrite creation and update timestamps",
+    "ac": "O-8"
+   }
+  ],
+  "rules": {
+   "clarify": [],
+   "cases": [],
+   "templates": null,
+   "gate": {
+    "every_criterion": true,
+    "k": 5,
+    "min_kills": 1,
+    "near": 3
+   },
+   "routes": [],
+   "scan": null
+  }
+ }
+}

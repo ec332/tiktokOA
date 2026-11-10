@@ -1,0 +1,30 @@
+{
+ "execution": 387,
+ "k": 3,
+ "variants": {
+  "reference": {
+   "spec_hash": "ea6bc55ef96d046f8d1a6b6af7e1d90280c87a67b59bbe4e8b2f35a9fc79ed5c",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_memos -f data/env/tp_bb_memos/compose.yml up -d --wait",
+   "shuffle_seed": 4712287,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "513c4bf76c0b1ffb415b7aa8e07309bf4d6c1c3b4911b7d65e73a62ebbb01639",
+    "images": {
+     "memos": "sha256:087e7dc6b76b31fcd1107a5767398b2a310ced209adb791efd8760c745dc8034",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-standin-http": "sha256:f9b07c99778b8c8c9f6f4f6c764303db970246030e858abf276a733afc38aba6"
+    },
+    "commit": "b40d8a7b573774c52b022c8d6537d6baf2129dc0",
+    "ref": "26.11.0",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "no build: images pulled at the tested tag"
+    }
+   }
+  }
+ },
+ "gate_report": "sha256:0fb32a7b12bd41931c1596b541939ec4c5ca7c041468074d0bc654f926b6dda9",
+ "bound_tests": "sha256:4007343447e139b94adeacf0559a1f204b5508cfb2520c5736be1cdca77e04f1"
+}

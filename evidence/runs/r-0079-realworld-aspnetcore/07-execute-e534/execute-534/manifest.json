@@ -1,0 +1,28 @@
+{
+ "execution": 534,
+ "k": 3,
+ "variants": {
+  "reference": {
+   "spec_hash": "504af7f145869a1d3c3ed2fac65b6117c9fbb6ff1c7d0fc43c61e6911f8c94c0",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_aspnetcore_realworld_example_app -f data/env/tp_bb_aspnetcore_realworld_example_app/compose.yml up -d --wait",
+   "shuffle_seed": 59606284,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "9958909c82a827c5f9321741999b049f30702ae8dd1451b95dc50d6d5057c34b",
+    "images": {
+     "conduit": "sha256:f294ba4ca7bfbafe134018b77425e57e7b6eb3f0efcd24a8bb80cc46888422bf",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e"
+    },
+    "commit": "9345f18abf36b778abe2f290467ba432bf1f7e5c",
+    "ref": "9345f18abf36b778abe2f290467ba432bf1f7e5c",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building conduit"
+    }
+   }
+  }
+ },
+ "gate_report": "sha256:f4b8f0ca0caa71c0804e48db996ade4662896be6408e02ab4f1022b1ed49ad8b",
+ "bound_tests": "sha256:4c2a0e193733dfe2e323e475579163790bfb68ecfc32e6dccc9e5f6f5198f0ba"
+}

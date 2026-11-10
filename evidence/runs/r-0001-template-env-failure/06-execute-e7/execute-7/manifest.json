@@ -1,0 +1,11 @@
+{
+ "execution": 7,
+ "k": 3,
+ "variants": {
+  "reference": {
+   "up_error": "EnvError: up -d: Container tp_reference-db-1  Running\n Container tp_reference-backend-1  Creating\n Container tp_reference-mailpit-1  Creating\n Container tp_reference-mailpit-1  Created\n Container tp_reference-backend-1  Created\n Container tp_reference-db-1  Waiting\n Container tp_reference-mailpit-1 "
+  }
+ },
+ "gate_report": "sha256:5d99c03ca5dfdaa4645a64b102f499d23a7020a7f6b2e33bb148a82f12bc515d",
+ "bound_tests": "sha256:84a7deb8f0fbb7390375b56f1a1f26ab98e7395f3eda115f6fb6b2a0a5e8550d"
+}

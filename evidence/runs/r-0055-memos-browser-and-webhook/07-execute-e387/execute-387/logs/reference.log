@@ -1,0 +1,74 @@
+memos: starting as UID:GID 10001:10001
+time=2026-11-09T05:42:35.174Z level=INFO msg="initializing new database with latest schema" file=migration/sqlite/LATEST.sql
+time=2026-11-09T05:42:35.212Z level=INFO msg="database initialized successfully" schemaVersion=26.10.1
+Memos 26.11.0 started successfully!
+time=2026-11-09T05:42:35.306Z level=INFO msg="rebuilding memo payloads" fromVersion=0 toVersion=1
+Data directory: /var/opt/memos
+Database driver: sqlite
+Server running on port 5230
+Access your memos at: http://localhost:5230
+Access mode: private
+time=2026-11-09T05:42:35.308Z level=INFO msg="rebuilt memo payloads" refreshed=0 skipped=0 failed=0
+time=2026-11-09T05:42:41.445Z level=INFO msg="client error" method=/memos.api.AuthService/RefreshToken error="unauthenticated: refresh token not found"
+time=2026-11-09T05:42:41.452Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceProfile
+time=2026-11-09T05:42:41.453Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceSetting
+time=2026-11-09T05:42:41.460Z level=INFO msg=OK method=/memos.api.InstanceService/BatchGetInstanceSettings
+time=2026-11-09T05:42:41.495Z level=INFO msg=OK method=/memos.api.IdentityProviderService/ListIdentityProviders
+time=2026-11-09T05:42:41.701Z level=INFO msg=OK method=/memos.api.AuthService/SignIn
+time=2026-11-09T05:42:41.706Z level=INFO msg=OK method=/memos.api.AuthService/GetCurrentUser
+time=2026-11-09T05:42:41.709Z level=INFO msg=OK method=/memos.api.UserService/ListUserSettings
+time=2026-11-09T05:42:41.877Z level=INFO msg=OK method=/memos.api.UserService/ListMemoViews
+time=2026-11-09T05:42:41.886Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:42:41.891Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:42:41.893Z level=INFO msg=OK method=/memos.api.SpaceService/ListSpaces
+time=2026-11-09T05:42:41.893Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats
+time=2026-11-09T05:42:41.896Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceSetting
+time=2026-11-09T05:42:42.436Z level=INFO msg=OK method=/memos.api.MemoService/CreateMemo
+time=2026-11-09T05:42:42.445Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:42:42.446Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats
+time=2026-11-09T05:42:42.447Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:42:42.448Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:42:42.452Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:42:42.457Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats
+time=2026-11-09T05:43:13.050Z level=INFO msg=OK method=/memos.api.InstanceService/BatchGetInstanceSettings
+time=2026-11-09T05:43:13.051Z level=INFO msg="client error" method=/memos.api.AuthService/RefreshToken error="unauthenticated: refresh token not found"
+time=2026-11-09T05:43:13.056Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceProfile
+time=2026-11-09T05:43:13.057Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceSetting
+time=2026-11-09T05:43:13.093Z level=INFO msg=OK method=/memos.api.IdentityProviderService/ListIdentityProviders
+time=2026-11-09T05:43:13.259Z level=INFO msg=OK method=/memos.api.AuthService/SignIn
+time=2026-11-09T05:43:13.268Z level=INFO msg=OK method=/memos.api.AuthService/GetCurrentUser
+time=2026-11-09T05:43:13.273Z level=INFO msg=OK method=/memos.api.UserService/ListUserSettings
+time=2026-11-09T05:43:13.381Z level=INFO msg=OK method=/memos.api.UserService/ListMemoViews
+time=2026-11-09T05:43:13.384Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:43:13.385Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:43:13.385Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceSetting
+time=2026-11-09T05:43:13.386Z level=INFO msg=OK method=/memos.api.SpaceService/ListSpaces
+time=2026-11-09T05:43:13.386Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats
+time=2026-11-09T05:43:15.296Z level=INFO msg=OK method=/memos.api.MemoService/CreateMemo
+time=2026-11-09T05:43:15.303Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:43:15.306Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats
+time=2026-11-09T05:43:15.307Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:43:15.310Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:43:15.311Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:43:15.312Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats
+time=2026-11-09T05:44:04.935Z level=INFO msg=OK method=/memos.api.InstanceService/BatchGetInstanceSettings
+time=2026-11-09T05:44:04.939Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceSetting
+time=2026-11-09T05:44:04.939Z level=INFO msg="client error" method=/memos.api.AuthService/RefreshToken error="unauthenticated: refresh token not found"
+time=2026-11-09T05:44:04.940Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceProfile
+time=2026-11-09T05:44:05.015Z level=INFO msg=OK method=/memos.api.IdentityProviderService/ListIdentityProviders
+time=2026-11-09T05:44:05.224Z level=INFO msg=OK method=/memos.api.AuthService/SignIn
+time=2026-11-09T05:44:05.232Z level=INFO msg=OK method=/memos.api.AuthService/GetCurrentUser
+time=2026-11-09T05:44:05.239Z level=INFO msg=OK method=/memos.api.UserService/ListUserSettings
+time=2026-11-09T05:44:05.454Z level=INFO msg=OK method=/memos.api.UserService/ListMemoViews
+time=2026-11-09T05:44:05.455Z level=INFO msg=OK method=/memos.api.InstanceService/GetInstanceSetting
+time=2026-11-09T05:44:05.469Z level=INFO msg=OK method=/memos.api.SpaceService/ListSpaces
+time=2026-11-09T05:44:05.474Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:44:05.480Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:44:05.480Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats
+time=2026-11-09T05:44:07.323Z level=INFO msg=OK method=/memos.api.MemoService/CreateMemo
+time=2026-11-09T05:44:07.340Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:44:07.343Z level=INFO msg=OK method=/memos.api.MemoService/ListMemos
+time=2026-11-09T05:44:07.344Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:44:07.347Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats
+time=2026-11-09T05:44:07.347Z level=INFO msg=OK method=/memos.api.UserService/GetUserStats
+time=2026-11-09T05:44:07.349Z level=INFO msg=OK method=/memos.api.UserService/ListUserStats

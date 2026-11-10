@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="28" time="22.694" timestamp="2026-11-09T08:14:18.084807+00:00" hostname="4e2a9f05d88c"><testcase classname="create_notes.ui.yaml" name="create_notes[U:create_notes]" time="3.367" /><testcase classname="test_tc_c1_1" name="test_tc_c1_1[TC-C1-1]" time="0.014" /><testcase classname="test_tc_c2_1" name="test_tc_c2_1[TC-C2-1]" time="0.200" /><testcase classname="test_tc_c3_1" name="test_tc_c3_1[TC-C3-1]" time="0.414" /><testcase classname="test_tc_o10_1" name="test_tc_o10_1[TC-O10-1]" time="0.197" /><testcase classname="test_tc_o11_1" name="test_tc_o11_1[TC-O11-1]" time="0.197" /><testcase classname="test_tc_o4_1" name="test_tc_o4_1[TC-O4-1]" time="0.220"><failure message="platform_rt.expect.ExpectationFailed: [TC-O4-1/status] expected '400', got 201">make = &lt;platform_rt.blackbox.Make object at 0xffffb0c5b530&gt;, case_id = 'TC-O4-1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o4_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin()
+        long_text = "x" * 100001
+        api.post("/api/notes", token=admin["token"], json={"text": long_text})
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=b83f0515f8a457833ae337c102e2e0059e49b5479d4f2810ffad7f5d77c6ab97
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_o4_1.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O4-1/status', ok = False, expected = '400', actual = 201
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O4-1/status] expected '400', got 201
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tp_families" name="test_generic[G:properties:GET /api/notes]" time="2.923" /><testcase classname="test_tp_families" name="test_generic[G:properties:POST /api/notes]" time="2.865" /><testcase classname="test_tp_families" name="test_generic[G:properties:GET /api/notes/{id}]" time="2.026" /><testcase classname="test_tp_families" name="test_generic[G:properties:POST /api/users]" time="2.048" /><testcase classname="test_tp_families" name="test_generic[G:properties:POST /api/login]" time="2.068"><failure message="platform_rt.expect.SpecMismatch: [property] POST /api/login: 3 example(s) disagree with the spec (Undocumented status code); first /api/login → 400">case_id = 'G:properties:POST /api/login'
+
+    def test_generic(case_id):
+&gt;       run(case_id, _spec(), conf())
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:402: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:386: in run
+    RUN[family](spec, c, method, path, op)
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:270: in properties
+    _fail("property", f"{method} {path}: {len(drift)} example(s) disagree with the spec "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'property'
+msg = 'POST /api/login: 3 example(s) disagree with the spec (Undocumented status code); first /api/login → 400'
+spec_side = True
+
+    def _fail(aid: str, msg: str, spec_side: bool = False):
+        record.current().assertions.append({"id": aid, "ok": False, "expected": None, "actual": msg})
+&gt;       raise (SpecMismatch if spec_side else ExpectationFailed)(aid, msg)
+E       platform_rt.expect.SpecMismatch: [property] POST /api/login: 3 example(s) disagree with the spec (Undocumented status code); first /api/login → 400
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:143: SpecMismatch</failure></testcase><testcase classname="test_tp_families" name="test_generic[G:auth_required:GET /api/notes]" time="0.368" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:POST /api/notes]" time="0.464" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:GET /api/notes/{id}]" time="0.318" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:DELETE /api/notes/{id}]" time="0.402" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:POST /api/users]" time="0.408" /><testcase classname="test_tp_families" name="test_generic[G:unknown_id:GET /api/notes/{id}]" time="0.200" /><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/notes]" time="0.406" /><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/users]" time="0.407" /><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/login]" time="0.406" /><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/invite]" time="0.406" /><testcase classname="test_tp_families" name="test_generic[G:read_back:POST /api/notes]" time="0.411" /><testcase classname="test_tp_families" name="test_generic[G:delete_final:POST /api/notes]" time="0.597" /><testcase classname="test_tp_families" name="test_generic[G:dependency_called:POST /api/notes]" time="0.321" /><testcase classname="test_tp_families" name="test_generic[G:dependency_called:POST /api/invite]" time="0.164" /><testcase classname="test_tp_families" name="test_generic[G:dependency_failure_handled:POST /api/notes]" time="0.322" /><testcase classname="test_tp_families" name="test_generic[G:dependency_failure_handled:POST /api/invite]" time="0.265" /></testsuite></testsuites>

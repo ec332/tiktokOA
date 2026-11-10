@@ -1,0 +1,8 @@
+{"path": "/api/notes", "id": 121, "location": null}
+{"path": "/api/notes", "id": 121, "location": null, "deleted_by_test": true}
+{"path": "/api/notes", "id": 122, "location": null}
+{"path": "/api/notes", "id": 122, "location": null, "deleted_by_test": true}
+{"path": "/api/invite", "id": null, "location": null, "untracked": "{'sent': True}"}
+{"path": "/api/invite", "id": null, "location": null, "untracked": "{'sent': True}"}
+{"path": "/api/notes", "id": 123, "location": null}
+{"path": "/api/notes", "id": 123, "location": null, "deleted_by_test": true}

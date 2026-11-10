@@ -1,0 +1,110 @@
+[
+ {
+  "id": "probe:reference/a1/pre",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a1/post",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/pre",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/post",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/pre",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/post",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ }
+]

@@ -1,0 +1,652 @@
+{
+ "deleted": [],
+ "failed": [],
+ "unknown_delete_route": [
+  {
+   "path": "/api/articles/tp-local-ee5212-article-92802e/comments",
+   "id": null,
+   "location": null,
+   "untracked": "{'comment': {'author': {'bio': '', 'following': False, 'image': 'https://static.productionready.io/images/smiley-cyrus.j"
+  },
+  {
+   "path": "/api/articles/tp-local-c696f7-article-806713/comments",
+   "id": null,
+   "location": null,
+   "untracked": "{'comment': {'author': {'bio': '', 'following': False, 'image': 'https://static.productionready.io/images/smiley-cyrus.j"
+  },
+  {
+   "path": "/api/articles/tp-local-b4142e-article-732f63/comments",
+   "id": null,
+   "location": null,
+   "untracked": "{'comment': {'author': {'bio': '', 'following': False, 'image': 'https://static.productionready.io/images/smiley-cyrus.j"
+  },
+  {
+   "path": "/api/articles/tp-local-d78187-article-24d2fc/favorite",
+   "id": "tp-local-d78187-article-24d2fc",
+   "location": null
+  },
+  {
+   "path": "/api/articles/tp-local-6593a3-fav-3e5a8c/favorite",
+   "id": "tp-local-6593a3-fav-3e5a8c",
+   "location": null
+  },
+  {
+   "path": "/api/articles/tp-local-0e7dc2-article-630ec0/comments",
+   "id": null,
+   "location": null,
+   "untracked": "{'comment': {'author': {'bio': '', 'following': False, 'image': 'https://static.productionready.io/images/smiley-cyrus.j"
+  }
+ ],
+ "deleted_by_test": [
+  {
+   "path": "/api/articles",
+   "id": "tp-local-0e7dc2-article-630ec0",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-d5207a",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-7a52d6",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-c85357",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-65c590",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-8ec364",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-d2c1f7",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-6adbb0",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-ca94fb",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-c4f156",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-38c058",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-67a606",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-dca1f2",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-ceabf0",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-cf226c",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-6f259b",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-a42c65",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-825d75",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-01be8e",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-407cc6",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-9a0c77",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-32e23f",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-e8cafc",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-1521ab",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-089a36",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-0e865f",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-259cfd",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-6c65da",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-1d921a",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-5cc46e",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-1d9c2d",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-c31ca5",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-97c323",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-b73a25",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-7447ae",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-425052",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-aa37f2",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-db280e",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-b87d61",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-418ea0",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-ad16f1",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-ce7674",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-f55a31",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-2d2e50",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-781f0a",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-e1d332-article-e925de",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-3f276d",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-17ef40",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-4cebf7",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-2728b5",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-9604ef",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-2ba57a",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-2fe84a",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-a4b161",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-5411c8",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-7fef0e",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-c5d4b8",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-a80f95",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-1c82e6",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-d06870",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-f0525b",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-b97193",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-1104e0",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-a485d9",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-170c16",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-86e0d5",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-b7b48f",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-9b5b51",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-c27c10",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-d9997a",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-367400",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-ba9f67",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-91f829",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-299ded",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-a6e504",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-04be41",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-9026bf",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-58cdc6",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-0187bc",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-4b7225",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-04e4b1",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-6eb687",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-3cd17f",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-3c5470",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-833fa2",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-e4bfdf",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-351ed2",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-24dc11",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-b7969f",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-cbef7e",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-993a58-art-ac1b3c",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-51abda",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-3aa623",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-69e7a5",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-280ba1",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-7707f8",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-a8cb29",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-746fde",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-222e3a",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-ea171b",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-ab4f0e",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-95a0ec",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-7aeca9",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-b97ef9",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-d14e0f",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-ba38ed",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-1dabcf",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-4eb4e1",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-e8201e",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-12246c",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-5c6792",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-116b8f-article-e69648",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-dda2af-a-fresh-title-582dd1",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-ff4887-owned-4bf58a",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-ff4887-title-of-another-article-d52a71",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-6593a3-fav-3e5a8c",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-d78187-article-24d2fc",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-837fdd-fav-0e564d",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-8a1a61-art-15e346",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-b4142e-article-732f63",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-c696f7-article-806713",
+   "location": null
+  },
+  {
+   "path": "/api/articles",
+   "id": "tp-local-ee5212-article-92802e",
+   "location": null
+  }
+ ]
+}

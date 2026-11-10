@@ -1,0 +1,32 @@
+{
+ "execution": 453,
+ "k": 5,
+ "variants": {
+  "reference": {
+   "spec_hash": "c5b3a91a2df92149bb3e02fe6ff42f5a0113c8313a0eb4a7f64f8923ccd03bfa",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_it3_i1_notify -f data/env/tp_bb_it3_i1_notify/compose.yml up -d --wait",
+   "shuffle_seed": 37863950,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+    "images": {
+     "app": "sha256:6810cd955a2ebebb4b1c06f17f3ba59965bce1d2678f442c06ee2639cee09dd6",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+     "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+    },
+    "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+    "ref": "v1.0.0",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building app"
+    }
+   }
+  }
+ },
+ "gate_report": "sha256:753ddfbda2606340d4632c223c1ae1ea270f5b3f9c0a79312d6d5e65ebe2585c",
+ "bound_tests": "sha256:4644df24a91bec5a43f45909d19a85738d72b428e53eda957f97517107d253cc"
+}

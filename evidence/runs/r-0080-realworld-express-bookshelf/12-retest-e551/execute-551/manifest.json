@@ -1,0 +1,55 @@
+{
+ "execution": 551,
+ "k": 5,
+ "variants": {
+  "reference": {
+   "spec_hash": "58abc1edf46eafac1194cf0489146e7837561d2ba48a72344b99e09704a4e3bf",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_express_bookshelf_realworld_example_app -f data/env/tp_bb_express_bookshelf_realworld_example_app/compose.yml up -d --wait",
+   "shuffle_seed": 98389987,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "b99f095e4676f28398e47008b75abe0c095e84ffc6eae116af5d8b80b744247d",
+    "images": {
+     "node": "sha256:04bebc2c32cb8136142980850f6ee04749261ba4d2250e584aa92b98ed78b9ca",
+     "postgres": "sha256:ff87138949ad9a46f32ff23bd6852b52ce024a13dffe9b4087be98292cdd3b4f",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e"
+    },
+    "commit": "68e7d4b46e2c2ef016d174e3715dad0f78e63007",
+    "ref": "68e7d4b46e2c2ef016d174e3715dad0f78e63007",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building node"
+    }
+   }
+  },
+  "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2": {
+   "spec_hash": "135046eeb2893d2b0bdab311ccec6ec7e243b615ff85e3dec3d83df084cafdec",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_express_bookshelf_realworld_example_app__fixed_sha256_b2100c7b9c5fe9b13b65b8e7170 -f data/env/tp_bb_express_bookshelf_realworld_example_app__fixed_sha256_b2100c7b9c5fe9b13b65b8e7170/compose.yml up -d --wait",
+   "shuffle_seed": 29792492,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "b99f095e4676f28398e47008b75abe0c095e84ffc6eae116af5d8b80b744247d",
+    "images": {
+     "node": "sha256:11853863dce7d053c2fae85ade296dbbaddbd862fc7fb059e6c47ae2c763012b",
+     "postgres": "sha256:ff87138949ad9a46f32ff23bd6852b52ce024a13dffe9b4087be98292cdd3b4f",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e"
+    },
+    "commit": "68e7d4b46e2c2ef016d174e3715dad0f78e63007",
+    "ref": "68e7d4b46e2c2ef016d174e3715dad0f78e63007",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building node"
+    },
+    "sut": {
+     "patches": {
+      "sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2": "85de598c1a6b84f82ea08331ce7abec962d550f348b59de7a5751a956158a6c0"
+     }
+    }
+   }
+  }
+ },
+ "gate_report": "sha256:7307ff008f8e0e62a25edca43823e0ae52e9e39e826f81be8e3783ecbf4ad4b4",
+ "bound_tests": "sha256:4c2a0e193733dfe2e323e475579163790bfb68ecfc32e6dccc9e5f6f5198f0ba"
+}

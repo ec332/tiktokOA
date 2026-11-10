@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="3" time="1.398" timestamp="2026-11-02T13:14:35.807991+00:00" hostname="6054a20a0296"><testcase classname="test_tc_c1_1" name="test_tc_c1_1[TC-C1-1]" time="1.043" /><testcase classname="test_tc_o8_2" name="test_tc_o8_2[TC-O8-2]" time="0.146" /><testcase classname="test_tc_o9_2" name="test_tc_o9_2[TC-O9-2]" time="0.130"><failure message="platform_rt.expect.ExpectationFailed: [TC-O9-2/status] expected '422', got 500">make = &lt;factories.Factories object at 0xffff98bd87d0&gt;, case_id = 'TC-O9-2'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o9_2(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        user = make.user()
+        item = make.item(owner=user)
+        # &gt;&gt;&gt; BINDING
+        api.put(f"/api/v1/items/{item['id']}", token=user["token"], json=dict(data))
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=5135cad21556563f45a5649259980b6a96e9cc78ff278ad944e47c94428af49e
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+/work/tests/test_tc_o9_2.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:69: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O9-2/status', ok = False, expected = '422', actual = 500
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O9-2/status] expected '422', got 500
+
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:30: ExpectationFailed</failure></testcase></testsuite></testsuites>

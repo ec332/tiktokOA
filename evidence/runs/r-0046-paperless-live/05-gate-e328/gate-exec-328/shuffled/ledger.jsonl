@@ -1,0 +1,9 @@
+{"path": "/api/document_types/", "id": 57, "location": null}
+{"path": "/api/custom_fields/", "id": 57, "location": null}
+{"path": "/api/custom_fields/", "id": 57, "location": null, "deleted_by_test": true}
+{"path": "/api/custom_fields/", "id": 58, "location": null}
+{"path": "/api/correspondents/", "id": 57, "location": null}
+{"path": "/api/correspondents/", "id": 58, "location": null}
+{"path": "/api/correspondents/", "id": 58, "location": null, "deleted_by_test": true}
+{"path": "/api/document_types/", "id": 58, "location": null}
+{"path": "/api/document_types/", "id": 58, "location": null, "deleted_by_test": true}

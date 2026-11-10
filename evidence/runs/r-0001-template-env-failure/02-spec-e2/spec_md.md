@@ -1,0 +1,55 @@
+# Spec v3 — full-stack-fastapi-template @ 6838b40
+
+Requirements: brief `sha256:5f845486a0fc`. Code index: 4 routes in 19 files.
+
+## Criteria
+
+| id | status | title | given / when / then | expected | sources | flags |
+|---|---|---|---|---|---|---|
+| O-1 | confirmed | Create item with price and discount | authenticated user / POST /api/v1/items/ with price and discount_percent / item created with owner set to caller; response includes final_price | 200 | backend/app/api/routes/items.py:68, backend/app/models.py:79, backend/app/models.py:74 | missing_error_path |
+| O-2 | confirmed | final_price is discounted price in every item response | item with price and discount_percent / any item endpoint returns the item / Leave to human judgement | human judgement | backend/app/models.py:107, backend/app/models.py:112 | missing_error_path, SUSPECTED DEFECT |
+| O-3 | confirmed | Item with null price shows null final_price | item with price null and any discount_percent / item is returned / final_price is null | 200 | backend/app/models.py:110, backend/app/models.py:111 | missing_error_path |
+| O-4 | confirmed | final_price rounds half to even | item price 0.05 and discount_percent 50 / item is returned / final_price is 0.02 because round uses half-to-even | 200 | backend/app/models.py:112 | missing_error_path |
+| O-5 | confirmed | Discount bounds on create | authenticated user / POST with discount_percent 0, 99, 100 or -1 / 0 and 99 accepted; 100 and -1 rejected with validation error | 422 | backend/app/models.py:75 |  |
+| O-6 | confirmed | Discount bounds on update | owner of item / PUT with discount_percent 100 or -1 / Leave to human judgement | human judgement | backend/app/models.py:88 | SUSPECTED DEFECT |
+| O-7 | confirmed | Price precision bounds | authenticated user / POST or PUT with price having more than 2 decimal places or more than 10 digits / Leave to human judgement | human judgement | backend/app/models.py:74, backend/app/models.py:87 | SUSPECTED DEFECT |
+| O-8 | confirmed | PUT with discount_percent null causes server error | owner of item / PUT with discount_percent null / Reject null with a 422 validation error. | 422 | backend/app/models.py:88, backend/app/api/routes/items.py:92, backend/app/models.py:112 | SUSPECTED DEFECT |
+| O-9 | confirmed | PUT with negative price is stored | owner of item / PUT with price -5 / Reject with a 422, as on create, because price must be at least 0. | 422 | backend/app/models.py:87, backend/app/models.py:112 | missing_error_path, SUSPECTED DEFECT |
+| O-10 | confirmed | PUT with null title causes server error | owner of item / PUT with title null / Reject null title with a 422 validation error. | 422 | backend/app/models.py:85, backend/app/api/routes/items.py:92 | SUSPECTED DEFECT |
+| O-11 | confirmed | PUT with price null clears price | owner of item with a price / PUT with price null / price cleared and final_price becomes null | 200 | backend/app/models.py:87, backend/app/models.py:110 | missing_error_path |
+| O-12 | confirmed | PUT with empty body changes nothing | owner of item / PUT with empty JSON object / Leave to human judgement | human judgement | backend/app/api/routes/items.py:91, backend/app/api/routes/items.py:96 | missing_error_path, SUSPECTED DEFECT |
+| O-13 | confirmed | GET item by id for non-owner | item owned by another user / GET /api/v1/items/{id} / 403 Not enough permissions; the response reveals the item exists | 403 | backend/app/api/routes/items.py:53, backend/app/api/routes/items.py:56 |  |
+| O-14 | confirmed | GET item by id for missing item | no item with the id / GET /api/v1/items/{id} / Leave to human judgement | human judgement | backend/app/api/routes/items.py:54, backend/app/api/routes/items.py:55 | SUSPECTED DEFECT |
+| O-15 | confirmed | Superuser reads and updates any item | item owned by another user / GET or PUT the item / allowed | 200 | backend/app/api/routes/items.py:56, backend/app/api/routes/items.py:89 | missing_error_path |
+| O-16 | confirmed | PUT by non-owner is rejected before update | item owned by another user / PUT /api/v1/items/{id} / 403 and item unchanged | 403 | backend/app/api/routes/items.py:89, backend/app/api/routes/items.py:90 |  |
+| O-17 | confirmed | List shows only own items for ordinary user | user with items / GET /api/v1/items/ / only own items, newest first by created_at; count is number of own items; empty list gives data [] and count 0 | 200 | backend/app/api/routes/items.py:36, backend/app/api/routes/items.py:38, backend/app/api/routes/items.py:44 | missing_error_path |
+| O-18 | confirmed | List shows all items for superuser | items owned by several users / GET /api/v1/items/ / all items, newest first by created_at; count is total | 200 | backend/app/api/routes/items.py:21, backend/app/api/routes/items.py:25 | vague_quantifier, missing_error_path |
+| O-19 | confirmed | GET list with negative limit causes server error | authenticated user / GET /api/v1/items/ with limit -1 or negative skip / Reject negative skip or limit with a 422 validation error. | 422 | backend/app/api/routes/items.py:15, backend/app/api/routes/items.py:40 | undefined_term, unspecified_boundary, SUSPECTED DEFECT |
+| O-20 | confirmed | GET list accepts limit above 100 | authenticated user with many items / GET /api/v1/items/ with limit 1000 / up to 1000 items returned in one response | 200 | backend/app/api/routes/items.py:15, backend/app/api/routes/items.py:40 | vague_quantifier, missing_error_path, unspecified_boundary |
+
+## Findings
+
+- **rule_interaction**: final_price is computed only when price is set. If price is null, final_price is null and discount_percent has no effect on the response. (backend/app/models.py:110, backend/app/models.py:111)
+- **missing_error_path**: The requirements do not say how final_price is rounded. The code uses Python round() on Decimal, which rounds half to even, so 0.05 with 50 percent discount gives 0.02, not 0.03. (backend/app/models.py:112)
+- **suspected_defect**: PUT with discount_percent set to null is accepted by the schema, then written as NULL to a non-null integer column, or breaks final_price arithmetic. Either way the client gets a server error for client input. (backend/app/models.py:88, backend/app/api/routes/items.py:91, backend/app/models.py:109, backend/app/models.py:112)
+- **suspected_defect**: ItemUpdate.price has no ge=0 bound, unlike ItemCreate, so PUT can store a negative price and final_price becomes negative. (backend/app/models.py:87, backend/app/models.py:74)
+- **suspected_defect**: PUT with title set to null passes the schema and writes NULL to the title column, which should fail a non-null constraint and give a server error. (backend/app/models.py:85, backend/app/api/routes/items.py:92)
+- **suspected_defect**: skip and limit have no lower bound. Negative values are passed straight to the database OFFSET/LIMIT and fail with a server error. (backend/app/api/routes/items.py:15, backend/app/api/routes/items.py:25, backend/app/api/routes/items.py:39)
+- **no_requirement**: The requirements never mention list pagination. The code sets limit default 100 with no maximum, so one request can return any number of items. (backend/app/api/routes/items.py:15, backend/app/api/routes/items.py:40)
+
+## Behaviour with no requirement (routes no criterion covers)
+
+- none
+
+## Decisions
+
+- intended behaviour: Reject null with a 422 validation error.
+- intended behaviour: Reject with a 422, as on create, because price must be at least 0.
+- intended behaviour: Reject null title with a 422 validation error.
+- intended behaviour: Reject negative skip or limit with a 422 validation error.
+- final_price rounding mode: Switch to ROUND_HALF_UP.
+- intended behaviour: Leave to human judgement
+- intended behaviour: Leave to human judgement
+- intended behaviour: Leave to human judgement
+- intended behaviour: Leave to human judgement
+- intended behaviour: Leave to human judgement

@@ -1,0 +1,1 @@
+{"body":{"profile":"localhost-8010","stops":["question","confirm_observed","setup","signoff"],"unattended":true},"manifest":{"created_at":"2026-11-08T09:14:56Z","id":"sha256:5bb2dd568154d0181d05ed52ab05d0fc90f746d4049f82060d7e5190f49d9137","labels":[],"parents":[],"schema_version":1,"signed":null,"stage":null,"stage_version":null,"type":"run_options"}}

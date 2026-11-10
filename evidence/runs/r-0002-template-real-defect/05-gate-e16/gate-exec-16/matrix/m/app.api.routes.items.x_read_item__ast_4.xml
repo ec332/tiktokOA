@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="5" time="1.508" timestamp="2026-11-02T13:15:56.614327+00:00" hostname="104e81bac439"><testcase classname="test_tc_o11_1" name="test_tc_o11_1[TC-O11-1.1]" time="0.645"><failure message="platform_rt.expect.ExpectationFailed: [TC-O11-1.1/status] expected '2xx', got 403">make = &lt;factories.Factories object at 0xffff95155e80&gt;, case_id = 'TC-O11-1.1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o11_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        user = make.user()
+        superuser = make.superuser()
+        item = make.item(owner=user)
+        # &gt;&gt;&gt; BINDING
+        other = make.user(); readers = {'owner': user['token'], 'superuser': superuser['token'], 'non-owner ordinary user': other['token']}; r = api.get(f"/api/v1/items/{item['id']}", token=readers[hints['reader']])
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=664c456e469aefe12391c64edf8f8a57035be713ebd3085a54b621a71441cf2a
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+/work/tests/test_tc_o11_1.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:69: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O11-1.1/status', ok = False, expected = '2xx', actual = 403
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O11-1.1/status] expected '2xx', got 403
+
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:30: ExpectationFailed</failure></testcase><testcase classname="test_tc_o11_1" name="test_tc_o11_1[TC-O11-1.2]" time="0.220"><failure message="platform_rt.expect.ExpectationFailed: [TC-O11-1.2/status] expected '2xx', got 403">make = &lt;factories.Factories object at 0xffff947a5310&gt;, case_id = 'TC-O11-1.2'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o11_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        user = make.user()
+        superuser = make.superuser()
+        item = make.item(owner=user)
+        # &gt;&gt;&gt; BINDING
+        other = make.user(); readers = {'owner': user['token'], 'superuser': superuser['token'], 'non-owner ordinary user': other['token']}; r = api.get(f"/api/v1/items/{item['id']}", token=readers[hints['reader']])
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=664c456e469aefe12391c64edf8f8a57035be713ebd3085a54b621a71441cf2a
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+/work/tests/test_tc_o11_1.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:69: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O11-1.2/status', ok = False, expected = '2xx', actual = 403
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O11-1.2/status] expected '2xx', got 403
+
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:30: ExpectationFailed</failure></testcase><testcase classname="test_tc_o11_1" name="test_tc_o11_1[TC-O11-1.3]" time="0.239" /><testcase classname="test_tc_o11_2" name="test_tc_o11_2[TC-O11-2]" time="0.120"><failure message="platform_rt.expect.ExpectationFailed: [TC-O11-2/status] expected '2xx', got 403">make = &lt;factories.Factories object at 0xffff9519bbb0&gt;, case_id = 'TC-O11-2'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o11_2(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        user = make.user()
+        item = make.item(owner=user)
+        # &gt;&gt;&gt; BINDING
+        item_read = api.get(f"/api/v1/items/{item['id']}", token=user["token"])
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=34e20fe50bf061f69bdd71f985d055ce90c5cd5cccf4431f972f95a8c45a163f
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+/work/tests/test_tc_o11_2.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:69: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O11-2/status', ok = False, expected = '2xx', actual = 403
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O11-2/status] expected '2xx', got 403
+
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:30: ExpectationFailed</failure></testcase><testcase classname="test_tc_o11_3" name="test_tc_o11_3[TC-O11-3]" time="0.217" /></testsuite></testsuites>

@@ -1,0 +1,2565 @@
+{
+ "header": {
+  "network": {
+   "build": "unrestricted outbound while building app",
+   "run": "none: an internal network, reached inbound through a forwarder"
+  },
+  "labels": [
+   "real",
+   "unsigned"
+  ],
+  "run_records": "sha256:34536e2fe4e153ca460188b58ca9776e122437ecb3ea787909227743a842e75e",
+  "execution": 448,
+  "variants": {
+   "bug:invite-wrong-recipient": {
+    "fingerprint": {
+     "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+     "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+     "flags": [
+      "invite-wrong-recipient:c4f7802a3c2dd44691e8df9a867ecafe86f95d6ba659bc15354e2e4e7e66696f"
+     ],
+     "images": {
+      "app": "sha256:835364c286d780680410fda11484468b6e9bce73ee6727d1083fa12180f753be",
+      "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+      "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+     },
+     "network": {
+      "build": "unrestricted outbound while building app",
+      "run": "none: an internal network, reached inbound through a forwarder"
+     },
+     "ref": "v1.0.0"
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "docker compose -p tp_bb_it3_i1_notify__bug_invite_wrong_recipient -f data/env/tp_bb_it3_i1_notify__bug_invite_wrong_recipient/compose.yml up -d --wait",
+    "shuffle_seed": 87644365,
+    "spec_hash": "984efbf3d56db49f7f5864d8d018aa98b7fdf64dbb04b3ea734b905c687371d1"
+   },
+   "bug:page-error": {
+    "fingerprint": {
+     "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+     "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+     "flags": [
+      "page-error:5a825965e40ede8dfde0ae691ccee08effe046b5bf1a02fc7607781cb59c3a0e"
+     ],
+     "images": {
+      "app": "sha256:b6dcc1a5b922395cb6f3f12c13dd1ae1001e6124e039604f237eec492a41be6d",
+      "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+      "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+     },
+     "network": {
+      "build": "unrestricted outbound while building app",
+      "run": "none: an internal network, reached inbound through a forwarder"
+     },
+     "ref": "v1.0.0"
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "docker compose -p tp_bb_it3_i1_notify__bug_page_error -f data/env/tp_bb_it3_i1_notify__bug_page_error/compose.yml up -d --wait",
+    "shuffle_seed": 15331855,
+    "spec_hash": "25e910c93f27350941e3ec463871491463257ea3e8b04ef9c27d4445f0af3726"
+   },
+   "bug:webhook-blocks": {
+    "fingerprint": {
+     "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+     "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+     "flags": [
+      "webhook-blocks:57eee071ef509e4812c96a7425e22d4ea747cd4ce6f19fd580501c6a7fa18c10"
+     ],
+     "images": {
+      "app": "sha256:07ea73216a4c4d621e9bbfe865c0cae9c1d07910c9db4a61a97e3d57501b29b7",
+      "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+      "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+     },
+     "network": {
+      "build": "unrestricted outbound while building app",
+      "run": "none: an internal network, reached inbound through a forwarder"
+     },
+     "ref": "v1.0.0"
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "docker compose -p tp_bb_it3_i1_notify__bug_webhook_blocks -f data/env/tp_bb_it3_i1_notify__bug_webhook_blocks/compose.yml up -d --wait",
+    "shuffle_seed": 62697287,
+    "spec_hash": "ae8372543d0b628a164892b167a015b75f9f6959d52c3122618443e034c60064"
+   },
+   "bug:webhook-drops-body": {
+    "fingerprint": {
+     "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+     "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+     "flags": [
+      "webhook-drops-body:7cfbda81fb7f029bdc49f8d144d1eff4b82b4a22db52e1ecd8fa29be7f6be9da"
+     ],
+     "images": {
+      "app": "sha256:8eaa8aaa01cae99a1d0112316b0295444a5521340861787bad0686c4f2e4709f",
+      "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+      "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+     },
+     "network": {
+      "build": "unrestricted outbound while building app",
+      "run": "none: an internal network, reached inbound through a forwarder"
+     },
+     "ref": "v1.0.0"
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "docker compose -p tp_bb_it3_i1_notify__bug_webhook_drops_body -f data/env/tp_bb_it3_i1_notify__bug_webhook_drops_body/compose.yml up -d --wait",
+    "shuffle_seed": 94674152,
+    "spec_hash": "cf2cf8fa717dcc65f3c247cf793bd0c043e762b4d793654e0414c29667739203"
+   },
+   "reference": {
+    "fingerprint": {
+     "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+     "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+     "images": {
+      "app": "sha256:6810cd955a2ebebb4b1c06f17f3ba59965bce1d2678f442c06ee2639cee09dd6",
+      "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+      "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+      "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+     },
+     "network": {
+      "build": "unrestricted outbound while building app",
+      "run": "none: an internal network, reached inbound through a forwarder"
+     },
+     "ref": "v1.0.0"
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "docker compose -p tp_bb_it3_i1_notify -f data/env/tp_bb_it3_i1_notify/compose.yml up -d --wait",
+    "shuffle_seed": 11407512,
+    "spec_hash": "c5b3a91a2df92149bb3e02fe6ff42f5a0113c8313a0eb4a7f64f8923ccd03bfa"
+   }
+  },
+  "k": 3,
+  "sut": {
+   "name": "it3-i1-notify",
+   "ref": "cb7e637b308b851307801d8e7e27aef0cce6b660"
+  },
+  "cases_signed": false,
+  "unattended_decisions": {
+   "n": 21,
+   "d": 21,
+   "ids": [
+    "review:618",
+    "review:619",
+    "review:620",
+    "review:621",
+    "review:622",
+    "review:623",
+    "review:624",
+    "review:625",
+    "review:626",
+    "review:627",
+    "review:628",
+    "review:629",
+    "review:630",
+    "review:631",
+    "review:632",
+    "review:633",
+    "review:634",
+    "review:635",
+    "review:636",
+    "review:637",
+    "review:638"
+   ]
+  },
+  "strategies": {
+   "reach": "container",
+   "spec": "served",
+   "auth": "token_header",
+   "data": "spec_derived",
+   "state": "namespace",
+   "mutation": "none",
+   "safety": "unrestricted",
+   "checks": "pytest_cases"
+  },
+  "ceiling": "Stable, property-checked",
+  "claim": {
+   "target": "it3-i1-notify",
+   "reach": "container",
+   "isolation": 1,
+   "isolation_words": "partly isolated (stand-ins)",
+   "ceiling": "Stable, property-checked",
+   "ran": {
+    "n": 28,
+    "d": 29,
+    "ids": [
+     "G:auth_required:DELETE /api/notes/{id}",
+     "G:auth_required:GET /api/notes",
+     "G:auth_required:GET /api/notes/{id}",
+     "G:auth_required:POST /api/notes",
+     "G:auth_required:POST /api/users",
+     "G:delete_final:POST /api/notes",
+     "G:dependency_called:POST /api/invite",
+     "G:dependency_called:POST /api/notes",
+     "G:dependency_failure_handled:POST /api/invite",
+     "G:dependency_failure_handled:POST /api/notes",
+     "G:invalid_input:POST /api/invite",
+     "G:invalid_input:POST /api/login",
+     "G:invalid_input:POST /api/notes",
+     "G:invalid_input:POST /api/users",
+     "G:properties:GET /api/notes",
+     "G:properties:GET /api/notes/{id}",
+     "G:properties:POST /api/login",
+     "G:properties:POST /api/notes",
+     "G:properties:POST /api/users",
+     "G:read_back:POST /api/notes",
+     "G:unknown_id:GET /api/notes/{id}",
+     "TC-C1-1",
+     "TC-C2-1",
+     "TC-C3-1",
+     "TC-O10-1",
+     "TC-O11-1",
+     "TC-O4-1",
+     "U:create_notes"
+    ]
+   },
+   "blocked": [
+    {
+     "why": "signed case not bound to a test",
+     "cases": {
+      "n": 1,
+      "d": 29,
+      "ids": [
+       "TC-O6-1"
+      ]
+     }
+    }
+   ],
+   "basis": {
+    "real": {
+     "n": 26,
+     "d": 28,
+     "ids": [
+      "G:auth_required:DELETE /api/notes/{id}",
+      "G:auth_required:GET /api/notes",
+      "G:auth_required:GET /api/notes/{id}",
+      "G:auth_required:POST /api/notes",
+      "G:auth_required:POST /api/users",
+      "G:delete_final:POST /api/notes",
+      "G:dependency_called:POST /api/invite",
+      "G:dependency_called:POST /api/notes",
+      "G:invalid_input:POST /api/invite",
+      "G:invalid_input:POST /api/login",
+      "G:invalid_input:POST /api/notes",
+      "G:invalid_input:POST /api/users",
+      "G:properties:GET /api/notes",
+      "G:properties:GET /api/notes/{id}",
+      "G:properties:POST /api/login",
+      "G:properties:POST /api/notes",
+      "G:properties:POST /api/users",
+      "G:read_back:POST /api/notes",
+      "G:unknown_id:GET /api/notes/{id}",
+      "TC-C1-1",
+      "TC-C2-1",
+      "TC-C3-1",
+      "TC-O10-1",
+      "TC-O11-1",
+      "TC-O4-1",
+      "U:create_notes"
+     ]
+    },
+    "simulated": {
+     "n": 2,
+     "d": 28,
+     "ids": [
+      "G:dependency_failure_handled:POST /api/invite",
+      "G:dependency_failure_handled:POST /api/notes"
+     ]
+    }
+   }
+  }
+ },
+ "worklist": {
+  "P0": [
+   {
+    "defect": "D-bug:invite-wrong-recipient/G:dependency_called:POST /api/invite",
+    "kind": "seeded",
+    "flag": "invite-wrong-recipient",
+    "ac": "G:dependency_called:POST /api/invite",
+    "title": "G:dependency_called:POST /api/invite",
+    "expected": "the trigger reaches the dependency's stand-in with what it was sent",
+    "observed": {
+     "json": {
+      "email": "tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test"
+     },
+     "method": "POST",
+     "path": "/api/invite",
+     "query": {},
+     "status": 202
+    },
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:dependency_called:POST /api/invite"
+     ]
+    },
+    "root_cause": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite",
+     "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite#1"
+    ],
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "basis": "real",
+    "retest": "not retested (M5)"
+   },
+   {
+    "defect": "D-bug:page-error/U:create_notes",
+    "kind": "seeded",
+    "flag": "page-error",
+    "ac": "U:create_notes",
+    "title": null,
+    "expected": null,
+    "observed": {
+     "json": null,
+     "method": "UI",
+     "path": "click button \"Save note\"",
+     "query": {},
+     "status": 0
+    },
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "U:create_notes"
+     ]
+    },
+    "root_cause": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:page-error/a1/U:create_notes",
+     "ex:bug:page-error/a1/U:create_notes#10"
+    ],
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "basis": "real",
+    "retest": "not retested (M5)"
+   },
+   {
+    "defect": "D-bug:webhook-blocks/G:dependency_failure_handled:POST /api/notes",
+    "kind": "seeded",
+    "flag": "webhook-blocks",
+    "ac": "G:dependency_failure_handled:POST /api/notes",
+    "title": "G:dependency_failure_handled:POST /api/notes",
+    "expected": "with the dependency failing: in time, never a bare 5xx",
+    "observed": {
+     "json": {
+      "text": "tp-x448.bug_webhook-blocks.a1-f0d1fe-text"
+     },
+     "method": "POST",
+     "path": "/api/notes",
+     "query": {},
+     "status": 201
+    },
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:dependency_failure_handled:POST /api/notes"
+     ]
+    },
+    "root_cause": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes",
+     "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes#1"
+    ],
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "basis": "simulated",
+    "retest": "not retested (M5)"
+   },
+   {
+    "defect": "D-bug:webhook-drops-body/G:dependency_called:POST /api/notes",
+    "kind": "seeded",
+    "flag": "webhook-drops-body",
+    "ac": "G:dependency_called:POST /api/notes",
+    "title": "G:dependency_called:POST /api/notes",
+    "expected": "the trigger reaches the dependency's stand-in with what it was sent",
+    "observed": {
+     "json": {
+      "text": "tp-x448.bug_webhook-drops-body.a1-893bb2-text"
+     },
+     "method": "POST",
+     "path": "/api/notes",
+     "query": {},
+     "status": 201
+    },
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:dependency_called:POST /api/notes"
+     ]
+    },
+    "root_cause": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes",
+     "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes#1"
+    ],
+    "decision": {
+     "by": "rules",
+     "decision": "seeded (ground truth known)"
+    },
+    "basis": "real",
+    "retest": "not retested (M5)"
+   }
+  ],
+  "P1": [
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O6-1",
+    "ac": "O-6",
+    "closes_it": "bind TC-O6-1: The case needs 150 notes to exist for the admin, but the only route in the OpenAPI excerpt is GET /api/notes and the tools provide no notes factory. Creating the notes would require a POST route that is not in the excerpt, so the precondition cannot be set up and the request would test an unknown data state."
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-4",
+    "case": null,
+    "closes_it": "TC-O4-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-6",
+    "case": null,
+    "closes_it": "TC-O6-1"
+   }
+  ],
+  "P2": {
+   "findings": [],
+   "quarantine": [],
+   "redundant": {
+    "n": 0,
+    "d": 28,
+    "ids": []
+   },
+   "mutation_strength": "not measured"
+  },
+  "P3": [
+   {
+    "what": "spec gap",
+    "ac": "O-4",
+    "case": "TC-O4-1",
+    "why": "the served spec and the server agree on this status: the drafted assumption is wrong",
+    "overridden": null,
+    "evidence": [
+     "ex:reference/a1/TC-O4-1"
+    ]
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-1",
+    "case": null,
+    "why": "People can post short notes"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-2",
+    "case": null,
+    "why": "Posted notes notify a webhook"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-3",
+    "case": null,
+    "why": "People can invite others by email"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-4",
+    "case": null,
+    "why": "Note text of any length is accepted"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-6",
+    "case": null,
+    "why": "Notes list has no bound on item count"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-10",
+    "case": null,
+    "why": "Invitation with malformed email has no declared response"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-11",
+    "case": null,
+    "why": "Invitation refused without token"
+   }
+  ]
+ },
+ "checks": {
+  "families": {
+   "properties": {
+    "claim": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:properties:GET /api/notes",
+      "G:properties:GET /api/notes/{id}",
+      "G:properties:POST /api/login",
+      "G:properties:POST /api/notes",
+      "G:properties:POST /api/users"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 4,
+      "d": 5,
+      "ids": [
+       "G:properties:GET /api/notes",
+       "G:properties:GET /api/notes/{id}",
+       "G:properties:POST /api/notes",
+       "G:properties:POST /api/users"
+      ]
+     },
+     "SPEC_MISMATCH": {
+      "n": 1,
+      "d": 5,
+      "ids": [
+       "G:properties:POST /api/login"
+      ]
+     }
+    }
+   },
+   "auth_required": {
+    "claim": "no or invalid credentials: never 2xx on a secured operation, never 5xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:auth_required:DELETE /api/notes/{id}",
+      "G:auth_required:GET /api/notes",
+      "G:auth_required:GET /api/notes/{id}",
+      "G:auth_required:POST /api/notes",
+      "G:auth_required:POST /api/users"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 5,
+      "d": 5,
+      "ids": [
+       "G:auth_required:DELETE /api/notes/{id}",
+       "G:auth_required:GET /api/notes",
+       "G:auth_required:GET /api/notes/{id}",
+       "G:auth_required:POST /api/notes",
+       "G:auth_required:POST /api/users"
+      ]
+     }
+    }
+   },
+   "unknown_id": {
+    "claim": "an ID that doesn't exist: never 2xx, never 5xx",
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:unknown_id:GET /api/notes/{id}"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 1,
+      "d": 1,
+      "ids": [
+       "G:unknown_id:GET /api/notes/{id}"
+      ]
+     }
+    }
+   },
+   "invalid_input": {
+    "claim": "a body its schema forbids: 4xx, never 5xx",
+    "cases": {
+     "n": 4,
+     "d": null,
+     "ids": [
+      "G:invalid_input:POST /api/invite",
+      "G:invalid_input:POST /api/login",
+      "G:invalid_input:POST /api/notes",
+      "G:invalid_input:POST /api/users"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 4,
+      "d": 4,
+      "ids": [
+       "G:invalid_input:POST /api/invite",
+       "G:invalid_input:POST /api/login",
+       "G:invalid_input:POST /api/notes",
+       "G:invalid_input:POST /api/users"
+      ]
+     }
+    }
+   },
+   "read_back": {
+    "claim": "declared fields round-trip from create to read",
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:read_back:POST /api/notes"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 1,
+      "d": 1,
+      "ids": [
+       "G:read_back:POST /api/notes"
+      ]
+     }
+    }
+   },
+   "delete_final": {
+    "claim": "a read after delete: never 2xx",
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:delete_final:POST /api/notes"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 1,
+      "d": 1,
+      "ids": [
+       "G:delete_final:POST /api/notes"
+      ]
+     }
+    }
+   },
+   "dependency_called": {
+    "claim": "the trigger reaches the dependency's stand-in with what it was sent",
+    "cases": {
+     "n": 2,
+     "d": null,
+     "ids": [
+      "G:dependency_called:POST /api/invite",
+      "G:dependency_called:POST /api/notes"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 2,
+      "d": 2,
+      "ids": [
+       "G:dependency_called:POST /api/invite",
+       "G:dependency_called:POST /api/notes"
+      ]
+     }
+    }
+   },
+   "dependency_failure_handled": {
+    "claim": "with the dependency failing: in time, never a bare 5xx",
+    "cases": {
+     "n": 2,
+     "d": null,
+     "ids": [
+      "G:dependency_failure_handled:POST /api/invite",
+      "G:dependency_failure_handled:POST /api/notes"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 2,
+      "d": 2,
+      "ids": [
+       "G:dependency_failure_handled:POST /api/invite",
+       "G:dependency_failure_handled:POST /api/notes"
+      ]
+     }
+    }
+   }
+  },
+  "excluded": {},
+  "spec_mismatch": [
+   {
+    "group": "G:properties:POST /api/login",
+    "claim": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "findings": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "F-reference/G:properties:POST /api/login"
+     ]
+    },
+    "rule": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "observed": {
+     "checks": [
+      "Undocumented status code"
+     ],
+     "curl": "curl -X POST -H 'Authorization: [Filtered]' http://app:8080/api/login",
+     "error": "SpecMismatch: [property] POST /api/login: 3 example(s) disagree with the spec (Undocumented status code); first /api/login \u2192 400",
+     "examples": "3/10",
+     "request": "POST /api/login",
+     "status": 400
+    }
+   }
+  ],
+  "spec_mismatch_more": {
+   "n": 0,
+   "d": 1,
+   "ids": []
+  }
+ },
+ "dependencies": [
+  {
+   "name": "http",
+   "kind": "http",
+   "via": "env",
+   "key": "NOTIFY_URL",
+   "trigger": "POST /api/notes",
+   "status": "tested",
+   "basis": "simulated",
+   "standin": "tp-standin-http",
+   "checks": [
+    {
+     "case": "G:dependency_called:POST /api/notes",
+     "outcome": "passed",
+     "fault": null
+    },
+    {
+     "case": "G:dependency_failure_handled:POST /api/notes",
+     "outcome": "passed",
+     "fault": {
+      "standin": "http",
+      "mode": "delay",
+      "value": 8.0
+     }
+    }
+   ],
+   "received": [
+    {
+     "n": 39,
+     "at": 1794213463.057152,
+     "method": "POST",
+     "path": "/notify_url",
+     "headers": {
+      "Accept-Encoding": "identity",
+      "Content-Length": "114",
+      "Host": "tp-standin-http:8000",
+      "User-Agent": "Python-urllib/3.14",
+      "Content-Type": "application/json",
+      "Connection": "close"
+     },
+     "body": "{\"event\": \"note.created\", \"note\": {\"id\": 40, \"text\": \"tp-x448.bug_page-error.a3-1bb200-text\", \"owner\": \"tpadmin\"}}"
+    }
+   ],
+   "guards": []
+  },
+  {
+   "name": "mail",
+   "kind": "smtp",
+   "via": "env",
+   "key": "SMTP_HOST",
+   "trigger": "POST /api/invite",
+   "status": "tested",
+   "basis": "simulated",
+   "standin": "tp-standin-mail",
+   "checks": [
+    {
+     "case": "G:dependency_called:POST /api/invite",
+     "outcome": "passed",
+     "fault": null
+    },
+    {
+     "case": "G:dependency_failure_handled:POST /api/invite",
+     "outcome": "passed",
+     "fault": {
+      "standin": "mail",
+      "mode": "smtp",
+      "value": 451
+     }
+    }
+   ],
+   "received": [
+    {
+     "to": [
+      "tp-x448.bug_page-error.a3-914c2e-email@example.test"
+     ],
+     "from": "tpadmin@notify.invalid",
+     "subject": "tpadmin invited you to notify"
+    }
+   ],
+   "guards": []
+  }
+ ],
+ "scorecard": {
+  "seeded_authored": {
+   "n": 4,
+   "d": 4,
+   "ids": [
+    "invite-wrong-recipient",
+    "page-error",
+    "webhook-blocks",
+    "webhook-drops-body"
+   ]
+  },
+  "seeded_per_flag": [
+   {
+    "flag": "invite-wrong-recipient",
+    "detected": true,
+    "targeted": {
+     "n": 0,
+     "d": 0,
+     "ids": []
+    },
+    "caught_by": [
+     "G:dependency_called:POST /api/invite"
+    ],
+    "rank": null
+   },
+   {
+    "flag": "page-error",
+    "detected": true,
+    "targeted": {
+     "n": 0,
+     "d": 0,
+     "ids": []
+    },
+    "caught_by": [
+     "U:create_notes"
+    ],
+    "rank": null
+   },
+   {
+    "flag": "webhook-blocks",
+    "detected": true,
+    "targeted": {
+     "n": 0,
+     "d": 0,
+     "ids": []
+    },
+    "caught_by": [
+     "G:dependency_failure_handled:POST /api/notes"
+    ],
+    "rank": null
+   },
+   {
+    "flag": "webhook-drops-body",
+    "detected": true,
+    "targeted": {
+     "n": 0,
+     "d": 0,
+     "ids": []
+    },
+    "caught_by": [
+     "G:dependency_called:POST /api/notes"
+    ],
+    "rank": null
+   }
+  ],
+  "seeded_blind": "not run (M7)",
+  "real_defects": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "mutation_strength": "not measured",
+  "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits mostly under the test data, so this measures authentication more than the item rules",
+  "mutation_per_criterion": {
+   "C-1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-2": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-3": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:DELETE /api/notes/{id}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:GET /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:GET /api/notes/{id}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:POST /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:POST /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:dependency_called:POST /api/invite": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:dependency_called:POST /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:dependency_failure_handled:POST /api/invite": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:dependency_failure_handled:POST /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/invite": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/login": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/notes/{id}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/login": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/notes/{id}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-10": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-11": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-4": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "U:create_notes": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "triage_correct_seeded": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "localisation": {
+   "top1": {
+    "n": 0,
+    "d": 4,
+    "ids": []
+   },
+   "top3": {
+    "n": 0,
+    "d": 4,
+    "ids": []
+   },
+   "top5": {
+    "n": 0,
+    "d": 4,
+    "ids": []
+   }
+  },
+  "fail_before_pass_after": "not run (M5)",
+  "criteria_without_admitted_test": {
+   "n": 2,
+   "d": 8,
+   "ids": [
+    "O-4",
+    "O-6"
+   ]
+  }
+ },
+ "traceability": [
+  {
+   "req": [],
+   "ac": "U:create_notes",
+   "case": "U:create_notes",
+   "assertions": [
+    "U:create_notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/U:create_notes"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-1",
+   "case": "TC-C1-1",
+   "assertions": [
+    "TC-C1-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C1-1"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-2",
+   "case": "TC-C2-1",
+   "assertions": [
+    "TC-C2-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C2-1"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-1",
+   "assertions": [
+    "TC-C3-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-1"
+  },
+  {
+   "req": [
+    "openapi/api/invite/POST.yaml:9",
+    "openapi/components.yaml:27"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-1",
+   "assertions": [
+    "TC-O10-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O10-1"
+  },
+  {
+   "req": [
+    "openapi/api/invite/POST.yaml:2",
+    "openapi/api/invite/POST.yaml:9"
+   ],
+   "ac": "O-11",
+   "case": "TC-O11-1",
+   "assertions": [
+    "TC-O11-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O11-1"
+  },
+  {
+   "req": [
+    "openapi/components.yaml:42",
+    "openapi/components.yaml:44"
+   ],
+   "ac": "O-4",
+   "case": "TC-O4-1",
+   "assertions": [
+    "TC-O4-1/status"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O4-1"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:DELETE /api/notes/{id}",
+   "case": "G:auth_required:DELETE /api/notes/{id}",
+   "assertions": [
+    "G:auth_required:DELETE /api/notes/{id}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:DELETE /api/notes/{id}"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:GET /api/notes/{id}",
+   "case": "G:auth_required:GET /api/notes/{id}",
+   "assertions": [
+    "G:auth_required:GET /api/notes/{id}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:GET /api/notes/{id}"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:GET /api/notes",
+   "case": "G:auth_required:GET /api/notes",
+   "assertions": [
+    "G:auth_required:GET /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:GET /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:POST /api/notes",
+   "case": "G:auth_required:POST /api/notes",
+   "assertions": [
+    "G:auth_required:POST /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:POST /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:POST /api/users",
+   "case": "G:auth_required:POST /api/users",
+   "assertions": [
+    "G:auth_required:POST /api/users/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:POST /api/users"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/notes",
+   "case": "G:delete_final:POST /api/notes",
+   "assertions": [
+    "G:delete_final:POST /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:delete_final:POST /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:dependency_called:POST /api/invite",
+   "case": "G:dependency_called:POST /api/invite",
+   "assertions": [
+    "G:dependency_called:POST /api/invite/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:dependency_called:POST /api/invite"
+  },
+  {
+   "req": [],
+   "ac": "G:dependency_called:POST /api/notes",
+   "case": "G:dependency_called:POST /api/notes",
+   "assertions": [
+    "G:dependency_called:POST /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:dependency_called:POST /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:dependency_failure_handled:POST /api/invite",
+   "case": "G:dependency_failure_handled:POST /api/invite",
+   "assertions": [
+    "G:dependency_failure_handled:POST /api/invite/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "simulated",
+   "evidence": "ex:reference/a1/G:dependency_failure_handled:POST /api/invite"
+  },
+  {
+   "req": [],
+   "ac": "G:dependency_failure_handled:POST /api/notes",
+   "case": "G:dependency_failure_handled:POST /api/notes",
+   "assertions": [
+    "G:dependency_failure_handled:POST /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "simulated",
+   "evidence": "ex:reference/a1/G:dependency_failure_handled:POST /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/invite",
+   "case": "G:invalid_input:POST /api/invite",
+   "assertions": [
+    "G:invalid_input:POST /api/invite/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/invite"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/login",
+   "case": "G:invalid_input:POST /api/login",
+   "assertions": [
+    "G:invalid_input:POST /api/login/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/login"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/notes",
+   "case": "G:invalid_input:POST /api/notes",
+   "assertions": [
+    "G:invalid_input:POST /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/users",
+   "case": "G:invalid_input:POST /api/users",
+   "assertions": [
+    "G:invalid_input:POST /api/users/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/users"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/notes/{id}",
+   "case": "G:properties:GET /api/notes/{id}",
+   "assertions": [
+    "G:properties:GET /api/notes/{id}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:GET /api/notes/{id}"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/notes",
+   "case": "G:properties:GET /api/notes",
+   "assertions": [
+    "G:properties:GET /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:GET /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/login",
+   "case": "G:properties:POST /api/login",
+   "assertions": [
+    "property"
+   ],
+   "gate": "SPEC_MISMATCH",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:POST /api/login"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/notes",
+   "case": "G:properties:POST /api/notes",
+   "assertions": [
+    "G:properties:POST /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:POST /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/users",
+   "case": "G:properties:POST /api/users",
+   "assertions": [
+    "G:properties:POST /api/users/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:POST /api/users"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/notes",
+   "case": "G:read_back:POST /api/notes",
+   "assertions": [
+    "G:read_back:POST /api/notes/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:read_back:POST /api/notes"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/notes/{id}",
+   "case": "G:unknown_id:GET /api/notes/{id}",
+   "assertions": [
+    "G:unknown_id:GET /api/notes/{id}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/notes/{id}"
+  }
+ ],
+ "coverage": {
+  "by": "case technique (boundary \u2192 boundary; error_exception/error_guessing \u2192 exception; rest \u2192 normal)",
+  "normal": {
+   "n": 28,
+   "d": 28,
+   "ids": [
+    "G:auth_required:DELETE /api/notes/{id}",
+    "G:auth_required:GET /api/notes",
+    "G:auth_required:GET /api/notes/{id}",
+    "G:auth_required:POST /api/notes",
+    "G:auth_required:POST /api/users",
+    "G:delete_final:POST /api/notes",
+    "G:dependency_called:POST /api/invite",
+    "G:dependency_called:POST /api/notes",
+    "G:dependency_failure_handled:POST /api/invite",
+    "G:dependency_failure_handled:POST /api/notes",
+    "G:invalid_input:POST /api/invite",
+    "G:invalid_input:POST /api/login",
+    "G:invalid_input:POST /api/notes",
+    "G:invalid_input:POST /api/users",
+    "G:properties:GET /api/notes",
+    "G:properties:GET /api/notes/{id}",
+    "G:properties:POST /api/login",
+    "G:properties:POST /api/notes",
+    "G:properties:POST /api/users",
+    "G:read_back:POST /api/notes",
+    "G:unknown_id:GET /api/notes/{id}",
+    "TC-C1-1",
+    "TC-C2-1",
+    "TC-C3-1",
+    "TC-O10-1",
+    "TC-O11-1",
+    "TC-O4-1",
+    "U:create_notes"
+   ]
+  },
+  "boundary": {
+   "n": 0,
+   "d": 28,
+   "ids": []
+  },
+  "exception": {
+   "n": 0,
+   "d": 28,
+   "ids": []
+  }
+ },
+ "uncovered": {
+  "criteria_out_of_scope": [
+   {
+    "criterion": "O-1",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-2",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-3",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-5",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-7",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-8",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-9",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-12",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-13",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-14",
+    "reason": "out of scope in the spec"
+   }
+  ],
+  "deferred": [],
+  "skipped_templates": [
+   "C-1: the drafter returned no cases",
+   "C-2: the drafter returned no cases",
+   "C-3: the drafter returned no cases",
+   "O-4: the drafter returned no cases",
+   "O-6: the drafter returned no cases",
+   "O-10: the drafter returned no cases",
+   "O-11: the drafter returned no cases",
+   "C-1: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "C-2: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "C-3: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "O-4: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "O-6: preconditions ['user_with_150_notes'] are not factories; moved to steps",
+   "O-10: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "O-11: preconditions ['anonymous_caller'] are not factories; moved to steps",
+   "C-1: minimum template error_exception neither used nor skipped with a reason",
+   "C-1: error path with no exception case",
+   "C-3: minimum template error_exception neither used nor skipped with a reason",
+   "C-3: error path with no exception case",
+   "O-4: minimum template boundary neither used nor skipped with a reason",
+   "O-4: minimum template error_exception neither used nor skipped with a reason",
+   "O-4: minimum template error_guessing neither used nor skipped with a reason",
+   "O-4: error path with no exception case",
+   "O-6: minimum template boundary neither used nor skipped with a reason",
+   "O-6: minimum template error_guessing neither used nor skipped with a reason",
+   "O-10: minimum template error_exception neither used nor skipped with a reason",
+   "O-10: minimum template error_guessing neither used nor skipped with a reason",
+   "O-10: error path with no exception case",
+   "O-11: minimum template error_exception neither used nor skipped with a reason",
+   "O-11: minimum template error_guessing neither used nor skipped with a reason",
+   "O-11: error path with no exception case",
+   "C-1: criterion is assumed, not confirmed: check its cases",
+   "C-2: criterion is assumed, not confirmed: check its cases",
+   "C-3: criterion is assumed, not confirmed: check its cases",
+   "O-4: criterion is assumed, not confirmed: check its cases",
+   "O-6: criterion is assumed, not confirmed: check its cases",
+   "O-10: criterion is assumed, not confirmed: check its cases",
+   "O-11: criterion is assumed, not confirmed: check its cases"
+  ],
+  "assumed": [
+   "C-1",
+   "C-2",
+   "C-3",
+   "O-4",
+   "O-6",
+   "O-10",
+   "O-11"
+  ],
+  "unbound_cases": [
+   "TC-O6-1"
+  ],
+  "behaviour_with_no_requirement": [
+   "DELETE /api/notes/{id}  (openapi/api/notes/{id}/DELETE.yaml:1)",
+   "GET /api/notes/{id}  (openapi/api/notes/{id}/GET.yaml:1)"
+  ],
+  "seeded_race": ""
+ },
+ "ai_decisions": {
+  "spec_answers": {
+   "n": 10,
+   "d": null,
+   "ids": [
+    "04ea687872536e1f",
+    "3592a1ee6ae108d3",
+    "48d02fa3cb0e03f7",
+    "62b6e1c01a8e8e23",
+    "6917c4538ac81b48",
+    "70e6bd7d311d6866",
+    "7814f8d7f1eb74bd",
+    "8c4affc153169be6",
+    "ada6eb2e02cc0139",
+    "adc9f46cc05b0924"
+   ]
+  },
+  "spec_assumed": {
+   "n": 10,
+   "d": 10,
+   "ids": [
+    "04ea687872536e1f",
+    "3592a1ee6ae108d3",
+    "48d02fa3cb0e03f7",
+    "62b6e1c01a8e8e23",
+    "6917c4538ac81b48",
+    "70e6bd7d311d6866",
+    "7814f8d7f1eb74bd",
+    "8c4affc153169be6",
+    "ada6eb2e02cc0139",
+    "adc9f46cc05b0924"
+   ]
+  },
+  "cases_llm_drafted": {
+   "n": 7,
+   "d": 7,
+   "ids": [
+    "TC-C1-1",
+    "TC-C2-1",
+    "TC-C3-1",
+    "TC-O10-1",
+    "TC-O11-1",
+    "TC-O4-1",
+    "TC-O6-1"
+   ]
+  },
+  "cases_signoff": {
+   "signed": false,
+   "approved": {
+    "n": 0,
+    "d": 7,
+    "ids": []
+   }
+  },
+  "gate_equivalence": {
+   "equivalent": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "resolution": "not confirmed by a person; counted as survivors"
+  },
+  "triage": "no AI in M4 (rules only; the AI judge is M7)",
+  "overrides": [],
+  "review_decisions": [
+   {
+    "item": 618,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 619,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 620,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 621,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 622,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 623,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 624,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 625,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 626,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 627,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 628,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 629,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 630,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 631,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 632,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 633,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 634,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 635,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 636,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 637,
+    "kind": "signoff",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 638,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   }
+  ]
+ },
+ "evidence": {
+  "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite": {
+   "batch": "bug:invite-wrong-recipient/a1",
+   "case_id": "G:dependency_called:POST /api/invite",
+   "error": "ExpectationFailed: [received] POST /api/invite: stand-in mail (SMTP_HOST) never received ['tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test']; it received 3 item(s) there",
+   "failed": [
+    {
+     "actual": "POST /api/invite: stand-in mail (SMTP_HOST) never received ['tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test']; it received 3 item(s) there",
+     "expected": null,
+     "id": "received",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "bug:invite-wrong-recipient"
+  },
+  "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite#1": {
+   "body": "{\"sent\": true}",
+   "json": {
+    "email": "tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test"
+   },
+   "kind": "exchange",
+   "method": "POST",
+   "path": "/api/invite",
+   "query": {},
+   "status": 202,
+   "traceparent": "00-12f62ca9282c922d321967288fa53499-be8811d3b952063d-01",
+   "x_test_trace": "x448.bug_invite-wrong-recipient.a1/G:dependency_called:POST /api/invite/1"
+  },
+  "ex:bug:page-error/a1/U:create_notes": {
+   "batch": "bug:page-error/a1",
+   "case_id": "U:create_notes",
+   "error": "UiPageError: the page's script failed: window.notes.render is not a function",
+   "failed": [],
+   "kind": "record",
+   "origin": "UI_ERROR",
+   "outcome": "failed",
+   "variant": "bug:page-error"
+  },
+  "ex:bug:page-error/a1/U:create_notes#10": {
+   "body": "null",
+   "json": null,
+   "kind": "exchange",
+   "method": "UI",
+   "path": "click button \"Save note\"",
+   "query": {},
+   "status": 0,
+   "traceparent": null,
+   "x_test_trace": null
+  },
+  "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes": {
+   "batch": "bug:webhook-blocks/a1",
+   "case_id": "G:dependency_failure_handled:POST /api/notes",
+   "error": "ExpectationFailed: [in_time] POST /api/notes took 8.2s with http failing (delay 8.0); the limit is 4s",
+   "failed": [
+    {
+     "actual": "POST /api/notes took 8.2s with http failing (delay 8.0); the limit is 4s",
+     "expected": null,
+     "id": "in_time",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "bug:webhook-blocks"
+  },
+  "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes#1": {
+   "body": "{\"id\": 18, \"text\": \"tp-x448.bug_webhook-blocks.a1-f0d1fe-text\", \"owner\": \"tpadmin\"}",
+   "json": {
+    "text": "tp-x448.bug_webhook-blocks.a1-f0d1fe-text"
+   },
+   "kind": "exchange",
+   "method": "POST",
+   "path": "/api/notes",
+   "query": {},
+   "status": 201,
+   "traceparent": "00-9f1b7357bf0aaac8711b428d5baa0407-81a57d1ff4dabd46-01",
+   "x_test_trace": "x448.bug_webhook-blocks.a1/G:dependency_failure_handled:POST /api/notes/1"
+  },
+  "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes": {
+   "batch": "bug:webhook-drops-body/a1",
+   "case_id": "G:dependency_called:POST /api/notes",
+   "error": "ExpectationFailed: [received] POST /api/notes: stand-in http (NOTIFY_URL) never received ['tp-x448.bug_webhook-drops-body.a1-893bb2-text']; it received 17 item(s) there",
+   "failed": [
+    {
+     "actual": "POST /api/notes: stand-in http (NOTIFY_URL) never received ['tp-x448.bug_webhook-drops-body.a1-893bb2-text']; it received 17 item(s) there",
+     "expected": null,
+     "id": "received",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "bug:webhook-drops-body"
+  },
+  "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes#1": {
+   "body": "{\"id\": 17, \"text\": \"tp-x448.bug_webhook-drops-body.a1-893bb2-text\", \"owner\": \"tpadmin\"}",
+   "json": {
+    "text": "tp-x448.bug_webhook-drops-body.a1-893bb2-text"
+   },
+   "kind": "exchange",
+   "method": "POST",
+   "path": "/api/notes",
+   "query": {},
+   "status": 201,
+   "traceparent": "00-490b422e3c3f4e5feaa91a792b4842b4-c12b6986cbb0ef59-01",
+   "x_test_trace": "x448.bug_webhook-drops-body.a1/G:dependency_called:POST /api/notes/1"
+  }
+ },
+ "defects": [
+  {
+   "ac": "G:dependency_called:POST /api/invite",
+   "cases": [
+    "G:dependency_called:POST /api/invite"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite",
+    "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite#1"
+   ],
+   "failed_assertions": [
+    {
+     "actual": "POST /api/invite: stand-in mail (SMTP_HOST) never received ['tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test']; it received 3 item(s) there",
+     "expected": null,
+     "id": "received",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-bug:invite-wrong-recipient/G:dependency_called:POST /api/invite"
+   ],
+   "flag": "invite-wrong-recipient",
+   "id": "D-bug:invite-wrong-recipient/G:dependency_called:POST /api/invite",
+   "kind": "seeded",
+   "observed": {
+    "json": {
+     "email": "tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test"
+    },
+    "method": "POST",
+    "path": "/api/invite",
+    "query": {},
+    "status": 202
+   },
+   "root_cause": {},
+   "suspects": [],
+   "variant": "bug:invite-wrong-recipient"
+  },
+  {
+   "ac": "U:create_notes",
+   "cases": [
+    "U:create_notes"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:bug:page-error/a1/U:create_notes",
+    "ex:bug:page-error/a1/U:create_notes#10"
+   ],
+   "failed_assertions": [],
+   "findings": [
+    "F-bug:page-error/U:create_notes"
+   ],
+   "flag": "page-error",
+   "id": "D-bug:page-error/U:create_notes",
+   "kind": "seeded",
+   "observed": {
+    "json": null,
+    "method": "UI",
+    "path": "click button \"Save note\"",
+    "query": {},
+    "status": 0
+   },
+   "root_cause": {},
+   "suspects": [],
+   "variant": "bug:page-error"
+  },
+  {
+   "ac": "G:dependency_failure_handled:POST /api/notes",
+   "cases": [
+    "G:dependency_failure_handled:POST /api/notes"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes",
+    "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes#1"
+   ],
+   "failed_assertions": [
+    {
+     "actual": "POST /api/notes took 8.2s with http failing (delay 8.0); the limit is 4s",
+     "expected": null,
+     "id": "in_time",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-bug:webhook-blocks/G:dependency_failure_handled:POST /api/notes"
+   ],
+   "flag": "webhook-blocks",
+   "id": "D-bug:webhook-blocks/G:dependency_failure_handled:POST /api/notes",
+   "kind": "seeded",
+   "observed": {
+    "json": {
+     "text": "tp-x448.bug_webhook-blocks.a1-f0d1fe-text"
+    },
+    "method": "POST",
+    "path": "/api/notes",
+    "query": {},
+    "status": 201
+   },
+   "root_cause": {},
+   "suspects": [],
+   "variant": "bug:webhook-blocks"
+  },
+  {
+   "ac": "G:dependency_called:POST /api/notes",
+   "cases": [
+    "G:dependency_called:POST /api/notes"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "evidence": [
+    "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes",
+    "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes#1"
+   ],
+   "failed_assertions": [
+    {
+     "actual": "POST /api/notes: stand-in http (NOTIFY_URL) never received ['tp-x448.bug_webhook-drops-body.a1-893bb2-text']; it received 17 item(s) there",
+     "expected": null,
+     "id": "received",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-bug:webhook-drops-body/G:dependency_called:POST /api/notes"
+   ],
+   "flag": "webhook-drops-body",
+   "id": "D-bug:webhook-drops-body/G:dependency_called:POST /api/notes",
+   "kind": "seeded",
+   "observed": {
+    "json": {
+     "text": "tp-x448.bug_webhook-drops-body.a1-893bb2-text"
+    },
+    "method": "POST",
+    "path": "/api/notes",
+    "query": {},
+    "status": 201
+   },
+   "root_cause": {},
+   "suspects": [],
+   "variant": "bug:webhook-drops-body"
+  }
+ ],
+ "product": {
+  "summary": {
+   "tests": 28,
+   "admitted": 26,
+   "defects": 4,
+   "problematic": 2,
+   "improve": 19,
+   "approved": 0,
+   "proposed": 7
+  },
+  "defects": [
+   {
+    "id": "D-bug:invite-wrong-recipient/G:dependency_called:POST /api/invite",
+    "kind": "seeded",
+    "class": "PRODUCT_DEFECT",
+    "ac": "G:dependency_called:POST /api/invite",
+    "criterion": "",
+    "observed": {
+     "json": {
+      "email": "tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test"
+     },
+     "method": "POST",
+     "path": "/api/invite",
+     "query": {},
+     "status": 202
+    },
+    "failed_assertions": [
+     {
+      "actual": "POST /api/invite: stand-in mail (SMTP_HOST) never received ['tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test']; it received 3 item(s) there",
+      "expected": null,
+      "id": "received",
+      "ok": false
+     }
+    ],
+    "location": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite",
+     "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite#1"
+    ],
+    "tests": [
+     {
+      "case": "G:dependency_called:POST /api/invite",
+      "title": "G:dependency_called:POST /api/invite",
+      "summary": "",
+      "ac": "G:dependency_called:POST /api/invite",
+      "criterion": ""
+     }
+    ],
+    "suggestion": null
+   },
+   {
+    "id": "D-bug:page-error/U:create_notes",
+    "kind": "seeded",
+    "class": "PRODUCT_DEFECT",
+    "ac": "U:create_notes",
+    "criterion": "",
+    "observed": {
+     "json": null,
+     "method": "UI",
+     "path": "click button \"Save note\"",
+     "query": {},
+     "status": 0
+    },
+    "failed_assertions": [],
+    "location": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:page-error/a1/U:create_notes",
+     "ex:bug:page-error/a1/U:create_notes#10"
+    ],
+    "tests": [
+     {
+      "case": "U:create_notes",
+      "title": "U:create_notes",
+      "summary": "",
+      "ac": "U:create_notes",
+      "criterion": ""
+     }
+    ],
+    "suggestion": null
+   },
+   {
+    "id": "D-bug:webhook-blocks/G:dependency_failure_handled:POST /api/notes",
+    "kind": "seeded",
+    "class": "PRODUCT_DEFECT",
+    "ac": "G:dependency_failure_handled:POST /api/notes",
+    "criterion": "",
+    "observed": {
+     "json": {
+      "text": "tp-x448.bug_webhook-blocks.a1-f0d1fe-text"
+     },
+     "method": "POST",
+     "path": "/api/notes",
+     "query": {},
+     "status": 201
+    },
+    "failed_assertions": [
+     {
+      "actual": "POST /api/notes took 8.2s with http failing (delay 8.0); the limit is 4s",
+      "expected": null,
+      "id": "in_time",
+      "ok": false
+     }
+    ],
+    "location": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes",
+     "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes#1"
+    ],
+    "tests": [
+     {
+      "case": "G:dependency_failure_handled:POST /api/notes",
+      "title": "G:dependency_failure_handled:POST /api/notes",
+      "summary": "",
+      "ac": "G:dependency_failure_handled:POST /api/notes",
+      "criterion": ""
+     }
+    ],
+    "suggestion": null
+   },
+   {
+    "id": "D-bug:webhook-drops-body/G:dependency_called:POST /api/notes",
+    "kind": "seeded",
+    "class": "PRODUCT_DEFECT",
+    "ac": "G:dependency_called:POST /api/notes",
+    "criterion": "",
+    "observed": {
+     "json": {
+      "text": "tp-x448.bug_webhook-drops-body.a1-893bb2-text"
+     },
+     "method": "POST",
+     "path": "/api/notes",
+     "query": {},
+     "status": 201
+    },
+    "failed_assertions": [
+     {
+      "actual": "POST /api/notes: stand-in http (NOTIFY_URL) never received ['tp-x448.bug_webhook-drops-body.a1-893bb2-text']; it received 17 item(s) there",
+      "expected": null,
+      "id": "received",
+      "ok": false
+     }
+    ],
+    "location": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes",
+     "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes#1"
+    ],
+    "tests": [
+     {
+      "case": "G:dependency_called:POST /api/notes",
+      "title": "G:dependency_called:POST /api/notes",
+      "summary": "",
+      "ac": "G:dependency_called:POST /api/notes",
+      "criterion": ""
+     }
+    ],
+    "suggestion": null
+   }
+  ],
+  "causes": [
+   {
+    "id": "D-bug:invite-wrong-recipient/G:dependency_called:POST /api/invite",
+    "kind": "seeded",
+    "class": "PRODUCT_DEFECT",
+    "ac": "G:dependency_called:POST /api/invite",
+    "criterion": "",
+    "observed": {
+     "json": {
+      "email": "tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test"
+     },
+     "method": "POST",
+     "path": "/api/invite",
+     "query": {},
+     "status": 202
+    },
+    "failed_assertions": [
+     {
+      "actual": "POST /api/invite: stand-in mail (SMTP_HOST) never received ['tp-x448.bug_invite-wrong-recipient.a1-e9e30f-email@example.test']; it received 3 item(s) there",
+      "expected": null,
+      "id": "received",
+      "ok": false
+     }
+    ],
+    "location": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite",
+     "ex:bug:invite-wrong-recipient/a1/G:dependency_called:POST /api/invite#1"
+    ],
+    "tests": [
+     {
+      "case": "G:dependency_called:POST /api/invite",
+      "title": "G:dependency_called:POST /api/invite",
+      "summary": "",
+      "ac": "G:dependency_called:POST /api/invite",
+      "criterion": ""
+     }
+    ],
+    "suggestion": null,
+    "requirements": [
+     {
+      "id": "D-bug:invite-wrong-recipient/G:dependency_called:POST /api/invite",
+      "ac": "G:dependency_called:POST /api/invite",
+      "criterion": ""
+     }
+    ]
+   },
+   {
+    "id": "D-bug:page-error/U:create_notes",
+    "kind": "seeded",
+    "class": "PRODUCT_DEFECT",
+    "ac": "U:create_notes",
+    "criterion": "",
+    "observed": {
+     "json": null,
+     "method": "UI",
+     "path": "click button \"Save note\"",
+     "query": {},
+     "status": 0
+    },
+    "failed_assertions": [],
+    "location": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:page-error/a1/U:create_notes",
+     "ex:bug:page-error/a1/U:create_notes#10"
+    ],
+    "tests": [
+     {
+      "case": "U:create_notes",
+      "title": "U:create_notes",
+      "summary": "",
+      "ac": "U:create_notes",
+      "criterion": ""
+     }
+    ],
+    "suggestion": null,
+    "requirements": [
+     {
+      "id": "D-bug:page-error/U:create_notes",
+      "ac": "U:create_notes",
+      "criterion": ""
+     }
+    ]
+   },
+   {
+    "id": "D-bug:webhook-blocks/G:dependency_failure_handled:POST /api/notes",
+    "kind": "seeded",
+    "class": "PRODUCT_DEFECT",
+    "ac": "G:dependency_failure_handled:POST /api/notes",
+    "criterion": "",
+    "observed": {
+     "json": {
+      "text": "tp-x448.bug_webhook-blocks.a1-f0d1fe-text"
+     },
+     "method": "POST",
+     "path": "/api/notes",
+     "query": {},
+     "status": 201
+    },
+    "failed_assertions": [
+     {
+      "actual": "POST /api/notes took 8.2s with http failing (delay 8.0); the limit is 4s",
+      "expected": null,
+      "id": "in_time",
+      "ok": false
+     }
+    ],
+    "location": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes",
+     "ex:bug:webhook-blocks/a1/G:dependency_failure_handled:POST /api/notes#1"
+    ],
+    "tests": [
+     {
+      "case": "G:dependency_failure_handled:POST /api/notes",
+      "title": "G:dependency_failure_handled:POST /api/notes",
+      "summary": "",
+      "ac": "G:dependency_failure_handled:POST /api/notes",
+      "criterion": ""
+     }
+    ],
+    "suggestion": null,
+    "requirements": [
+     {
+      "id": "D-bug:webhook-blocks/G:dependency_failure_handled:POST /api/notes",
+      "ac": "G:dependency_failure_handled:POST /api/notes",
+      "criterion": ""
+     }
+    ]
+   },
+   {
+    "id": "D-bug:webhook-drops-body/G:dependency_called:POST /api/notes",
+    "kind": "seeded",
+    "class": "PRODUCT_DEFECT",
+    "ac": "G:dependency_called:POST /api/notes",
+    "criterion": "",
+    "observed": {
+     "json": {
+      "text": "tp-x448.bug_webhook-drops-body.a1-893bb2-text"
+     },
+     "method": "POST",
+     "path": "/api/notes",
+     "query": {},
+     "status": 201
+    },
+    "failed_assertions": [
+     {
+      "actual": "POST /api/notes: stand-in http (NOTIFY_URL) never received ['tp-x448.bug_webhook-drops-body.a1-893bb2-text']; it received 17 item(s) there",
+      "expected": null,
+      "id": "received",
+      "ok": false
+     }
+    ],
+    "location": {},
+    "suspects": [],
+    "evidence": [
+     "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes",
+     "ex:bug:webhook-drops-body/a1/G:dependency_called:POST /api/notes#1"
+    ],
+    "tests": [
+     {
+      "case": "G:dependency_called:POST /api/notes",
+      "title": "G:dependency_called:POST /api/notes",
+      "summary": "",
+      "ac": "G:dependency_called:POST /api/notes",
+      "criterion": ""
+     }
+    ],
+    "suggestion": null,
+    "requirements": [
+     {
+      "id": "D-bug:webhook-drops-body/G:dependency_called:POST /api/notes",
+      "ac": "G:dependency_called:POST /api/notes",
+      "criterion": ""
+     }
+    ]
+   }
+  ],
+  "problematic_tests": [
+   {
+    "case": "TC-O4-1",
+    "title": "Note text above the documented maximum length is rejected with 400.",
+    "summary": "Note text far above the documented maximum length is stored instead of rejected.",
+    "ac": "O-4",
+    "criterion": "Note text of any length is accepted",
+    "status": "SPEC_GAP",
+    "reason": "Fails, but its requirement was only assumed: check that answer.",
+    "evidence": [
+     "ex:reference/a1/TC-O4-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "G:properties:POST /api/login",
+    "title": "G:properties:POST /api/login",
+    "summary": "",
+    "ac": "G:properties:POST /api/login",
+    "criterion": "",
+    "status": "SPEC_MISMATCH",
+    "reason": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "evidence": [
+     "ex:reference/a1/G:properties:POST /api/login"
+    ],
+    "source": "execute",
+    "count": 1
+   }
+  ],
+  "improve": [
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-4",
+    "detail": "Note text of any length is accepted",
+    "ac": "O-4"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-6",
+    "detail": "Notes list has no bound on item count",
+    "ac": "O-6"
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "The server rejects text above a documented maximum length with 400.",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "The list is paged with a documented default and maximum page size.",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "The server responds 400 with an Error body.",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "The server responds 401 with an Error body, as the security requirement implies, but the spec declares no 401 response.",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: note_max_length",
+    "detail": "A limit such as 280 characters rejected with 400.",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: notes_list_limit",
+    "detail": "a default page of 20 with a maximum of 100",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: note_visibility",
+    "detail": "only the caller's own notes",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: webhook_failure",
+    "detail": "return 201 and retry asynchronously",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: invite_sent_false",
+    "detail": "sent may be false with 202 when delivery is refused",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: invite_duplicate",
+    "detail": "refuse with 409",
+    "ac": null
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-1 is still an assumption",
+    "detail": "People can post short notes",
+    "ac": "C-1"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-2 is still an assumption",
+    "detail": "Posted notes notify a webhook",
+    "ac": "C-2"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-3 is still an assumption",
+    "detail": "People can invite others by email",
+    "ac": "C-3"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-4 is still an assumption",
+    "detail": "Note text of any length is accepted",
+    "ac": "O-4"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-6 is still an assumption",
+    "detail": "Notes list has no bound on item count",
+    "ac": "O-6"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-10 is still an assumption",
+    "detail": "Invitation with malformed email has no declared response",
+    "ac": "O-10"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-11 is still an assumption",
+    "detail": "Invitation refused without token",
+    "ac": "O-11"
+   }
+  ],
+  "rules": {
+   "clarify": [],
+   "cases": [],
+   "templates": null,
+   "gate": {
+    "every_criterion": true,
+    "k": 5,
+    "min_kills": 1,
+    "near": 3
+   },
+   "routes": [],
+   "scan": null
+  }
+ }
+}

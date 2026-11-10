@@ -1,0 +1,3726 @@
+{
+ "header": {
+  "labels": [
+   "real"
+  ],
+  "run_records": "sha256:e40d34e6c654e8b594bd798b985c5524700a2fdae71569f665f225e9b0afade3",
+  "execution": 18,
+  "variants": {
+   "reference": {
+    "fingerprint": {
+     "fake_now": null,
+     "flags": [],
+     "images": {
+      "backend": "sha256:abf6bd481023d3b337cd7fb992b9b8bf9d02f7d954fd9d1d470042813519c2b6",
+      "db": "[\"postgres@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81\"]",
+      "mailpit": "[\"axllent/mailpit@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231\"]"
+     },
+     "runner": "sha256:8809a217da93a6de1b9d864cc5f7906f50e30d548594bf15fca7d2704f59e7b7",
+     "schema_head": "3b7c2e9d4f1a",
+     "seed_hash": "bc01da224eb8bde217cba7b5a8d4e7da24990708cc8d000caeb7e05ffcc0cff7",
+     "services": {
+      "backend": "03d6d299cb2adb1c44d326ec83ca5f05a1df931ab55a5b1627327a1addc82fdd",
+      "db": "f43361e21237bdfbaa3ae33347d05b777a21ee539778bdfb03db52bf3da92cbf",
+      "mailpit": "f803ef01df18505b365da8dd760039036008349ba09a59305b613153834e3b26"
+     },
+     "sut": {
+      "name": "full-stack-fastapi-template",
+      "patches": {
+       "testinfo": "3049e8ee184f5158f45c568a9da7a11726c2914a7045c52403f79cd422d4128c",
+       "trace": "ee9d08c896e0315febc2ab2bc41f7cb32ab9c9aeab81a7a362bf446b03bfcc2a"
+      },
+      "ref": "6838b40e414641ce5616d926d9c649a96a4e8c56"
+     },
+     "tools": {
+      "compose": "2.31.0-desktop.2",
+      "docker": "27.4.0"
+     }
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "tp env up reference --expect de10f4826c7a50ad73ece24a5db484bc3250a7e9aed8422697e0de3798c4ea74",
+    "shuffle_seed": 13351657,
+    "spec_hash": "de10f4826c7a50ad73ece24a5db484bc3250a7e9aed8422697e0de3798c4ea74"
+   }
+  },
+  "k": 3,
+  "sut": {
+   "name": "full-stack-fastapi-template",
+   "ref": "6838b40e414641ce5616d926d9c649a96a4e8c56"
+  },
+  "cases_signed": true,
+  "unattended_decisions": {
+   "n": 0,
+   "d": 26,
+   "ids": []
+  }
+ },
+ "worklist": {
+  "P0": [
+   {
+    "defect": "D-reference/O-1",
+    "kind": "real",
+    "flag": null,
+    "ac": "O-1",
+    "title": "Create item with price and discount returns rounded final_price",
+    "expected": "The response includes price 19.99, discount_percent 15 and final_price 16.99 (computed and rounded to 2 places, not stored)",
+    "observed": {
+     "json": {
+      "discount_percent": 15,
+      "price": "19.99",
+      "title": "Discounted item"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 200
+    },
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "TC-O1-1"
+     ]
+    },
+    "root_cause": null,
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 62,
+      "text": "def create_item(",
+      "upstream_line": 62
+     },
+     {
+      "basis": "code_ref of O-1 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 68,
+      "text": "item = Item.model_validate(item_in, update={\"owner_id\": current_user.id})",
+      "upstream_line": 68
+     },
+     {
+      "basis": "code_ref of O-1 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 72,
+      "text": "return item",
+      "upstream_line": 72
+     },
+     {
+      "basis": "code_ref of O-1 (no stack)",
+      "file": "backend/app/models.py",
+      "line": 112,
+      "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+      "upstream_line": 112
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O1-1",
+     "ex:reference/a1/TC-O1-1#5",
+     "log:x18.reference.a1/TC-O1-1/5"
+    ],
+    "decision": {
+     "by": "focused",
+     "decision": "accept",
+     "reason": "focused default"
+    },
+    "retest": "not retested (M5)"
+   },
+   {
+    "defect": "D-reference/O-3",
+    "kind": "real",
+    "flag": null,
+    "ac": "O-3",
+    "title": "Create item rejects discount_percent of 100 or more and negatives",
+    "expected": "discount_percent 0 to 100 inclusive is accepted with 200 (100 gives final_price 0.00); -1 and 101 return 422",
+    "observed": {
+     "json": {
+      "discount_percent": 100,
+      "title": "Boundary item"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 422
+    },
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "TC-O3-3.b"
+     ]
+    },
+    "root_cause": null,
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 422",
+      "file": "backend/app/api/routes/items.py",
+      "line": 62,
+      "text": "def create_item(",
+      "upstream_line": 62
+     },
+     {
+      "basis": "code_ref of O-3 (no stack)",
+      "file": "backend/app/models.py",
+      "line": 75,
+      "text": "discount_percent: int = Field(default=0, ge=0, lt=100)",
+      "upstream_line": 75
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O3-3.b",
+     "ex:reference/a1/TC-O3-3.b#5",
+     "log:x18.reference.a1/TC-O3-3.b/5"
+    ],
+    "decision": {
+     "by": "focused",
+     "decision": "accept",
+     "reason": "focused default"
+    },
+    "retest": "not retested (M5)"
+   },
+   {
+    "defect": "D-reference/O-5",
+    "kind": "real",
+    "flag": null,
+    "ac": "O-5",
+    "title": "Final price rounds half-even at the cent",
+    "expected": "0.03 under round-half-up",
+    "observed": {
+     "json": {
+      "discount_percent": 50,
+      "price": "0.05",
+      "title": "Half cent item"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 200
+    },
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "TC-O5-2"
+     ]
+    },
+    "root_cause": null,
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 62,
+      "text": "def create_item(",
+      "upstream_line": 62
+     },
+     {
+      "basis": "code_ref of O-5 (no stack)",
+      "file": "backend/app/models.py",
+      "line": 112,
+      "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+      "upstream_line": 112
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O5-2",
+     "ex:reference/a1/TC-O5-2#5",
+     "log:x18.reference.a1/TC-O5-2/5"
+    ],
+    "decision": {
+     "by": "focused",
+     "decision": "accept",
+     "reason": "focused default"
+    },
+    "retest": "not retested (M5)"
+   },
+   {
+    "defect": "D-reference/O-6",
+    "kind": "real",
+    "flag": null,
+    "ac": "O-6",
+    "title": "Update discount only keeps stored price and recomputes final_price",
+    "expected": "The stored price stays 50.00 and final_price is 40.00; fields not sent are unchanged",
+    "observed": {
+     "json": {
+      "discount_percent": 20,
+      "price": "50.00"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab",
+     "query": {},
+     "status": 200
+    },
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "TC-O6-1"
+     ]
+    },
+    "root_cause": null,
+    "suspects": [
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab (update_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-6 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 91,
+      "text": "update_dict = item_in.model_dump(exclude_unset=True)",
+      "upstream_line": 91
+     },
+     {
+      "basis": "code_ref of O-6 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 92,
+      "text": "item.sqlmodel_update(update_dict)",
+      "upstream_line": 92
+     },
+     {
+      "basis": "code_ref of O-6 (no stack)",
+      "file": "backend/app/models.py",
+      "line": 112,
+      "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+      "upstream_line": 112
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O6-1",
+     "ex:reference/a1/TC-O6-1#7",
+     "log:x18.reference.a1/TC-O6-1/7"
+    ],
+    "decision": {
+     "by": "focused",
+     "decision": "accept",
+     "reason": "focused default"
+    },
+    "retest": "not retested (M5)"
+   },
+   {
+    "defect": "D-reference/O-8",
+    "kind": "real",
+    "flag": null,
+    "ac": "O-8",
+    "title": "Update accepts a negative price",
+    "expected": "422 with the same bound as create (price ge 0)",
+    "observed": {
+     "json": {
+      "price": "-5"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1",
+     "query": {},
+     "status": 500
+    },
+    "cases": {
+     "n": 2,
+     "d": null,
+     "ids": [
+      "TC-O8-1",
+      "TC-O8-3"
+     ]
+    },
+    "root_cause": {
+     "cls": "fastapi.exceptions.ResponseValidationError",
+     "msg": "1 validation error:"
+    },
+    "suspects": [
+     {
+      "basis": "innermost app frame of the traceback (update_item), fastapi.exceptions.ResponseValidationError raised here",
+      "file": "backend/app/api/routes/items.py",
+      "line": 75,
+      "text": "@router.put(\"/{id}\", response_model=ItemPublic)",
+      "upstream_line": 75
+     },
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1 (update_item), which answered 500",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-8",
+      "file": "backend/app/models.py",
+      "line": 87,
+      "text": "price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)",
+      "upstream_line": 87
+     },
+     {
+      "basis": "code_ref of O-8",
+      "file": "backend/app/api/routes/items.py",
+      "line": 92,
+      "text": "item.sqlmodel_update(update_dict)",
+      "upstream_line": 92
+     },
+     {
+      "basis": "code_ref of O-8",
+      "file": "backend/app/models.py",
+      "line": 112,
+      "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+      "upstream_line": 112
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O8-1",
+     "ex:reference/a1/TC-O8-1#7",
+     "log:x18.reference.a1/TC-O8-1/7"
+    ],
+    "decision": {
+     "by": "focused",
+     "decision": "accept",
+     "reason": "focused default"
+    },
+    "retest": "not retested (M5)"
+   },
+   {
+    "defect": "D-reference/O-9",
+    "kind": "real",
+    "flag": null,
+    "ac": "O-9",
+    "title": "Update with explicit null discount_percent fails with a server error",
+    "expected": "422 rejecting null discount_percent, or treating null as the default 0",
+    "observed": {
+     "json": {
+      "discount_percent": null,
+      "title": "Item 10fa9b35c4-2"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc",
+     "query": {},
+     "status": 500
+    },
+    "cases": {
+     "n": 3,
+     "d": null,
+     "ids": [
+      "TC-O9-1",
+      "TC-O9-2",
+      "TC-O9-3"
+     ]
+    },
+    "root_cause": {
+     "cls": "psycopg.errors.NotNullViolation",
+     "msg": "null value in column \"discount_percent\" of relation \"item\" violates not-null constraint"
+    },
+    "suspects": [
+     {
+      "basis": "innermost app frame of the traceback (update_item), psycopg.errors.NotNullViolation raised here",
+      "file": "backend/app/api/routes/items.py",
+      "line": 94,
+      "text": "session.commit()",
+      "upstream_line": 94
+     },
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc (update_item), which answered 500",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-9",
+      "file": "backend/app/models.py",
+      "line": 88,
+      "text": "discount_percent: int | None = Field(default=None, ge=0, lt=100)",
+      "upstream_line": 88
+     },
+     {
+      "basis": "code_ref of O-9",
+      "file": "backend/app/api/routes/items.py",
+      "line": 91,
+      "text": "update_dict = item_in.model_dump(exclude_unset=True)",
+      "upstream_line": 91
+     },
+     {
+      "basis": "code_ref of O-9",
+      "file": "backend/app/models.py",
+      "line": 112,
+      "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+      "upstream_line": 112
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O9-1",
+     "ex:reference/a1/TC-O9-1#7",
+     "log:x18.reference.a1/TC-O9-1/7"
+    ],
+    "decision": {
+     "by": "focused",
+     "decision": "accept",
+     "reason": "focused default"
+    },
+    "retest": "not retested (M5)"
+   }
+  ],
+  "P1": [
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-C1-1",
+    "ac": "C-1",
+    "closes_it": "a row of C-1 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O10-1.1",
+    "ac": "O-10",
+    "closes_it": "a row of O-10 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O10-1.2",
+    "ac": "O-10",
+    "closes_it": "a row of O-10 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O10-1.3",
+    "ac": "O-10",
+    "closes_it": "a row of O-10 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O10-1.4",
+    "ac": "O-10",
+    "closes_it": "a row of O-10 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O10-2",
+    "ac": "O-10",
+    "closes_it": "a row of O-10 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O3-2",
+    "ac": "O-3",
+    "closes_it": "a row of O-3 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O3-3.a",
+    "ac": "O-3",
+    "closes_it": "a row of O-3 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O3-3.c",
+    "ac": "O-3",
+    "closes_it": "a row of O-3 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O3-4.a",
+    "ac": "O-3",
+    "closes_it": "a row of O-3 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O3-4.c",
+    "ac": "O-3",
+    "closes_it": "a row of O-3 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O3-5",
+    "ac": "O-3",
+    "closes_it": "a row of O-3 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O4-2.a",
+    "ac": "O-4",
+    "closes_it": "a row of O-4 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O4-3",
+    "ac": "O-4",
+    "closes_it": "a row of O-4 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O8-2",
+    "ac": "O-8",
+    "closes_it": "a row of O-8 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O3-1",
+    "ac": "O-3",
+    "closes_it": "bind TC-O3-1 (needs the clock/decode patches)"
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O5-1",
+    "ac": "O-5",
+    "closes_it": "bind TC-O5-1 (needs the clock/decode patches)"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "C-1",
+    "case": null,
+    "closes_it": "TC-C1-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-1",
+    "case": null,
+    "closes_it": "TC-O1-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-10",
+    "case": null,
+    "closes_it": "TC-O10-1, TC-O10-2"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-5",
+    "case": null,
+    "closes_it": "TC-O5-1, TC-O5-2"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-6",
+    "case": null,
+    "closes_it": "TC-O6-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-8",
+    "case": null,
+    "closes_it": "TC-O8-1, TC-O8-2, TC-O8-3"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-9",
+    "case": null,
+    "closes_it": "TC-O9-1, TC-O9-2, TC-O9-3"
+   }
+  ],
+  "P2": {
+   "findings": [],
+   "quarantine": [],
+   "redundant": {
+    "n": 8,
+    "d": 36,
+    "ids": [
+     "TC-O11-1.1",
+     "TC-O11-1.2",
+     "TC-O11-1.3",
+     "TC-O11-2",
+     "TC-O11-3",
+     "TC-O2-1",
+     "TC-O3-4.b",
+     "TC-O4-2.c"
+    ]
+   },
+   "mutation_strength": {
+    "n": 13,
+    "d": 31,
+    "ids": []
+   }
+  },
+  "P3": []
+ },
+ "scorecard": {
+  "seeded_authored": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "seeded_per_flag": [],
+  "seeded_blind": "not run (M7)",
+  "real_defects": {
+   "n": 6,
+   "d": 6,
+   "ids": [
+    "D-reference/O-1",
+    "D-reference/O-3",
+    "D-reference/O-5",
+    "D-reference/O-6",
+    "D-reference/O-8",
+    "D-reference/O-9"
+   ]
+  },
+  "mutation_strength": {
+   "n": 13,
+   "d": 31,
+   "ids": []
+  },
+  "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits mostly under the test data, so this measures authentication more than the item rules",
+  "mutation_per_criterion": {
+   "C-1": {
+    "n": 0,
+    "d": 18,
+    "ids": []
+   },
+   "O-1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-10": {
+    "n": 0,
+    "d": 21,
+    "ids": []
+   },
+   "O-11": {
+    "n": 3,
+    "d": 22,
+    "ids": []
+   },
+   "O-2": {
+    "n": 2,
+    "d": 18,
+    "ids": []
+   },
+   "O-3": {
+    "n": 2,
+    "d": 18,
+    "ids": []
+   },
+   "O-4": {
+    "n": 7,
+    "d": 18,
+    "ids": []
+   },
+   "O-5": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-6": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-7": {
+    "n": 3,
+    "d": 23,
+    "ids": []
+   },
+   "O-8": {
+    "n": 0,
+    "d": 18,
+    "ids": []
+   },
+   "O-9": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "triage_correct_seeded": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "localisation": {
+   "top1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top3": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top5": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "fail_before_pass_after": "not run (M5)",
+  "criteria_without_admitted_test": {
+   "n": 7,
+   "d": 12,
+   "ids": [
+    "C-1",
+    "O-1",
+    "O-10",
+    "O-5",
+    "O-6",
+    "O-8",
+    "O-9"
+   ]
+  }
+ },
+ "traceability": [
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-1",
+   "case": "TC-C1-1",
+   "assertions": [
+    "TC-C1-1/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-C1-1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:32",
+    "backend/app/api/routes/items.py:44",
+    "backend/app/api/routes/items.py:45"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-1.1",
+   "assertions": [
+    "TC-O10-1.1/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O10-1.1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:32",
+    "backend/app/api/routes/items.py:44",
+    "backend/app/api/routes/items.py:45"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-1.2",
+   "assertions": [
+    "TC-O10-1.2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O10-1.2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:32",
+    "backend/app/api/routes/items.py:44",
+    "backend/app/api/routes/items.py:45"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-1.3",
+   "assertions": [
+    "TC-O10-1.3/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O10-1.3"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:32",
+    "backend/app/api/routes/items.py:44",
+    "backend/app/api/routes/items.py:45"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-1.4",
+   "assertions": [
+    "TC-O10-1.4/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O10-1.4"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:32",
+    "backend/app/api/routes/items.py:44",
+    "backend/app/api/routes/items.py:45"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-2",
+   "assertions": [
+    "TC-O10-2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O10-2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "ac": "O-11",
+   "case": "TC-O11-1.1",
+   "assertions": [
+    "TC-O11-1.1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O11-1.1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "ac": "O-11",
+   "case": "TC-O11-1.2",
+   "assertions": [
+    "TC-O11-1.2/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O11-1.2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "ac": "O-11",
+   "case": "TC-O11-1.3",
+   "assertions": [
+    "TC-O11-1.3/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O11-1.3"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "ac": "O-11",
+   "case": "TC-O11-2",
+   "assertions": [
+    "TC-O11-2/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O11-2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:57"
+   ],
+   "ac": "O-11",
+   "case": "TC-O11-3",
+   "assertions": [
+    "TC-O11-3/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O11-3"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:68",
+    "backend/app/api/routes/items.py:72",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-1",
+   "case": "TC-O1-1",
+   "assertions": [
+    "TC-O1-1/percent_off"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O1-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:74",
+    "backend/app/models.py:75",
+    "backend/app/models.py:110",
+    "backend/app/models.py:111"
+   ],
+   "ac": "O-2",
+   "case": "TC-O2-1",
+   "assertions": [
+    "TC-O2-1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O2-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-2",
+   "assertions": [
+    "TC-O3-2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O3-2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-3.a",
+   "assertions": [
+    "TC-O3-3.a/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O3-3.a"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-3.b",
+   "assertions": [
+    "TC-O3-3.b/status"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O3-3.b"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-3.c",
+   "assertions": [
+    "TC-O3-3.c/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O3-3.c"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-4.a",
+   "assertions": [
+    "TC-O3-4.a/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O3-4.a"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-4.b",
+   "assertions": [
+    "TC-O3-4.b/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O3-4.b"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-4.c",
+   "assertions": [
+    "TC-O3-4.c/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O3-4.c"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-5",
+   "assertions": [
+    "TC-O3-5/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O3-5"
+  },
+  {
+   "req": [
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-4",
+   "case": "TC-O4-1",
+   "assertions": [
+    "TC-O4-1/*"
+   ],
+   "gate": "ADMITTED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O4-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-4",
+   "case": "TC-O4-2.a",
+   "assertions": [
+    "TC-O4-2.a/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O4-2.a"
+  },
+  {
+   "req": [
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-4",
+   "case": "TC-O4-2.b",
+   "assertions": [
+    "TC-O4-2.b/*"
+   ],
+   "gate": "ADMITTED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O4-2.b"
+  },
+  {
+   "req": [
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-4",
+   "case": "TC-O4-2.c",
+   "assertions": [
+    "TC-O4-2.c/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O4-2.c"
+  },
+  {
+   "req": [
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-4",
+   "case": "TC-O4-3",
+   "assertions": [
+    "TC-O4-3/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O4-3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-4",
+   "case": "TC-O4-4",
+   "assertions": [
+    "TC-O4-4/*"
+   ],
+   "gate": "ADMITTED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O4-4"
+  },
+  {
+   "req": [
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-5",
+   "case": "TC-O5-2",
+   "assertions": [
+    "TC-O5-2/percent_off"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O5-2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:91",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-6",
+   "case": "TC-O6-1",
+   "assertions": [
+    "TC-O6-1/percent_off"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O6-1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:91",
+    "backend/app/models.py:110"
+   ],
+   "ac": "O-7",
+   "case": "TC-O7-1",
+   "assertions": [
+    "TC-O7-1/*"
+   ],
+   "gate": "ADMITTED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O7-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-1",
+   "assertions": [
+    "TC-O8-1/status"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O8-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-2",
+   "assertions": [
+    "TC-O8-2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/TC-O8-2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-3",
+   "assertions": [
+    "TC-O8-3/status"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O8-3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:91",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-1",
+   "assertions": [
+    "TC-O9-1/status"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O9-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:91",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-2",
+   "assertions": [
+    "TC-O9-2/status"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O9-2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:91",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-3",
+   "assertions": [
+    "TC-O9-3/status"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/TC-O9-3"
+  }
+ ],
+ "coverage": {
+  "by": "case technique (boundary \u2192 boundary; error_exception/error_guessing \u2192 exception; rest \u2192 normal)",
+  "normal": {
+   "n": 17,
+   "d": 36,
+   "ids": [
+    "TC-C1-1",
+    "TC-O1-1",
+    "TC-O10-1.1",
+    "TC-O10-1.2",
+    "TC-O10-1.3",
+    "TC-O10-1.4",
+    "TC-O10-2",
+    "TC-O11-1.1",
+    "TC-O11-1.2",
+    "TC-O11-1.3",
+    "TC-O11-2",
+    "TC-O2-1",
+    "TC-O4-1",
+    "TC-O6-1",
+    "TC-O7-1",
+    "TC-O8-1",
+    "TC-O9-1"
+   ]
+  },
+  "boundary": {
+   "n": 9,
+   "d": 36,
+   "ids": [
+    "TC-O3-3.a",
+    "TC-O3-3.b",
+    "TC-O3-3.c",
+    "TC-O3-4.a",
+    "TC-O3-4.b",
+    "TC-O3-4.c",
+    "TC-O4-2.a",
+    "TC-O4-2.b",
+    "TC-O4-2.c"
+   ]
+  },
+  "exception": {
+   "n": 10,
+   "d": 36,
+   "ids": [
+    "TC-O11-3",
+    "TC-O3-2",
+    "TC-O3-5",
+    "TC-O4-3",
+    "TC-O4-4",
+    "TC-O5-2",
+    "TC-O8-2",
+    "TC-O8-3",
+    "TC-O9-2",
+    "TC-O9-3"
+   ]
+  }
+ },
+ "uncovered": {
+  "criteria_out_of_scope": [],
+  "deferred": [],
+  "skipped_templates": [
+   "C-2: dropped a drafted case: expected '2xx' is not traceable to C-2 (spec allows [])",
+   "O-10: decision table leaves out 4 combination(s), e.g. {'caller': 'ordinary user', 'item owner': 'other user', 'item has price': 'without price'}",
+   "O-11: decision table leaves out 3 combination(s), e.g. {'reader': 'non-owner ordinary user', 'item owner': 'self'}",
+   "C-2: dropped a drafted case: expected 'null' is not traceable to C-2 (spec allows [])",
+   "C-2: no acceptance case"
+  ],
+  "assumed": [],
+  "unbound_cases": [
+   "TC-O3-1",
+   "TC-O5-1"
+  ],
+  "behaviour_with_no_requirement": [],
+  "seeded_race": "BUG_FLAKE_RACE: no signed case reads an item right after creating it, so the suite cannot observe the late commit"
+ },
+ "ai_decisions": {
+  "spec_answers": {
+   "n": 8,
+   "d": null,
+   "ids": [
+    "10da09b160c6b58b",
+    "2a89a029f3991580",
+    "30989b7c387aa457",
+    "31e67b1129ccb8b5",
+    "5f271087e9db1330",
+    "941cdff06253080c",
+    "ca623bb38ea9f3b1",
+    "ff981ef1444dc8a6"
+   ]
+  },
+  "spec_assumed": {
+   "n": 0,
+   "d": 8,
+   "ids": []
+  },
+  "cases_llm_drafted": {
+   "n": 27,
+   "d": 27,
+   "ids": [
+    "TC-C1-1",
+    "TC-O1-1",
+    "TC-O10-1",
+    "TC-O10-2",
+    "TC-O11-1",
+    "TC-O11-2",
+    "TC-O11-3",
+    "TC-O2-1",
+    "TC-O3-1",
+    "TC-O3-2",
+    "TC-O3-3",
+    "TC-O3-4",
+    "TC-O3-5",
+    "TC-O4-1",
+    "TC-O4-2",
+    "TC-O4-3",
+    "TC-O4-4",
+    "TC-O5-1",
+    "TC-O5-2",
+    "TC-O6-1",
+    "TC-O7-1",
+    "TC-O8-1",
+    "TC-O8-2",
+    "TC-O8-3",
+    "TC-O9-1",
+    "TC-O9-2",
+    "TC-O9-3"
+   ]
+  },
+  "cases_signoff": {
+   "signed": true,
+   "approved": {
+    "n": 27,
+    "d": 27,
+    "ids": []
+   }
+  },
+  "gate_equivalence": {
+   "equivalent": {
+    "n": 0,
+    "d": 18,
+    "ids": []
+   },
+   "resolution": "not confirmed by a person; counted as survivors"
+  },
+  "triage": "no AI in M4 (rules only; the AI judge is M7)",
+  "overrides": [],
+  "review_decisions": [
+   {
+    "item": 32,
+    "kind": "question",
+    "decision": "pick",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 33,
+    "kind": "question",
+    "decision": "pick",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 34,
+    "kind": "question",
+    "decision": "pick",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 35,
+    "kind": "question",
+    "decision": "pick",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 36,
+    "kind": "question",
+    "decision": "pick",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 37,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 38,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 39,
+    "kind": "confirm_observed",
+    "decision": "reject",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 40,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 41,
+    "kind": "confirm_observed",
+    "decision": "reject",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 42,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 43,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 44,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 45,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 46,
+    "kind": "question",
+    "decision": "pick",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 47,
+    "kind": "question",
+    "decision": "pick",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 48,
+    "kind": "question",
+    "decision": "pick",
+    "by": "claude (intended spec)",
+    "reason": ""
+   },
+   {
+    "item": 49,
+    "kind": "signoff",
+    "decision": "approve",
+    "by": "claude (approve all)",
+    "reason": ""
+   },
+   {
+    "item": 50,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 51,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 52,
+    "kind": "triage",
+    "decision": "accept",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 53,
+    "kind": "triage",
+    "decision": "accept",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 54,
+    "kind": "triage",
+    "decision": "accept",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 55,
+    "kind": "triage",
+    "decision": "accept",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 56,
+    "kind": "triage",
+    "decision": "accept",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 57,
+    "kind": "triage",
+    "decision": "accept",
+    "by": "focused",
+    "reason": "focused default"
+   }
+  ]
+ },
+ "evidence": {
+  "ex:reference/a1/TC-O1-1": {
+   "batch": "reference/a1",
+   "case_id": "TC-O1-1",
+   "error": "ExpectationFailed: [TC-O1-1/percent_off] expected '16.99', got 15",
+   "failed": [
+    {
+     "actual": 15,
+     "expected": "16.99",
+     "id": "TC-O1-1/percent_off",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O1-1#5": {
+   "body": "{\"title\": \"Discounted item\", \"description\": null, \"price\": \"19.99\", \"discount_percent\": 15, \"id\": \"06309c95-ca90-4ed8-83e4-7ac6680bb7f2\", \"owner_id\": \"41c7950b-d30d-49f7-aa67-e8ef8316473a\", \"created_at\": \"2026-11-02T13:18:24.330958Z\", \"final_price\": \"16.99\"}",
+   "json": {
+    "discount_percent": 15,
+    "price": "19.99",
+    "title": "Discounted item"
+   },
+   "kind": "exchange",
+   "method": "POST",
+   "path": "/api/v1/items/",
+   "query": {},
+   "status": 200,
+   "traceparent": "00-4cc6e0f20f6d719031fe7d9261392b05-e384898798b31591-01",
+   "x_test_trace": "x18.reference.a1/TC-O1-1/5"
+  },
+  "ex:reference/a1/TC-O3-3.b": {
+   "batch": "reference/a1",
+   "case_id": "TC-O3-3.b",
+   "error": "ExpectationFailed: [TC-O3-3.b/status] expected '200', got 422",
+   "failed": [
+    {
+     "actual": 422,
+     "expected": "200",
+     "id": "TC-O3-3.b/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O3-3.b#5": {
+   "body": "{\"detail\": [{\"type\": \"less_than\", \"loc\": [\"body\", \"discount_percent\"], \"msg\": \"Input should be less than 100\", \"input\": 100, \"ctx\": {\"lt\": 100}}]}",
+   "json": {
+    "discount_percent": 100,
+    "title": "Boundary item"
+   },
+   "kind": "exchange",
+   "method": "POST",
+   "path": "/api/v1/items/",
+   "query": {},
+   "status": 422,
+   "traceparent": "00-eeec1569eb89c0bace3cf7944d6246a3-bde2c44ae1067d13-01",
+   "x_test_trace": "x18.reference.a1/TC-O3-3.b/5"
+  },
+  "ex:reference/a1/TC-O5-2": {
+   "batch": "reference/a1",
+   "case_id": "TC-O5-2",
+   "error": "ExpectationFailed: [TC-O5-2/percent_off] expected '0.03', got '0.02'",
+   "failed": [
+    {
+     "actual": "0.02",
+     "expected": "0.03",
+     "id": "TC-O5-2/percent_off",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O5-2#5": {
+   "body": "{\"title\": \"Half cent item\", \"description\": null, \"price\": \"0.05\", \"discount_percent\": 50, \"id\": \"0f4f400d-2c91-459b-a0f1-101742feaf3b\", \"owner_id\": \"fc4e23d5-1cf3-48cf-b5ec-99c6e0e8a3ba\", \"created_at\": \"2026-11-02T13:18:26.247474Z\", \"final_price\": \"0.02\"}",
+   "json": {
+    "discount_percent": 50,
+    "price": "0.05",
+    "title": "Half cent item"
+   },
+   "kind": "exchange",
+   "method": "POST",
+   "path": "/api/v1/items/",
+   "query": {},
+   "status": 200,
+   "traceparent": "00-6b381a6aad1a8a0f610b38112c340176-6d5db97668259eb5-01",
+   "x_test_trace": "x18.reference.a1/TC-O5-2/5"
+  },
+  "ex:reference/a1/TC-O6-1": {
+   "batch": "reference/a1",
+   "case_id": "TC-O6-1",
+   "error": "ExpectationFailed: [TC-O6-1/percent_off] expected '40.00', got 20",
+   "failed": [
+    {
+     "actual": 20,
+     "expected": "40.00",
+     "id": "TC-O6-1/percent_off",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "ASSERTION",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O6-1#7": {
+   "body": "{\"title\": \"Item 5f0c514c7c-2\", \"description\": \"Description 5f0c514c7c-2\", \"price\": \"50.00\", \"discount_percent\": 20, \"id\": \"6ff70fda-5b8a-4c50-9b4b-4154a25e6dab\", \"owner_id\": \"4b6cd872-2291-4619-9924-b759a9d8cd41\", \"created_at\": \"2026-11-02T13:18:26.355076Z\", \"final_price\": \"40.00\"}",
+   "json": {
+    "discount_percent": 20,
+    "price": "50.00"
+   },
+   "kind": "exchange",
+   "method": "PUT",
+   "path": "/api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab",
+   "query": {},
+   "status": 200,
+   "traceparent": "00-3a34150fa38936660f4943bdaf953199-c7d810ed6c048862-01",
+   "x_test_trace": "x18.reference.a1/TC-O6-1/7"
+  },
+  "ex:reference/a1/TC-O8-1": {
+   "batch": "reference/a1",
+   "case_id": "TC-O8-1",
+   "error": "ExpectationFailed: [TC-O8-1/status] expected '422', got 500",
+   "failed": [
+    {
+     "actual": 500,
+     "expected": "422",
+     "id": "TC-O8-1/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O8-1#7": {
+   "body": "\"Internal Server Error\"",
+   "json": {
+    "price": "-5"
+   },
+   "kind": "exchange",
+   "method": "PUT",
+   "path": "/api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1",
+   "query": {},
+   "status": 500,
+   "traceparent": "00-c1896a4f2d7bf42d131f10319aa6779f-956d3a54b59e4795-01",
+   "x_test_trace": "x18.reference.a1/TC-O8-1/7"
+  },
+  "ex:reference/a1/TC-O9-1": {
+   "batch": "reference/a1",
+   "case_id": "TC-O9-1",
+   "error": "ExpectationFailed: [TC-O9-1/status] expected '422', got 500",
+   "failed": [
+    {
+     "actual": 500,
+     "expected": "422",
+     "id": "TC-O9-1/status",
+     "ok": false
+    }
+   ],
+   "kind": "record",
+   "origin": "PRODUCT_ERROR",
+   "outcome": "failed",
+   "variant": "reference"
+  },
+  "ex:reference/a1/TC-O9-1#7": {
+   "body": "\"Internal Server Error\"",
+   "json": {
+    "discount_percent": null,
+    "title": "Item 10fa9b35c4-2"
+   },
+   "kind": "exchange",
+   "method": "PUT",
+   "path": "/api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc",
+   "query": {},
+   "status": 500,
+   "traceparent": "00-47e408762905c30370ddaf235b45956f-6ec3ba7f7d16dd7f-01",
+   "x_test_trace": "x18.reference.a1/TC-O9-1/7"
+  },
+  "log:x18.reference.a1/TC-O1-1/5": {
+   "kind": "log",
+   "line": "INFO:app.trace:POST /api/v1/items/ 200 traceparent=00-4cc6e0f20f6d719031fe7d9261392b05-e384898798b31591-01 x-test-trace=x18.reference.a1/TC-O1-1/5",
+   "line_no": 292,
+   "traceback": "",
+   "variant": "reference"
+  },
+  "log:x18.reference.a1/TC-O3-3.b/5": {
+   "kind": "log",
+   "line": "INFO:app.trace:POST /api/v1/items/ 422 traceparent=00-eeec1569eb89c0bace3cf7944d6246a3-bde2c44ae1067d13-01 x-test-trace=x18.reference.a1/TC-O3-3.b/5",
+   "line_no": 339,
+   "traceback": "",
+   "variant": "reference"
+  },
+  "log:x18.reference.a1/TC-O5-2/5": {
+   "kind": "log",
+   "line": "INFO:app.trace:POST /api/v1/items/ 200 traceparent=00-6b381a6aad1a8a0f610b38112c340176-6d5db97668259eb5-01 x-test-trace=x18.reference.a1/TC-O5-2/5",
+   "line_no": 459,
+   "traceback": "",
+   "variant": "reference"
+  },
+  "log:x18.reference.a1/TC-O6-1/7": {
+   "kind": "log",
+   "line": "INFO:app.trace:PUT /api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab 200 traceparent=00-3a34150fa38936660f4943bdaf953199-c7d810ed6c048862-01 x-test-trace=x18.reference.a1/TC-O6-1/7",
+   "line_no": 473,
+   "traceback": "",
+   "variant": "reference"
+  },
+  "log:x18.reference.a1/TC-O8-1/7": {
+   "kind": "log",
+   "line": "INFO:app.trace:PUT /api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1 500 traceparent=00-c1896a4f2d7bf42d131f10319aa6779f-956d3a54b59e4795-01 x-test-trace=x18.reference.a1/TC-O8-1/7",
+   "line_no": 501,
+   "traceback": "ERROR:    Exception in ASGI application\nTraceback (most recent call last):\n  File \"/app/.venv/lib/python3.14/site-packages/uvicorn/protocols/http/httptools_impl.py\", line 421, in run_asgi\n    result = await app(  # type: ignore[func-returns-value]\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        self.scope, self.receive, self.send\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py\", line 62, in __call__\n    return await self.app(scope, receive, send)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/applications.py\", line 1163, in __call__\n    await super().__call__(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/applications.py\", line 90, in __call__\n    await self.middleware_stack(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py\", line 186, in __call__\n    raise exc\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py\", line 164, in __call__\n    await self.app(scope, receive, _send)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/middleware/base.py\", line 193, in __call__\n    response = await self.dispatch_func(request, call_next)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/backend/app/main.py\", line 45, in log_trace\n    response = await call_next(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/middleware/base.py\", line 168, in call_next\n    raise app_exc from app_exc.__cause__ or app_exc.__context__\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/middleware/base.py\", line 144, in coro\n    await self.app(scope, receive_or_disconnect, send_no_error)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py\", line 88, in __call__\n    await self.app(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py\", line 63, in __call__\n    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    raise exc\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 42, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py\", line 18, in __call__\n    await self.app(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/routing.py\", line 660, in __call__\n    await self.middleware_stack(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 2734, in app\n    await route.handle(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 1780, in handle\n    await self.original_router.handle(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 2789, in handle\n    await included_router._handle_selected(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 1791, in _handle_selected\n    await route.handle(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 1780, in handle\n    await self.original_router.handle(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 2789, in handle\n    await included_router._handle_selected(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 1800, in _handle_selected\n    await original_route.handle(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 1279, in handle\n    await app(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 158, in app\n    await wrap_app_handling_exceptions(app, request)(scope, receive, send)\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    raise exc\n  File \"/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 42, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 144, in app\n    response = await f(request)\n               ^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 727, in app\n    content = await serialize_response(\n              ^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<11 lines>...\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/fastapi/routing.py\", line 324, in serialize_response\n    raise ResponseValidationError(\n    ...<3 lines>...\n    )\nfastapi.exceptions.ResponseValidationError: 1 validation error:\n  {'type': 'greater_than_equal', 'loc': ('response', 'price'), 'msg': 'Input should be greater than or equal to 0', 'input': Decimal('-5.00'), 'ctx': {'ge': Decimal('0')}}\n\n  File \"/app/backend/app/api/routes/items.py\", line 75, in update_item\n    PUT /api/v1/items/{id}",
+   "variant": "reference"
+  },
+  "log:x18.reference.a1/TC-O9-1/7": {
+   "kind": "log",
+   "line": "INFO:app.trace:PUT /api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc 500 traceparent=00-47e408762905c30370ddaf235b45956f-6ec3ba7f7d16dd7f-01 x-test-trace=x18.reference.a1/TC-O9-1/7",
+   "line_no": 709,
+   "traceback": "^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/to_thread.py\", line 65, in run_sync\n    return await get_async_backend().run_sync_in_worker_thread(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py\", line 2641, in run_sync_in_worker_thread\n    return await future\n           ^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py\", line 1033, in run\n    result = context.run(func, *args)\n  File \"/app/backend/app/api/routes/items.py\", line 94, in update_item\n    session.commit()\n    ~~~~~~~~~~~~~~^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 2035, in commit\n    trans.commit(_to_root=True)\n    ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"<string>\", line 2, in commit\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state_changes.py\", line 137, in _go\n    ret_value = fn(self, *arg, **kw)\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 1316, in commit\n    self._prepare_impl()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"<string>\", line 2, in _prepare_impl\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state_changes.py\", line 137, in _go\n    ret_value = fn(self, *arg, **kw)\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 1290, in _prepare_impl\n    self.session.flush()\n    ~~~~~~~~~~~~~~~~~~^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 4353, in flush\n    self._flush(objects)\n    ~~~~~~~~~~~^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 4488, in _flush\n    with util.safe_reraise():\n         ~~~~~~~~~~~~~~~~~^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py\", line 122, in __exit__\n    raise exc_value.with_traceback(exc_tb)\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py\", line 4449, in _flush\n    flush_context.execute()\n    ~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/unitofwork.py\", line 465, in execute\n    rec.execute(self)\n    ~~~~~~~~~~~^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/unitofwork.py\", line 641, in execute\n    util.preloaded.orm_persistence.save_obj(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self.mapper,\n        ^^^^^^^^^^^^\n        uow.states_for_mapper_hierarchy(self.mapper, False, False),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        uow,\n        ^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/persistence.py\", line 86, in save_obj\n    _emit_update_statements(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        base_mapper,\n        ^^^^^^^^^^^^\n    ...<3 lines>...\n        update,\n        ^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/orm/persistence.py\", line 913, in _emit_update_statements\n    c = connection.execute(\n        statement, multiparams, execution_options=execution_options\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1421, in execute\n    return meth(\n        self,\n        distilled_parameters,\n        execution_options or NO_OPTIONS,\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/sql/elements.py\", line 526, in _execute_on_connection\n    return connection._execute_clauseelement(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        self, distilled_params, execution_options\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1643, in _execute_clauseelement\n    ret = self._execute_context(\n        dialect,\n    ...<8 lines>...\n        cache_hit=cache_hit,\n    )\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1848, in _execute_context\n    return self._exec_single_context(\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^\n        dialect, context, statement, parameters\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1988, in _exec_single_context\n    self._handle_dbapi_exception(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        e, str_statement, effective_parameters, cursor, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 2365, in _handle_dbapi_exception\n    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py\", line 1969, in _exec_single_context\n    self.dialect.do_execute(\n    ~~~~~~~~~~~~~~~~~~~~~~~^\n        cursor, str_statement, effective_parameters, context\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/app/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py\", line 952, in do_execute\n    cursor.execute(statement, parameters)\n    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/.venv/lib/python3.14/site-packages/psycopg/cursor.py\", line 117, in execute\n    raise ex.with_traceback(None)\nsqlalchemy.exc.IntegrityError: (psycopg.errors.NotNullViolation) null value in column \"discount_percent\" of relation \"item\" violates not-null constraint\nDETAIL:  Failing row contains (Description 10fa9b35c4-2, Item 10fa9b35c4-2, 2d00b7c1-cb28-4447-b36d-e0de4629f1bc, f2b6f0a0-2c5a-4f72-97e7-29b6b5d703cb, 2026-11-02 13:18:26.980156+00, null, null).\n[SQL: UPDATE item SET discount_percent=%(discount_percent)s::INTEGER WHERE item.id = %(item_id)s::UUID]\n[parameters: {'discount_percent': None, 'item_id': UUID('2d00b7c1-cb28-4447-b36d-e0de4629f1bc')}]\n(Background on this error at: https://sqlalche.me/e/20/gkpj)",
+   "variant": "reference"
+  }
+ },
+ "defects": [
+  {
+   "ac": "O-1",
+   "cases": [
+    "TC-O1-1"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "decision": {
+    "by": "focused",
+    "decision": "accept",
+    "reason": "focused default"
+   },
+   "evidence": [
+    "ex:reference/a1/TC-O1-1",
+    "ex:reference/a1/TC-O1-1#5",
+    "log:x18.reference.a1/TC-O1-1/5"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 15,
+     "expected": "16.99",
+     "id": "TC-O1-1/percent_off",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O1-1"
+   ],
+   "flag": null,
+   "id": "D-reference/O-1",
+   "kind": "real",
+   "observed": {
+    "json": {
+     "discount_percent": 15,
+     "price": "19.99",
+     "title": "Discounted item"
+    },
+    "method": "POST",
+    "path": "/api/v1/items/",
+    "query": {},
+    "status": 200
+   },
+   "review": 52,
+   "root_cause": null,
+   "suggestion": {
+    "applies": false,
+    "edits": [],
+    "explanation": "The failed assertion checks a field named percent_off expecting 16.99, but the response has no such field, and the value it got (15) is discount_percent. The source already computes final_price in ItemPublic.final_price as a computed field, rounded to 2 places and not stored, and the failing exchange does not show final_price missing from the response. The evidence therefore points at the test's field name or expectation rather than a code defect I can fix with confidence, so I am returning no edits.",
+    "patch": "",
+    "problems": []
+   },
+   "suspects": [
+    {
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200",
+     "file": "backend/app/api/routes/items.py",
+     "line": 62,
+     "text": "def create_item(",
+     "upstream_line": 62
+    },
+    {
+     "basis": "code_ref of O-1 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 68,
+     "text": "item = Item.model_validate(item_in, update={\"owner_id\": current_user.id})",
+     "upstream_line": 68
+    },
+    {
+     "basis": "code_ref of O-1 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 72,
+     "text": "return item",
+     "upstream_line": 72
+    },
+    {
+     "basis": "code_ref of O-1 (no stack)",
+     "file": "backend/app/models.py",
+     "line": 112,
+     "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+     "upstream_line": 112
+    }
+   ],
+   "variant": "reference"
+  },
+  {
+   "ac": "O-3",
+   "cases": [
+    "TC-O3-3.b"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "decision": {
+    "by": "focused",
+    "decision": "accept",
+    "reason": "focused default"
+   },
+   "evidence": [
+    "ex:reference/a1/TC-O3-3.b",
+    "ex:reference/a1/TC-O3-3.b#5",
+    "log:x18.reference.a1/TC-O3-3.b/5"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 422,
+     "expected": "200",
+     "id": "TC-O3-3.b/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O3-3.b"
+   ],
+   "flag": null,
+   "id": "D-reference/O-3",
+   "kind": "real",
+   "observed": {
+    "json": {
+     "discount_percent": 100,
+     "title": "Boundary item"
+    },
+    "method": "POST",
+    "path": "/api/v1/items/",
+    "query": {},
+    "status": 422
+   },
+   "review": 53,
+   "root_cause": null,
+   "suggestion": {
+    "applies": true,
+    "edits": [
+     {
+      "file": "backend/app/models.py",
+      "find": "    discount_percent: int = Field(default=0, ge=0, lt=100)",
+      "replace": "    discount_percent: int = Field(default=0, ge=0, le=100)"
+     },
+     {
+      "file": "backend/app/models.py",
+      "find": "    discount_percent: int | None = Field(default=None, ge=0, lt=100)",
+      "replace": "    discount_percent: int | None = Field(default=None, ge=0, le=100)"
+     }
+    ],
+    "explanation": "The requirement says discount_percent 0 to 100 inclusive must be accepted, but ItemBase declares discount_percent with lt=100, so the value 100 fails validation and the API returns 422. The fix changes the upper bound from exclusive to inclusive by replacing lt=100 with le=100 on ItemBase.discount_percent, which is the field shared by ItemCreate; ItemUpdate has the same constraint and is changed in the same way to keep the two consistent.",
+    "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -72,7 +72,7 @@\n     title: str = Field(min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n     price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)\n-    discount_percent: int = Field(default=0, ge=0, lt=100)\n+    discount_percent: int = Field(default=0, ge=0, le=100)\n \n \n # Properties to receive on item creation\n@@ -85,7 +85,7 @@\n     title: str | None = Field(default=None, min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n     price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)\n-    discount_percent: int | None = Field(default=None, ge=0, lt=100)\n+    discount_percent: int | None = Field(default=None, ge=0, le=100)\n \n \n # Database model, database table inferred from class name\n",
+    "problems": []
+   },
+   "suspects": [
+    {
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 422",
+     "file": "backend/app/api/routes/items.py",
+     "line": 62,
+     "text": "def create_item(",
+     "upstream_line": 62
+    },
+    {
+     "basis": "code_ref of O-3 (no stack)",
+     "file": "backend/app/models.py",
+     "line": 75,
+     "text": "discount_percent: int = Field(default=0, ge=0, lt=100)",
+     "upstream_line": 75
+    }
+   ],
+   "variant": "reference"
+  },
+  {
+   "ac": "O-5",
+   "cases": [
+    "TC-O5-2"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "decision": {
+    "by": "focused",
+    "decision": "accept",
+    "reason": "focused default"
+   },
+   "evidence": [
+    "ex:reference/a1/TC-O5-2",
+    "ex:reference/a1/TC-O5-2#5",
+    "log:x18.reference.a1/TC-O5-2/5"
+   ],
+   "failed_assertions": [
+    {
+     "actual": "0.02",
+     "expected": "0.03",
+     "id": "TC-O5-2/percent_off",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O5-2"
+   ],
+   "flag": null,
+   "id": "D-reference/O-5",
+   "kind": "real",
+   "observed": {
+    "json": {
+     "discount_percent": 50,
+     "price": "0.05",
+     "title": "Half cent item"
+    },
+    "method": "POST",
+    "path": "/api/v1/items/",
+    "query": {},
+    "status": 200
+   },
+   "review": 54,
+   "root_cause": null,
+   "suggestion": {
+    "applies": true,
+    "edits": [
+     {
+      "file": "backend/app/models.py",
+      "find": "from decimal import Decimal",
+      "replace": "from decimal import ROUND_HALF_UP, Decimal"
+     },
+     {
+      "file": "backend/app/models.py",
+      "find": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+      "replace": "return (self.price * (100 - self.discount_percent) / 100).quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP)"
+     }
+    ],
+    "explanation": "The final_price computed field calls round(Decimal, 2), which uses Python's default ROUND_HALF_EVEN, so for price 0.05 with 50% off (0.025) it returns 0.02 instead of the required round-half-up 0.03. The fix quantizes the Decimal to cents with an explicit ROUND_HALF_UP rounding mode, which is the smallest change that matches requirement O-5.",
+    "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -1,6 +1,6 @@\n import uuid\n from datetime import UTC, datetime\n-from decimal import Decimal\n+from decimal import ROUND_HALF_UP, Decimal\n \n from pydantic import EmailStr, computed_field\n from sqlmodel import Field, Relationship, SQLModel\n@@ -109,7 +109,7 @@\n     def final_price(self) -> Decimal | None:\n         if self.price is None:\n             return None\n-        return round(self.price * (100 - self.discount_percent) / 100, 2)\n+        return (self.price * (100 - self.discount_percent) / 100).quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP)\n \n \n class ItemsPublic(SQLModel):\n",
+    "problems": []
+   },
+   "suspects": [
+    {
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200",
+     "file": "backend/app/api/routes/items.py",
+     "line": 62,
+     "text": "def create_item(",
+     "upstream_line": 62
+    },
+    {
+     "basis": "code_ref of O-5 (no stack)",
+     "file": "backend/app/models.py",
+     "line": 112,
+     "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+     "upstream_line": 112
+    }
+   ],
+   "variant": "reference"
+  },
+  {
+   "ac": "O-6",
+   "cases": [
+    "TC-O6-1"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "decision": {
+    "by": "focused",
+    "decision": "accept",
+    "reason": "focused default"
+   },
+   "evidence": [
+    "ex:reference/a1/TC-O6-1",
+    "ex:reference/a1/TC-O6-1#7",
+    "log:x18.reference.a1/TC-O6-1/7"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 20,
+     "expected": "40.00",
+     "id": "TC-O6-1/percent_off",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O6-1"
+   ],
+   "flag": null,
+   "id": "D-reference/O-6",
+   "kind": "real",
+   "observed": {
+    "json": {
+     "discount_percent": 20,
+     "price": "50.00"
+    },
+    "method": "PUT",
+    "path": "/api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab",
+    "query": {},
+    "status": 200
+   },
+   "review": 55,
+   "root_cause": null,
+   "suggestion": {
+    "applies": false,
+    "edits": [],
+    "explanation": "The failing assertion compares a field named percent_off, expected 40.00, against actual 20. The source computes final_price as round(price * (100 - discount_percent) / 100, 2), which gives 40.00 for price 50.00 and discount 20, and update_item applies only the fields that were sent, so the stored price is unchanged. The actual value 20 is the correct discount_percent, so the mismatch points to the test checking the wrong field or label rather than a code defect, and I am making no edits.",
+    "patch": "",
+    "problems": []
+   },
+   "suspects": [
+    {
+     "basis": "handler of the failing request PUT /api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab (update_item), which answered 200",
+     "file": "backend/app/api/routes/items.py",
+     "line": 76,
+     "text": "def update_item(",
+     "upstream_line": 76
+    },
+    {
+     "basis": "code_ref of O-6 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 91,
+     "text": "update_dict = item_in.model_dump(exclude_unset=True)",
+     "upstream_line": 91
+    },
+    {
+     "basis": "code_ref of O-6 (no stack)",
+     "file": "backend/app/api/routes/items.py",
+     "line": 92,
+     "text": "item.sqlmodel_update(update_dict)",
+     "upstream_line": 92
+    },
+    {
+     "basis": "code_ref of O-6 (no stack)",
+     "file": "backend/app/models.py",
+     "line": 112,
+     "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+     "upstream_line": 112
+    }
+   ],
+   "variant": "reference"
+  },
+  {
+   "ac": "O-8",
+   "cases": [
+    "TC-O8-1",
+    "TC-O8-3"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "decision": {
+    "by": "focused",
+    "decision": "accept",
+    "reason": "focused default"
+   },
+   "evidence": [
+    "ex:reference/a1/TC-O8-1",
+    "ex:reference/a1/TC-O8-1#7",
+    "log:x18.reference.a1/TC-O8-1/7"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 500,
+     "expected": "422",
+     "id": "TC-O8-1/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O8-1",
+    "F-reference/TC-O8-3"
+   ],
+   "flag": null,
+   "id": "D-reference/O-8",
+   "kind": "real",
+   "observed": {
+    "json": {
+     "price": "-5"
+    },
+    "method": "PUT",
+    "path": "/api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1",
+    "query": {},
+    "status": 500
+   },
+   "review": 56,
+   "root_cause": {
+    "cls": "fastapi.exceptions.ResponseValidationError",
+    "msg": "1 validation error:"
+   },
+   "suggestion": {
+    "applies": true,
+    "edits": [
+     {
+      "file": "backend/app/models.py",
+      "find": "price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)",
+      "replace": "price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)"
+     }
+    ],
+    "explanation": "ItemUpdate.price in models.py has no ge=0 bound, unlike ItemBase.price, so PUT accepts price -5 and stores it. The response model ItemPublic then rejects the negative value during response validation, which surfaces as a 500 instead of a 422. Adding ge=0 to ItemUpdate.price makes the update request fail input validation with 422, matching create.",
+    "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -84,7 +84,7 @@\n class ItemUpdate(SQLModel):\n     title: str | None = Field(default=None, min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n-    price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)\n+    price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)\n     discount_percent: int | None = Field(default=None, ge=0, lt=100)\n \n \n",
+    "problems": []
+   },
+   "suspects": [
+    {
+     "basis": "innermost app frame of the traceback (update_item), fastapi.exceptions.ResponseValidationError raised here",
+     "file": "backend/app/api/routes/items.py",
+     "line": 75,
+     "text": "@router.put(\"/{id}\", response_model=ItemPublic)",
+     "upstream_line": 75
+    },
+    {
+     "basis": "handler of the failing request PUT /api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1 (update_item), which answered 500",
+     "file": "backend/app/api/routes/items.py",
+     "line": 76,
+     "text": "def update_item(",
+     "upstream_line": 76
+    },
+    {
+     "basis": "code_ref of O-8",
+     "file": "backend/app/models.py",
+     "line": 87,
+     "text": "price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)",
+     "upstream_line": 87
+    },
+    {
+     "basis": "code_ref of O-8",
+     "file": "backend/app/api/routes/items.py",
+     "line": 92,
+     "text": "item.sqlmodel_update(update_dict)",
+     "upstream_line": 92
+    },
+    {
+     "basis": "code_ref of O-8",
+     "file": "backend/app/models.py",
+     "line": 112,
+     "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+     "upstream_line": 112
+    }
+   ],
+   "variant": "reference"
+  },
+  {
+   "ac": "O-9",
+   "cases": [
+    "TC-O9-1",
+    "TC-O9-2",
+    "TC-O9-3"
+   ],
+   "class": "PRODUCT_DEFECT",
+   "decision": {
+    "by": "focused",
+    "decision": "accept",
+    "reason": "focused default"
+   },
+   "evidence": [
+    "ex:reference/a1/TC-O9-1",
+    "ex:reference/a1/TC-O9-1#7",
+    "log:x18.reference.a1/TC-O9-1/7"
+   ],
+   "failed_assertions": [
+    {
+     "actual": 500,
+     "expected": "422",
+     "id": "TC-O9-1/status",
+     "ok": false
+    }
+   ],
+   "findings": [
+    "F-reference/TC-O9-1",
+    "F-reference/TC-O9-2",
+    "F-reference/TC-O9-3"
+   ],
+   "flag": null,
+   "id": "D-reference/O-9",
+   "kind": "real",
+   "observed": {
+    "json": {
+     "discount_percent": null,
+     "title": "Item 10fa9b35c4-2"
+    },
+    "method": "PUT",
+    "path": "/api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc",
+    "query": {},
+    "status": 500
+   },
+   "review": 57,
+   "root_cause": {
+    "cls": "psycopg.errors.NotNullViolation",
+    "msg": "null value in column \"discount_percent\" of relation \"item\" violates not-null constraint"
+   },
+   "suggestion": {
+    "applies": true,
+    "edits": [
+     {
+      "file": "backend/app/api/routes/items.py",
+      "find": "    update_dict = item_in.model_dump(exclude_unset=True)\n",
+      "replace": "    update_dict = item_in.model_dump(exclude_unset=True)\n    if \"discount_percent\" in update_dict and update_dict[\"discount_percent\"] is None:\n        update_dict[\"discount_percent\"] = 0\n"
+     }
+    ],
+    "explanation": "PUT /api/v1/items/{id} with an explicit discount_percent of null passes ItemUpdate validation, because the field is typed int | None. model_dump(exclude_unset=True) keeps the null, sqlmodel_update writes it to the NOT NULL discount_percent column, and the commit raises NotNullViolation, which becomes a 500. The change maps an explicit null to the default 0 before the update is applied, which satisfies the requirement's allowed behaviour of treating null as 0.",
+    "patch": "--- a/backend/app/api/routes/items.py\n+++ b/backend/app/api/routes/items.py\n@@ -89,6 +89,8 @@\n     if not current_user.is_superuser and (item.owner_id != current_user.id):\n         raise HTTPException(status_code=403, detail=\"Not enough permissions\")\n     update_dict = item_in.model_dump(exclude_unset=True)\n+    if \"discount_percent\" in update_dict and update_dict[\"discount_percent\"] is None:\n+        update_dict[\"discount_percent\"] = 0\n     item.sqlmodel_update(update_dict)\n     session.add(item)\n     session.commit()\n",
+    "problems": []
+   },
+   "suspects": [
+    {
+     "basis": "innermost app frame of the traceback (update_item), psycopg.errors.NotNullViolation raised here",
+     "file": "backend/app/api/routes/items.py",
+     "line": 94,
+     "text": "session.commit()",
+     "upstream_line": 94
+    },
+    {
+     "basis": "handler of the failing request PUT /api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc (update_item), which answered 500",
+     "file": "backend/app/api/routes/items.py",
+     "line": 76,
+     "text": "def update_item(",
+     "upstream_line": 76
+    },
+    {
+     "basis": "code_ref of O-9",
+     "file": "backend/app/models.py",
+     "line": 88,
+     "text": "discount_percent: int | None = Field(default=None, ge=0, lt=100)",
+     "upstream_line": 88
+    },
+    {
+     "basis": "code_ref of O-9",
+     "file": "backend/app/api/routes/items.py",
+     "line": 91,
+     "text": "update_dict = item_in.model_dump(exclude_unset=True)",
+     "upstream_line": 91
+    },
+    {
+     "basis": "code_ref of O-9",
+     "file": "backend/app/models.py",
+     "line": 112,
+     "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+     "upstream_line": 112
+    }
+   ],
+   "variant": "reference"
+  }
+ ],
+ "product": {
+  "summary": {
+   "tests": 36,
+   "admitted": 12,
+   "defects": 6,
+   "problematic": 19,
+   "improve": 17,
+   "approved": 27,
+   "proposed": 27
+  },
+  "defects": [
+   {
+    "id": "D-reference/O-1",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-1",
+    "criterion": "Create item with price and discount returns rounded final_price",
+    "observed": {
+     "json": {
+      "discount_percent": 15,
+      "price": "19.99",
+      "title": "Discounted item"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 200
+    },
+    "failed_assertions": [
+     {
+      "actual": 15,
+      "expected": "16.99",
+      "id": "TC-O1-1/percent_off",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 62,
+     "text": "def create_item(",
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200"
+    },
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 62,
+      "text": "def create_item(",
+      "upstream_line": 62
+     },
+     {
+      "basis": "code_ref of O-1 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 68,
+      "text": "item = Item.model_validate(item_in, update={\"owner_id\": current_user.id})",
+      "upstream_line": 68
+     },
+     {
+      "basis": "code_ref of O-1 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 72,
+      "text": "return item",
+      "upstream_line": 72
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O1-1",
+     "ex:reference/a1/TC-O1-1#5",
+     "log:x18.reference.a1/TC-O1-1/5"
+    ],
+    "tests": [
+     {
+      "case": "TC-O1-1",
+      "title": "Verify creating an item with price and discount returns the computed, rounded final_price",
+      "summary": "Created item response has a final_price that is not price x (100 - discount) / 100 rounded half-up to 2 places",
+      "ac": "O-1",
+      "criterion": "Create item with price and discount returns rounded final_price"
+     }
+    ],
+    "suggestion": {
+     "applies": false,
+     "edits": [],
+     "explanation": "The failed assertion checks a field named percent_off expecting 16.99, but the response has no such field, and the value it got (15) is discount_percent. The source already computes final_price in ItemPublic.final_price as a computed field, rounded to 2 places and not stored, and the failing exchange does not show final_price missing from the response. The evidence therefore points at the test's field name or expectation rather than a code defect I can fix with confidence, so I am returning no edits.",
+     "patch": "",
+     "problems": []
+    }
+   },
+   {
+    "id": "D-reference/O-3",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-3",
+    "criterion": "Create item rejects discount_percent of 100 or more and negatives",
+    "observed": {
+     "json": {
+      "discount_percent": 100,
+      "title": "Boundary item"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 422
+    },
+    "failed_assertions": [
+     {
+      "actual": 422,
+      "expected": "200",
+      "id": "TC-O3-3.b/status",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 62,
+     "text": "def create_item(",
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 422"
+    },
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 422",
+      "file": "backend/app/api/routes/items.py",
+      "line": 62,
+      "text": "def create_item(",
+      "upstream_line": 62
+     },
+     {
+      "basis": "code_ref of O-3 (no stack)",
+      "file": "backend/app/models.py",
+      "line": 75,
+      "text": "discount_percent: int = Field(default=0, ge=0, lt=100)",
+      "upstream_line": 75
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O3-3.b",
+     "ex:reference/a1/TC-O3-3.b#5",
+     "log:x18.reference.a1/TC-O3-3.b/5"
+    ],
+    "tests": [
+     {
+      "case": "TC-O3-3.b",
+      "title": "discount_percent at the 100 limit",
+      "summary": "Upper bound off by one: discount_percent above 100 is accepted",
+      "ac": "O-3",
+      "criterion": "Create item rejects discount_percent of 100 or more and negatives"
+     }
+    ],
+    "suggestion": {
+     "applies": true,
+     "edits": [
+      {
+       "file": "backend/app/models.py",
+       "find": "    discount_percent: int = Field(default=0, ge=0, lt=100)",
+       "replace": "    discount_percent: int = Field(default=0, ge=0, le=100)"
+      },
+      {
+       "file": "backend/app/models.py",
+       "find": "    discount_percent: int | None = Field(default=None, ge=0, lt=100)",
+       "replace": "    discount_percent: int | None = Field(default=None, ge=0, le=100)"
+      }
+     ],
+     "explanation": "The requirement says discount_percent 0 to 100 inclusive must be accepted, but ItemBase declares discount_percent with lt=100, so the value 100 fails validation and the API returns 422. The fix changes the upper bound from exclusive to inclusive by replacing lt=100 with le=100 on ItemBase.discount_percent, which is the field shared by ItemCreate; ItemUpdate has the same constraint and is changed in the same way to keep the two consistent.",
+     "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -72,7 +72,7 @@\n     title: str = Field(min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n     price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)\n-    discount_percent: int = Field(default=0, ge=0, lt=100)\n+    discount_percent: int = Field(default=0, ge=0, le=100)\n \n \n # Properties to receive on item creation\n@@ -85,7 +85,7 @@\n     title: str | None = Field(default=None, min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n     price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)\n-    discount_percent: int | None = Field(default=None, ge=0, lt=100)\n+    discount_percent: int | None = Field(default=None, ge=0, le=100)\n \n \n # Database model, database table inferred from class name\n",
+     "problems": []
+    }
+   },
+   {
+    "id": "D-reference/O-5",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-5",
+    "criterion": "Final price rounds half-even at the cent",
+    "observed": {
+     "json": {
+      "discount_percent": 50,
+      "price": "0.05",
+      "title": "Half cent item"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 200
+    },
+    "failed_assertions": [
+     {
+      "actual": "0.02",
+      "expected": "0.03",
+      "id": "TC-O5-2/percent_off",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 62,
+     "text": "def create_item(",
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200"
+    },
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 62,
+      "text": "def create_item(",
+      "upstream_line": 62
+     },
+     {
+      "basis": "code_ref of O-5 (no stack)",
+      "file": "backend/app/models.py",
+      "line": 112,
+      "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+      "upstream_line": 112
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O5-2",
+     "ex:reference/a1/TC-O5-2#5",
+     "log:x18.reference.a1/TC-O5-2/5"
+    ],
+    "tests": [
+     {
+      "case": "TC-O5-2",
+      "title": "Verify creating an item with a half-cent discounted price gives final_price 0.03",
+      "summary": "Half-cent value rounds half-even to 0.02 on create",
+      "ac": "O-5",
+      "criterion": "Final price rounds half-even at the cent"
+     }
+    ],
+    "suggestion": {
+     "applies": true,
+     "edits": [
+      {
+       "file": "backend/app/models.py",
+       "find": "from decimal import Decimal",
+       "replace": "from decimal import ROUND_HALF_UP, Decimal"
+      },
+      {
+       "file": "backend/app/models.py",
+       "find": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+       "replace": "return (self.price * (100 - self.discount_percent) / 100).quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP)"
+      }
+     ],
+     "explanation": "The final_price computed field calls round(Decimal, 2), which uses Python's default ROUND_HALF_EVEN, so for price 0.05 with 50% off (0.025) it returns 0.02 instead of the required round-half-up 0.03. The fix quantizes the Decimal to cents with an explicit ROUND_HALF_UP rounding mode, which is the smallest change that matches requirement O-5.",
+     "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -1,6 +1,6 @@\n import uuid\n from datetime import UTC, datetime\n-from decimal import Decimal\n+from decimal import ROUND_HALF_UP, Decimal\n \n from pydantic import EmailStr, computed_field\n from sqlmodel import Field, Relationship, SQLModel\n@@ -109,7 +109,7 @@\n     def final_price(self) -> Decimal | None:\n         if self.price is None:\n             return None\n-        return round(self.price * (100 - self.discount_percent) / 100, 2)\n+        return (self.price * (100 - self.discount_percent) / 100).quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP)\n \n \n class ItemsPublic(SQLModel):\n",
+     "problems": []
+    }
+   },
+   {
+    "id": "D-reference/O-6",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-6",
+    "criterion": "Update discount only keeps stored price and recomputes final_price",
+    "observed": {
+     "json": {
+      "discount_percent": 20,
+      "price": "50.00"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab",
+     "query": {},
+     "status": 200
+    },
+    "failed_assertions": [
+     {
+      "actual": 20,
+      "expected": "40.00",
+      "id": "TC-O6-1/percent_off",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 76,
+     "text": "def update_item(",
+     "basis": "handler of the failing request PUT /api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab (update_item), which answered 200"
+    },
+    "suspects": [
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab (update_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-6 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 91,
+      "text": "update_dict = item_in.model_dump(exclude_unset=True)",
+      "upstream_line": 91
+     },
+     {
+      "basis": "code_ref of O-6 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 92,
+      "text": "item.sqlmodel_update(update_dict)",
+      "upstream_line": 92
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O6-1",
+     "ex:reference/a1/TC-O6-1#7",
+     "log:x18.reference.a1/TC-O6-1/7"
+    ],
+    "tests": [
+     {
+      "case": "TC-O6-1",
+      "title": "Verify a PUT sending only discount_percent keeps the stored price and recomputes final_price",
+      "summary": "Update that sends only discount_percent clears the stored price or leaves final_price stale",
+      "ac": "O-6",
+      "criterion": "Update discount only keeps stored price and recomputes final_price"
+     }
+    ],
+    "suggestion": {
+     "applies": false,
+     "edits": [],
+     "explanation": "The failing assertion compares a field named percent_off, expected 40.00, against actual 20. The source computes final_price as round(price * (100 - discount_percent) / 100, 2), which gives 40.00 for price 50.00 and discount 20, and update_item applies only the fields that were sent, so the stored price is unchanged. The actual value 20 is the correct discount_percent, so the mismatch points to the test checking the wrong field or label rather than a code defect, and I am making no edits.",
+     "patch": "",
+     "problems": []
+    }
+   },
+   {
+    "id": "D-reference/O-8",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-8",
+    "criterion": "Update accepts a negative price",
+    "observed": {
+     "json": {
+      "price": "-5"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1",
+     "query": {},
+     "status": 500
+    },
+    "failed_assertions": [
+     {
+      "actual": 500,
+      "expected": "422",
+      "id": "TC-O8-1/status",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 75,
+     "text": "@router.put(\"/{id}\", response_model=ItemPublic)",
+     "basis": "innermost app frame of the traceback (update_item), fastapi.exceptions.ResponseValidationError raised here"
+    },
+    "suspects": [
+     {
+      "basis": "innermost app frame of the traceback (update_item), fastapi.exceptions.ResponseValidationError raised here",
+      "file": "backend/app/api/routes/items.py",
+      "line": 75,
+      "text": "@router.put(\"/{id}\", response_model=ItemPublic)",
+      "upstream_line": 75
+     },
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1 (update_item), which answered 500",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-8",
+      "file": "backend/app/models.py",
+      "line": 87,
+      "text": "price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)",
+      "upstream_line": 87
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O8-1",
+     "ex:reference/a1/TC-O8-1#7",
+     "log:x18.reference.a1/TC-O8-1/7"
+    ],
+    "tests": [
+     {
+      "case": "TC-O8-1",
+      "title": "Verify PUT with a negative price is refused with 422",
+      "summary": "Update schema lacks the price ge 0 bound, so a negative price is accepted",
+      "ac": "O-8",
+      "criterion": "Update accepts a negative price"
+     },
+     {
+      "case": "TC-O8-3",
+      "title": "Verify a refused negative-price PUT leaves the stored item unchanged",
+      "summary": "Failed update partially writes fields before rejecting the price",
+      "ac": "O-8",
+      "criterion": "Update accepts a negative price"
+     }
+    ],
+    "suggestion": {
+     "applies": true,
+     "edits": [
+      {
+       "file": "backend/app/models.py",
+       "find": "price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)",
+       "replace": "price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)"
+      }
+     ],
+     "explanation": "ItemUpdate.price in models.py has no ge=0 bound, unlike ItemBase.price, so PUT accepts price -5 and stores it. The response model ItemPublic then rejects the negative value during response validation, which surfaces as a 500 instead of a 422. Adding ge=0 to ItemUpdate.price makes the update request fail input validation with 422, matching create.",
+     "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -84,7 +84,7 @@\n class ItemUpdate(SQLModel):\n     title: str | None = Field(default=None, min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n-    price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)\n+    price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)\n     discount_percent: int | None = Field(default=None, ge=0, lt=100)\n \n \n",
+     "problems": []
+    }
+   },
+   {
+    "id": "D-reference/O-9",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-9",
+    "criterion": "Update with explicit null discount_percent fails with a server error",
+    "observed": {
+     "json": {
+      "discount_percent": null,
+      "title": "Item 10fa9b35c4-2"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc",
+     "query": {},
+     "status": 500
+    },
+    "failed_assertions": [
+     {
+      "actual": 500,
+      "expected": "422",
+      "id": "TC-O9-1/status",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 94,
+     "text": "session.commit()",
+     "basis": "innermost app frame of the traceback (update_item), psycopg.errors.NotNullViolation raised here"
+    },
+    "suspects": [
+     {
+      "basis": "innermost app frame of the traceback (update_item), psycopg.errors.NotNullViolation raised here",
+      "file": "backend/app/api/routes/items.py",
+      "line": 94,
+      "text": "session.commit()",
+      "upstream_line": 94
+     },
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc (update_item), which answered 500",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-9",
+      "file": "backend/app/models.py",
+      "line": 88,
+      "text": "discount_percent: int | None = Field(default=None, ge=0, lt=100)",
+      "upstream_line": 88
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O9-1",
+     "ex:reference/a1/TC-O9-1#7",
+     "log:x18.reference.a1/TC-O9-1/7"
+    ],
+    "tests": [
+     {
+      "case": "TC-O9-1",
+      "title": "Verify PUT with explicit null discount_percent is refused with 422 and not a server error",
+      "summary": "Explicit null discount_percent causes a 5xx instead of a 422",
+      "ac": "O-9",
+      "criterion": "Update with explicit null discount_percent fails with a server error"
+     },
+     {
+      "case": "TC-O9-2",
+      "title": "Verify null discount_percent on an item with no price is refused with 422",
+      "summary": "Null discount_percent crashes the update when price is also null",
+      "ac": "O-9",
+      "criterion": "Update with explicit null discount_percent fails with a server error"
+     },
+     {
+      "case": "TC-O9-3",
+      "title": "Verify a refused null-discount PUT leaves the stored discount and final_price unchanged",
+      "summary": "Failed null-discount update partially changes the stored discount or final_price",
+      "ac": "O-9",
+      "criterion": "Update with explicit null discount_percent fails with a server error"
+     }
+    ],
+    "suggestion": {
+     "applies": true,
+     "edits": [
+      {
+       "file": "backend/app/api/routes/items.py",
+       "find": "    update_dict = item_in.model_dump(exclude_unset=True)\n",
+       "replace": "    update_dict = item_in.model_dump(exclude_unset=True)\n    if \"discount_percent\" in update_dict and update_dict[\"discount_percent\"] is None:\n        update_dict[\"discount_percent\"] = 0\n"
+      }
+     ],
+     "explanation": "PUT /api/v1/items/{id} with an explicit discount_percent of null passes ItemUpdate validation, because the field is typed int | None. model_dump(exclude_unset=True) keeps the null, sqlmodel_update writes it to the NOT NULL discount_percent column, and the commit raises NotNullViolation, which becomes a 500. The change maps an explicit null to the default 0 before the update is applied, which satisfies the requirement's allowed behaviour of treating null as 0.",
+     "patch": "--- a/backend/app/api/routes/items.py\n+++ b/backend/app/api/routes/items.py\n@@ -89,6 +89,8 @@\n     if not current_user.is_superuser and (item.owner_id != current_user.id):\n         raise HTTPException(status_code=403, detail=\"Not enough permissions\")\n     update_dict = item_in.model_dump(exclude_unset=True)\n+    if \"discount_percent\" in update_dict and update_dict[\"discount_percent\"] is None:\n+        update_dict[\"discount_percent\"] = 0\n     item.sqlmodel_update(update_dict)\n     session.add(item)\n     session.commit()\n",
+     "problems": []
+    }
+   }
+  ],
+  "causes": [
+   {
+    "id": "D-reference/O-5",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-5",
+    "criterion": "Final price rounds half-even at the cent",
+    "observed": {
+     "json": {
+      "discount_percent": 50,
+      "price": "0.05",
+      "title": "Half cent item"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 200
+    },
+    "failed_assertions": [
+     {
+      "actual": "0.02",
+      "expected": "0.03",
+      "id": "TC-O5-2/percent_off",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 62,
+     "text": "def create_item(",
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200"
+    },
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 62,
+      "text": "def create_item(",
+      "upstream_line": 62
+     },
+     {
+      "basis": "code_ref of O-5 (no stack)",
+      "file": "backend/app/models.py",
+      "line": 112,
+      "text": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+      "upstream_line": 112
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O1-1",
+     "ex:reference/a1/TC-O1-1#5",
+     "ex:reference/a1/TC-O5-2",
+     "ex:reference/a1/TC-O5-2#5",
+     "log:x18.reference.a1/TC-O1-1/5",
+     "log:x18.reference.a1/TC-O5-2/5"
+    ],
+    "tests": [
+     {
+      "case": "TC-O1-1",
+      "title": "Verify creating an item with price and discount returns the computed, rounded final_price",
+      "summary": "Created item response has a final_price that is not price x (100 - discount) / 100 rounded half-up to 2 places",
+      "ac": "O-1",
+      "criterion": "Create item with price and discount returns rounded final_price"
+     },
+     {
+      "case": "TC-O5-2",
+      "title": "Verify creating an item with a half-cent discounted price gives final_price 0.03",
+      "summary": "Half-cent value rounds half-even to 0.02 on create",
+      "ac": "O-5",
+      "criterion": "Final price rounds half-even at the cent"
+     }
+    ],
+    "suggestion": {
+     "applies": true,
+     "edits": [
+      {
+       "file": "backend/app/models.py",
+       "find": "from decimal import Decimal",
+       "replace": "from decimal import ROUND_HALF_UP, Decimal"
+      },
+      {
+       "file": "backend/app/models.py",
+       "find": "return round(self.price * (100 - self.discount_percent) / 100, 2)",
+       "replace": "return (self.price * (100 - self.discount_percent) / 100).quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP)"
+      }
+     ],
+     "explanation": "The final_price computed field calls round(Decimal, 2), which uses Python's default ROUND_HALF_EVEN, so for price 0.05 with 50% off (0.025) it returns 0.02 instead of the required round-half-up 0.03. The fix quantizes the Decimal to cents with an explicit ROUND_HALF_UP rounding mode, which is the smallest change that matches requirement O-5.",
+     "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -1,6 +1,6 @@\n import uuid\n from datetime import UTC, datetime\n-from decimal import Decimal\n+from decimal import ROUND_HALF_UP, Decimal\n \n from pydantic import EmailStr, computed_field\n from sqlmodel import Field, Relationship, SQLModel\n@@ -109,7 +109,7 @@\n     def final_price(self) -> Decimal | None:\n         if self.price is None:\n             return None\n-        return round(self.price * (100 - self.discount_percent) / 100, 2)\n+        return (self.price * (100 - self.discount_percent) / 100).quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP)\n \n \n class ItemsPublic(SQLModel):\n",
+     "problems": []
+    },
+    "requirements": [
+     {
+      "id": "D-reference/O-1",
+      "ac": "O-1",
+      "criterion": "Create item with price and discount returns rounded final_price"
+     },
+     {
+      "id": "D-reference/O-5",
+      "ac": "O-5",
+      "criterion": "Final price rounds half-even at the cent"
+     }
+    ]
+   },
+   {
+    "id": "D-reference/O-3",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-3",
+    "criterion": "Create item rejects discount_percent of 100 or more and negatives",
+    "observed": {
+     "json": {
+      "discount_percent": 100,
+      "title": "Boundary item"
+     },
+     "method": "POST",
+     "path": "/api/v1/items/",
+     "query": {},
+     "status": 422
+    },
+    "failed_assertions": [
+     {
+      "actual": 422,
+      "expected": "200",
+      "id": "TC-O3-3.b/status",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 62,
+     "text": "def create_item(",
+     "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 422"
+    },
+    "suspects": [
+     {
+      "basis": "handler of the failing request POST /api/v1/items/ (create_item), which answered 422",
+      "file": "backend/app/api/routes/items.py",
+      "line": 62,
+      "text": "def create_item(",
+      "upstream_line": 62
+     },
+     {
+      "basis": "code_ref of O-3 (no stack)",
+      "file": "backend/app/models.py",
+      "line": 75,
+      "text": "discount_percent: int = Field(default=0, ge=0, lt=100)",
+      "upstream_line": 75
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O3-3.b",
+     "ex:reference/a1/TC-O3-3.b#5",
+     "log:x18.reference.a1/TC-O3-3.b/5"
+    ],
+    "tests": [
+     {
+      "case": "TC-O3-3.b",
+      "title": "discount_percent at the 100 limit",
+      "summary": "Upper bound off by one: discount_percent above 100 is accepted",
+      "ac": "O-3",
+      "criterion": "Create item rejects discount_percent of 100 or more and negatives"
+     }
+    ],
+    "suggestion": {
+     "applies": true,
+     "edits": [
+      {
+       "file": "backend/app/models.py",
+       "find": "    discount_percent: int = Field(default=0, ge=0, lt=100)",
+       "replace": "    discount_percent: int = Field(default=0, ge=0, le=100)"
+      },
+      {
+       "file": "backend/app/models.py",
+       "find": "    discount_percent: int | None = Field(default=None, ge=0, lt=100)",
+       "replace": "    discount_percent: int | None = Field(default=None, ge=0, le=100)"
+      }
+     ],
+     "explanation": "The requirement says discount_percent 0 to 100 inclusive must be accepted, but ItemBase declares discount_percent with lt=100, so the value 100 fails validation and the API returns 422. The fix changes the upper bound from exclusive to inclusive by replacing lt=100 with le=100 on ItemBase.discount_percent, which is the field shared by ItemCreate; ItemUpdate has the same constraint and is changed in the same way to keep the two consistent.",
+     "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -72,7 +72,7 @@\n     title: str = Field(min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n     price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)\n-    discount_percent: int = Field(default=0, ge=0, lt=100)\n+    discount_percent: int = Field(default=0, ge=0, le=100)\n \n \n # Properties to receive on item creation\n@@ -85,7 +85,7 @@\n     title: str | None = Field(default=None, min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n     price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)\n-    discount_percent: int | None = Field(default=None, ge=0, lt=100)\n+    discount_percent: int | None = Field(default=None, ge=0, le=100)\n \n \n # Database model, database table inferred from class name\n",
+     "problems": []
+    },
+    "requirements": [
+     {
+      "id": "D-reference/O-3",
+      "ac": "O-3",
+      "criterion": "Create item rejects discount_percent of 100 or more and negatives"
+     }
+    ]
+   },
+   {
+    "id": "D-reference/O-6",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-6",
+    "criterion": "Update discount only keeps stored price and recomputes final_price",
+    "observed": {
+     "json": {
+      "discount_percent": 20,
+      "price": "50.00"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab",
+     "query": {},
+     "status": 200
+    },
+    "failed_assertions": [
+     {
+      "actual": 20,
+      "expected": "40.00",
+      "id": "TC-O6-1/percent_off",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 76,
+     "text": "def update_item(",
+     "basis": "handler of the failing request PUT /api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab (update_item), which answered 200"
+    },
+    "suspects": [
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/6ff70fda-5b8a-4c50-9b4b-4154a25e6dab (update_item), which answered 200",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-6 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 91,
+      "text": "update_dict = item_in.model_dump(exclude_unset=True)",
+      "upstream_line": 91
+     },
+     {
+      "basis": "code_ref of O-6 (no stack)",
+      "file": "backend/app/api/routes/items.py",
+      "line": 92,
+      "text": "item.sqlmodel_update(update_dict)",
+      "upstream_line": 92
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O6-1",
+     "ex:reference/a1/TC-O6-1#7",
+     "log:x18.reference.a1/TC-O6-1/7"
+    ],
+    "tests": [
+     {
+      "case": "TC-O6-1",
+      "title": "Verify a PUT sending only discount_percent keeps the stored price and recomputes final_price",
+      "summary": "Update that sends only discount_percent clears the stored price or leaves final_price stale",
+      "ac": "O-6",
+      "criterion": "Update discount only keeps stored price and recomputes final_price"
+     }
+    ],
+    "suggestion": {
+     "applies": false,
+     "edits": [],
+     "explanation": "The failing assertion compares a field named percent_off, expected 40.00, against actual 20. The source computes final_price as round(price * (100 - discount_percent) / 100, 2), which gives 40.00 for price 50.00 and discount 20, and update_item applies only the fields that were sent, so the stored price is unchanged. The actual value 20 is the correct discount_percent, so the mismatch points to the test checking the wrong field or label rather than a code defect, and I am making no edits.",
+     "patch": "",
+     "problems": []
+    },
+    "requirements": [
+     {
+      "id": "D-reference/O-6",
+      "ac": "O-6",
+      "criterion": "Update discount only keeps stored price and recomputes final_price"
+     }
+    ]
+   },
+   {
+    "id": "D-reference/O-8",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-8",
+    "criterion": "Update accepts a negative price",
+    "observed": {
+     "json": {
+      "price": "-5"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1",
+     "query": {},
+     "status": 500
+    },
+    "failed_assertions": [
+     {
+      "actual": 500,
+      "expected": "422",
+      "id": "TC-O8-1/status",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 75,
+     "text": "@router.put(\"/{id}\", response_model=ItemPublic)",
+     "basis": "innermost app frame of the traceback (update_item), fastapi.exceptions.ResponseValidationError raised here"
+    },
+    "suspects": [
+     {
+      "basis": "innermost app frame of the traceback (update_item), fastapi.exceptions.ResponseValidationError raised here",
+      "file": "backend/app/api/routes/items.py",
+      "line": 75,
+      "text": "@router.put(\"/{id}\", response_model=ItemPublic)",
+      "upstream_line": 75
+     },
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/0388b5fa-a20e-4ec6-8f10-57393ae989f1 (update_item), which answered 500",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-8",
+      "file": "backend/app/models.py",
+      "line": 87,
+      "text": "price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)",
+      "upstream_line": 87
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O8-1",
+     "ex:reference/a1/TC-O8-1#7",
+     "log:x18.reference.a1/TC-O8-1/7"
+    ],
+    "tests": [
+     {
+      "case": "TC-O8-1",
+      "title": "Verify PUT with a negative price is refused with 422",
+      "summary": "Update schema lacks the price ge 0 bound, so a negative price is accepted",
+      "ac": "O-8",
+      "criterion": "Update accepts a negative price"
+     },
+     {
+      "case": "TC-O8-3",
+      "title": "Verify a refused negative-price PUT leaves the stored item unchanged",
+      "summary": "Failed update partially writes fields before rejecting the price",
+      "ac": "O-8",
+      "criterion": "Update accepts a negative price"
+     }
+    ],
+    "suggestion": {
+     "applies": true,
+     "edits": [
+      {
+       "file": "backend/app/models.py",
+       "find": "price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)",
+       "replace": "price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)"
+      }
+     ],
+     "explanation": "ItemUpdate.price in models.py has no ge=0 bound, unlike ItemBase.price, so PUT accepts price -5 and stores it. The response model ItemPublic then rejects the negative value during response validation, which surfaces as a 500 instead of a 422. Adding ge=0 to ItemUpdate.price makes the update request fail input validation with 422, matching create.",
+     "patch": "--- a/backend/app/models.py\n+++ b/backend/app/models.py\n@@ -84,7 +84,7 @@\n class ItemUpdate(SQLModel):\n     title: str | None = Field(default=None, min_length=1, max_length=255)\n     description: str | None = Field(default=None, max_length=255)\n-    price: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)\n+    price: Decimal | None = Field(default=None, ge=0, max_digits=10, decimal_places=2)\n     discount_percent: int | None = Field(default=None, ge=0, lt=100)\n \n \n",
+     "problems": []
+    },
+    "requirements": [
+     {
+      "id": "D-reference/O-8",
+      "ac": "O-8",
+      "criterion": "Update accepts a negative price"
+     }
+    ]
+   },
+   {
+    "id": "D-reference/O-9",
+    "kind": "real",
+    "class": "PRODUCT_DEFECT",
+    "ac": "O-9",
+    "criterion": "Update with explicit null discount_percent fails with a server error",
+    "observed": {
+     "json": {
+      "discount_percent": null,
+      "title": "Item 10fa9b35c4-2"
+     },
+     "method": "PUT",
+     "path": "/api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc",
+     "query": {},
+     "status": 500
+    },
+    "failed_assertions": [
+     {
+      "actual": 500,
+      "expected": "422",
+      "id": "TC-O9-1/status",
+      "ok": false
+     }
+    ],
+    "location": {
+     "file": "backend/app/api/routes/items.py",
+     "line": 94,
+     "text": "session.commit()",
+     "basis": "innermost app frame of the traceback (update_item), psycopg.errors.NotNullViolation raised here"
+    },
+    "suspects": [
+     {
+      "basis": "innermost app frame of the traceback (update_item), psycopg.errors.NotNullViolation raised here",
+      "file": "backend/app/api/routes/items.py",
+      "line": 94,
+      "text": "session.commit()",
+      "upstream_line": 94
+     },
+     {
+      "basis": "handler of the failing request PUT /api/v1/items/2d00b7c1-cb28-4447-b36d-e0de4629f1bc (update_item), which answered 500",
+      "file": "backend/app/api/routes/items.py",
+      "line": 76,
+      "text": "def update_item(",
+      "upstream_line": 76
+     },
+     {
+      "basis": "code_ref of O-9",
+      "file": "backend/app/models.py",
+      "line": 88,
+      "text": "discount_percent: int | None = Field(default=None, ge=0, lt=100)",
+      "upstream_line": 88
+     }
+    ],
+    "evidence": [
+     "ex:reference/a1/TC-O9-1",
+     "ex:reference/a1/TC-O9-1#7",
+     "log:x18.reference.a1/TC-O9-1/7"
+    ],
+    "tests": [
+     {
+      "case": "TC-O9-1",
+      "title": "Verify PUT with explicit null discount_percent is refused with 422 and not a server error",
+      "summary": "Explicit null discount_percent causes a 5xx instead of a 422",
+      "ac": "O-9",
+      "criterion": "Update with explicit null discount_percent fails with a server error"
+     },
+     {
+      "case": "TC-O9-2",
+      "title": "Verify null discount_percent on an item with no price is refused with 422",
+      "summary": "Null discount_percent crashes the update when price is also null",
+      "ac": "O-9",
+      "criterion": "Update with explicit null discount_percent fails with a server error"
+     },
+     {
+      "case": "TC-O9-3",
+      "title": "Verify a refused null-discount PUT leaves the stored discount and final_price unchanged",
+      "summary": "Failed null-discount update partially changes the stored discount or final_price",
+      "ac": "O-9",
+      "criterion": "Update with explicit null discount_percent fails with a server error"
+     }
+    ],
+    "suggestion": {
+     "applies": true,
+     "edits": [
+      {
+       "file": "backend/app/api/routes/items.py",
+       "find": "    update_dict = item_in.model_dump(exclude_unset=True)\n",
+       "replace": "    update_dict = item_in.model_dump(exclude_unset=True)\n    if \"discount_percent\" in update_dict and update_dict[\"discount_percent\"] is None:\n        update_dict[\"discount_percent\"] = 0\n"
+      }
+     ],
+     "explanation": "PUT /api/v1/items/{id} with an explicit discount_percent of null passes ItemUpdate validation, because the field is typed int | None. model_dump(exclude_unset=True) keeps the null, sqlmodel_update writes it to the NOT NULL discount_percent column, and the commit raises NotNullViolation, which becomes a 500. The change maps an explicit null to the default 0 before the update is applied, which satisfies the requirement's allowed behaviour of treating null as 0.",
+     "patch": "--- a/backend/app/api/routes/items.py\n+++ b/backend/app/api/routes/items.py\n@@ -89,6 +89,8 @@\n     if not current_user.is_superuser and (item.owner_id != current_user.id):\n         raise HTTPException(status_code=403, detail=\"Not enough permissions\")\n     update_dict = item_in.model_dump(exclude_unset=True)\n+    if \"discount_percent\" in update_dict and update_dict[\"discount_percent\"] is None:\n+        update_dict[\"discount_percent\"] = 0\n     item.sqlmodel_update(update_dict)\n     session.add(item)\n     session.commit()\n",
+     "problems": []
+    },
+    "requirements": [
+     {
+      "id": "D-reference/O-9",
+      "ac": "O-9",
+      "criterion": "Update with explicit null discount_percent fails with a server error"
+     }
+    ]
+   }
+  ],
+  "problematic_tests": [
+   {
+    "case": "TC-O1-1",
+    "title": "Verify creating an item with price and discount returns the computed, rounded final_price",
+    "summary": "Created item response has a final_price that is not price x (100 - discount) / 100 rounded half-up to 2 places",
+    "ac": "O-1",
+    "criterion": "Create item with price and discount returns rounded final_price",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O1-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O3-3.b",
+    "title": "discount_percent at the 100 limit",
+    "summary": "Upper bound off by one: discount_percent above 100 is accepted",
+    "ac": "O-3",
+    "criterion": "Create item rejects discount_percent of 100 or more and negatives",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O3-3.b"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O5-2",
+    "title": "Verify creating an item with a half-cent discounted price gives final_price 0.03",
+    "summary": "Half-cent value rounds half-even to 0.02 on create",
+    "ac": "O-5",
+    "criterion": "Final price rounds half-even at the cent",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O5-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O6-1",
+    "title": "Verify a PUT sending only discount_percent keeps the stored price and recomputes final_price",
+    "summary": "Update that sends only discount_percent clears the stored price or leaves final_price stale",
+    "ac": "O-6",
+    "criterion": "Update discount only keeps stored price and recomputes final_price",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O6-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O8-1",
+    "title": "Verify PUT with a negative price is refused with 422",
+    "summary": "Update schema lacks the price ge 0 bound, so a negative price is accepted",
+    "ac": "O-8",
+    "criterion": "Update accepts a negative price",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O8-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O8-3",
+    "title": "Verify a refused negative-price PUT leaves the stored item unchanged",
+    "summary": "Failed update partially writes fields before rejecting the price",
+    "ac": "O-8",
+    "criterion": "Update accepts a negative price",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O8-3"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O9-1",
+    "title": "Verify PUT with explicit null discount_percent is refused with 422 and not a server error",
+    "summary": "Explicit null discount_percent causes a 5xx instead of a 422",
+    "ac": "O-9",
+    "criterion": "Update with explicit null discount_percent fails with a server error",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O9-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O9-2",
+    "title": "Verify null discount_percent on an item with no price is refused with 422",
+    "summary": "Null discount_percent crashes the update when price is also null",
+    "ac": "O-9",
+    "criterion": "Update with explicit null discount_percent fails with a server error",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O9-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O9-3",
+    "title": "Verify a refused null-discount PUT leaves the stored discount and final_price unchanged",
+    "summary": "Failed null-discount update partially changes the stored discount or final_price",
+    "ac": "O-9",
+    "criterion": "Update with explicit null discount_percent fails with a server error",
+    "status": "PRODUCT_DEFECT",
+    "reason": "Failed on every run with the product's responses: a product defect.",
+    "evidence": [
+     "ex:reference/a1/TC-O9-3"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-C1-1",
+    "title": "Verify a response shows the discounted price for an item with a price and discount percentage",
+    "summary": "Discounted price shown in responses is not price x (100 - discount) / 100 rounded half-up to 2 decimals",
+    "ac": "C-1",
+    "criterion": "Responses show the discounted price for items with a price and discount percentage",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 1
+   },
+   {
+    "case": "TC-O10-1.1",
+    "title": "caller \u00d7 item owner \u00d7 item has price",
+    "summary": "List shows other users' items to an ordinary user, or hides items from a superuser",
+    "ac": "O-10",
+    "criterion": "List returns final_price for each of the caller's items",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 4
+   },
+   {
+    "case": "TC-O10-2",
+    "title": "Verify GET list returns final_price for the caller's items",
+    "summary": "List response omits the final_price field",
+    "ac": "O-10",
+    "criterion": "List returns final_price for each of the caller's items",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 1
+   },
+   {
+    "case": "TC-O3-2",
+    "title": "Verify a very large discount_percent is refused with 422 and not a server error",
+    "summary": "Huge discount_percent is accepted or causes a 5xx instead of 422",
+    "ac": "O-3",
+    "criterion": "Create item rejects discount_percent of 100 or more and negatives",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 1
+   },
+   {
+    "case": "TC-O3-3.a",
+    "title": "discount_percent at the 100 limit",
+    "summary": "Upper bound off by one: discount_percent above 100 is accepted",
+    "ac": "O-3",
+    "criterion": "Create item rejects discount_percent of 100 or more and negatives",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 2
+   },
+   {
+    "case": "TC-O3-4.a",
+    "title": "discount_percent at the 0 limit",
+    "summary": "Lower bound off by one: discount_percent 0 is rejected",
+    "ac": "O-3",
+    "criterion": "Create item rejects discount_percent of 100 or more and negatives",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 2
+   },
+   {
+    "case": "TC-O3-5",
+    "title": "Verify a negative discount_percent is refused with 422",
+    "summary": "Negative discount_percent is accepted and stored",
+    "ac": "O-3",
+    "criterion": "Create item rejects discount_percent of 100 or more and negatives",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 1
+   },
+   {
+    "case": "TC-O4-2.a",
+    "title": "price at the 0 limit",
+    "summary": "Price 0 is wrongly rejected",
+    "ac": "O-4",
+    "criterion": "Create item rejects negative price, more than 2 decimals, or over 10 digits",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 1
+   },
+   {
+    "case": "TC-O4-3",
+    "title": "Verify a negative price is refused with 422 and no item is created",
+    "summary": "Negative price is accepted on create",
+    "ac": "O-4",
+    "criterion": "Create item rejects negative price, more than 2 decimals, or over 10 digits",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 1
+   },
+   {
+    "case": "TC-O8-2",
+    "title": "Verify a very large negative price on PUT is refused with 422 and not a server error",
+    "summary": "Very large negative price on update causes overflow or a 5xx",
+    "ac": "O-8",
+    "criterion": "Update accepts a negative price",
+    "status": "WEAK",
+    "reason": "Passes, but no code change the gate made was caught by it: it may check too little.",
+    "evidence": [],
+    "source": "gate",
+    "count": 1
+   }
+  ],
+  "improve": [
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for C-1",
+    "detail": "Responses show the discounted price for items with a price and discount percentage",
+    "ac": "C-1"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-10",
+    "detail": "List returns final_price for each of the caller's items",
+    "ac": "O-10"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/api/routes/items.py:32 went unnoticed",
+    "detail": "-Item.owner_id == current_user.id\n+Item.owner_id != current_user.id",
+    "ac": "O-10"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/api/routes/items.py:55 went unnoticed",
+    "detail": "-404\n+405",
+    "ac": "O-11"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/api/routes/items.py:88 went unnoticed",
+    "detail": "-404\n+405",
+    "ac": "O-6, O-7, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/api/routes/items.py:90 went unnoticed",
+    "detail": "-403\n+404",
+    "ac": "O-6, O-7, O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:74 went unnoticed",
+    "detail": "-max_digits=10\n+max_digits=9",
+    "ac": "O-2, O-3, O-4"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:75 went unnoticed",
+    "detail": "-lt=100\n+le=100",
+    "ac": "O-2, O-3, O-4"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:75 went unnoticed",
+    "detail": "-lt=100\n+lt=101",
+    "ac": "O-2, O-3, O-4"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:87 went unnoticed",
+    "detail": "-max_digits=10\n+max_digits=11",
+    "ac": "O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:87 went unnoticed",
+    "detail": "-max_digits=10\n+max_digits=9",
+    "ac": "O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:87 went unnoticed",
+    "detail": "-decimal_places=2\n+decimal_places=3",
+    "ac": "O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:87 went unnoticed",
+    "detail": "-decimal_places=2\n+decimal_places=1",
+    "ac": "O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:88 went unnoticed",
+    "detail": "-ge=0\n+gt=0",
+    "ac": "O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:88 went unnoticed",
+    "detail": "-ge=0\n+ge=1",
+    "ac": "O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:88 went unnoticed",
+    "detail": "-lt=100\n+le=100",
+    "ac": "O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:88 went unnoticed",
+    "detail": "-lt=100\n+lt=101",
+    "ac": "O-8, O-9"
+   }
+  ],
+  "rules": {
+   "clarify": [
+    "Money fields: settle how amounts are rounded and how many decimal places are kept."
+   ],
+   "cases": [
+    "When a requirement states a computed value such as final_price, the test checks that exact value, not only the status code.",
+    "Include a discounted price that lands on a half cent (for example price 0.05 with 50% off) to check rounding."
+   ],
+   "templates": null,
+   "gate": {
+    "every_criterion": true,
+    "k": 5,
+    "min_kills": 1,
+    "near": 3
+   },
+   "routes": [
+    "GET /api/v1/items/",
+    "POST /api/v1/items/",
+    "GET /api/v1/items/{id}",
+    "PUT /api/v1/items/{id}"
+   ]
+  }
+ }
+}

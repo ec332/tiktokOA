@@ -1,0 +1,470 @@
+[
+ {
+  "id": "probe:reference/a1/pre",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a1/post",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/pre",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/post",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/pre",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/post",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o1/pre",
+  "variant": "reference",
+  "batch": "reference/o1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o1/post",
+  "variant": "reference",
+  "batch": "reference/o1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o2/pre",
+  "variant": "reference",
+  "batch": "reference/o2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o2/post",
+  "variant": "reference",
+  "batch": "reference/o2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o3/pre",
+  "variant": "reference",
+  "batch": "reference/o3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o3/post",
+  "variant": "reference",
+  "batch": "reference/o3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o4/pre",
+  "variant": "reference",
+  "batch": "reference/o4",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o4/post",
+  "variant": "reference",
+  "batch": "reference/o4",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o5/pre",
+  "variant": "reference",
+  "batch": "reference/o5",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o5/post",
+  "variant": "reference",
+  "batch": "reference/o5",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o6/pre",
+  "variant": "reference",
+  "batch": "reference/o6",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o6/post",
+  "variant": "reference",
+  "batch": "reference/o6",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o7/pre",
+  "variant": "reference",
+  "batch": "reference/o7",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o7/post",
+  "variant": "reference",
+  "batch": "reference/o7",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o8/pre",
+  "variant": "reference",
+  "batch": "reference/o8",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o8/post",
+  "variant": "reference",
+  "batch": "reference/o8",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o9/pre",
+  "variant": "reference",
+  "batch": "reference/o9",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o9/post",
+  "variant": "reference",
+  "batch": "reference/o9",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o10/pre",
+  "variant": "reference",
+  "batch": "reference/o10",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o10/post",
+  "variant": "reference",
+  "batch": "reference/o10",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ }
+]

@@ -1,0 +1,2979 @@
+{
+ "header": {
+  "labels": [
+   "real"
+  ],
+  "run_records": "sha256:b0c3adcd1460047a081042c05e1574d18d15cc2e09a27e63bace99d80509f3e8",
+  "execution": 7,
+  "variants": {
+   "reference": {
+    "up_error": "EnvError: up -d: Container tp_reference-db-1  Running\n Container tp_reference-backend-1  Creating\n Container tp_reference-mailpit-1  Creating\n Container tp_reference-mailpit-1  Created\n Container tp_reference-backend-1  Created\n Container tp_reference-db-1  Waiting\n Container tp_reference-mailpit-1 "
+   }
+  },
+  "k": 3,
+  "sut": {
+   "name": "full-stack-fastapi-template",
+   "ref": "6838b40e414641ce5616d926d9c649a96a4e8c56"
+  },
+  "cases_signed": true,
+  "unattended_decisions": {
+   "n": 0,
+   "d": 31,
+   "ids": []
+  }
+ },
+ "worklist": {
+  "P0": [],
+  "P1": [
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O10-1.3",
+    "ac": "O-10",
+    "closes_it": "a row of O-10 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O11-1.2",
+    "ac": "O-11",
+    "closes_it": "a row of O-11 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O13-1.4",
+    "ac": "O-13",
+    "closes_it": "a row of O-13 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O15-1.2",
+    "ac": "O-15",
+    "closes_it": "a row of O-15 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O15-1.3",
+    "ac": "O-15",
+    "closes_it": "a row of O-15 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O16-1.3",
+    "ac": "O-16",
+    "closes_it": "a row of O-16 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O19-3.b",
+    "ac": "O-19",
+    "closes_it": "a row of O-19 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O19-3.c",
+    "ac": "O-19",
+    "closes_it": "a row of O-19 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O19-4.b",
+    "ac": "O-19",
+    "closes_it": "a row of O-19 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O19-4.c",
+    "ac": "O-19",
+    "closes_it": "a row of O-19 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O1-1.1",
+    "ac": "O-1",
+    "closes_it": "a row of O-1 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O1-1.2",
+    "ac": "O-1",
+    "closes_it": "a row of O-1 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O1-2",
+    "ac": "O-1",
+    "closes_it": "a row of O-1 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O5-2.a",
+    "ac": "O-5",
+    "closes_it": "a row of O-5 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O5-2.c",
+    "ac": "O-5",
+    "closes_it": "a row of O-5 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O5-4",
+    "ac": "O-5",
+    "closes_it": "a row of O-5 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O7-1",
+    "ac": "O-7",
+    "closes_it": "a row of O-7 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O8-1.3",
+    "ac": "O-8",
+    "closes_it": "a row of O-8 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O8-2",
+    "ac": "O-8",
+    "closes_it": "a row of O-8 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "weak test (cannot fail on any mutant)",
+    "case": "TC-O9-1.4",
+    "ac": "O-9",
+    "closes_it": "a row of O-9 whose request reaches the item rules (the anonymous row stops at auth)"
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O12-1",
+    "ac": "O-12",
+    "closes_it": "bind TC-O12-1 (needs the clock/decode patches)"
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O16-3",
+    "ac": "O-16",
+    "closes_it": "bind TC-O16-3 (needs the clock/decode patches)"
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O2-1",
+    "ac": "O-2",
+    "closes_it": "bind TC-O2-1 (needs the clock/decode patches)"
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O4-1",
+    "ac": "O-4",
+    "closes_it": "bind TC-O4-1 (needs the clock/decode patches)"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-1",
+    "case": null,
+    "closes_it": "TC-O1-1, TC-O1-2"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-12",
+    "case": null,
+    "closes_it": "TC-O12-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-19",
+    "case": null,
+    "closes_it": "TC-O19-1, TC-O19-2, TC-O19-3, TC-O19-4, TC-O19-5"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-2",
+    "case": null,
+    "closes_it": "TC-O2-1, TC-O2-2"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-4",
+    "case": null,
+    "closes_it": "TC-O4-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-6",
+    "case": null,
+    "closes_it": "TC-O6-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "O-7",
+    "case": null,
+    "closes_it": "TC-O7-1"
+   }
+  ],
+  "P2": {
+   "findings": [
+    {
+     "finding": "F-reference/TC-O10-1.1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O10-1.1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O10-1.2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O10-1.2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O10-1.3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O10-1.3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O10-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O10-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O10-3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O10-3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O10-4",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O10-4"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O11-1.1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O11-1.1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O11-1.2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O11-1.2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O13-1.1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O13-1.1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O13-1.2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O13-1.2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O13-1.3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O13-1.3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O13-1.4",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O13-1.4"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O13-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O13-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O13-3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O13-3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O15-1.1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O15-1.1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O15-1.2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O15-1.2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O15-1.3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O15-1.3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O15-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O15-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O16-1.1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O16-1.1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O16-1.2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O16-1.2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O16-1.3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O16-1.3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O16-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O16-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O17-1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O17-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O18-1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O18-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-3.a",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-3.a"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-3.b",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-3.b"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-3.c",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-3.c"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-4.a",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-4.a"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-4.b",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-4.b"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-4.c",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-4.c"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O19-5",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O19-5"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O1-1.1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O1-1.1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O1-1.2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O1-1.2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O1-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O1-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O20-1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O20-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O2-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O2-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O5-1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O5-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O5-2.a",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O5-2.a"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O5-2.b",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O5-2.b"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O5-2.c",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O5-2.c"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O5-3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O5-3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O5-4",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O5-4"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O6-1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O6-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O7-1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O7-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O8-1.1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O8-1.1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O8-1.2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O8-1.2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O8-1.3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O8-1.3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O8-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O8-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O8-3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O8-3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O8-4",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O8-4"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-1.1",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-1.1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-1.2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-1.2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-1.3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-1.3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-1.4",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-1.4"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-2",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-2"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-3",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-3"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-4.a",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-4.a"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-4.b",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-4.b"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-4.c",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-4.c"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-O9-5",
+     "class": "ENV",
+     "rule": "NOT_RUN: the environment was not healthy around this batch",
+     "dist": "?/3",
+     "evidence": [
+      "ex:reference/a1/TC-O9-5"
+     ]
+    }
+   ],
+   "quarantine": [],
+   "redundant": {
+    "n": 16,
+    "d": 62,
+    "ids": [
+     "TC-O10-1.1",
+     "TC-O11-1.1",
+     "TC-O13-1.1",
+     "TC-O13-1.2",
+     "TC-O13-1.3",
+     "TC-O13-2",
+     "TC-O13-3",
+     "TC-O15-1.1",
+     "TC-O15-2",
+     "TC-O16-1.1",
+     "TC-O16-1.2",
+     "TC-O16-2",
+     "TC-O17-1",
+     "TC-O8-1.2",
+     "TC-O9-1.1",
+     "TC-O9-1.3"
+    ]
+   },
+   "mutation_strength": {
+    "n": 14,
+    "d": 31,
+    "ids": []
+   }
+  },
+  "P3": []
+ },
+ "scorecard": {
+  "seeded_authored": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "seeded_per_flag": [],
+  "seeded_blind": "not run (M7)",
+  "real_defects": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "mutation_strength": {
+   "n": 14,
+   "d": 31,
+   "ids": []
+  },
+  "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits mostly under the test data, so this measures authentication more than the item rules",
+  "mutation_per_criterion": {
+   "O-1": {
+    "n": 0,
+    "d": 18,
+    "ids": []
+   },
+   "O-10": {
+    "n": 3,
+    "d": 23,
+    "ids": []
+   },
+   "O-11": {
+    "n": 3,
+    "d": 23,
+    "ids": []
+   },
+   "O-13": {
+    "n": 3,
+    "d": 22,
+    "ids": []
+   },
+   "O-15": {
+    "n": 4,
+    "d": 27,
+    "ids": []
+   },
+   "O-16": {
+    "n": 4,
+    "d": 23,
+    "ids": []
+   },
+   "O-17": {
+    "n": 1,
+    "d": 21,
+    "ids": []
+   },
+   "O-18": {
+    "n": 1,
+    "d": 21,
+    "ids": []
+   },
+   "O-19": {
+    "n": 0,
+    "d": 21,
+    "ids": []
+   },
+   "O-2": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-20": {
+    "n": 2,
+    "d": 21,
+    "ids": []
+   },
+   "O-5": {
+    "n": 4,
+    "d": 18,
+    "ids": []
+   },
+   "O-6": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-7": {
+    "n": 0,
+    "d": 18,
+    "ids": []
+   },
+   "O-8": {
+    "n": 3,
+    "d": 23,
+    "ids": []
+   },
+   "O-9": {
+    "n": 4,
+    "d": 23,
+    "ids": []
+   }
+  },
+  "triage_correct_seeded": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "localisation": {
+   "top1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top3": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top5": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "fail_before_pass_after": "not run (M5)",
+  "criteria_without_admitted_test": {
+   "n": 7,
+   "d": 18,
+   "ids": [
+    "O-1",
+    "O-12",
+    "O-19",
+    "O-2",
+    "O-4",
+    "O-6",
+    "O-7"
+   ]
+  }
+ },
+ "traceability": [
+  {
+   "req": [
+    "backend/app/models.py:85",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-1.1",
+   "assertions": [
+    "TC-O10-1.1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O10-1.1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:85",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-1.2",
+   "assertions": [
+    "TC-O10-1.2/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O10-1.2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:85",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-1.3",
+   "assertions": [
+    "TC-O10-1.3/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O10-1.3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:85",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-2",
+   "assertions": [
+    "TC-O10-2/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O10-2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:85",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-3",
+   "assertions": [
+    "TC-O10-3/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O10-3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:85",
+    "backend/app/api/routes/items.py:92"
+   ],
+   "ac": "O-10",
+   "case": "TC-O10-4",
+   "assertions": [
+    "TC-O10-4/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O10-4"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:110"
+   ],
+   "ac": "O-11",
+   "case": "TC-O11-1.1",
+   "assertions": [
+    "TC-O11-1.1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O11-1.1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:110"
+   ],
+   "ac": "O-11",
+   "case": "TC-O11-1.2",
+   "assertions": [
+    "TC-O11-1.2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O11-1.2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56"
+   ],
+   "ac": "O-13",
+   "case": "TC-O13-1.1",
+   "assertions": [
+    "TC-O13-1.1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O13-1.1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56"
+   ],
+   "ac": "O-13",
+   "case": "TC-O13-1.2",
+   "assertions": [
+    "TC-O13-1.2/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O13-1.2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56"
+   ],
+   "ac": "O-13",
+   "case": "TC-O13-1.3",
+   "assertions": [
+    "TC-O13-1.3/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O13-1.3"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56"
+   ],
+   "ac": "O-13",
+   "case": "TC-O13-1.4",
+   "assertions": [
+    "TC-O13-1.4/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O13-1.4"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56"
+   ],
+   "ac": "O-13",
+   "case": "TC-O13-2",
+   "assertions": [
+    "TC-O13-2/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O13-2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:53",
+    "backend/app/api/routes/items.py:56"
+   ],
+   "ac": "O-13",
+   "case": "TC-O13-3",
+   "assertions": [
+    "TC-O13-3/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O13-3"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:89"
+   ],
+   "ac": "O-15",
+   "case": "TC-O15-1.1",
+   "assertions": [
+    "TC-O15-1.1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O15-1.1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:89"
+   ],
+   "ac": "O-15",
+   "case": "TC-O15-1.2",
+   "assertions": [
+    "TC-O15-1.2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O15-1.2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:89"
+   ],
+   "ac": "O-15",
+   "case": "TC-O15-1.3",
+   "assertions": [
+    "TC-O15-1.3/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O15-1.3"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:56",
+    "backend/app/api/routes/items.py:89"
+   ],
+   "ac": "O-15",
+   "case": "TC-O15-2",
+   "assertions": [
+    "TC-O15-2/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O15-2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:89",
+    "backend/app/api/routes/items.py:90"
+   ],
+   "ac": "O-16",
+   "case": "TC-O16-1.1",
+   "assertions": [
+    "TC-O16-1.1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O16-1.1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:89",
+    "backend/app/api/routes/items.py:90"
+   ],
+   "ac": "O-16",
+   "case": "TC-O16-1.2",
+   "assertions": [
+    "TC-O16-1.2/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O16-1.2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:89",
+    "backend/app/api/routes/items.py:90"
+   ],
+   "ac": "O-16",
+   "case": "TC-O16-1.3",
+   "assertions": [
+    "TC-O16-1.3/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O16-1.3"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:89",
+    "backend/app/api/routes/items.py:90"
+   ],
+   "ac": "O-16",
+   "case": "TC-O16-2",
+   "assertions": [
+    "TC-O16-2/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O16-2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:36",
+    "backend/app/api/routes/items.py:38",
+    "backend/app/api/routes/items.py:44"
+   ],
+   "ac": "O-17",
+   "case": "TC-O17-1",
+   "assertions": [
+    "TC-O17-1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O17-1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:21",
+    "backend/app/api/routes/items.py:25"
+   ],
+   "ac": "O-18",
+   "case": "TC-O18-1",
+   "assertions": [
+    "TC-O18-1/*"
+   ],
+   "gate": "ADMITTED",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O18-1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-1",
+   "assertions": [
+    "TC-O19-1/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-2",
+   "assertions": [
+    "TC-O19-2/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-3.a",
+   "assertions": [
+    "TC-O19-3.a/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-3.a"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-3.b",
+   "assertions": [
+    "TC-O19-3.b/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-3.b"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-3.c",
+   "assertions": [
+    "TC-O19-3.c/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-3.c"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-4.a",
+   "assertions": [
+    "TC-O19-4.a/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-4.a"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-4.b",
+   "assertions": [
+    "TC-O19-4.b/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-4.b"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-4.c",
+   "assertions": [
+    "TC-O19-4.c/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-4.c"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-19",
+   "case": "TC-O19-5",
+   "assertions": [
+    "TC-O19-5/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O19-5"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:68",
+    "backend/app/models.py:79",
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-1",
+   "case": "TC-O1-1.1",
+   "assertions": [
+    "TC-O1-1.1/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O1-1.1"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:68",
+    "backend/app/models.py:79",
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-1",
+   "case": "TC-O1-1.2",
+   "assertions": [
+    "TC-O1-1.2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O1-1.2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:68",
+    "backend/app/models.py:79",
+    "backend/app/models.py:74"
+   ],
+   "ac": "O-1",
+   "case": "TC-O1-2",
+   "assertions": [
+    "TC-O1-2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O1-2"
+  },
+  {
+   "req": [
+    "backend/app/api/routes/items.py:15",
+    "backend/app/api/routes/items.py:40"
+   ],
+   "ac": "O-20",
+   "case": "TC-O20-1",
+   "assertions": [
+    "TC-O20-1/*"
+   ],
+   "gate": "ADMITTED",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O20-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:107",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-2",
+   "case": "TC-O2-2",
+   "assertions": [
+    "TC-O2-2/*"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O2-2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-5",
+   "case": "TC-O5-1",
+   "assertions": [
+    "TC-O5-1/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O5-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-5",
+   "case": "TC-O5-2.a",
+   "assertions": [
+    "TC-O5-2.a/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O5-2.a"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-5",
+   "case": "TC-O5-2.b",
+   "assertions": [
+    "TC-O5-2.b/*"
+   ],
+   "gate": "ADMITTED",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O5-2.b"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-5",
+   "case": "TC-O5-2.c",
+   "assertions": [
+    "TC-O5-2.c/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O5-2.c"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-5",
+   "case": "TC-O5-3",
+   "assertions": [
+    "TC-O5-3/*"
+   ],
+   "gate": "ADMITTED",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O5-3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:75"
+   ],
+   "ac": "O-5",
+   "case": "TC-O5-4",
+   "assertions": [
+    "TC-O5-4/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O5-4"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88"
+   ],
+   "ac": "O-6",
+   "case": "TC-O6-1",
+   "assertions": [
+    "TC-O6-1/*"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O6-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:74",
+    "backend/app/models.py:87"
+   ],
+   "ac": "O-7",
+   "case": "TC-O7-1",
+   "assertions": [
+    "TC-O7-1/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O7-1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-1.1",
+   "assertions": [
+    "TC-O8-1.1/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O8-1.1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-1.2",
+   "assertions": [
+    "TC-O8-1.2/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O8-1.2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-1.3",
+   "assertions": [
+    "TC-O8-1.3/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O8-1.3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-2",
+   "assertions": [
+    "TC-O8-2/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O8-2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-3",
+   "assertions": [
+    "TC-O8-3/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O8-3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:88",
+    "backend/app/api/routes/items.py:92",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-8",
+   "case": "TC-O8-4",
+   "assertions": [
+    "TC-O8-4/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O8-4"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-1.1",
+   "assertions": [
+    "TC-O9-1.1/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-1.1"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-1.2",
+   "assertions": [
+    "TC-O9-1.2/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-1.2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-1.3",
+   "assertions": [
+    "TC-O9-1.3/*"
+   ],
+   "gate": "ADMITTED_REDUNDANT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-1.3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-1.4",
+   "assertions": [
+    "TC-O9-1.4/*"
+   ],
+   "gate": "WEAK",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-1.4"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-2",
+   "assertions": [
+    "TC-O9-2/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-2"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-3",
+   "assertions": [
+    "TC-O9-3/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-3"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-4.a",
+   "assertions": [
+    "TC-O9-4.a/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-4.a"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-4.b",
+   "assertions": [
+    "TC-O9-4.b/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-4.b"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-4.c",
+   "assertions": [
+    "TC-O9-4.c/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-4.c"
+  },
+  {
+   "req": [
+    "backend/app/models.py:87",
+    "backend/app/models.py:112"
+   ],
+   "ac": "O-9",
+   "case": "TC-O9-5",
+   "assertions": [
+    "TC-O9-5/*"
+   ],
+   "gate": "CANDIDATE_DEFECT",
+   "verdict": "NOT_RUN",
+   "dist": "?/3",
+   "evidence": "ex:reference/a1/TC-O9-5"
+  }
+ ],
+ "coverage": {
+  "by": "case technique (boundary \u2192 boundary; error_exception/error_guessing \u2192 exception; rest \u2192 normal)",
+  "normal": {
+   "n": 0,
+   "d": 62,
+   "ids": []
+  },
+  "boundary": {
+   "n": 0,
+   "d": 62,
+   "ids": []
+  },
+  "exception": {
+   "n": 0,
+   "d": 62,
+   "ids": []
+  }
+ },
+ "uncovered": {
+  "criteria_out_of_scope": [],
+  "deferred": [],
+  "skipped_templates": [
+   "O-3: dropped a drafted case: expected 'null' is not traceable to O-3 (spec allows ['200', '2xx'])",
+   "O-4: skipped minimum template boundary: Rounding tie is not a numeric threshold, so there is no limit to set",
+   "O-6: dropped a drafted case: expected '4xx' is not traceable to O-6 (spec allows [])",
+   "O-6: skipped minimum template decision_table: Resolution left to human judgement, so no row has a decided outcome",
+   "O-7: dropped a drafted case: expected '4xx' is not traceable to O-7 (spec allows [])",
+   "O-7: dropped a drafted case: expected '4xx' is not traceable to O-7 (spec allows [])",
+   "O-8: decision table leaves out 1 combination(s), e.g. {'caller': 'anonymous', 'discount_percent': 'null'}",
+   "O-9: decision table leaves out 2 combination(s), e.g. {'caller': 'anonymous', 'price': '20.00'}",
+   "O-10: dropped a drafted case: expected '2xx' is not traceable to O-10 (spec allows ['422', '4xx'])",
+   "O-10: decision table leaves out 1 combination(s), e.g. {'caller': 'anonymous', 'title': 'null'}",
+   "O-11: dropped a drafted case: expected 'null' is not traceable to O-11 (spec allows ['200', '2xx'])",
+   "O-12: dropped a drafted case: expected '2xx' is not traceable to O-12 (spec allows [])",
+   "O-12: skipped minimum template decision_table: Outcome left to human judgement with no single decided row; only one caller and input",
+   "O-14: dropped a drafted case: expected '4xx' is not traceable to O-14 (spec allows [])",
+   "O-14: dropped a drafted case: expected '4xx' is not traceable to O-14 (spec allows [])",
+   "O-15: decision table leaves out 1 combination(s), e.g. {'caller': 'superuser', 'method': 'GET'}",
+   "O-17: dropped a drafted table: expected 'own items only, newest first' is not traceable to O-17 (spec allows ['200', '2xx', '422', '4xx'])",
+   "O-18: dropped a drafted table: expected 'all items, count is total' is not traceable to O-18 (spec allows ['200', '2xx', '422', '4xx'])",
+   "O-20: skipped minimum template boundary: Spec gives no maximum above 1000, so the outcome for 1001 is undecided and no fail point can be set",
+   "O-3: dropped a drafted case: expected 'null' is not traceable to O-3 (spec allows ['200', '2xx'])",
+   "O-11: dropped a drafted case: expected 'null' is not traceable to O-11 (spec allows ['200', '2xx'])",
+   "O-14: dropped a drafted case: expected '' is not traceable to O-14 (spec allows [])",
+   "O-3: no acceptance case",
+   "O-6: minimum template error_guessing neither used nor skipped with a reason",
+   "O-7: minimum template error_guessing neither used nor skipped with a reason",
+   "O-11: no acceptance case",
+   "O-12: minimum template error_guessing neither used nor skipped with a reason",
+   "O-14: no acceptance case",
+   "O-14: minimum template error_guessing neither used nor skipped with a reason",
+   "O-18: minimum template decision_table neither used nor skipped with a reason"
+  ],
+  "assumed": [],
+  "unbound_cases": [
+   "TC-O12-1",
+   "TC-O16-3",
+   "TC-O2-1",
+   "TC-O4-1"
+  ],
+  "behaviour_with_no_requirement": [],
+  "seeded_race": "BUG_FLAKE_RACE: no signed case reads an item right after creating it, so the suite cannot observe the late commit"
+ },
+ "ai_decisions": {
+  "spec_answers": {
+   "n": 10,
+   "d": null,
+   "ids": [
+    "11c51c7bca2f33c4",
+    "319e3d4758f26b7d",
+    "3477c04869cdb8ec",
+    "5493816b0a583a1b",
+    "6249dd4db789cef9",
+    "7b85a450f3cb04e7",
+    "b7f6aaf7f0602b24",
+    "b856cf8e1fb2a149",
+    "f28450f4814d9e24",
+    "f993a5cbc959b482"
+   ]
+  },
+  "spec_assumed": {
+   "n": 0,
+   "d": 10,
+   "ids": []
+  },
+  "cases_llm_drafted": {
+   "n": 42,
+   "d": 42,
+   "ids": [
+    "TC-O1-1",
+    "TC-O1-2",
+    "TC-O10-1",
+    "TC-O10-2",
+    "TC-O10-3",
+    "TC-O10-4",
+    "TC-O11-1",
+    "TC-O12-1",
+    "TC-O13-1",
+    "TC-O13-2",
+    "TC-O13-3",
+    "TC-O15-1",
+    "TC-O15-2",
+    "TC-O16-1",
+    "TC-O16-2",
+    "TC-O16-3",
+    "TC-O17-1",
+    "TC-O18-1",
+    "TC-O19-1",
+    "TC-O19-2",
+    "TC-O19-3",
+    "TC-O19-4",
+    "TC-O19-5",
+    "TC-O2-1",
+    "TC-O2-2",
+    "TC-O20-1",
+    "TC-O4-1",
+    "TC-O5-1",
+    "TC-O5-2",
+    "TC-O5-3",
+    "TC-O5-4",
+    "TC-O6-1",
+    "TC-O7-1",
+    "TC-O8-1",
+    "TC-O8-2",
+    "TC-O8-3",
+    "TC-O8-4",
+    "TC-O9-1",
+    "TC-O9-2",
+    "TC-O9-3",
+    "TC-O9-4",
+    "TC-O9-5"
+   ]
+  },
+  "cases_signoff": {
+   "signed": true,
+   "approved": {
+    "n": 42,
+    "d": 42,
+    "ids": []
+   }
+  },
+  "gate_equivalence": {
+   "equivalent": {
+    "n": 0,
+    "d": 17,
+    "ids": []
+   },
+   "resolution": "not confirmed by a person; counted as survivors"
+  },
+  "triage": "no AI in M4 (rules only; the AI judge is M7)",
+  "overrides": [],
+  "review_decisions": [
+   {
+    "item": 1,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 2,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 3,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 4,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 5,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 6,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 7,
+    "kind": "confirm_observed",
+    "decision": "reject",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 8,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 9,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 10,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 11,
+    "kind": "confirm_observed",
+    "decision": "reject",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 12,
+    "kind": "confirm_observed",
+    "decision": "reject",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 13,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 14,
+    "kind": "confirm_observed",
+    "decision": "reject",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 15,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 16,
+    "kind": "confirm_observed",
+    "decision": "reject",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 17,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 18,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 19,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 20,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 21,
+    "kind": "confirm_observed",
+    "decision": "confirm",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 22,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 23,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 24,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 25,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 26,
+    "kind": "question",
+    "decision": "pick",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 27,
+    "kind": "signoff",
+    "decision": "approve",
+    "by": "you",
+    "reason": ""
+   },
+   {
+    "item": 28,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 29,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 30,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "focused",
+    "reason": "focused default"
+   },
+   {
+    "item": 31,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "focused",
+    "reason": "focused default"
+   }
+  ]
+ },
+ "evidence": {},
+ "defects": [],
+ "product": {
+  "summary": {
+   "tests": 62,
+   "admitted": 20,
+   "defects": 0,
+   "problematic": 38,
+   "improve": 22,
+   "approved": 42,
+   "proposed": 42
+  },
+  "defects": [],
+  "causes": [],
+  "problematic_tests": [
+   {
+    "case": "TC-O10-1.1",
+    "title": "caller \u00d7 title",
+    "summary": "title validation skipped on PUT for owner",
+    "ac": "O-10",
+    "criterion": "PUT with null title causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O10-1.1",
+     "ex:reference/a1/TC-O10-1.2",
+     "ex:reference/a1/TC-O10-1.3"
+    ],
+    "source": "execute",
+    "count": 3
+   },
+   {
+    "case": "TC-O10-2",
+    "title": "PUT with title null by the owner is rejected with a 422 validation error",
+    "summary": "null title is accepted and stored, returning 200 instead of rejecting it with 422",
+    "ac": "O-10",
+    "criterion": "PUT with null title causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O10-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O10-3",
+    "title": "Null title refused and stored title kept",
+    "summary": "null title overwrites stored title despite refusal",
+    "ac": "O-10",
+    "criterion": "PUT with null title causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O10-3"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O10-4",
+    "title": "Null title refused with 422",
+    "summary": "PUT with null title returns 500 instead of 422",
+    "ac": "O-10",
+    "criterion": "PUT with null title causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O10-4"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O11-1.1",
+    "title": "caller \u00d7 price",
+    "summary": "anonymous PUT clears an item price",
+    "ac": "O-11",
+    "criterion": "PUT with price null clears price",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O11-1.1",
+     "ex:reference/a1/TC-O11-1.2"
+    ],
+    "source": "execute",
+    "count": 2
+   },
+   {
+    "case": "TC-O13-1.1",
+    "title": "caller",
+    "summary": "owner or superuser blocked by the ownership check on GET",
+    "ac": "O-13",
+    "criterion": "GET item by id for non-owner",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O13-1.1",
+     "ex:reference/a1/TC-O13-1.2",
+     "ex:reference/a1/TC-O13-1.3",
+     "ex:reference/a1/TC-O13-1.4"
+    ],
+    "source": "execute",
+    "count": 4
+   },
+   {
+    "case": "TC-O13-2",
+    "title": "Non-owner GET of another user's item is refused",
+    "summary": "non-owner can read another user's item",
+    "ac": "O-13",
+    "criterion": "GET item by id for non-owner",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O13-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O13-3",
+    "title": "403 response carries no item details",
+    "summary": "403 response body includes item details",
+    "ac": "O-13",
+    "criterion": "GET item by id for non-owner",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O13-3"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O15-1.1",
+    "title": "caller \u00d7 method",
+    "summary": "superuser write blocked by the ownership check",
+    "ac": "O-15",
+    "criterion": "Superuser reads and updates any item",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O15-1.1",
+     "ex:reference/a1/TC-O15-1.2",
+     "ex:reference/a1/TC-O15-1.3"
+    ],
+    "source": "execute",
+    "count": 3
+   },
+   {
+    "case": "TC-O15-2",
+    "title": "Superuser reads an item owned by another user",
+    "summary": "superuser blocked from reading another user's item",
+    "ac": "O-15",
+    "criterion": "Superuser reads and updates any item",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O15-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O16-1.1",
+    "title": "caller",
+    "summary": "owner PUT refused or non-owner PUT allowed",
+    "ac": "O-16",
+    "criterion": "PUT by non-owner is rejected before update",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O16-1.1",
+     "ex:reference/a1/TC-O16-1.2",
+     "ex:reference/a1/TC-O16-1.3"
+    ],
+    "source": "execute",
+    "count": 3
+   },
+   {
+    "case": "TC-O16-2",
+    "title": "Non-owner PUT refused with 403",
+    "summary": "non-owner PUT not refused with 403",
+    "ac": "O-16",
+    "criterion": "PUT by non-owner is rejected before update",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O16-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O17-1",
+    "title": "Own items listed newest first by created_at",
+    "summary": "list not ordered newest first for ordinary user",
+    "ac": "O-17",
+    "criterion": "List shows only own items for ordinary user",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O17-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O18-1",
+    "title": "Superuser list shows all items newest first",
+    "summary": "superuser list not ordered newest first",
+    "ac": "O-18",
+    "criterion": "List shows all items for superuser",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O18-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O19-1",
+    "title": "Negative limit refused with 422",
+    "summary": "negative limit returns 500 instead of 422",
+    "ac": "O-19",
+    "criterion": "GET list with negative limit causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O19-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O19-2",
+    "title": "Combined negative paging parameters refused with 422",
+    "summary": "combined negative skip and limit crashes paging",
+    "ac": "O-19",
+    "criterion": "GET list with negative limit causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O19-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O19-3.a",
+    "title": "limit at the 0 limit",
+    "summary": "limit 0 wrongly rejected",
+    "ac": "O-19",
+    "criterion": "GET list with negative limit causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O19-3.a",
+     "ex:reference/a1/TC-O19-3.b",
+     "ex:reference/a1/TC-O19-3.c"
+    ],
+    "source": "execute",
+    "count": 3
+   },
+   {
+    "case": "TC-O19-4.a",
+    "title": "skip at the 0 limit",
+    "summary": "skip 0 wrongly rejected",
+    "ac": "O-19",
+    "criterion": "GET list with negative limit causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O19-4.a",
+     "ex:reference/a1/TC-O19-4.b",
+     "ex:reference/a1/TC-O19-4.c"
+    ],
+    "source": "execute",
+    "count": 3
+   },
+   {
+    "case": "TC-O19-5",
+    "title": "Negative skip refused with 422",
+    "summary": "negative skip accepted and returns items",
+    "ac": "O-19",
+    "criterion": "GET list with negative limit causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O19-5"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O1-1.1",
+    "title": "caller",
+    "summary": "anonymous caller can create an item",
+    "ac": "O-1",
+    "criterion": "Create item with price and discount",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O1-1.1",
+     "ex:reference/a1/TC-O1-1.2"
+    ],
+    "source": "execute",
+    "count": 2
+   },
+   {
+    "case": "TC-O1-2",
+    "title": "Create item and check final_price is the exact discounted value",
+    "summary": "final_price not computed on create",
+    "ac": "O-1",
+    "criterion": "Create item with price and discount",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O1-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O20-1",
+    "title": "Limit 1000 returns all items up to 1000 in one response",
+    "summary": "list capped at 100 items regardless of limit",
+    "ac": "O-20",
+    "criterion": "GET list accepts limit above 100",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O20-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O2-2",
+    "title": "List endpoint returns undiscounted price; resolution undecided so expectation follows the title",
+    "summary": "list endpoint returns undiscounted final_price",
+    "ac": "O-2",
+    "criterion": "final_price is discounted price in every item response",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O2-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O5-1",
+    "title": "Discount 99 accepted and final_price is exact",
+    "summary": "discount 99 rejected by over-strict upper check",
+    "ac": "O-5",
+    "criterion": "Discount bounds on create",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O5-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O5-2.a",
+    "title": "discount_percent at the 0 limit",
+    "summary": "lower edge discount 0 wrongly rejected",
+    "ac": "O-5",
+    "criterion": "Discount bounds on create",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O5-2.a",
+     "ex:reference/a1/TC-O5-2.b",
+     "ex:reference/a1/TC-O5-2.c"
+    ],
+    "source": "execute",
+    "count": 3
+   },
+   {
+    "case": "TC-O5-3",
+    "title": "Discount 100 refused with 422 and no item created",
+    "summary": "discount 100 accepted on create",
+    "ac": "O-5",
+    "criterion": "Discount bounds on create",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O5-3"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O5-4",
+    "title": "Negative discount refused with 422",
+    "summary": "negative discount accepted on create",
+    "ac": "O-5",
+    "criterion": "Discount bounds on create",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O5-4"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O6-1",
+    "title": "Owner PUT discount is applied to exact final_price",
+    "summary": "PUT discount not applied to final_price",
+    "ac": "O-6",
+    "criterion": "Discount bounds on update",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O6-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O7-1",
+    "title": "Valid two-decimal price gives exact final_price",
+    "summary": "valid two-decimal price rejected or mis-rounded",
+    "ac": "O-7",
+    "criterion": "Price precision bounds",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O7-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O8-1.1",
+    "title": "caller \u00d7 discount_percent",
+    "summary": "validation rejects valid discount on update",
+    "ac": "O-8",
+    "criterion": "PUT with discount_percent null causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O8-1.1",
+     "ex:reference/a1/TC-O8-1.2",
+     "ex:reference/a1/TC-O8-1.3"
+    ],
+    "source": "execute",
+    "count": 3
+   },
+   {
+    "case": "TC-O8-2",
+    "title": "Valid PUT discount updates exact final_price",
+    "summary": "final_price stale after PUT discount change",
+    "ac": "O-8",
+    "criterion": "PUT with discount_percent null causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O8-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O8-3",
+    "title": "Null discount on PUT refused and item left unchanged",
+    "summary": "null discount on PUT partly applied despite refusal",
+    "ac": "O-8",
+    "criterion": "PUT with discount_percent null causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O8-3"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O8-4",
+    "title": "Null discount on PUT refused with 422",
+    "summary": "null discount on PUT returns 500",
+    "ac": "O-8",
+    "criterion": "PUT with discount_percent null causes server error",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O8-4"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O9-1.1",
+    "title": "caller \u00d7 price",
+    "summary": "non-owner PUT reaches price validation before the 403",
+    "ac": "O-9",
+    "criterion": "PUT with negative price is stored",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O9-1.1",
+     "ex:reference/a1/TC-O9-1.2",
+     "ex:reference/a1/TC-O9-1.3",
+     "ex:reference/a1/TC-O9-1.4"
+    ],
+    "source": "execute",
+    "count": 4
+   },
+   {
+    "case": "TC-O9-2",
+    "title": "Valid PUT price is stored and final_price is exact",
+    "summary": "valid PUT price not stored",
+    "ac": "O-9",
+    "criterion": "PUT with negative price is stored",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O9-2"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O9-3",
+    "title": "PUT with price -5 refused and original price kept",
+    "summary": "PUT with price -5 stored despite 422",
+    "ac": "O-9",
+    "criterion": "PUT with negative price is stored",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O9-3"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-O9-4.a",
+    "title": "price at the 0 limit",
+    "summary": "price exactly 0 wrongly refused on PUT",
+    "ac": "O-9",
+    "criterion": "PUT with negative price is stored",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O9-4.a",
+     "ex:reference/a1/TC-O9-4.b",
+     "ex:reference/a1/TC-O9-4.c"
+    ],
+    "source": "execute",
+    "count": 3
+   },
+   {
+    "case": "TC-O9-5",
+    "title": "PUT with negative price refused with 422",
+    "summary": "PUT with price -5 returns 500 instead of 422",
+    "ac": "O-9",
+    "criterion": "PUT with negative price is stored",
+    "status": "ENV",
+    "reason": "The environment was unhealthy around this run: no verdict.",
+    "evidence": [
+     "ex:reference/a1/TC-O9-5"
+    ],
+    "source": "execute",
+    "count": 1
+   }
+  ],
+  "improve": [
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-1",
+    "detail": "Create item with price and discount",
+    "ac": "O-1"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-12",
+    "detail": "PUT with empty body changes nothing",
+    "ac": "O-12"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-2",
+    "detail": "final_price is discounted price in every item response",
+    "ac": "O-2"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-4",
+    "detail": "final_price rounds half to even",
+    "ac": "O-4"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-6",
+    "detail": "Discount bounds on update",
+    "ac": "O-6"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for O-7",
+    "detail": "Price precision bounds",
+    "ac": "O-7"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/api/routes/items.py:55 went unnoticed",
+    "detail": "-404\n+405",
+    "ac": "O-13, O-14, O-15"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/api/routes/items.py:88 went unnoticed",
+    "detail": "-404\n+405",
+    "ac": "O-15, O-16"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:74 went unnoticed",
+    "detail": "-ge=0\n+gt=0",
+    "ac": "O-1, O-5, O-7"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:74 went unnoticed",
+    "detail": "-ge=0\n+ge=1",
+    "ac": "O-1, O-5, O-7"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:74 went unnoticed",
+    "detail": "-max_digits=10\n+max_digits=11",
+    "ac": "O-1, O-5, O-7"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:74 went unnoticed",
+    "detail": "-max_digits=10\n+max_digits=9",
+    "ac": "O-1, O-5, O-7"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:74 went unnoticed",
+    "detail": "-decimal_places=2\n+decimal_places=3",
+    "ac": "O-1, O-5, O-7"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:74 went unnoticed",
+    "detail": "-decimal_places=2\n+decimal_places=1",
+    "ac": "O-1, O-5, O-7"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:87 went unnoticed",
+    "detail": "-max_digits=10\n+max_digits=11",
+    "ac": "O-11, O-6, O-7, O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:87 went unnoticed",
+    "detail": "-max_digits=10\n+max_digits=9",
+    "ac": "O-11, O-6, O-7, O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:87 went unnoticed",
+    "detail": "-decimal_places=2\n+decimal_places=3",
+    "ac": "O-11, O-6, O-7, O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:87 went unnoticed",
+    "detail": "-decimal_places=2\n+decimal_places=1",
+    "ac": "O-11, O-6, O-7, O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:88 went unnoticed",
+    "detail": "-ge=0\n+gt=0",
+    "ac": "O-11, O-6, O-7, O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:88 went unnoticed",
+    "detail": "-ge=0\n+ge=1",
+    "ac": "O-11, O-6, O-7, O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:88 went unnoticed",
+    "detail": "-lt=100\n+le=100",
+    "ac": "O-11, O-6, O-7, O-8, O-9"
+   },
+   {
+    "kind": "survivor",
+    "title": "A change at backend/app/models.py:88 went unnoticed",
+    "detail": "-lt=100\n+lt=101",
+    "ac": "O-11, O-6, O-7, O-8, O-9"
+   }
+  ],
+  "rules": {
+   "clarify": [
+    "settle how amounts are rounded and how many decimal places are kept"
+   ],
+   "cases": [
+    "When a requirement states a computed value such as final_price, the test checks that exact value, not only the status code."
+   ],
+   "templates": null,
+   "gate": {
+    "every_criterion": true,
+    "k": 3,
+    "min_kills": 1,
+    "near": 1
+   },
+   "routes": [
+    "GET /api/v1/items/",
+    "POST /api/v1/items/",
+    "GET /api/v1/items/{id}",
+    "PUT /api/v1/items/{id}"
+   ]
+  }
+ }
+}

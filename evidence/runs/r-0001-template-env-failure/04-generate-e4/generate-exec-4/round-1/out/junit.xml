@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="6" time="2.493" timestamp="2026-11-02T11:22:30.909361+00:00" hostname="69ce53835542"><testcase classname="test_tc_o16_3" name="test_tc_o16_3[TC-O16-3]" time="1.237"><failure message="platform_rt.api.ConformanceError: observed percent_off='5.00' is not in the response under test">make = &lt;factories.Factories object at 0xffffafce5400&gt;, case_id = 'TC-O16-3'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o16_3(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        item = make.item()
+        # &gt;&gt;&gt; BINDING
+        owner = make.user(); own_item = make.item(owner=owner); own_id = own_item['id']; api.put(f'/api/v1/items/{own_id}', token=owner['token'], json={'price': '5.00'}); other = make.user(); api.put(f'/api/v1/items/{own_id}', token=other['token'], json=data); snapshot = api.get(f'/api/v1/items/{own_id}', token=owner['token']); observe('percent_off', snapshot.json()['final_price'])
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=6ec48c7ed84d785b20965c0107d02b0a2ac3c6d27f70a0c9efd72bb4ec9be07c
+        api.under_test(CASE_DATA[case_id], REQUEST[case_id])
+&gt;       expect.equals('percent_off', EXPECTED[case_id]["observe"]['percent_off'], id=f"{case_id}/percent_off")
+
+/work/tests/test_tc_o16_3.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:73: in equals
+    actual = _observed(name)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'percent_off'
+
+    def _observed(name: str):
+        rec = record.current()
+        if name not in rec.observed:
+            raise MissingObservation(f"the binding never observed {name!r}")
+        value = rec.observed[name]
+        if rec.under_test is not None and not grounded(value, rec.under_test["body"]):
+            from platform_rt.api import ConformanceError
+    
+&gt;           raise ConformanceError(  # review gap 4: an observation must come from the response
+                f"observed {name}={value!r} is not in the response under test"
+            )
+E           platform_rt.api.ConformanceError: observed percent_off='5.00' is not in the response under test
+
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:61: ConformanceError</failure></testcase><testcase classname="test_tc_o2_2" name="test_tc_o2_2[TC-O2-2]" time="0.244"><failure message="platform_rt.expect.ExpectationFailed: [TC-O2-2/percent_off] expected '8.54', got 15">make = &lt;factories.Factories object at 0xffffae9b8050&gt;, case_id = 'TC-O2-2'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o2_2(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        item = make.item()
+        # &gt;&gt;&gt; BINDING
+        user = make.user()
+        created = api.post('/api/v1/items/', token=user['token'], json={'title': 'Priced item', 'price': data['price'], 'discount_percent': data['discount_percent']})
+        observe('percent_off', created.json()['discount_percent'])
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=d965e78e10cbe7e5ea17268ec875b6172f2acf0044f2751b5c7c414c220edcf7
+        api.under_test(CASE_DATA[case_id], REQUEST[case_id])
+&gt;       expect.equals('percent_off', EXPECTED[case_id]["observe"]['percent_off'], id=f"{case_id}/percent_off")
+
+/work/tests/test_tc_o2_2.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:74: in equals
+    _record(id, actual == expected, expected, actual)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O2-2/percent_off', ok = False, expected = '8.54', actual = 15
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O2-2/percent_off] expected '8.54', got 15
+
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:30: ExpectationFailed</failure></testcase><testcase classname="test_tc_o6_1" name="test_tc_o6_1[TC-O6-1]" time="0.257"><failure message="platform_rt.expect.ExpectationFailed: [TC-O6-1/percent_off] expected '5.00', got 50">make = &lt;factories.Factories object at 0xffffae9b9090&gt;, case_id = 'TC-O6-1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o6_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        item = make.item()
+        # &gt;&gt;&gt; BINDING
+        owner = make.user(); own_item = make.item(owner=owner)
+        put_resp = api.put(f"/api/v1/items/{own_item['id']}", token=owner['token'], json=dict(data))
+        get_resp = api.get(f"/api/v1/items/{own_item['id']}", token=owner['token'])
+        observe('percent_off', get_resp.json()['discount_percent'])
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=4acdd842bc4a84d96ba1b8d61024849d052f3d0e70fae07006b44b5d88a313dd
+        api.under_test(CASE_DATA[case_id], REQUEST[case_id])
+&gt;       expect.equals('percent_off', EXPECTED[case_id]["observe"]['percent_off'], id=f"{case_id}/percent_off")
+
+/work/tests/test_tc_o6_1.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:74: in equals
+    _record(id, actual == expected, expected, actual)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O6-1/percent_off', ok = False, expected = '5.00', actual = 50
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O6-1/percent_off] expected '5.00', got 50
+
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:30: ExpectationFailed</failure></testcase><testcase classname="test_tc_o7_1" name="test_tc_o7_1[TC-O7-1]" time="0.224" /><testcase classname="test_tc_o8_2" name="test_tc_o8_2[TC-O8-2]" time="0.209" /><testcase classname="test_tc_o9_2" name="test_tc_o9_2[TC-O9-2]" time="0.211"><failure message="platform_rt.expect.ExpectationFailed: [TC-O9-2/percent_off] expected '18.00', got 10">make = &lt;factories.Factories object at 0xffffaf3a70b0&gt;, case_id = 'TC-O9-2'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o9_2(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        item = make.item()
+        # &gt;&gt;&gt; BINDING
+        user = make.user(); owned = make.item(owner=user); api.put(f"/api/v1/items/{owned['id']}", token=user["token"], json=data); r = api.get(f"/api/v1/items/{owned['id']}", token=user["token"]); observe('percent_off', r.json()['discount_percent'])
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=f3ee04b639e19aa8e02c9657a32929ec9d80f2922f0c8364cbc32149a2711c61
+        api.under_test(CASE_DATA[case_id], REQUEST[case_id])
+&gt;       expect.equals('percent_off', EXPECTED[case_id]["observe"]['percent_off'], id=f"{case_id}/percent_off")
+
+/work/tests/test_tc_o9_2.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:74: in equals
+    _record(id, actual == expected, expected, actual)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O9-2/percent_off', ok = False, expected = '18.00', actual = 10
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O9-2/percent_off] expected '18.00', got 10
+
+../.venv/lib/python3.14/site-packages/platform_rt/expect.py:30: ExpectationFailed</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="2" tests="46" time="46.779" timestamp="2026-11-09T14:13:40.585615+00:00" hostname="404e62ad8801"><testcase classname="test_tc_c10_1" name="test_tc_c10_1[TC-C10-1]" time="0.226" /><testcase classname="test_tc_c2_1" name="test_tc_c2_1[TC-C2-1]" time="0.193"><failure message="platform_rt.expect.ExpectationFailed: [TC-C2-1/status] expected '2xx', got 409">make = &lt;platform_rt.blackbox.Make object at 0xffffa0792c10&gt;, case_id = 'TC-C2-1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c2_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        username = make.name("person")
+        resp = api.post("/api/users", token=None, json={"user": {"username": username, "email": hints["email"], "password": "Passw0rd-long-enough"}})
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=2560281961176bbe798cd629847771c7853ac5cb9efa21fa7dbe8f2eb41508a9
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c2_1.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C2-1/status', ok = False, expected = '2xx', actual = 409
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C2-1/status] expected '2xx', got 409
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c3_1" name="test_tc_c3_1[TC-C3-1]" time="9.408"><failure message="platform_rt.expect.ExpectationFailed: [TC-C3-1/count] expected 45, got 49">make = &lt;platform_rt.blackbox.Make object at 0xffffa08dfb10&gt;, case_id = 'TC-C3-1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c3_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin()
+        for _ in range(45):
+            api.post('/api/articles', token=admin['token'], json={'article': {'title': make.name('article'), 'description': 'd', 'body': 'b', 'tagList': []}})
+        r = eventually(lambda: api.get('/api/articles', params=data), lambda r: r.json()['articlesCount'] &gt;= 45)
+        observe('count', r.json()['articlesCount'])
+        observe('data_len', len(r.json()['articles']))
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=2712e5f873cc1e553d520d579d1794a49ca0d93ddaaea52436de66e7ed6a9856
+        api.under_test(CASE_DATA[case_id], REQUEST[case_id])
+&gt;       expect.equals('count', EXPECTED[case_id]["observe"]['count'], id=f"{case_id}/count")
+
+tests/test_tc_c3_1.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:79: in equals
+    _record(id, actual == expected, expected, actual)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C3-1/count', ok = False, expected = 45, actual = 49
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C3-1/count] expected 45, got 49
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c3_2" name="test_tc_c3_2[TC-C3-2]" time="9.378" /><testcase classname="test_tc_c3_3" name="test_tc_c3_3[TC-C3-3.a]" time="0.100"><failure message="platform_rt.expect.ExpectationFailed: [TC-C3-3.a/status] expected '422', got 200">make = &lt;platform_rt.blackbox.Make object at 0xffffa078ce90&gt;
+case_id = 'TC-C3-3.a'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c3_3(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        api.get("/api/articles", token=None, params=data)
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=26ec90b23714fcfef2eeb1997c6fb9953deaf397ef75fc81921aadf5d20f6380
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c3_3.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C3-3.a/status', ok = False, expected = '422', actual = 200
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C3-3.a/status] expected '422', got 200
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c3_3" name="test_tc_c3_3[TC-C3-3.b]" time="0.205" /><testcase classname="test_tc_c3_3" name="test_tc_c3_3[TC-C3-3.c]" time="0.199" /><testcase classname="test_tc_c3_4" name="test_tc_c3_4[TC-C3-4.a]" time="0.199"><failure message="platform_rt.expect.ExpectationFailed: [TC-C3-4.a/status] expected '422', got 200">make = &lt;platform_rt.blackbox.Make object at 0xffffa072aad0&gt;
+case_id = 'TC-C3-4.a'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c3_4(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin()
+        resp = api.get("/api/articles", token=admin["token"], params=data)
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=940ab2dfd5b0db9546571d195cd383e1b4d7ae6106dd3ae0666c2449394c353f
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c3_4.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C3-4.a/status', ok = False, expected = '422', actual = 200
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C3-4.a/status] expected '422', got 200
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c3_4" name="test_tc_c3_4[TC-C3-4.b]" time="0.198" /><testcase classname="test_tc_c3_4" name="test_tc_c3_4[TC-C3-4.c]" time="0.199" /><testcase classname="test_tc_c3_5" name="test_tc_c3_5[TC-C3-5]" time="0.201"><failure message="platform_rt.expect.ExpectationFailed: [TC-C3-5/status] expected '422', got 200">make = &lt;platform_rt.blackbox.Make object at 0xffffa05ae5d0&gt;, case_id = 'TC-C3-5'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c3_5(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        api.get('/api/articles', token=None, params=data)
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=d920dbe93e41e1a0160977a42a2a6295071abbeffc8902cde766f5fe4832b496
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c3_5.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C3-5/status', ok = False, expected = '422', actual = 200
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C3-5/status] expected '422', got 200
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c3_6" name="test_tc_c3_6[TC-C3-6]" time="0.192" /><testcase classname="test_tc_c4_1" name="test_tc_c4_1[TC-C4-1]" time="4.538"><failure message="platform_rt.expect.ExpectationFailed: [TC-C4-1/count] expected 21, got 25">make = &lt;platform_rt.blackbox.Make object at 0xffffa058b4d0&gt;, case_id = 'TC-C4-1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c4_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin()
+        for i in range(21):
+            api.post("/api/articles", token=admin["token"], json={"article": {"title": make.name("article"), "description": "d", "body": "b", "tagList": []}})
+        resp = api.get("/api/articles", token=None, params=data)
+        observe("count", resp.json()["articlesCount"])
+        observe("data_len", len(resp.json()["articles"]))
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=35d745da42f44722f293a72851062630803c9d98be4488c3c4df3c6bc78c1ecb
+        api.under_test(CASE_DATA[case_id], REQUEST[case_id])
+&gt;       expect.equals('count', EXPECTED[case_id]["observe"]['count'], id=f"{case_id}/count")
+
+tests/test_tc_c4_1.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:79: in equals
+    _record(id, actual == expected, expected, actual)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C4-1/count', ok = False, expected = 21, actual = 25
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C4-1/count] expected 21, got 25
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c5_1" name="test_tc_c5_1[TC-C5-1]" time="0.134" /><testcase classname="test_tc_c5_2" name="test_tc_c5_2[TC-C5-2]" time="0.209" /><testcase classname="test_tc_c6_1" name="test_tc_c6_1[TC-C6-1]" time="0.503"><failure message="platform_rt.expect.ExpectationFailed: [TC-C6-1/status] expected '2xx', got 401">make = &lt;platform_rt.blackbox.Make object at 0xffffa07ddd90&gt;, case_id = 'TC-C6-1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c6_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        email = hints["email"]; password = "S3cret-pass-123"; username = make.name("user"); api.post("/api/users", token=None, json={"user": {"username": username, "email": email, "password": password}}); api.post("/api/users/login", token=None, json={"user": {"email": email, "password": password}})
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=fee3ff766d1453e6bc1beb5b5cb1df277d1cf6a740e2571f35dacfb5ca3aeb2a
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c6_1.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C6-1/status', ok = False, expected = '2xx', actual = 401
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C6-1/status] expected '2xx', got 401
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c7_2" name="test_tc_c7_2[TC-C7-2]" time="0.104" /><testcase classname="test_tc_c7_3" name="test_tc_c7_3[TC-C7-3]" time="0.625"><failure message="platform_rt.expect.ExpectationFailed: [TC-C7-3/status] expected '409', got 200">make = &lt;platform_rt.blackbox.Make object at 0xffffa05173e0&gt;, case_id = 'TC-C7-3'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c7_3(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin()
+        t = admin["token"]
+        dup_title = make.name(hints["title"])
+        other = api.post("/api/articles", token=t, json={"article": {"title": dup_title, "description": "other article", "body": "other body"}})
+        mine = api.post("/api/articles", token=t, json={"article": {"title": make.name("owned"), "description": "owned article", "body": "owned body"}})
+        slug = mine.json()["article"]["slug"]
+        update = api.put(f"/api/articles/{slug}", token=t, json={"article": {"title": dup_title}})
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=8f72f4498bc4fb010f6cd77979b25636c06cf51069ce47ef3da6900ba5e31637
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c7_3.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C7-3/status', ok = False, expected = '409', actual = 200
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C7-3/status] expected '409', got 200
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c9_1" name="test_tc_c9_1[TC-C9-1]" time="0.395" /><testcase classname="test_tc_c9_2" name="test_tc_c9_2[TC-C9-2]" time="0.603" /><testcase classname="test_tc_c9_3" name="test_tc_c9_3[TC-C9-3]" time="0.398" /><testcase classname="test_tc_o1_1" name="test_tc_o1_1[TC-O1-1.1]" time="0.209" /><testcase classname="test_tc_o1_1" name="test_tc_o1_1[TC-O1-1.2]" time="0.196" /><testcase classname="test_tc_o1_2" name="test_tc_o1_2[TC-O1-2]" time="0.201" /><testcase classname="test_tc_o1_3" name="test_tc_o1_3[TC-O1-3]" time="0.444" /><testcase classname="test_tc_o2_1" name="test_tc_o2_1[TC-O2-1.1]" time="0.580" /><testcase classname="test_tc_o2_1" name="test_tc_o2_1[TC-O2-1.2]" time="0.597" /><testcase classname="test_tc_o2_2" name="test_tc_o2_2[TC-O2-2]" time="0.619" /><testcase classname="test_tc_o3_3" name="test_tc_o3_3[TC-O3-3]" time="0.399" /><testcase classname="test_tp_families" name="test_generic[G:properties:GET /api/articles]" time="3.089" /><testcase classname="test_tp_families" name="test_generic[G:properties:POST /api/articles]" time="2.051" /><testcase classname="test_tp_families" name="test_generic[G:properties:GET /api/articles/{slug}]" time="2.015" /><testcase classname="test_tp_families" name="test_generic[G:properties:POST /api/users/login]" time="2.044" /><testcase classname="test_tp_families" name="test_generic[G:properties:POST /api/users]" time="2.024" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:GET /api/articles]" time="0.202"><failure message="platform_rt.expect.SpecMismatch: [no credentials:2xx] GET /api/articles answered 200 with no credentials; the spec declares no security for it">case_id = 'G:auth_required:GET /api/articles'
+
+    def test_generic(case_id):
+&gt;       run(case_id, _spec(), conf())
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:403: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:387: in run
+    RUN[family](spec, c, method, path, op)
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:284: in auth_required
+    _fail(f"{label}:2xx", f"{method} {r.request.url.path} answered {r.status_code} with "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'no credentials:2xx'
+msg = 'GET /api/articles answered 200 with no credentials; the spec declares no security for it'
+spec_side = True
+
+    def _fail(aid: str, msg: str, spec_side: bool = False):
+        record.current().assertions.append({"id": aid, "ok": False, "expected": None, "actual": msg})
+&gt;       raise (SpecMismatch if spec_side else ExpectationFailed)(aid, msg)
+E       platform_rt.expect.SpecMismatch: [no credentials:2xx] GET /api/articles answered 200 with no credentials; the spec declares no security for it
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:144: SpecMismatch</failure></testcase><testcase classname="test_tp_families" name="test_generic[G:auth_required:POST /api/articles]" time="0.376" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:GET /api/articles/{slug}]" time="0.403" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:PUT /api/articles/{slug}]" time="0.407" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:DELETE /api/articles/{slug}]" time="0.407" /><testcase classname="test_tp_families" name="test_generic[G:unknown_id:GET /api/articles/{slug}]" time="0.208" /><testcase classname="test_tp_families" name="test_generic[G:unknown_id:GET /api/profiles/{username}]" time="0.196" /><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/articles]" time="0.401" /><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/users/login]" time="0.406" /><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/users]" time="0.396" /><testcase classname="test_tp_families" name="test_generic[G:read_back:POST /api/articles]" time="0.203"><skipped type="pytest.skip" message="no_valid_body: POST /api/articles answered 422">/usr/local/lib/python3.14/site-packages/platform_rt/families.py:215: no_valid_body: POST /api/articles answered 422</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:delete_final:POST /api/articles]" time="0.203"><skipped type="pytest.skip" message="no_valid_body: POST /api/articles answered 422">/usr/local/lib/python3.14/site-packages/platform_rt/families.py:215: no_valid_body: POST /api/articles answered 422</skipped></testcase></testsuite></testsuites>

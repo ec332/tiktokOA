@@ -1,0 +1,24 @@
+{
+ "execution": 330,
+ "k": 3,
+ "variants": {
+  "reference": {
+   "spec_hash": "3500fc5fadcef598367ddbb641b497173ba9ee7b3a0a10e05b9c5e68a0b91952",
+   "flags": [],
+   "reproduce": "curl http://localhost:8010/api/schema/",
+   "shuffle_seed": 56643073,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "url": "http://localhost:8010",
+    "commit": "unknown: a live system",
+    "spec": "2247a67613ae7cc352a313a177bdc396699ff0d5e3d351e877884a65a6d413c9",
+    "network": {
+     "run": "runner on an internal network, out only through the safe-mode proxy",
+     "build": "none: the system was already running"
+    }
+   }
+  }
+ },
+ "gate_report": "sha256:3224618a84e77e2ee2a162d83f878306e76cd2274a7b6dd485db1f6927b455bc",
+ "bound_tests": "sha256:b287880605c3630551696705513bbd7b17197e30df02a09cf96fc1e2d3289889"
+}

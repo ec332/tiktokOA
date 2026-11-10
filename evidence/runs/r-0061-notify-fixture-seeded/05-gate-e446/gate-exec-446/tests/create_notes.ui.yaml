@@ -1,0 +1,32 @@
+name: create_notes
+steps:
+- goto: /
+- fill:
+    role: textbox
+    name: Username
+    value: tpadmin
+- fill:
+    role: textbox
+    name: Password
+    value: $TP_SECRET_ADMIN_PASSWORD
+- click:
+    role: button
+    name: Sign in
+- click:
+    role: button
+    name: Dismiss
+    optional: true
+- fill:
+    role: textbox
+    name: Note
+    value: $TP_UNIQUE
+- click:
+    role: button
+    name: Save note
+- expect_request:
+    method: POST
+    path: /api/notes
+    status: 2xx
+- read_back:
+    path: /api/notes
+    contains: $TP_UNIQUE

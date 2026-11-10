@@ -1,0 +1,31 @@
+name: create_creatememo
+steps:
+- goto: /
+- fill:
+    role: textbox
+    name: Username
+    value: tpadmin
+- fill:
+    role: textbox
+    name: Password
+    value: $TP_SECRET_ADMIN_PASSWORD
+- click:
+    role: button
+    name: Sign in
+- click:
+    role: button
+    name: Skip
+    optional: true
+- fill:
+    role: textbox
+    value: $TP_UNIQUE
+- click:
+    role: button
+    name: Save
+- expect_request:
+    method: POST
+    path: /memos.api.MemoService/CreateMemo
+    status: 2xx
+- read_back:
+    path: /api/memos
+    contains: $TP_UNIQUE

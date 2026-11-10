@@ -1,0 +1,1604 @@
+{
+ "header": {
+  "network": {
+   "build": "none: the system was already running",
+   "run": "runner on an internal network, out only through the safe-mode proxy"
+  },
+  "labels": [
+   "real",
+   "unsigned"
+  ],
+  "run_records": "sha256:5b5bf42110a3610ee380fcd9bbd6166eaeadb2887c5d27698818679a9f81fcc6",
+  "execution": 330,
+  "variants": {
+   "reference": {
+    "fingerprint": {
+     "commit": "unknown: a live system",
+     "network": {
+      "build": "none: the system was already running",
+      "run": "runner on an internal network, out only through the safe-mode proxy"
+     },
+     "spec": "2247a67613ae7cc352a313a177bdc396699ff0d5e3d351e877884a65a6d413c9",
+     "url": "http://localhost:8010"
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "curl http://localhost:8010/api/schema/",
+    "shuffle_seed": 56643073,
+    "spec_hash": "3500fc5fadcef598367ddbb641b497173ba9ee7b3a0a10e05b9c5e68a0b91952"
+   }
+  },
+  "k": 3,
+  "sut": {
+   "name": "localhost-8010",
+   "ref": "unknown: a live system"
+  },
+  "cases_signed": false,
+  "unattended_decisions": {
+   "n": 13,
+   "d": 13,
+   "ids": [
+    "review:464",
+    "review:465",
+    "review:466",
+    "review:467",
+    "review:468",
+    "review:469",
+    "review:470",
+    "review:471",
+    "review:472",
+    "review:473",
+    "review:474",
+    "review:475",
+    "review:476"
+   ]
+  },
+  "strategies": {
+   "reach": "external",
+   "spec": "served",
+   "auth": "token_header",
+   "data": "spec_derived",
+   "state": "namespace",
+   "mutation": "none",
+   "safety": "safe_mode",
+   "checks": "pytest_cases"
+  },
+  "ceiling": "Seen on the live system, stable 3/3"
+ },
+ "worklist": {
+  "P0": [],
+  "P1": [],
+  "P2": {
+   "findings": [],
+   "quarantine": [],
+   "redundant": {
+    "n": 0,
+    "d": 35,
+    "ids": []
+   },
+   "mutation_strength": "not measured"
+  },
+  "P3": [
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-1",
+    "case": null,
+    "why": "Admin creates a tag with a name"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-3",
+    "case": null,
+    "why": "Tags can be listed with paging"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-4",
+    "case": null,
+    "why": "Tag can be deleted"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-6",
+    "case": null,
+    "why": "Tag list page_size has no upper bound"
+   }
+  ]
+ },
+ "checks": {
+  "families": {
+   "properties": {
+    "claim": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:properties:GET /api/correspondents/",
+      "G:properties:GET /api/correspondents/{id}/",
+      "G:properties:GET /api/custom_fields/",
+      "G:properties:POST /api/correspondents/",
+      "G:properties:POST /api/custom_fields/"
+     ]
+    },
+    "outcomes": {
+     "EXCLUDED": {
+      "n": 2,
+      "d": 5,
+      "ids": [
+       "G:properties:POST /api/correspondents/",
+       "G:properties:POST /api/custom_fields/"
+      ]
+     },
+     "SPEC_MISMATCH": {
+      "n": 3,
+      "d": 5,
+      "ids": [
+       "G:properties:GET /api/correspondents/",
+       "G:properties:GET /api/correspondents/{id}/",
+       "G:properties:GET /api/custom_fields/"
+      ]
+     }
+    }
+   },
+   "auth_required": {
+    "claim": "no or invalid credentials: never 2xx on a secured operation, never 5xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:auth_required:GET /api/correspondents/",
+      "G:auth_required:GET /api/correspondents/{id}/",
+      "G:auth_required:PATCH /api/correspondents/{id}/",
+      "G:auth_required:POST /api/correspondents/",
+      "G:auth_required:PUT /api/correspondents/{id}/"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 2,
+      "d": 5,
+      "ids": [
+       "G:auth_required:GET /api/correspondents/",
+       "G:auth_required:GET /api/correspondents/{id}/"
+      ]
+     },
+     "EXCLUDED": {
+      "n": 3,
+      "d": 5,
+      "ids": [
+       "G:auth_required:PATCH /api/correspondents/{id}/",
+       "G:auth_required:POST /api/correspondents/",
+       "G:auth_required:PUT /api/correspondents/{id}/"
+      ]
+     }
+    }
+   },
+   "unknown_id": {
+    "claim": "an ID that doesn't exist: never 2xx, never 5xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:unknown_id:GET /api/correspondents/{id}/",
+      "G:unknown_id:GET /api/custom_fields/{id}/",
+      "G:unknown_id:GET /api/document_types/{id}/",
+      "G:unknown_id:GET /api/groups/{id}/",
+      "G:unknown_id:GET /api/mail_accounts/{id}/"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 5,
+      "d": 5,
+      "ids": [
+       "G:unknown_id:GET /api/correspondents/{id}/",
+       "G:unknown_id:GET /api/custom_fields/{id}/",
+       "G:unknown_id:GET /api/document_types/{id}/",
+       "G:unknown_id:GET /api/groups/{id}/",
+       "G:unknown_id:GET /api/mail_accounts/{id}/"
+      ]
+     }
+    }
+   },
+   "invalid_input": {
+    "claim": "a body its schema forbids: 4xx, never 5xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:invalid_input:POST /api/correspondents/",
+      "G:invalid_input:POST /api/custom_fields/",
+      "G:invalid_input:POST /api/document_types/",
+      "G:invalid_input:POST /api/groups/",
+      "G:invalid_input:POST /api/mail_accounts/"
+     ]
+    },
+    "outcomes": {
+     "EXCLUDED": {
+      "n": 5,
+      "d": 5,
+      "ids": [
+       "G:invalid_input:POST /api/correspondents/",
+       "G:invalid_input:POST /api/custom_fields/",
+       "G:invalid_input:POST /api/document_types/",
+       "G:invalid_input:POST /api/groups/",
+       "G:invalid_input:POST /api/mail_accounts/"
+      ]
+     }
+    }
+   },
+   "read_back": {
+    "claim": "declared fields round-trip from create to read",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:read_back:POST /api/correspondents/",
+      "G:read_back:POST /api/custom_fields/",
+      "G:read_back:POST /api/document_types/",
+      "G:read_back:POST /api/groups/",
+      "G:read_back:POST /api/mail_accounts/"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 3,
+      "d": 5,
+      "ids": [
+       "G:read_back:POST /api/correspondents/",
+       "G:read_back:POST /api/custom_fields/",
+       "G:read_back:POST /api/document_types/"
+      ]
+     },
+     "EXCLUDED": {
+      "n": 2,
+      "d": 5,
+      "ids": [
+       "G:read_back:POST /api/groups/",
+       "G:read_back:POST /api/mail_accounts/"
+      ]
+     }
+    }
+   },
+   "delete_final": {
+    "claim": "a read after delete: never 2xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:delete_final:POST /api/correspondents/",
+      "G:delete_final:POST /api/custom_fields/",
+      "G:delete_final:POST /api/document_types/",
+      "G:delete_final:POST /api/groups/",
+      "G:delete_final:POST /api/mail_accounts/"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 3,
+      "d": 5,
+      "ids": [
+       "G:delete_final:POST /api/correspondents/",
+       "G:delete_final:POST /api/custom_fields/",
+       "G:delete_final:POST /api/document_types/"
+      ]
+     },
+     "EXCLUDED": {
+      "n": 2,
+      "d": 5,
+      "ids": [
+       "G:delete_final:POST /api/groups/",
+       "G:delete_final:POST /api/mail_accounts/"
+      ]
+     }
+    }
+   },
+   "paging": {
+    "claim": "out-of-range paging or a bad token: never 5xx; a 2xx is a page",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:paging:GET /api/correspondents/",
+      "G:paging:GET /api/custom_fields/",
+      "G:paging:GET /api/document_types/",
+      "G:paging:GET /api/groups/",
+      "G:paging:GET /api/mail_accounts/"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 5,
+      "d": 5,
+      "ids": [
+       "G:paging:GET /api/correspondents/",
+       "G:paging:GET /api/custom_fields/",
+       "G:paging:GET /api/document_types/",
+       "G:paging:GET /api/groups/",
+       "G:paging:GET /api/mail_accounts/"
+      ]
+     }
+    }
+   }
+  },
+  "excluded": {
+   "NOT_RUN": {
+    "n": 14,
+    "d": 35,
+    "ids": [
+     "G:auth_required:PATCH /api/correspondents/{id}/",
+     "G:auth_required:POST /api/correspondents/",
+     "G:auth_required:PUT /api/correspondents/{id}/",
+     "G:delete_final:POST /api/groups/",
+     "G:delete_final:POST /api/mail_accounts/",
+     "G:invalid_input:POST /api/correspondents/",
+     "G:invalid_input:POST /api/custom_fields/",
+     "G:invalid_input:POST /api/document_types/",
+     "G:invalid_input:POST /api/groups/",
+     "G:invalid_input:POST /api/mail_accounts/",
+     "G:properties:POST /api/correspondents/",
+     "G:properties:POST /api/custom_fields/",
+     "G:read_back:POST /api/groups/",
+     "G:read_back:POST /api/mail_accounts/"
+    ]
+   }
+  },
+  "spec_mismatch": [
+   {
+    "group": "G:properties:GET /api/correspondents/",
+    "claim": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "findings": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "F-reference/G:properties:GET /api/correspondents/"
+     ]
+    },
+    "rule": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "observed": {
+     "checks": [
+      "Undocumented status code"
+     ],
+     "curl": "curl -X GET -H 'Authorization: [Filtered]' -H 'Cookie: sessionid=[Filtered]' 'http://tp_ext_localhost_8010_proxy:8000/api/correspondents/?page=5197553'",
+     "error": "SpecMismatch: [property] GET /api/correspondents/: 5 example(s) disagree with the spec (Undocumented status code); first /api/correspondents/ \u2192 404",
+     "examples": "5/10",
+     "request": "GET /api/correspondents/",
+     "status": 404
+    }
+   },
+   {
+    "group": "G:properties:GET /api/correspondents/{id}/",
+    "claim": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "findings": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "F-reference/G:properties:GET /api/correspondents/{id}/"
+     ]
+    },
+    "rule": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "observed": {
+     "checks": [
+      "Undocumented status code"
+     ],
+     "curl": "curl -X GET -H 'Authorization: [Filtered]' http://tp_ext_localhost_8010_proxy:8000/api/correspondents/1/",
+     "error": "SpecMismatch: [property] GET /api/correspondents/{id}/: 10 example(s) disagree with the spec (Undocumented status code); first /api/correspondents/1/ \u2192 404",
+     "examples": "10/10",
+     "request": "GET /api/correspondents/1/",
+     "status": 404
+    }
+   },
+   {
+    "group": "G:properties:GET /api/custom_fields/",
+    "claim": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "findings": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "F-reference/G:properties:GET /api/custom_fields/"
+     ]
+    },
+    "rule": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "observed": {
+     "checks": [
+      "Undocumented status code"
+     ],
+     "curl": "curl -X GET -H 'Authorization: [Filtered]' -H 'Cookie: sessionid=[Filtered]' 'http://tp_ext_localhost_8010_proxy:8000/api/custom_fields/?page=5197553'",
+     "error": "SpecMismatch: [property] GET /api/custom_fields/: 2 example(s) disagree with the spec (Undocumented status code); first /api/custom_fields/ \u2192 404",
+     "examples": "2/10",
+     "request": "GET /api/custom_fields/",
+     "status": 404
+    }
+   }
+  ],
+  "spec_mismatch_more": {
+   "n": 0,
+   "d": 3,
+   "ids": []
+  }
+ },
+ "scorecard": {
+  "seeded_authored": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "seeded_per_flag": [],
+  "seeded_blind": "not run (M7)",
+  "real_defects": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "mutation_strength": "not measured",
+  "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits mostly under the test data, so this measures authentication more than the item rules",
+  "mutation_per_criterion": {
+   "G:auth_required:GET /api/correspondents/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:GET /api/correspondents/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:PATCH /api/correspondents/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:POST /api/correspondents/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:PUT /api/correspondents/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/correspondents/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/custom_fields/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/document_types/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/groups/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/mail_accounts/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/correspondents/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/custom_fields/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/document_types/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/groups/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/mail_accounts/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/correspondents/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/custom_fields/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/document_types/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/groups/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:paging:GET /api/mail_accounts/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/correspondents/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/correspondents/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/custom_fields/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/correspondents/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/custom_fields/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/correspondents/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/custom_fields/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/document_types/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/groups/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/mail_accounts/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/correspondents/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/custom_fields/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/document_types/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/groups/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/mail_accounts/{id}/": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "triage_correct_seeded": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "localisation": {
+   "top1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top3": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top5": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "fail_before_pass_after": "not run (M5)",
+  "criteria_without_admitted_test": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  }
+ },
+ "traceability": [
+  {
+   "req": [],
+   "ac": "G:auth_required:GET /api/correspondents/",
+   "case": "G:auth_required:GET /api/correspondents/",
+   "assertions": [
+    "G:auth_required:GET /api/correspondents//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:auth_required:GET /api/correspondents/"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:GET /api/correspondents/{id}/",
+   "case": "G:auth_required:GET /api/correspondents/{id}/",
+   "assertions": [
+    "G:auth_required:GET /api/correspondents/{id}//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:auth_required:GET /api/correspondents/{id}/"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:PATCH /api/correspondents/{id}/",
+   "case": "G:auth_required:PATCH /api/correspondents/{id}/",
+   "assertions": [
+    "G:auth_required:PATCH /api/correspondents/{id}//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:POST /api/correspondents/",
+   "case": "G:auth_required:POST /api/correspondents/",
+   "assertions": [
+    "G:auth_required:POST /api/correspondents//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:PUT /api/correspondents/{id}/",
+   "case": "G:auth_required:PUT /api/correspondents/{id}/",
+   "assertions": [
+    "G:auth_required:PUT /api/correspondents/{id}//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/correspondents/",
+   "case": "G:delete_final:POST /api/correspondents/",
+   "assertions": [
+    "G:delete_final:POST /api/correspondents//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:delete_final:POST /api/correspondents/"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/custom_fields/",
+   "case": "G:delete_final:POST /api/custom_fields/",
+   "assertions": [
+    "G:delete_final:POST /api/custom_fields//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:delete_final:POST /api/custom_fields/"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/document_types/",
+   "case": "G:delete_final:POST /api/document_types/",
+   "assertions": [
+    "G:delete_final:POST /api/document_types//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:delete_final:POST /api/document_types/"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/groups/",
+   "case": "G:delete_final:POST /api/groups/",
+   "assertions": [
+    "G:delete_final:POST /api/groups//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/mail_accounts/",
+   "case": "G:delete_final:POST /api/mail_accounts/",
+   "assertions": [
+    "G:delete_final:POST /api/mail_accounts//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/correspondents/",
+   "case": "G:invalid_input:POST /api/correspondents/",
+   "assertions": [
+    "G:invalid_input:POST /api/correspondents//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/custom_fields/",
+   "case": "G:invalid_input:POST /api/custom_fields/",
+   "assertions": [
+    "G:invalid_input:POST /api/custom_fields//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/document_types/",
+   "case": "G:invalid_input:POST /api/document_types/",
+   "assertions": [
+    "G:invalid_input:POST /api/document_types//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/groups/",
+   "case": "G:invalid_input:POST /api/groups/",
+   "assertions": [
+    "G:invalid_input:POST /api/groups//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/mail_accounts/",
+   "case": "G:invalid_input:POST /api/mail_accounts/",
+   "assertions": [
+    "G:invalid_input:POST /api/mail_accounts//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/correspondents/",
+   "case": "G:paging:GET /api/correspondents/",
+   "assertions": [
+    "G:paging:GET /api/correspondents//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:paging:GET /api/correspondents/"
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/custom_fields/",
+   "case": "G:paging:GET /api/custom_fields/",
+   "assertions": [
+    "G:paging:GET /api/custom_fields//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:paging:GET /api/custom_fields/"
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/document_types/",
+   "case": "G:paging:GET /api/document_types/",
+   "assertions": [
+    "G:paging:GET /api/document_types//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:paging:GET /api/document_types/"
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/groups/",
+   "case": "G:paging:GET /api/groups/",
+   "assertions": [
+    "G:paging:GET /api/groups//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:paging:GET /api/groups/"
+  },
+  {
+   "req": [],
+   "ac": "G:paging:GET /api/mail_accounts/",
+   "case": "G:paging:GET /api/mail_accounts/",
+   "assertions": [
+    "G:paging:GET /api/mail_accounts//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:paging:GET /api/mail_accounts/"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/correspondents/",
+   "case": "G:properties:GET /api/correspondents/",
+   "assertions": [
+    "property"
+   ],
+   "gate": "SPEC_MISMATCH",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/G:properties:GET /api/correspondents/"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/correspondents/{id}/",
+   "case": "G:properties:GET /api/correspondents/{id}/",
+   "assertions": [
+    "property"
+   ],
+   "gate": "SPEC_MISMATCH",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/G:properties:GET /api/correspondents/{id}/"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/custom_fields/",
+   "case": "G:properties:GET /api/custom_fields/",
+   "assertions": [
+    "property"
+   ],
+   "gate": "SPEC_MISMATCH",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "evidence": "ex:reference/a1/G:properties:GET /api/custom_fields/"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/correspondents/",
+   "case": "G:properties:POST /api/correspondents/",
+   "assertions": [
+    "G:properties:POST /api/correspondents//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/custom_fields/",
+   "case": "G:properties:POST /api/custom_fields/",
+   "assertions": [
+    "G:properties:POST /api/custom_fields//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/correspondents/",
+   "case": "G:read_back:POST /api/correspondents/",
+   "assertions": [
+    "G:read_back:POST /api/correspondents//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:read_back:POST /api/correspondents/"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/custom_fields/",
+   "case": "G:read_back:POST /api/custom_fields/",
+   "assertions": [
+    "G:read_back:POST /api/custom_fields//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:read_back:POST /api/custom_fields/"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/document_types/",
+   "case": "G:read_back:POST /api/document_types/",
+   "assertions": [
+    "G:read_back:POST /api/document_types//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:read_back:POST /api/document_types/"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/groups/",
+   "case": "G:read_back:POST /api/groups/",
+   "assertions": [
+    "G:read_back:POST /api/groups//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/mail_accounts/",
+   "case": "G:read_back:POST /api/mail_accounts/",
+   "assertions": [
+    "G:read_back:POST /api/mail_accounts//*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/correspondents/{id}/",
+   "case": "G:unknown_id:GET /api/correspondents/{id}/",
+   "assertions": [
+    "G:unknown_id:GET /api/correspondents/{id}//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/correspondents/{id}/"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/custom_fields/{id}/",
+   "case": "G:unknown_id:GET /api/custom_fields/{id}/",
+   "assertions": [
+    "G:unknown_id:GET /api/custom_fields/{id}//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/custom_fields/{id}/"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/document_types/{id}/",
+   "case": "G:unknown_id:GET /api/document_types/{id}/",
+   "assertions": [
+    "G:unknown_id:GET /api/document_types/{id}//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/document_types/{id}/"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/groups/{id}/",
+   "case": "G:unknown_id:GET /api/groups/{id}/",
+   "assertions": [
+    "G:unknown_id:GET /api/groups/{id}//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/groups/{id}/"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/mail_accounts/{id}/",
+   "case": "G:unknown_id:GET /api/mail_accounts/{id}/",
+   "assertions": [
+    "G:unknown_id:GET /api/mail_accounts/{id}//*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/mail_accounts/{id}/"
+  }
+ ],
+ "coverage": {
+  "by": "case technique (boundary \u2192 boundary; error_exception/error_guessing \u2192 exception; rest \u2192 normal)",
+  "normal": {
+   "n": 21,
+   "d": 21,
+   "ids": [
+    "G:auth_required:GET /api/correspondents/",
+    "G:auth_required:GET /api/correspondents/{id}/",
+    "G:delete_final:POST /api/correspondents/",
+    "G:delete_final:POST /api/custom_fields/",
+    "G:delete_final:POST /api/document_types/",
+    "G:paging:GET /api/correspondents/",
+    "G:paging:GET /api/custom_fields/",
+    "G:paging:GET /api/document_types/",
+    "G:paging:GET /api/groups/",
+    "G:paging:GET /api/mail_accounts/",
+    "G:properties:GET /api/correspondents/",
+    "G:properties:GET /api/correspondents/{id}/",
+    "G:properties:GET /api/custom_fields/",
+    "G:read_back:POST /api/correspondents/",
+    "G:read_back:POST /api/custom_fields/",
+    "G:read_back:POST /api/document_types/",
+    "G:unknown_id:GET /api/correspondents/{id}/",
+    "G:unknown_id:GET /api/custom_fields/{id}/",
+    "G:unknown_id:GET /api/document_types/{id}/",
+    "G:unknown_id:GET /api/groups/{id}/",
+    "G:unknown_id:GET /api/mail_accounts/{id}/"
+   ]
+  },
+  "boundary": {
+   "n": 0,
+   "d": 21,
+   "ids": []
+  },
+  "exception": {
+   "n": 0,
+   "d": 21,
+   "ids": []
+  }
+ },
+ "uncovered": {
+  "criteria_out_of_scope": [
+   {
+    "criterion": "C-1",
+    "reason": "flow FLOW-tags not in this run"
+   },
+   {
+    "criterion": "C-2",
+    "reason": "flow FLOW-tags not in this run"
+   },
+   {
+    "criterion": "C-3",
+    "reason": "flow FLOW-tags not in this run"
+   },
+   {
+    "criterion": "C-4",
+    "reason": "flow FLOW-tags not in this run"
+   },
+   {
+    "criterion": "C-5",
+    "reason": "flow FLOW-tags not in this run"
+   },
+   {
+    "criterion": "O-1",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-2",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-3",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-4",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-5",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-6",
+    "reason": "flow FLOW-tags not in this run"
+   },
+   {
+    "criterion": "O-7",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-8",
+    "reason": "out of scope in the spec"
+   }
+  ],
+  "deferred": [],
+  "skipped_templates": [],
+  "assumed": [
+   "C-1",
+   "C-3",
+   "C-4",
+   "O-6"
+  ],
+  "unbound_cases": [],
+  "behaviour_with_no_requirement": [
+   "POST /api/bulk_edit_objects/  (openapi/api/bulk_edit_objects/POST.yaml:1)",
+   "GET /api/config/  (openapi/api/config/GET.yaml:1)",
+   "DELETE /api/config/{id}/  (openapi/api/config/{id}/DELETE.yaml:1)",
+   "GET /api/config/{id}/  (openapi/api/config/{id}/GET.yaml:1)",
+   "PATCH /api/config/{id}/  (openapi/api/config/{id}/PATCH.yaml:1)",
+   "PUT /api/config/{id}/  (openapi/api/config/{id}/PUT.yaml:1)",
+   "GET /api/correspondents/  (openapi/api/correspondents/GET.yaml:1)",
+   "POST /api/correspondents/  (openapi/api/correspondents/POST.yaml:1)",
+   "DELETE /api/correspondents/{id}/  (openapi/api/correspondents/{id}/DELETE.yaml:1)",
+   "GET /api/correspondents/{id}/  (openapi/api/correspondents/{id}/GET.yaml:1)",
+   "PATCH /api/correspondents/{id}/  (openapi/api/correspondents/{id}/PATCH.yaml:1)",
+   "PUT /api/correspondents/{id}/  (openapi/api/correspondents/{id}/PUT.yaml:1)",
+   "GET /api/custom_fields/  (openapi/api/custom_fields/GET.yaml:1)",
+   "POST /api/custom_fields/  (openapi/api/custom_fields/POST.yaml:1)",
+   "DELETE /api/custom_fields/{id}/  (openapi/api/custom_fields/{id}/DELETE.yaml:1)",
+   "GET /api/custom_fields/{id}/  (openapi/api/custom_fields/{id}/GET.yaml:1)",
+   "PATCH /api/custom_fields/{id}/  (openapi/api/custom_fields/{id}/PATCH.yaml:1)",
+   "PUT /api/custom_fields/{id}/  (openapi/api/custom_fields/{id}/PUT.yaml:1)",
+   "GET /api/document_types/  (openapi/api/document_types/GET.yaml:1)",
+   "POST /api/document_types/  (openapi/api/document_types/POST.yaml:1)",
+   "DELETE /api/document_types/{id}/  (openapi/api/document_types/{id}/DELETE.yaml:1)",
+   "GET /api/document_types/{id}/  (openapi/api/document_types/{id}/GET.yaml:1)",
+   "PATCH /api/document_types/{id}/  (openapi/api/document_types/{id}/PATCH.yaml:1)",
+   "PUT /api/document_types/{id}/  (openapi/api/document_types/{id}/PUT.yaml:1)",
+   "GET /api/documents/  (openapi/api/documents/GET.yaml:1)",
+   "POST /api/documents/bulk_download/  (openapi/api/documents/bulk_download/POST.yaml:1)",
+   "POST /api/documents/bulk_edit/  (openapi/api/documents/bulk_edit/POST.yaml:1)",
+   "POST /api/documents/chat/  (openapi/api/documents/chat/POST.yaml:1)",
+   "POST /api/documents/delete/  (openapi/api/documents/delete/POST.yaml:1)",
+   "POST /api/documents/edit_pdf/  (openapi/api/documents/edit_pdf/POST.yaml:1)",
+   "POST /api/documents/email/  (openapi/api/documents/email/POST.yaml:1)",
+   "POST /api/documents/merge/  (openapi/api/documents/merge/POST.yaml:1)",
+   "POST /api/documents/merge_as_versions/  (openapi/api/documents/merge_as_versions/POST.yaml:1)",
+   "GET /api/documents/next_asn/  (openapi/api/documents/next_asn/GET.yaml:1)",
+   "POST /api/documents/post_document/  (openapi/api/documents/post_document/POST.yaml:1)",
+   "POST /api/documents/remove_password/  (openapi/api/documents/remove_password/POST.yaml:1)",
+   "POST /api/documents/reprocess/  (openapi/api/documents/reprocess/POST.yaml:1)",
+   "POST /api/documents/rotate/  (openapi/api/documents/rotate/POST.yaml:1)",
+   "POST /api/documents/selection_data/  (openapi/api/documents/selection_data/POST.yaml:1)",
+   "DELETE /api/documents/{id}/  (openapi/api/documents/{id}/DELETE.yaml:1)",
+   "GET /api/documents/{id}/  (openapi/api/documents/{id}/GET.yaml:1)",
+   "PATCH /api/documents/{id}/  (openapi/api/documents/{id}/PATCH.yaml:1)",
+   "PUT /api/documents/{id}/  (openapi/api/documents/{id}/PUT.yaml:1)",
+   "GET /api/documents/{id}/ai_suggestions/  (openapi/api/documents/{id}/ai_suggestions/GET.yaml:1)",
+   "GET /api/documents/{id}/download/  (openapi/api/documents/{id}/download/GET.yaml:1)",
+   "POST /api/documents/{id}/email/  (openapi/api/documents/{id}/email/POST.yaml:1)",
+   "GET /api/documents/{id}/history/  (openapi/api/documents/{id}/history/GET.yaml:1)",
+   "GET /api/documents/{id}/metadata/  (openapi/api/documents/{id}/metadata/GET.yaml:1)",
+   "DELETE /api/documents/{id}/notes/  (openapi/api/documents/{id}/notes/DELETE.yaml:1)",
+   "GET /api/documents/{id}/notes/  (openapi/api/documents/{id}/notes/GET.yaml:1)",
+   "POST /api/documents/{id}/notes/  (openapi/api/documents/{id}/notes/POST.yaml:1)",
+   "GET /api/documents/{id}/preview/  (openapi/api/documents/{id}/preview/GET.yaml:1)",
+   "GET /api/documents/{id}/root/  (openapi/api/documents/{id}/root/GET.yaml:1)",
+   "GET /api/documents/{id}/share_links/  (openapi/api/documents/{id}/share_links/GET.yaml:1)",
+   "GET /api/documents/{id}/suggestions/  (openapi/api/documents/{id}/suggestions/GET.yaml:1)",
+   "GET /api/documents/{id}/thumb/  (openapi/api/documents/{id}/thumb/GET.yaml:1)",
+   "POST /api/documents/{id}/update_version/  (openapi/api/documents/{id}/update_version/POST.yaml:1)",
+   "DELETE /api/documents/{id}/versions/{version_id}/  (openapi/api/documents/{id}/versions/{version_id}/DELETE.yaml:1)",
+   "PATCH /api/documents/{id}/versions/{version_id}/  (openapi/api/documents/{id}/versions/{version_id}/PATCH.yaml:1)",
+   "GET /api/groups/  (openapi/api/groups/GET.yaml:1)",
+   "POST /api/groups/  (openapi/api/groups/POST.yaml:1)",
+   "DELETE /api/groups/{id}/  (openapi/api/groups/{id}/DELETE.yaml:1)",
+   "GET /api/groups/{id}/  (openapi/api/groups/{id}/GET.yaml:1)",
+   "PATCH /api/groups/{id}/  (openapi/api/groups/{id}/PATCH.yaml:1)",
+   "PUT /api/groups/{id}/  (openapi/api/groups/{id}/PUT.yaml:1)",
+   "GET /api/logs/  (openapi/api/logs/GET.yaml:1)",
+   "GET /api/logs/{id}/  (openapi/api/logs/{id}/GET.yaml:1)",
+   "GET /api/mail_accounts/  (openapi/api/mail_accounts/GET.yaml:1)",
+   "POST /api/mail_accounts/  (openapi/api/mail_accounts/POST.yaml:1)",
+   "POST /api/mail_accounts/test/  (openapi/api/mail_accounts/test/POST.yaml:1)",
+   "DELETE /api/mail_accounts/{id}/  (openapi/api/mail_accounts/{id}/DELETE.yaml:1)",
+   "GET /api/mail_accounts/{id}/  (openapi/api/mail_accounts/{id}/GET.yaml:1)",
+   "PATCH /api/mail_accounts/{id}/  (openapi/api/mail_accounts/{id}/PATCH.yaml:1)",
+   "PUT /api/mail_accounts/{id}/  (openapi/api/mail_accounts/{id}/PUT.yaml:1)",
+   "POST /api/mail_accounts/{id}/process/  (openapi/api/mail_accounts/{id}/process/POST.yaml:1)",
+   "GET /api/mail_rules/  (openapi/api/mail_rules/GET.yaml:1)",
+   "POST /api/mail_rules/  (openapi/api/mail_rules/POST.yaml:1)",
+   "DELETE /api/mail_rules/{id}/  (openapi/api/mail_rules/{id}/DELETE.yaml:1)",
+   "GET /api/mail_rules/{id}/  (openapi/api/mail_rules/{id}/GET.yaml:1)",
+   "PATCH /api/mail_rules/{id}/  (openapi/api/mail_rules/{id}/PATCH.yaml:1)",
+   "PUT /api/mail_rules/{id}/  (openapi/api/mail_rules/{id}/PUT.yaml:1)",
+   "GET /api/oauth/callback/  (openapi/api/oauth/callback/GET.yaml:1)",
+   "GET /api/processed_mail/  (openapi/api/processed_mail/GET.yaml:1)",
+   "POST /api/processed_mail/bulk_delete/  (openapi/api/processed_mail/bulk_delete/POST.yaml:1)",
+   "GET /api/processed_mail/{id}/  (openapi/api/processed_mail/{id}/GET.yaml:1)",
+   "GET /api/profile/  (openapi/api/profile/GET.yaml:1)",
+   "PATCH /api/profile/  (openapi/api/profile/PATCH.yaml:1)",
+   "POST /api/profile/disconnect_social_account/  (openapi/api/profile/disconnect_social_account/POST.yaml:1)",
+   "POST /api/profile/generate_auth_token/  (openapi/api/profile/generate_auth_token/POST.yaml:1)",
+   "GET /api/profile/social_account_providers/  (openapi/api/profile/social_account_providers/GET.yaml:1)",
+   "DELETE /api/profile/totp/  (openapi/api/profile/totp/DELETE.yaml:1)",
+   "GET /api/profile/totp/  (openapi/api/profile/totp/GET.yaml:1)",
+   "POST /api/profile/totp/  (openapi/api/profile/totp/POST.yaml:1)",
+   "GET /api/remote_version/  (openapi/api/remote_version/GET.yaml:1)",
+   "GET /api/saved_views/  (openapi/api/saved_views/GET.yaml:1)",
+   "POST /api/saved_views/  (openapi/api/saved_views/POST.yaml:1)",
+   "DELETE /api/saved_views/{id}/  (openapi/api/saved_views/{id}/DELETE.yaml:1)",
+   "GET /api/saved_views/{id}/  (openapi/api/saved_views/{id}/GET.yaml:1)",
+   "PATCH /api/saved_views/{id}/  (openapi/api/saved_views/{id}/PATCH.yaml:1)",
+   "PUT /api/saved_views/{id}/  (openapi/api/saved_views/{id}/PUT.yaml:1)",
+   "GET /api/search/  (openapi/api/search/GET.yaml:1)",
+   "GET /api/search/autocomplete/  (openapi/api/search/autocomplete/GET.yaml:1)",
+   "GET /api/share_link_bundles/  (openapi/api/share_link_bundles/GET.yaml:1)",
+   "POST /api/share_link_bundles/  (openapi/api/share_link_bundles/POST.yaml:1)",
+   "DELETE /api/share_link_bundles/{id}/  (openapi/api/share_link_bundles/{id}/DELETE.yaml:1)",
+   "GET /api/share_link_bundles/{id}/  (openapi/api/share_link_bundles/{id}/GET.yaml:1)",
+   "POST /api/share_link_bundles/{id}/rebuild/  (openapi/api/share_link_bundles/{id}/rebuild/POST.yaml:1)",
+   "GET /api/share_links/  (openapi/api/share_links/GET.yaml:1)",
+   "POST /api/share_links/  (openapi/api/share_links/POST.yaml:1)",
+   "DELETE /api/share_links/{id}/  (openapi/api/share_links/{id}/DELETE.yaml:1)",
+   "GET /api/share_links/{id}/  (openapi/api/share_links/{id}/GET.yaml:1)",
+   "GET /api/statistics/  (openapi/api/statistics/GET.yaml:1)",
+   "GET /api/status/  (openapi/api/status/GET.yaml:1)",
+   "GET /api/storage_paths/  (openapi/api/storage_paths/GET.yaml:1)",
+   "POST /api/storage_paths/  (openapi/api/storage_paths/POST.yaml:1)",
+   "POST /api/storage_paths/test/  (openapi/api/storage_paths/test/POST.yaml:1)",
+   "DELETE /api/storage_paths/{id}/  (openapi/api/storage_paths/{id}/DELETE.yaml:1)",
+   "GET /api/storage_paths/{id}/  (openapi/api/storage_paths/{id}/GET.yaml:1)",
+   "PATCH /api/storage_paths/{id}/  (openapi/api/storage_paths/{id}/PATCH.yaml:1)",
+   "PUT /api/storage_paths/{id}/  (openapi/api/storage_paths/{id}/PUT.yaml:1)",
+   "GET /api/tasks/  (openapi/api/tasks/GET.yaml:1)",
+   "POST /api/tasks/acknowledge/  (openapi/api/tasks/acknowledge/POST.yaml:1)",
+   "GET /api/tasks/active/  (openapi/api/tasks/active/GET.yaml:1)",
+   "POST /api/tasks/run/  (openapi/api/tasks/run/POST.yaml:1)",
+   "GET /api/tasks/status_counts/  (openapi/api/tasks/status_counts/GET.yaml:1)",
+   "GET /api/tasks/summary/  (openapi/api/tasks/summary/GET.yaml:1)",
+   "GET /api/tasks/{id}/  (openapi/api/tasks/{id}/GET.yaml:1)",
+   "POST /api/token/  (openapi/api/token/POST.yaml:1)",
+   "GET /api/trash/  (openapi/api/trash/GET.yaml:1)",
+   "POST /api/trash/  (openapi/api/trash/POST.yaml:1)",
+   "GET /api/ui_settings/  (openapi/api/ui_settings/GET.yaml:1)",
+   "POST /api/ui_settings/  (openapi/api/ui_settings/POST.yaml:1)",
+   "GET /api/users/  (openapi/api/users/GET.yaml:1)",
+   "POST /api/users/  (openapi/api/users/POST.yaml:1)",
+   "DELETE /api/users/{id}/  (openapi/api/users/{id}/DELETE.yaml:1)",
+   "GET /api/users/{id}/  (openapi/api/users/{id}/GET.yaml:1)",
+   "PATCH /api/users/{id}/  (openapi/api/users/{id}/PATCH.yaml:1)",
+   "PUT /api/users/{id}/  (openapi/api/users/{id}/PUT.yaml:1)",
+   "POST /api/users/{id}/deactivate_totp/  (openapi/api/users/{id}/deactivate_totp/POST.yaml:1)",
+   "GET /api/workflow_actions/  (openapi/api/workflow_actions/GET.yaml:1)",
+   "POST /api/workflow_actions/  (openapi/api/workflow_actions/POST.yaml:1)",
+   "DELETE /api/workflow_actions/{id}/  (openapi/api/workflow_actions/{id}/DELETE.yaml:1)",
+   "GET /api/workflow_actions/{id}/  (openapi/api/workflow_actions/{id}/GET.yaml:1)",
+   "PATCH /api/workflow_actions/{id}/  (openapi/api/workflow_actions/{id}/PATCH.yaml:1)",
+   "PUT /api/workflow_actions/{id}/  (openapi/api/workflow_actions/{id}/PUT.yaml:1)",
+   "GET /api/workflow_triggers/  (openapi/api/workflow_triggers/GET.yaml:1)",
+   "POST /api/workflow_triggers/  (openapi/api/workflow_triggers/POST.yaml:1)",
+   "DELETE /api/workflow_triggers/{id}/  (openapi/api/workflow_triggers/{id}/DELETE.yaml:1)",
+   "GET /api/workflow_triggers/{id}/  (openapi/api/workflow_triggers/{id}/GET.yaml:1)",
+   "PATCH /api/workflow_triggers/{id}/  (openapi/api/workflow_triggers/{id}/PATCH.yaml:1)",
+   "PUT /api/workflow_triggers/{id}/  (openapi/api/workflow_triggers/{id}/PUT.yaml:1)",
+   "GET /api/workflows/  (openapi/api/workflows/GET.yaml:1)",
+   "POST /api/workflows/  (openapi/api/workflows/POST.yaml:1)",
+   "DELETE /api/workflows/{id}/  (openapi/api/workflows/{id}/DELETE.yaml:1)",
+   "GET /api/workflows/{id}/  (openapi/api/workflows/{id}/GET.yaml:1)",
+   "PATCH /api/workflows/{id}/  (openapi/api/workflows/{id}/PATCH.yaml:1)",
+   "PUT /api/workflows/{id}/  (openapi/api/workflows/{id}/PUT.yaml:1)"
+  ],
+  "seeded_race": ""
+ },
+ "ai_decisions": {
+  "spec_answers": {
+   "n": 6,
+   "d": null,
+   "ids": [
+    "35f59893d1234a1d",
+    "5cc36b837b559a79",
+    "8794135dfc3ef5de",
+    "a8ad5cd6fd81f480",
+    "db745e2e45d5e125",
+    "e5509dbbb23b3068"
+   ]
+  },
+  "spec_assumed": {
+   "n": 6,
+   "d": 6,
+   "ids": [
+    "35f59893d1234a1d",
+    "5cc36b837b559a79",
+    "8794135dfc3ef5de",
+    "a8ad5cd6fd81f480",
+    "db745e2e45d5e125",
+    "e5509dbbb23b3068"
+   ]
+  },
+  "cases_llm_drafted": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "cases_signoff": {
+   "signed": false,
+   "approved": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "gate_equivalence": {
+   "equivalent": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "resolution": "not confirmed by a person; counted as survivors"
+  },
+  "triage": "no AI in M4 (rules only; the AI judge is M7)",
+  "overrides": [],
+  "review_decisions": [
+   {
+    "item": 464,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 465,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 466,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 467,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 468,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 469,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 470,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 471,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 472,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 473,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 474,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 475,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 476,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   }
+  ]
+ },
+ "evidence": {},
+ "defects": [],
+ "product": {
+  "summary": {
+   "tests": 35,
+   "admitted": 18,
+   "defects": 0,
+   "problematic": 3,
+   "improve": 10,
+   "approved": 0,
+   "proposed": 0
+  },
+  "defects": [],
+  "causes": [],
+  "problematic_tests": [
+   {
+    "case": "G:properties:GET /api/correspondents/",
+    "title": "G:properties:GET /api/correspondents/",
+    "summary": "",
+    "ac": "G:properties:GET /api/correspondents/",
+    "criterion": "",
+    "status": "SPEC_MISMATCH",
+    "reason": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "evidence": [
+     "ex:reference/a1/G:properties:GET /api/correspondents/"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "G:properties:GET /api/correspondents/{id}/",
+    "title": "G:properties:GET /api/correspondents/{id}/",
+    "summary": "",
+    "ac": "G:properties:GET /api/correspondents/{id}/",
+    "criterion": "",
+    "status": "SPEC_MISMATCH",
+    "reason": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "evidence": [
+     "ex:reference/a1/G:properties:GET /api/correspondents/{id}/"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "G:properties:GET /api/custom_fields/",
+    "title": "G:properties:GET /api/custom_fields/",
+    "summary": "",
+    "ac": "G:properties:GET /api/custom_fields/",
+    "criterion": "",
+    "status": "SPEC_MISMATCH",
+    "reason": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "evidence": [
+     "ex:reference/a1/G:properties:GET /api/custom_fields/"
+    ],
+    "source": "execute",
+    "count": 1
+   }
+  ],
+  "improve": [
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "page_size capped at a documented maximum such as 100, with larger values clamped or rejected with 400",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: admin-only create",
+    "detail": "admin or superuser only, ordinary user gets 403",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: duplicate tag names",
+    "detail": "reject with 400 or 409",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: delete tag in use or with children",
+    "detail": "refuse with 409",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: page_size maximum",
+    "detail": "cap at a documented maximum such as 100",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: default ordering of the list",
+    "detail": "Sort by name ascending",
+    "ac": null
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-1 is still an assumption",
+    "detail": "Admin creates a tag with a name",
+    "ac": "C-1"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-3 is still an assumption",
+    "detail": "Tags can be listed with paging",
+    "ac": "C-3"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-4 is still an assumption",
+    "detail": "Tag can be deleted",
+    "ac": "C-4"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-6 is still an assumption",
+    "detail": "Tag list page_size has no upper bound",
+    "ac": "O-6"
+   }
+  ],
+  "rules": {
+   "clarify": [],
+   "cases": [],
+   "templates": null,
+   "gate": {
+    "every_criterion": true,
+    "k": 3,
+    "min_kills": 1,
+    "near": 3
+   },
+   "routes": [],
+   "scan": null
+  }
+ }
+}

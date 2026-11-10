@@ -1,0 +1,1 @@
+{"body":{"profile":"memos","stops":["question","confirm_observed","setup","signoff"],"unattended":true},"manifest":{"created_at":"2026-11-08T09:09:14Z","id":"sha256:36897b8516eedf0b11373222e7d6af86a9724076c7429871e3b33d9be959b50d","labels":[],"parents":[],"schema_version":1,"signed":null,"stage":null,"stage_version":null,"type":"run_options"}}

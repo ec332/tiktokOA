@@ -1,0 +1,137 @@
+# Spec v3 — memos @ b40d8a7
+
+Requirements: brief `sha256:f2c1dba6df67`. Code index: 93 routes in 94 files.
+
+## Criteria
+
+| id | status | title | given / when / then | expected | sources | flags |
+|---|---|---|---|---|---|---|
+| C-1 | assumed | People can write short notes | none stated / a person writes a short note / the short note is written (the text states no further outcome) | human judgement | L1-L1 | no_observable_outcome, missing_actor, missing_error_path, review needed |
+| C-2 | assumed | People can edit notes they have written | a note exists / a person edits the note / the note is edited (the text states no further outcome) | human judgement | L1-L1 | no_observable_outcome, missing_actor, missing_error_path, review needed |
+| C-3 | confirmed | People can delete notes they have written | a note exists / a person deletes the note / the note is deleted (the text states no further outcome) | human judgement | L1-L1 | missing_actor, missing_error_path |
+| O-1 | out_of_scope | Create without memo ID generates one | an authenticated user / POST /api/memos is called without the memoId query parameter / a memo is created with a server-generated unique ID and returned | 200 | openapi/api/memos/POST.yaml:11 |  |
+| O-2 | out_of_scope | Create defaults visibility to PRIVATE | an authenticated user / POST /api/memos is called with no visibility value / the memo is created with visibility PRIVATE | 200 | openapi/components.yaml:1321 | missing_error_path |
+| O-3 | out_of_scope | Create always yields a NORMAL memo | an authenticated user / POST /api/memos creates a memo / the memo state is NORMAL, whatever state the request body carries | 200 | openapi/components.yaml:1331 | undefined_term, missing_error_path |
+| O-4 | out_of_scope | Create ignores pinned flag | an authenticated user / POST /api/memos is called with pinned set to true / the memo is created unpinned, since pinned is ignored on creation | 200 | openapi/components.yaml:1336 | missing_error_path |
+| O-5 | out_of_scope | Anonymous create is refused | no signed-in session / POST /api/memos is called / the call requires authentication; the status code for refusal is not stated |  | openapi/api/memos/POST.yaml:6 |  |
+| O-6 | out_of_scope | Edit limited to creator or admin | a memo exists / PATCH /api/memos/{memo} is called / the update is allowed only for the creator or an instance admin; the status code for other callers is not stated |  | openapi/api/memos/{memo}/PATCH.yaml:4, openapi/api/memos/{memo}/PATCH.yaml:5 | missing_error_path |
+| O-7 | out_of_scope | Edit applies only the fields in updateMask | a memo exists / PATCH /api/memos/{memo} is called with an updateMask / only the listed fields change, and the updated memo is returned | 200 | openapi/api/memos/{memo}/PATCH.yaml:16, openapi/api/memos/{memo}/PATCH.yaml:28 | missing_error_path |
+| O-8 | assumed | Edit can rewrite creation and update timestamps | a memo exists / PATCH /api/memos/{memo} is called with create_time or update_time in updateMask / Ignore them and set update_time to the server time on edit |  | openapi/api/memos/{memo}/PATCH.yaml:17 | missing_actor, missing_error_path, SUSPECTED DEFECT, review needed |
+| O-9 | out_of_scope | Delete removes the comment subtree | a memo has comments and nested replies / DELETE /api/memos/{memo} is called / the memo and its whole comment subtree are removed, with their owned resources and incident relations | 200 | openapi/api/memos/{memo}/DELETE.yaml:4, openapi/api/memos/{memo}/DELETE.yaml:5 | missing_error_path |
+| O-10 | out_of_scope | Delete limited to creator or admin | a memo exists / DELETE /api/memos/{memo} is called / the delete is allowed only for the creator or an instance admin; the status code for other callers is not stated |  | openapi/api/memos/{memo}/DELETE.yaml:6 | missing_error_path |
+| O-11 | out_of_scope | Delete returns an empty success body | a memo exists / DELETE /api/memos/{memo} succeeds / the response is 200 with no body | 200 | openapi/api/memos/{memo}/DELETE.yaml:22, openapi/api/memos/{memo}/DELETE.yaml:24 | missing_error_path |
+| O-12 | out_of_scope | Delete ignores force flag | a memo exists / DELETE /api/memos/{memo}?force=true is called / the force flag has no effect; deletion always includes the comment subtree | 200 | openapi/api/memos/{memo}/DELETE.yaml:17, openapi/api/memos/{memo}/DELETE.yaml:18 | missing_error_path |
+
+## Findings
+
+- **missing_error_path**: Empty note content is not settled. Memo.content is required, but no minimum length is stated, and the only stated limit is the instance content length limit, whose value the requirements do not give. (openapi/components.yaml:1288, openapi/components.yaml:1307)
+- **missing_error_path**: Behaviour when the requested memo ID already exists is not described. The memo ID query parameter only says it is used as the resource name suffix or generated when empty. (openapi/api/memos/POST.yaml:11, openapi/api/memos/POST.yaml:12)
+- **rule_interaction**: visibility is listed as required in the Memo schema, but the field description says it defaults to PRIVATE when unspecified. A create request that omits visibility could be rejected or accepted, and the requirements do not say which. (openapi/components.yaml:1289, openapi/components.yaml:1321, openapi/api/memos/POST.yaml:4)
+- **story_code_conflict**: The brief says people edit and delete the notes they have written. The code lets an instance administrator edit and delete any memo as well. (openapi/api/memos/{memo}/PATCH.yaml:4, openapi/api/memos/{memo}/DELETE.yaml:6)
+- **rule_interaction**: Deleting a note also deletes its whole comment subtree, including nested replies written by other people and their owned resources, and removes relations of all deleted memos. The brief does not mention this cascade. (openapi/api/memos/{memo}/DELETE.yaml:4, openapi/api/memos/{memo}/DELETE.yaml:5)
+- **no_requirement**: The force query parameter on delete is ignored by the server, and the requirements do not mention it. (openapi/api/memos/{memo}/DELETE.yaml:15, openapi/api/memos/{memo}/DELETE.yaml:17)
+- **suspected_defect**: The UpdateMemo field mask accepts create_time and update_time, so an ordinary edit can rewrite a note's creation timestamp. Nothing in the spec says clients should be able to do this. (openapi/api/memos/{memo}/PATCH.yaml:16, openapi/api/memos/{memo}/PATCH.yaml:17)
+- **missing_error_path**: updateMask is required, but what happens when it is present and empty is not stated, so an edit with no fields could be an error or a silent no-op. (openapi/api/memos/{memo}/PATCH.yaml:16)
+
+## Behaviour with no requirement (routes no criterion covers)
+
+- POST /api/ai:transcribe  (openapi/api/ai:transcribe/POST.yaml:1)
+- GET /api/attachments  (openapi/api/attachments/GET.yaml:1)
+- POST /api/attachments  (openapi/api/attachments/POST.yaml:1)
+- DELETE /api/attachments/{attachment}  (openapi/api/attachments/{attachment}/DELETE.yaml:1)
+- GET /api/attachments/{attachment}  (openapi/api/attachments/{attachment}/GET.yaml:1)
+- PATCH /api/attachments/{attachment}  (openapi/api/attachments/{attachment}/PATCH.yaml:1)
+- POST /api/attachments:batchDelete  (openapi/api/attachments:batchDelete/POST.yaml:1)
+- POST /api/attachments:upload  (openapi/api/attachments:upload/POST.yaml:1)
+- GET /api/auth/me  (openapi/api/auth/me/GET.yaml:1)
+- POST /api/auth/refresh  (openapi/api/auth/refresh/POST.yaml:1)
+- POST /api/auth/signin  (openapi/api/auth/signin/POST.yaml:1)
+- POST /api/auth/signout  (openapi/api/auth/signout/POST.yaml:1)
+- GET /api/identity-providers  (openapi/api/identity-providers/GET.yaml:1)
+- POST /api/identity-providers  (openapi/api/identity-providers/POST.yaml:1)
+- DELETE /api/identity-providers/{identity-provider}  (openapi/api/identity-providers/{identity-provider}/DELETE.yaml:1)
+- GET /api/identity-providers/{identity-provider}  (openapi/api/identity-providers/{identity-provider}/GET.yaml:1)
+- PATCH /api/identity-providers/{identity-provider}  (openapi/api/identity-providers/{identity-provider}/PATCH.yaml:1)
+- GET /api/instance/configuration  (openapi/api/instance/configuration/GET.yaml:1)
+- GET /api/instance/profile  (openapi/api/instance/profile/GET.yaml:1)
+- POST /api/instance/settings/notification:testEmail  (openapi/api/instance/settings/notification:testEmail/POST.yaml:1)
+- POST /api/instance/settings:batchGet  (openapi/api/instance/settings:batchGet/POST.yaml:1)
+- GET /api/instance/stats  (openapi/api/instance/stats/GET.yaml:1)
+- GET /api/instance/{instance}/*  (openapi/api/instance/{instance}/*/GET.yaml:1)
+- PATCH /api/instance/{instance}/*  (openapi/api/instance/{instance}/*/PATCH.yaml:1)
+- GET /api/memos  (openapi/api/memos/GET.yaml:1)
+- GET /api/memos/-/linkMetadata  (openapi/api/memos/-/linkMetadata/GET.yaml:1)
+- POST /api/memos/-/linkMetadata:batchGet  (openapi/api/memos/-/linkMetadata:batchGet/POST.yaml:1)
+- GET /api/memos/{memo}  (openapi/api/memos/{memo}/GET.yaml:1)
+- GET /api/memos/{memo}/attachments  (openapi/api/memos/{memo}/attachments/GET.yaml:1)
+- PATCH /api/memos/{memo}/attachments  (openapi/api/memos/{memo}/attachments/PATCH.yaml:1)
+- GET /api/memos/{memo}/comments  (openapi/api/memos/{memo}/comments/GET.yaml:1)
+- POST /api/memos/{memo}/comments  (openapi/api/memos/{memo}/comments/POST.yaml:1)
+- GET /api/memos/{memo}/reactions  (openapi/api/memos/{memo}/reactions/GET.yaml:1)
+- POST /api/memos/{memo}/reactions  (openapi/api/memos/{memo}/reactions/POST.yaml:1)
+- DELETE /api/memos/{memo}/reactions/{reaction}  (openapi/api/memos/{memo}/reactions/{reaction}/DELETE.yaml:1)
+- GET /api/memos/{memo}/relations  (openapi/api/memos/{memo}/relations/GET.yaml:1)
+- PATCH /api/memos/{memo}/relations  (openapi/api/memos/{memo}/relations/PATCH.yaml:1)
+- GET /api/memos/{memo}/shares  (openapi/api/memos/{memo}/shares/GET.yaml:1)
+- POST /api/memos/{memo}/shares  (openapi/api/memos/{memo}/shares/POST.yaml:1)
+- DELETE /api/memos/{memo}/shares/{share}  (openapi/api/memos/{memo}/shares/{share}/DELETE.yaml:1)
+- GET /api/shares/{shareToken}/memo  (openapi/api/shares/{shareToken}/memo/GET.yaml:1)
+- GET /api/spaces  (openapi/api/spaces/GET.yaml:1)
+- POST /api/spaces  (openapi/api/spaces/POST.yaml:1)
+- DELETE /api/spaces/{space}  (openapi/api/spaces/{space}/DELETE.yaml:1)
+- GET /api/spaces/{space}  (openapi/api/spaces/{space}/GET.yaml:1)
+- PATCH /api/spaces/{space}  (openapi/api/spaces/{space}/PATCH.yaml:1)
+- GET /api/spaces/{space}/invitations  (openapi/api/spaces/{space}/invitations/GET.yaml:1)
+- POST /api/spaces/{space}/invitations  (openapi/api/spaces/{space}/invitations/POST.yaml:1)
+- DELETE /api/spaces/{space}/invitations/{invitation}  (openapi/api/spaces/{space}/invitations/{invitation}/DELETE.yaml:1)
+- GET /api/spaces/{space}/invitations/{invitation}  (openapi/api/spaces/{space}/invitations/{invitation}/GET.yaml:1)
+- POST /api/spaces/{space}/invitations/{invitation}:accept  (openapi/api/spaces/{space}/invitations/{invitation}:accept/POST.yaml:1)
+- POST /api/spaces/{space}/invitations/{invitation}:decline  (openapi/api/spaces/{space}/invitations/{invitation}:decline/POST.yaml:1)
+- GET /api/spaces/{space}/members  (openapi/api/spaces/{space}/members/GET.yaml:1)
+- DELETE /api/spaces/{space}/members/{member}  (openapi/api/spaces/{space}/members/{member}/DELETE.yaml:1)
+- GET /api/spaces/{space}/members/{member}  (openapi/api/spaces/{space}/members/{member}/GET.yaml:1)
+- PATCH /api/spaces/{space}/members/{member}  (openapi/api/spaces/{space}/members/{member}/PATCH.yaml:1)
+- GET /api/users  (openapi/api/users/GET.yaml:1)
+- POST /api/users  (openapi/api/users/POST.yaml:1)
+- DELETE /api/users/{user}  (openapi/api/users/{user}/DELETE.yaml:1)
+- GET /api/users/{user}  (openapi/api/users/{user}/GET.yaml:1)
+- PATCH /api/users/{user}  (openapi/api/users/{user}/PATCH.yaml:1)
+- GET /api/users/{user}/linkedIdentities  (openapi/api/users/{user}/linkedIdentities/GET.yaml:1)
+- POST /api/users/{user}/linkedIdentities  (openapi/api/users/{user}/linkedIdentities/POST.yaml:1)
+- DELETE /api/users/{user}/linkedIdentities/{linkedIdentity}  (openapi/api/users/{user}/linkedIdentities/{linkedIdentity}/DELETE.yaml:1)
+- GET /api/users/{user}/linkedIdentities/{linkedIdentity}  (openapi/api/users/{user}/linkedIdentities/{linkedIdentity}/GET.yaml:1)
+- GET /api/users/{user}/notifications  (openapi/api/users/{user}/notifications/GET.yaml:1)
+- DELETE /api/users/{user}/notifications/{notification}  (openapi/api/users/{user}/notifications/{notification}/DELETE.yaml:1)
+- PATCH /api/users/{user}/notifications/{notification}  (openapi/api/users/{user}/notifications/{notification}/PATCH.yaml:1)
+- GET /api/users/{user}/personalAccessTokens  (openapi/api/users/{user}/personalAccessTokens/GET.yaml:1)
+- POST /api/users/{user}/personalAccessTokens  (openapi/api/users/{user}/personalAccessTokens/POST.yaml:1)
+- DELETE /api/users/{user}/personalAccessTokens/{personalAccessToken}  (openapi/api/users/{user}/personalAccessTokens/{personalAccessToken}/DELETE.yaml:1)
+- GET /api/users/{user}/settings  (openapi/api/users/{user}/settings/GET.yaml:1)
+- GET /api/users/{user}/settings/{setting}  (openapi/api/users/{user}/settings/{setting}/GET.yaml:1)
+- PATCH /api/users/{user}/settings/{setting}  (openapi/api/users/{user}/settings/{setting}/PATCH.yaml:1)
+- GET /api/users/{user}/spaceInvitations  (openapi/api/users/{user}/spaceInvitations/GET.yaml:1)
+- GET /api/users/{user}/stats  (openapi/api/users/{user}/stats/GET.yaml:1)
+- GET /api/users/{user}/usage  (openapi/api/users/{user}/usage/GET.yaml:1)
+- GET /api/users/{user}/views  (openapi/api/users/{user}/views/GET.yaml:1)
+- POST /api/users/{user}/views  (openapi/api/users/{user}/views/POST.yaml:1)
+- DELETE /api/users/{user}/views/{view}  (openapi/api/users/{user}/views/{view}/DELETE.yaml:1)
+- GET /api/users/{user}/views/{view}  (openapi/api/users/{user}/views/{view}/GET.yaml:1)
+- PATCH /api/users/{user}/views/{view}  (openapi/api/users/{user}/views/{view}/PATCH.yaml:1)
+- GET /api/users/{user}/webhooks  (openapi/api/users/{user}/webhooks/GET.yaml:1)
+- POST /api/users/{user}/webhooks  (openapi/api/users/{user}/webhooks/POST.yaml:1)
+- DELETE /api/users/{user}/webhooks/{webhook}  (openapi/api/users/{user}/webhooks/{webhook}/DELETE.yaml:1)
+- PATCH /api/users/{user}/webhooks/{webhook}  (openapi/api/users/{user}/webhooks/{webhook}/PATCH.yaml:1)
+- GET /api/users/{user}/webhooks/{webhook}:getSigningSecret  (openapi/api/users/{user}/webhooks/{webhook}:getSigningSecret/GET.yaml:1)
+- GET /api/users/{user}:getStats  (openapi/api/users/{user}:getStats/GET.yaml:1)
+- POST /api/users/{user}:importMemos  (openapi/api/users/{user}:importMemos/POST.yaml:1)
+- POST /api/users:batchGet  (openapi/api/users:batchGet/POST.yaml:1)
+
+## Decisions
+
+- intended behaviour: Ignore them and set update_time to the server time on edit (assumed)
+- empty_content: Reject empty content with a client error (assumed)
+- max_content_length: The instance content limit value from configuration (assumed)
+- duplicate_memo_id: Reject with an already-exists error (assumed)
+- empty_update_mask: Reject with a client error (assumed)
+- timestamp_in_mask: Reject create_time and update_time in the mask (assumed)
+- admin_override: Only the creator may edit and delete (assumed)

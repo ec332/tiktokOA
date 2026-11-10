@@ -1,0 +1,1322 @@
+[
+ {
+  "id": "probe:reference/a1/pre",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:39.935498+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:40.012344+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a1/post",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:50.032180+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:50.108875+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/pre",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:50.496039+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:50.568190+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/post",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:59.241112+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:59.303428+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/pre",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:59.689456+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:19:59.759241+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/post",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:07.374087+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:07.438914+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a4/pre",
+  "variant": "reference",
+  "batch": "reference/a4",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:07.776851+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:07.836173+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a4/post",
+  "variant": "reference",
+  "batch": "reference/a4",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:15.206820+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:15.269294+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a5/pre",
+  "variant": "reference",
+  "batch": "reference/a5",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:15.687016+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:15.798179+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a5/post",
+  "variant": "reference",
+  "batch": "reference/a5",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:23.501814+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:23.561388+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o1/pre",
+  "variant": "reference",
+  "batch": "reference/o1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:23.929980+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:23.990311+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o1/post",
+  "variant": "reference",
+  "batch": "reference/o1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:27.454829+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:27.539689+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o2/pre",
+  "variant": "reference",
+  "batch": "reference/o2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:27.955589+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:28.021723+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o2/post",
+  "variant": "reference",
+  "batch": "reference/o2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:31.053360+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:31.123656+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o3/pre",
+  "variant": "reference",
+  "batch": "reference/o3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:31.510507+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:31.576273+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o3/post",
+  "variant": "reference",
+  "batch": "reference/o3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:35.000616+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:35.062729+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o4/pre",
+  "variant": "reference",
+  "batch": "reference/o4",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:35.432340+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:35.497507+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o4/post",
+  "variant": "reference",
+  "batch": "reference/o4",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:38.873097+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:38.954146+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o5/pre",
+  "variant": "reference",
+  "batch": "reference/o5",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:39.354759+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:39.418458+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o5/post",
+  "variant": "reference",
+  "batch": "reference/o5",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:42.558194+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:42.629831+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o6/pre",
+  "variant": "reference",
+  "batch": "reference/o6",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:43.027284+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:43.090044+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o6/post",
+  "variant": "reference",
+  "batch": "reference/o6",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:46.523188+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:46.593997+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o7/pre",
+  "variant": "reference",
+  "batch": "reference/o7",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:46.947829+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:47.020162+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o7/post",
+  "variant": "reference",
+  "batch": "reference/o7",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:50.098222+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:50.163320+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o8/pre",
+  "variant": "reference",
+  "batch": "reference/o8",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:50.568320+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:50.626569+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o8/post",
+  "variant": "reference",
+  "batch": "reference/o8",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:53.894392+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:53.962458+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o9/pre",
+  "variant": "reference",
+  "batch": "reference/o9",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:54.347476+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:54.405206+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o9/post",
+  "variant": "reference",
+  "batch": "reference/o9",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:58.076738+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:58.152024+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o10/pre",
+  "variant": "reference",
+  "batch": "reference/o10",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:58.572265+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:20:58.634485+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/o10/post",
+  "variant": "reference",
+  "batch": "reference/o10",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:02.502189+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:02.576242+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a1/pre",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:24.275019+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:24.346491+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a1/post",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:36.758759+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:36.836598+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a2/pre",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:37.279991+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:37.353123+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a2/post",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:47.781872+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:47.857734+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a3/pre",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:48.576637+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:21:48.646695+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a3/post",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:01.220966+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:01.297584+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a4/pre",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a4",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:01.838134+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:01.949712+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a4/post",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a4",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:12.249750+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:12.322531+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a5/pre",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a5",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:12.708140+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:12.824094+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a5/post",
+  "variant": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd",
+  "batch": "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd/a5",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:27.555291+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:22:27.651019+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ }
+]

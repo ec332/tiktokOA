@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="14" tests="35" time="20.494" timestamp="2026-11-08T09:16:38.659548+00:00" hostname="c47a7adc0c94"><testcase classname="test_tp_families" name="test_generic[G:properties:GET /api/correspondents/]" time="3.064"><failure message="platform_rt.expect.SpecMismatch: [property] GET /api/correspondents/: 5 example(s) disagree with the spec (Undocumented status code); first /api/correspondents/ → 404">case_id = 'G:properties:GET /api/correspondents/'
+
+    def test_generic(case_id):
+&gt;       run(case_id, _spec(), conf())
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:390: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:374: in run
+    RUN[family](spec, c, method, path, op)
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:266: in properties
+    _fail("property", f"{method} {path}: {len(drift)} example(s) disagree with the spec "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'property'
+msg = 'GET /api/correspondents/: 5 example(s) disagree with the spec (Undocumented status code); first /api/correspondents/ → 404'
+spec_side = True
+
+    def _fail(aid: str, msg: str, spec_side: bool = False):
+        record.current().assertions.append({"id": aid, "ok": False, "expected": None, "actual": msg})
+&gt;       raise (SpecMismatch if spec_side else ExpectationFailed)(aid, msg)
+E       platform_rt.expect.SpecMismatch: [property] GET /api/correspondents/: 5 example(s) disagree with the spec (Undocumented status code); first /api/correspondents/ → 404
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:139: SpecMismatch</failure></testcase><testcase classname="test_tp_families" name="test_generic[G:properties:POST /api/correspondents/]" time="0.001"><skipped type="pytest.skip" message="NOT_RUN: safe mode (property checks run reads only): POST /api/correspondents/">/usr/local/lib/python3.14/site-packages/platform_rt/families.py:227: NOT_RUN: safe mode (property checks run reads only): POST /api/correspondents/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:properties:GET /api/correspondents/{id}/]" time="1.943"><failure message="platform_rt.expect.SpecMismatch: [property] GET /api/correspondents/{id}/: 10 example(s) disagree with the spec (Undocumented status code); first /api/correspondents/1/ → 404">case_id = 'G:properties:GET /api/correspondents/{id}/'
+
+    def test_generic(case_id):
+&gt;       run(case_id, _spec(), conf())
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:390: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:374: in run
+    RUN[family](spec, c, method, path, op)
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:266: in properties
+    _fail("property", f"{method} {path}: {len(drift)} example(s) disagree with the spec "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'property'
+msg = 'GET /api/correspondents/{id}/: 10 example(s) disagree with the spec (Undocumented status code); first /api/correspondents/1/ → 404'
+spec_side = True
+
+    def _fail(aid: str, msg: str, spec_side: bool = False):
+        record.current().assertions.append({"id": aid, "ok": False, "expected": None, "actual": msg})
+&gt;       raise (SpecMismatch if spec_side else ExpectationFailed)(aid, msg)
+E       platform_rt.expect.SpecMismatch: [property] GET /api/correspondents/{id}/: 10 example(s) disagree with the spec (Undocumented status code); first /api/correspondents/1/ → 404
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:139: SpecMismatch</failure></testcase><testcase classname="test_tp_families" name="test_generic[G:properties:GET /api/custom_fields/]" time="2.016"><failure message="platform_rt.expect.SpecMismatch: [property] GET /api/custom_fields/: 2 example(s) disagree with the spec (Undocumented status code); first /api/custom_fields/ → 404">case_id = 'G:properties:GET /api/custom_fields/'
+
+    def test_generic(case_id):
+&gt;       run(case_id, _spec(), conf())
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:390: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:374: in run
+    RUN[family](spec, c, method, path, op)
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:266: in properties
+    _fail("property", f"{method} {path}: {len(drift)} example(s) disagree with the spec "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'property'
+msg = 'GET /api/custom_fields/: 2 example(s) disagree with the spec (Undocumented status code); first /api/custom_fields/ → 404'
+spec_side = True
+
+    def _fail(aid: str, msg: str, spec_side: bool = False):
+        record.current().assertions.append({"id": aid, "ok": False, "expected": None, "actual": msg})
+&gt;       raise (SpecMismatch if spec_side else ExpectationFailed)(aid, msg)
+E       platform_rt.expect.SpecMismatch: [property] GET /api/custom_fields/: 2 example(s) disagree with the spec (Undocumented status code); first /api/custom_fields/ → 404
+
+/usr/local/lib/python3.14/site-packages/platform_rt/families.py:139: SpecMismatch</failure></testcase><testcase classname="test_tp_families" name="test_generic[G:properties:POST /api/custom_fields/]" time="0.002"><skipped type="pytest.skip" message="NOT_RUN: safe mode (property checks run reads only): POST /api/custom_fields/">/usr/local/lib/python3.14/site-packages/platform_rt/families.py:227: NOT_RUN: safe mode (property checks run reads only): POST /api/custom_fields/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:auth_required:GET /api/correspondents/]" time="0.354" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:POST /api/correspondents/]" time="0.189"><skipped type="pytest.skip" message="NOT_RUN: safe mode (create body doesn't carry the run prefix): POST /api/correspondents/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (create body doesn't carry the run prefix): POST /api/correspondents/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:auth_required:GET /api/correspondents/{id}/]" time="0.427" /><testcase classname="test_tp_families" name="test_generic[G:auth_required:PUT /api/correspondents/{id}/]" time="0.174"><skipped type="pytest.skip" message="NOT_RUN: safe mode (not created by this run): PUT /api/correspondents/1541832181/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (not created by this run): PUT /api/correspondents/1541832181/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:auth_required:PATCH /api/correspondents/{id}/]" time="0.197"><skipped type="pytest.skip" message="NOT_RUN: safe mode (not created by this run): PATCH /api/correspondents/1136723499/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (not created by this run): PATCH /api/correspondents/1136723499/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:unknown_id:GET /api/correspondents/{id}/]" time="0.216" /><testcase classname="test_tp_families" name="test_generic[G:unknown_id:GET /api/custom_fields/{id}/]" time="0.205" /><testcase classname="test_tp_families" name="test_generic[G:unknown_id:GET /api/document_types/{id}/]" time="0.204" /><testcase classname="test_tp_families" name="test_generic[G:unknown_id:GET /api/groups/{id}/]" time="0.196" /><testcase classname="test_tp_families" name="test_generic[G:unknown_id:GET /api/mail_accounts/{id}/]" time="0.199" /><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/correspondents/]" time="0.189"><skipped type="pytest.skip" message="NOT_RUN: safe mode (create body doesn't carry the run prefix): POST /api/correspondents/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (create body doesn't carry the run prefix): POST /api/correspondents/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/custom_fields/]" time="0.203"><skipped type="pytest.skip" message="NOT_RUN: safe mode (create body doesn't carry the run prefix): POST /api/custom_fields/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (create body doesn't carry the run prefix): POST /api/custom_fields/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/document_types/]" time="0.196"><skipped type="pytest.skip" message="NOT_RUN: safe mode (create body doesn't carry the run prefix): POST /api/document_types/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (create body doesn't carry the run prefix): POST /api/document_types/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/groups/]" time="0.198"><skipped type="pytest.skip" message="NOT_RUN: safe mode (deny category 'group'): POST /api/groups/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (deny category 'group'): POST /api/groups/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:invalid_input:POST /api/mail_accounts/]" time="0.207"><skipped type="pytest.skip" message="NOT_RUN: safe mode (deny category 'mail'): POST /api/mail_accounts/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (deny category 'mail'): POST /api/mail_accounts/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:read_back:POST /api/correspondents/]" time="0.431" /><testcase classname="test_tp_families" name="test_generic[G:read_back:POST /api/custom_fields/]" time="0.408" /><testcase classname="test_tp_families" name="test_generic[G:read_back:POST /api/document_types/]" time="0.392" /><testcase classname="test_tp_families" name="test_generic[G:read_back:POST /api/groups/]" time="0.170"><skipped type="pytest.skip" message="NOT_RUN: safe mode (deny category 'group'): POST /api/groups/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (deny category 'group'): POST /api/groups/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:read_back:POST /api/mail_accounts/]" time="0.198"><skipped type="pytest.skip" message="NOT_RUN: safe mode (deny category 'mail'): POST /api/mail_accounts/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (deny category 'mail'): POST /api/mail_accounts/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:delete_final:POST /api/correspondents/]" time="0.626" /><testcase classname="test_tp_families" name="test_generic[G:delete_final:POST /api/custom_fields/]" time="0.622" /><testcase classname="test_tp_families" name="test_generic[G:delete_final:POST /api/document_types/]" time="0.594" /><testcase classname="test_tp_families" name="test_generic[G:delete_final:POST /api/groups/]" time="0.182"><skipped type="pytest.skip" message="NOT_RUN: safe mode (deny category 'group'): POST /api/groups/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (deny category 'group'): POST /api/groups/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:delete_final:POST /api/mail_accounts/]" time="0.193"><skipped type="pytest.skip" message="NOT_RUN: safe mode (deny category 'mail'): POST /api/mail_accounts/">/usr/local/lib/python3.14/site-packages/platform_rt/api.py:136: NOT_RUN: safe mode (deny category 'mail'): POST /api/mail_accounts/</skipped></testcase><testcase classname="test_tp_families" name="test_generic[G:paging:GET /api/correspondents/]" time="1.220" /><testcase classname="test_tp_families" name="test_generic[G:paging:GET /api/custom_fields/]" time="1.207" /><testcase classname="test_tp_families" name="test_generic[G:paging:GET /api/document_types/]" time="1.221" /><testcase classname="test_tp_families" name="test_generic[G:paging:GET /api/groups/]" time="1.199" /><testcase classname="test_tp_families" name="test_generic[G:paging:GET /api/mail_accounts/]" time="1.213" /></testsuite></testsuites>

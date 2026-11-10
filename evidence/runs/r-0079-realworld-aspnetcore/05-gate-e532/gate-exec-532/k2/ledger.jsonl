@@ -1,0 +1,260 @@
+{"path": "/api/articles", "id": "tp-local-ae0641-article", "location": null}
+{"path": "/api/articles/tp-local-ae0641-article/comments", "id": null, "location": null, "untracked": "{'comment': {'id': 13, 'body': 'A useful comment', 'author': {'username': 'tpadmin', 'bio': None, 'image': None, 'follow"}
+{"path": "/api/articles", "id": "tp-local-ae0641-article", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-1", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-2", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-3", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-4", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-5", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-6", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-7", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-8", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-9", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-10", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-11", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-12", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-13", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-14", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-15", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-16", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-17", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-18", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-19", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-20", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-21", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-22", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-23", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-24", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-25", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-26", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-27", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-28", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-29", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-30", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-31", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-32", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-33", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-34", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-35", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-36", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-37", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-38", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-39", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-40", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-41", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-42", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-43", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-44", "location": null}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-44", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-43", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-42", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-41", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-40", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-39", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-38", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-37", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-36", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-35", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-34", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-33", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-32", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-31", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-30", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-29", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-28", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-27", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-26", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-25", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-24", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-23", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-22", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-21", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-20", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-19", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-18", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-17", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-16", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-15", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-14", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-13", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-12", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-11", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-10", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-9", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-8", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-7", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-6", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-5", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-4", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-3", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-2", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article-1", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-0613fe-article", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-1", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-2", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-3", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-4", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-5", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-6", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-7", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-8", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-9", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-10", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-11", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-12", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-13", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-14", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-15", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-16", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-17", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-18", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-19", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-20", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-21", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-22", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-23", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-24", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-25", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-26", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-27", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-28", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-29", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-30", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-31", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-32", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-33", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-34", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-35", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-36", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-37", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-38", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-39", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-40", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-41", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-42", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-43", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-44", "location": null}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-44", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-43", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-42", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-41", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-40", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-39", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-38", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-37", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-36", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-35", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-34", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-33", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-32", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-31", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-30", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-29", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-28", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-27", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-26", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-25", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-24", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-23", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-22", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-21", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-20", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-19", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-18", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-17", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-16", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-15", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-14", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-13", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-12", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-11", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-10", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-9", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-8", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-7", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-6", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-5", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-4", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-3", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-2", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art-1", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d976c8-art", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-1", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-2", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-3", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-4", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-5", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-6", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-7", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-8", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-9", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-10", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-11", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-12", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-13", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-14", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-15", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-16", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-17", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-18", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-19", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-20", "location": null}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-20", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-19", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-18", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-17", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-16", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-15", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-14", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-13", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-12", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-11", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-10", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-9", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-8", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-7", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-6", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-5", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-4", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-3", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-2", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article-1", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-e8fe89-article", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-cc103a-a-fresh-title", "location": null}
+{"path": "/api/articles", "id": "tp-local-cc103a-a-fresh-title", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d6286c-title-of-another-article", "location": null}
+{"path": "/api/articles", "id": "tp-local-d6286c-owned", "location": null}
+{"path": "/api/articles", "id": "tp-local-d6286c-owned", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d6286c-title-of-another-article", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-c36f94-fav", "location": null}
+{"path": "/api/articles/tp-local-c36f94-fav/favorite", "id": "tp-local-c36f94-fav", "location": null}
+{"path": "/api/articles", "id": "tp-local-c36f94-fav", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-040280-article", "location": null}
+{"path": "/api/articles/tp-local-040280-article/favorite", "id": "tp-local-040280-article", "location": null}
+{"path": "/api/articles/tp-local-040280-article/favorite", "id": "tp-local-040280-article", "location": null}
+{"path": "/api/articles", "id": "tp-local-040280-article", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-00d047-fav", "location": null}
+{"path": "/api/articles", "id": "tp-local-00d047-fav", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-2e3844-art", "location": null}
+{"path": "/api/articles", "id": "tp-local-2e3844-art", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-d7c69e-article", "location": null}
+{"path": "/api/articles/tp-local-d7c69e-article/comments", "id": null, "location": null, "untracked": "{'comment': {'id': 14, 'body': 'tp-local-d7c69e-comment', 'author': {'username': 'tpadmin', 'bio': None, 'image': None, "}
+{"path": "/api/articles", "id": "tp-local-d7c69e-article", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-bda008-article", "location": null}
+{"path": "/api/articles/tp-local-bda008-article/comments", "id": null, "location": null, "untracked": "{'comment': {'id': 15, 'body': 'tp-local-bda008-comment', 'author': {'username': 'tpadmin', 'bio': None, 'image': None, "}
+{"path": "/api/articles", "id": "tp-local-bda008-article", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "tp-local-224e3e-article", "location": null}
+{"path": "/api/articles/tp-local-224e3e-article/comments", "id": null, "location": null, "untracked": "{'comment': {'id': 16, 'body': 'hello', 'author': {'username': 'tpadmin', 'bio': None, 'image': None, 'following': False"}
+{"path": "/api/articles", "id": "tp-local-224e3e-article", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "-1", "location": null}
+{"path": "/api/articles", "id": "-2", "location": null}
+{"path": "/api/articles", "id": "weg", "location": null}
+{"path": "/api/articles", "id": "q", "location": null}
+{"path": "/api/articles", "id": "q", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "weg", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "-2", "location": null, "deleted_by_test": true}
+{"path": "/api/articles", "id": "-1", "location": null, "deleted_by_test": true}
+{"path": "/api/users/login", "id": null, "location": null, "untracked": "{'user': {'username': '[U;?', 'email': '$%90|3~@maxtl.6o4ziy44.io', 'bio': None, 'image': None, 'token': 'eyJhbGciOiJIUz"}

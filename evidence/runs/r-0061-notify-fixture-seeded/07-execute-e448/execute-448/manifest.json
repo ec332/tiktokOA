@@ -1,0 +1,140 @@
+{
+ "execution": 448,
+ "k": 3,
+ "variants": {
+  "reference": {
+   "spec_hash": "c5b3a91a2df92149bb3e02fe6ff42f5a0113c8313a0eb4a7f64f8923ccd03bfa",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_it3_i1_notify -f data/env/tp_bb_it3_i1_notify/compose.yml up -d --wait",
+   "shuffle_seed": 11407512,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+    "images": {
+     "app": "sha256:6810cd955a2ebebb4b1c06f17f3ba59965bce1d2678f442c06ee2639cee09dd6",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+     "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+    },
+    "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+    "ref": "v1.0.0",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building app"
+    }
+   }
+  },
+  "bug:webhook-drops-body": {
+   "spec_hash": "cf2cf8fa717dcc65f3c247cf793bd0c043e762b4d793654e0414c29667739203",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_it3_i1_notify__bug_webhook_drops_body -f data/env/tp_bb_it3_i1_notify__bug_webhook_drops_body/compose.yml up -d --wait",
+   "shuffle_seed": 94674152,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+    "images": {
+     "app": "sha256:8eaa8aaa01cae99a1d0112316b0295444a5521340861787bad0686c4f2e4709f",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+     "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+    },
+    "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+    "ref": "v1.0.0",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building app"
+    },
+    "flags": [
+     "webhook-drops-body:7cfbda81fb7f029bdc49f8d144d1eff4b82b4a22db52e1ecd8fa29be7f6be9da"
+    ]
+   }
+  },
+  "bug:webhook-blocks": {
+   "spec_hash": "ae8372543d0b628a164892b167a015b75f9f6959d52c3122618443e034c60064",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_it3_i1_notify__bug_webhook_blocks -f data/env/tp_bb_it3_i1_notify__bug_webhook_blocks/compose.yml up -d --wait",
+   "shuffle_seed": 62697287,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+    "images": {
+     "app": "sha256:07ea73216a4c4d621e9bbfe865c0cae9c1d07910c9db4a61a97e3d57501b29b7",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+     "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+    },
+    "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+    "ref": "v1.0.0",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building app"
+    },
+    "flags": [
+     "webhook-blocks:57eee071ef509e4812c96a7425e22d4ea747cd4ce6f19fd580501c6a7fa18c10"
+    ]
+   }
+  },
+  "bug:invite-wrong-recipient": {
+   "spec_hash": "984efbf3d56db49f7f5864d8d018aa98b7fdf64dbb04b3ea734b905c687371d1",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_it3_i1_notify__bug_invite_wrong_recipient -f data/env/tp_bb_it3_i1_notify__bug_invite_wrong_recipient/compose.yml up -d --wait",
+   "shuffle_seed": 87644365,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+    "images": {
+     "app": "sha256:835364c286d780680410fda11484468b6e9bce73ee6727d1083fa12180f753be",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+     "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+    },
+    "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+    "ref": "v1.0.0",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building app"
+    },
+    "flags": [
+     "invite-wrong-recipient:c4f7802a3c2dd44691e8df9a867ecafe86f95d6ba659bc15354e2e4e7e66696f"
+    ]
+   }
+  },
+  "bug:page-error": {
+   "spec_hash": "25e910c93f27350941e3ec463871491463257ea3e8b04ef9c27d4445f0af3726",
+   "flags": [],
+   "reproduce": "docker compose -p tp_bb_it3_i1_notify__bug_page_error -f data/env/tp_bb_it3_i1_notify__bug_page_error/compose.yml up -d --wait",
+   "shuffle_seed": 15331855,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "compose": "7d9aae323cf2651128824254453f63f6ee6fbc0840ec2c81274ef3646a1662a8",
+    "images": {
+     "app": "sha256:b6dcc1a5b922395cb6f3f12c13dd1ae1001e6124e039604f237eec492a41be6d",
+     "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-http": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-forwarder-mail": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e",
+     "tp-standin-http": "sha256:c5be010b520276ec4a437d301346428eeebeaf210e19e082ab7c5c1d3e1bedbc",
+     "tp-standin-mail": "sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce"
+    },
+    "commit": "cb7e637b308b851307801d8e7e27aef0cce6b660",
+    "ref": "v1.0.0",
+    "network": {
+     "run": "none: an internal network, reached inbound through a forwarder",
+     "build": "unrestricted outbound while building app"
+    },
+    "flags": [
+     "page-error:5a825965e40ede8dfde0ae691ccee08effe046b5bf1a02fc7607781cb59c3a0e"
+    ]
+   }
+  }
+ },
+ "gate_report": "sha256:753ddfbda2606340d4632c223c1ae1ea270f5b3f9c0a79312d6d5e65ebe2585c",
+ "bound_tests": "sha256:4644df24a91bec5a43f45909d19a85738d72b428e53eda957f97517107d253cc"
+}

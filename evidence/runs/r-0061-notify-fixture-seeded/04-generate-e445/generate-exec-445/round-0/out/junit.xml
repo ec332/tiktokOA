@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="6" time="1.318" timestamp="2026-11-09T08:12:23.017346+00:00" hostname="48af3f1b4eff"><testcase classname="test_tc_c1_1" name="test_tc_c1_1[TC-C1-1]" time="0.049" /><testcase classname="test_tc_c2_1" name="test_tc_c2_1[TC-C2-1]" time="0.170" /><testcase classname="test_tc_c3_1" name="test_tc_c3_1[TC-C3-1]" time="0.422" /><testcase classname="test_tc_o10_1" name="test_tc_o10_1[TC-O10-1]" time="0.207" /><testcase classname="test_tc_o11_1" name="test_tc_o11_1[TC-O11-1]" time="0.184" /><testcase classname="test_tc_o4_1" name="test_tc_o4_1[TC-O4-1]" time="0.209"><failure message="platform_rt.expect.ExpectationFailed: [TC-O4-1/status] expected '400', got 201">make = &lt;platform_rt.blackbox.Make object at 0xffff9579cdd0&gt;, case_id = 'TC-O4-1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o4_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin()
+        long_text = "x" * 100001
+        api.post("/api/notes", token=admin["token"], json={"text": long_text})
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=b83f0515f8a457833ae337c102e2e0059e49b5479d4f2810ffad7f5d77c6ab97
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_o4_1.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-O4-1/status', ok = False, expected = '400', actual = 201
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-O4-1/status] expected '400', got 201
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase></testsuite></testsuites>

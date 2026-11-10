@@ -1,0 +1,81 @@
+{
+ "execution": 22,
+ "k": 5,
+ "variants": {
+  "reference": {
+   "spec_hash": "de10f4826c7a50ad73ece24a5db484bc3250a7e9aed8422697e0de3798c4ea74",
+   "flags": [],
+   "reproduce": "tp env up reference --expect de10f4826c7a50ad73ece24a5db484bc3250a7e9aed8422697e0de3798c4ea74",
+   "shuffle_seed": 23059507,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "services": {
+     "db": "f43361e21237bdfbaa3ae33347d05b777a21ee539778bdfb03db52bf3da92cbf",
+     "backend": "03d6d299cb2adb1c44d326ec83ca5f05a1df931ab55a5b1627327a1addc82fdd",
+     "mailpit": "f803ef01df18505b365da8dd760039036008349ba09a59305b613153834e3b26"
+    },
+    "runner": "sha256:8809a217da93a6de1b9d864cc5f7906f50e30d548594bf15fca7d2704f59e7b7",
+    "images": {
+     "db": "[\"postgres@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81\"]",
+     "backend": "sha256:abf6bd481023d3b337cd7fb992b9b8bf9d02f7d954fd9d1d470042813519c2b6",
+     "mailpit": "[\"axllent/mailpit@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231\"]"
+    },
+    "sut": {
+     "name": "full-stack-fastapi-template",
+     "ref": "6838b40e414641ce5616d926d9c649a96a4e8c56",
+     "patches": {
+      "testinfo": "3049e8ee184f5158f45c568a9da7a11726c2914a7045c52403f79cd422d4128c",
+      "trace": "ee9d08c896e0315febc2ab2bc41f7cb32ab9c9aeab81a7a362bf446b03bfcc2a"
+     }
+    },
+    "flags": [],
+    "seed_hash": "bc01da224eb8bde217cba7b5a8d4e7da24990708cc8d000caeb7e05ffcc0cff7",
+    "schema_head": "3b7c2e9d4f1a",
+    "fake_now": null,
+    "tools": {
+     "docker": "27.4.0",
+     "compose": "2.31.0-desktop.2"
+    }
+   }
+  },
+  "fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd": {
+   "spec_hash": "f39953251ac4184e1b97baa9e03dc6051f817a927c132d7cae131753a8da172a",
+   "flags": [],
+   "reproduce": "tp env up fixed:sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd --expect f39953251ac4184e1b97baa9e03dc6051f817a927c132d7cae131753a8da172a",
+   "shuffle_seed": 17635189,
+   "fingerprint_mismatch": false,
+   "fingerprint": {
+    "services": {
+     "db": "f43361e21237bdfbaa3ae33347d05b777a21ee539778bdfb03db52bf3da92cbf",
+     "backend": "4e74a615fa69e4962ada3a6ea78348d708e97faf298dca1c05f2c57755ef8c8d",
+     "mailpit": "f803ef01df18505b365da8dd760039036008349ba09a59305b613153834e3b26"
+    },
+    "runner": "sha256:8809a217da93a6de1b9d864cc5f7906f50e30d548594bf15fca7d2704f59e7b7",
+    "images": {
+     "db": "[\"postgres@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81\"]",
+     "backend": "sha256:16a7deb52db4766481c09ee51387f1949a8bce70c8f51bf4ab94eccbc0a7df76",
+     "mailpit": "[\"axllent/mailpit@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231\"]"
+    },
+    "sut": {
+     "name": "full-stack-fastapi-template",
+     "ref": "6838b40e414641ce5616d926d9c649a96a4e8c56",
+     "patches": {
+      "testinfo": "3049e8ee184f5158f45c568a9da7a11726c2914a7045c52403f79cd422d4128c",
+      "trace": "ee9d08c896e0315febc2ab2bc41f7cb32ab9c9aeab81a7a362bf446b03bfcc2a",
+      "sha256:eab1a4701bfed2d8f368df4205b5df1d266b978f5bcd84e339c2bd8a4c5f6fbd": "c1b88030af02b047a83a7b28921b9e764d045d07947b15f136e16b18e5e20a4a"
+     }
+    },
+    "flags": [],
+    "seed_hash": "bc01da224eb8bde217cba7b5a8d4e7da24990708cc8d000caeb7e05ffcc0cff7",
+    "schema_head": "3b7c2e9d4f1a",
+    "fake_now": null,
+    "tools": {
+     "docker": "27.4.0",
+     "compose": "2.31.0-desktop.2"
+    }
+   }
+  }
+ },
+ "gate_report": "sha256:3a187ca033b71b5173462838a1c41dd99c960b2dac95d6883cac44c70110cbeb",
+ "bound_tests": "sha256:69aed4668bd128e54e6d56d9944e207db2895305f50267fa98d73a85b671c64b"
+}

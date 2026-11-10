@@ -1,0 +1,200 @@
+[
+ {
+  "id": "probe:reference/a1/pre",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:20.179212+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:20.245174+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a1/post",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:28.081214+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:28.147395+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/pre",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:28.503385+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:28.564000+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/post",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:36.619393+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:36.684802+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/pre",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:37.041539+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:37.115442+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/post",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200 True"
+   },
+   {
+    "name": "db",
+    "ok": true,
+    "raw": "3b7c2e9d4f1a"
+   },
+   {
+    "name": "flags",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:44.486959+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "clock",
+    "ok": true,
+    "raw": "200 {'clock': {'source': 'system', 'now': '2026-11-02T13:18:44.561516+00:00'}, 'flags': []}"
+   },
+   {
+    "name": "seed",
+    "ok": true,
+    "raw": "superuser rows: 1"
+   }
+  ]
+ }
+]

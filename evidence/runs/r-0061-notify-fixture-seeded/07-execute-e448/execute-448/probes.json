@@ -1,0 +1,542 @@
+[
+ {
+  "id": "probe:reference/a1/pre",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a1/post",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/pre",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/post",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/pre",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/post",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-drops-body/a1/pre",
+  "variant": "bug:webhook-drops-body",
+  "batch": "bug:webhook-drops-body/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-drops-body/a1/post",
+  "variant": "bug:webhook-drops-body",
+  "batch": "bug:webhook-drops-body/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-drops-body/a2/pre",
+  "variant": "bug:webhook-drops-body",
+  "batch": "bug:webhook-drops-body/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-drops-body/a2/post",
+  "variant": "bug:webhook-drops-body",
+  "batch": "bug:webhook-drops-body/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-drops-body/a3/pre",
+  "variant": "bug:webhook-drops-body",
+  "batch": "bug:webhook-drops-body/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-drops-body/a3/post",
+  "variant": "bug:webhook-drops-body",
+  "batch": "bug:webhook-drops-body/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-blocks/a1/pre",
+  "variant": "bug:webhook-blocks",
+  "batch": "bug:webhook-blocks/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-blocks/a1/post",
+  "variant": "bug:webhook-blocks",
+  "batch": "bug:webhook-blocks/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-blocks/a2/pre",
+  "variant": "bug:webhook-blocks",
+  "batch": "bug:webhook-blocks/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-blocks/a2/post",
+  "variant": "bug:webhook-blocks",
+  "batch": "bug:webhook-blocks/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-blocks/a3/pre",
+  "variant": "bug:webhook-blocks",
+  "batch": "bug:webhook-blocks/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:webhook-blocks/a3/post",
+  "variant": "bug:webhook-blocks",
+  "batch": "bug:webhook-blocks/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:invite-wrong-recipient/a1/pre",
+  "variant": "bug:invite-wrong-recipient",
+  "batch": "bug:invite-wrong-recipient/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:invite-wrong-recipient/a1/post",
+  "variant": "bug:invite-wrong-recipient",
+  "batch": "bug:invite-wrong-recipient/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:invite-wrong-recipient/a2/pre",
+  "variant": "bug:invite-wrong-recipient",
+  "batch": "bug:invite-wrong-recipient/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:invite-wrong-recipient/a2/post",
+  "variant": "bug:invite-wrong-recipient",
+  "batch": "bug:invite-wrong-recipient/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:invite-wrong-recipient/a3/pre",
+  "variant": "bug:invite-wrong-recipient",
+  "batch": "bug:invite-wrong-recipient/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:invite-wrong-recipient/a3/post",
+  "variant": "bug:invite-wrong-recipient",
+  "batch": "bug:invite-wrong-recipient/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:page-error/a1/pre",
+  "variant": "bug:page-error",
+  "batch": "bug:page-error/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:page-error/a1/post",
+  "variant": "bug:page-error",
+  "batch": "bug:page-error/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:page-error/a2/pre",
+  "variant": "bug:page-error",
+  "batch": "bug:page-error/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:page-error/a2/post",
+  "variant": "bug:page-error",
+  "batch": "bug:page-error/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:page-error/a3/pre",
+  "variant": "bug:page-error",
+  "batch": "bug:page-error/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:bug:page-error/a3/post",
+  "variant": "bug:page-error",
+  "batch": "bug:page-error/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ }
+]

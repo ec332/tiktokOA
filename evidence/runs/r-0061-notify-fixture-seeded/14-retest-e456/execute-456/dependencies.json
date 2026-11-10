@@ -1,0 +1,54 @@
+{
+ "G:dependency_called:POST /api/invite": {
+  "outcome": "passed",
+  "fault": null,
+  "received": [
+   {
+    "to": [
+     "tp-x456.reference.a5-e96a14-email@example.test"
+    ],
+    "from": "tpadmin@notify.invalid",
+    "subject": "tpadmin invited you to notify"
+   }
+  ]
+ },
+ "G:dependency_called:POST /api/notes": {
+  "outcome": "passed",
+  "fault": null,
+  "received": [
+   {
+    "n": 86,
+    "at": 1794214347.9017255,
+    "method": "POST",
+    "path": "/notify_url",
+    "headers": {
+     "Accept-Encoding": "identity",
+     "Content-Length": "109",
+     "Host": "tp-standin-http:8000",
+     "User-Agent": "Python-urllib/3.14",
+     "Content-Type": "application/json",
+     "Connection": "close"
+    },
+    "body": "{\"event\": \"note.created\", \"note\": {\"id\": 87, \"text\": \"tp-x456.reference.a5-a4694c-text\", \"owner\": \"tpadmin\"}}"
+   }
+  ]
+ },
+ "G:dependency_failure_handled:POST /api/invite": {
+  "outcome": "passed",
+  "fault": {
+   "standin": "mail",
+   "mode": "smtp",
+   "value": 451
+  },
+  "received": []
+ },
+ "G:dependency_failure_handled:POST /api/notes": {
+  "outcome": "passed",
+  "fault": {
+   "standin": "http",
+   "mode": "delay",
+   "value": 8.0
+  },
+  "received": []
+ }
+}

@@ -1,0 +1,158 @@
+{
+ "deleted": [],
+ "failed": [],
+ "unknown_delete_route": [
+  {
+   "path": "/api/invite",
+   "id": null,
+   "location": null,
+   "untracked": "{'sent': True}"
+  },
+  {
+   "path": "/api/login",
+   "id": null,
+   "location": null,
+   "untracked": "{'username': '5\\x0b\\x9d \u00c6', 'token': '84dd7621259a3ad7697ef0712759aa94'}"
+  },
+  {
+   "path": "/api/login",
+   "id": null,
+   "location": null,
+   "untracked": "{'username': '~\\x02', 'token': '1c56c5b3c23fc26cff8ad002de98bd85'}"
+  },
+  {
+   "path": "/api/login",
+   "id": null,
+   "location": null,
+   "untracked": "{'username': '\\U0010ee0cS\u00ff', 'token': '8c8c3d1c5bebfaec67f6bf3cadb4f566'}"
+  },
+  {
+   "path": "/api/login",
+   "id": null,
+   "location": null,
+   "untracked": "{'username': '%', 'token': 'a9c4e0a47b00ef5df202f21b047526da'}"
+  },
+  {
+   "path": "/api/login",
+   "id": null,
+   "location": null,
+   "untracked": "{'username': '\\U0010e842R\\x1c\\x97V\\x93\u00dbQ\u00f6', 'token': '356bf66559451d8e203f3e66130b1c9e'}"
+  },
+  {
+   "path": "/api/login",
+   "id": null,
+   "location": null,
+   "untracked": "{'username': '0', 'token': '20e39b3fdeae9174bce35401cf35bfc6'}"
+  },
+  {
+   "path": "/api/login",
+   "id": null,
+   "location": null,
+   "untracked": "{'username': '0', 'token': 'b2545c774775b5b71d4cc8891cbf47b2'}"
+  },
+  {
+   "path": "/api/invite",
+   "id": null,
+   "location": null,
+   "untracked": "{'sent': True}"
+  },
+  {
+   "path": "/api/invite",
+   "id": null,
+   "location": null,
+   "untracked": "{'sent': True}"
+  }
+ ],
+ "deleted_by_test": [
+  {
+   "path": "/api/notes",
+   "id": 142,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 143,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 144,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 145,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 155,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 154,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 153,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 152,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 151,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 150,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 149,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 148,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 147,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 146,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 156,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 157,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 158,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 159,
+   "location": null
+  }
+ ]
+}

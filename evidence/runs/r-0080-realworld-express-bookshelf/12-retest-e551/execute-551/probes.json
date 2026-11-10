@@ -1,0 +1,362 @@
+[
+ {
+  "id": "probe:reference/a1/pre",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a1/post",
+  "variant": "reference",
+  "batch": "reference/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/pre",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a2/post",
+  "variant": "reference",
+  "batch": "reference/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/pre",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a3/post",
+  "variant": "reference",
+  "batch": "reference/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a4/pre",
+  "variant": "reference",
+  "batch": "reference/a4",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a4/post",
+  "variant": "reference",
+  "batch": "reference/a4",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a5/pre",
+  "variant": "reference",
+  "batch": "reference/a5",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:reference/a5/post",
+  "variant": "reference",
+  "batch": "reference/a5",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a1/pre",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a1",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a1/post",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a1",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a2/pre",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a2",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a2/post",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a2",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a3/pre",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a3",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a3/post",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a3",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a4/pre",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a4",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a4/post",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a4",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a5/pre",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a5",
+  "when": "pre",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ },
+ {
+  "id": "probe:fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a5/post",
+  "variant": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2",
+  "batch": "fixed:sha256:b2100c7b9c5fe9b13b65b8e717042d2c961b4e88d97a8c587aec22404c1936d2/a5",
+  "when": "post",
+  "probes": [
+   {
+    "name": "health",
+    "ok": true,
+    "raw": "200"
+   },
+   {
+    "name": "auth",
+    "ok": true,
+    "raw": "anonymous 401, admin 200"
+   }
+  ]
+ }
+]

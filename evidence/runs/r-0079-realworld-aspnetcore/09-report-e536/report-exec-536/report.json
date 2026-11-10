@@ -1,0 +1,2291 @@
+{
+ "header": {
+  "network": {
+   "build": "unrestricted outbound while building conduit",
+   "run": "none: an internal network, reached inbound through a forwarder"
+  },
+  "labels": [
+   "real",
+   "unsigned"
+  ],
+  "run_records": "sha256:cc69bab211723cb39a4b5454681fdd92e5f04ac1b69596ef9758f2668f429c38",
+  "execution": 534,
+  "variants": {
+   "reference": {
+    "fingerprint": {
+     "commit": "9345f18abf36b778abe2f290467ba432bf1f7e5c",
+     "compose": "9958909c82a827c5f9321741999b049f30702ae8dd1451b95dc50d6d5057c34b",
+     "images": {
+      "conduit": "sha256:f294ba4ca7bfbafe134018b77425e57e7b6eb3f0efcd24a8bb80cc46888422bf",
+      "tp-forwarder": "sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e"
+     },
+     "network": {
+      "build": "unrestricted outbound while building conduit",
+      "run": "none: an internal network, reached inbound through a forwarder"
+     },
+     "ref": "9345f18abf36b778abe2f290467ba432bf1f7e5c"
+    },
+    "fingerprint_mismatch": false,
+    "flags": [],
+    "reproduce": "docker compose -p tp_bb_aspnetcore_realworld_example_app -f data/env/tp_bb_aspnetcore_realworld_example_app/compose.yml up -d --wait",
+    "shuffle_seed": 59606284,
+    "spec_hash": "504af7f145869a1d3c3ed2fac65b6117c9fbb6ff1c7d0fc43c61e6911f8c94c0"
+   }
+  },
+  "k": 3,
+  "sut": {
+   "name": "aspnetcore-realworld-example-app",
+   "ref": "9345f18abf36b778abe2f290467ba432bf1f7e5c"
+  },
+  "cases_signed": false,
+  "unattended_decisions": {
+   "n": 31,
+   "d": 31,
+   "ids": [
+    "review:698",
+    "review:699",
+    "review:700",
+    "review:701",
+    "review:702",
+    "review:703",
+    "review:704",
+    "review:705",
+    "review:706",
+    "review:707",
+    "review:708",
+    "review:709",
+    "review:710",
+    "review:711",
+    "review:712",
+    "review:713",
+    "review:714",
+    "review:715",
+    "review:716",
+    "review:717",
+    "review:718",
+    "review:719",
+    "review:720",
+    "review:721",
+    "review:722",
+    "review:723",
+    "review:724",
+    "review:725",
+    "review:726",
+    "review:727",
+    "review:728"
+   ]
+  },
+  "strategies": {
+   "reach": "container",
+   "spec": "pack_file",
+   "auth": "token_header",
+   "data": "spec_derived",
+   "state": "namespace",
+   "mutation": "none",
+   "safety": "unrestricted",
+   "checks": "pytest_cases"
+  },
+  "ceiling": "Stable, property-checked",
+  "claim": {
+   "target": "aspnetcore-realworld-example-app",
+   "reach": "container",
+   "isolation": 0,
+   "isolation_words": "isolated",
+   "ceiling": "Stable, property-checked",
+   "ran": {
+    "n": 44,
+    "d": 55,
+    "ids": [
+     "G:auth_required:DELETE /api/articles/{slug}",
+     "G:auth_required:GET /api/articles",
+     "G:auth_required:GET /api/articles/{slug}",
+     "G:auth_required:POST /api/articles",
+     "G:auth_required:PUT /api/articles/{slug}",
+     "G:invalid_input:POST /api/articles",
+     "G:invalid_input:POST /api/users",
+     "G:invalid_input:POST /api/users/login",
+     "G:properties:GET /api/articles",
+     "G:properties:GET /api/articles/{slug}",
+     "G:properties:POST /api/articles",
+     "G:properties:POST /api/users",
+     "G:properties:POST /api/users/login",
+     "G:unknown_id:GET /api/articles/{slug}",
+     "G:unknown_id:GET /api/profiles/{username}",
+     "TC-C10-1",
+     "TC-C2-1",
+     "TC-C3-1",
+     "TC-C3-2",
+     "TC-C3-3.a",
+     "TC-C3-3.b",
+     "TC-C3-3.c",
+     "TC-C3-4.a",
+     "TC-C3-4.b",
+     "TC-C3-4.c",
+     "TC-C3-5",
+     "TC-C3-6",
+     "TC-C4-1",
+     "TC-C5-1",
+     "TC-C5-2",
+     "TC-C6-1",
+     "TC-C7-2",
+     "TC-C7-3",
+     "TC-C9-1",
+     "TC-C9-2",
+     "TC-C9-3",
+     "TC-O1-1.1",
+     "TC-O1-1.2",
+     "TC-O1-2",
+     "TC-O1-3",
+     "TC-O2-1.1",
+     "TC-O2-1.2",
+     "TC-O2-2",
+     "TC-O3-3"
+    ]
+   },
+   "blocked": [
+    {
+     "why": "excluded: no_valid_body",
+     "cases": {
+      "n": 2,
+      "d": 55,
+      "ids": [
+       "G:delete_final:POST /api/articles",
+       "G:read_back:POST /api/articles"
+      ]
+     }
+    },
+    {
+     "why": "signed case not bound to a test",
+     "cases": {
+      "n": 9,
+      "d": 55,
+      "ids": [
+       "TC-C1-1",
+       "TC-C1-2",
+       "TC-C7-1",
+       "TC-C8-1",
+       "TC-C8-2",
+       "TC-C8-3",
+       "TC-O2-3",
+       "TC-O3-1",
+       "TC-O3-2"
+      ]
+     }
+    }
+   ],
+   "basis": {
+    "real": {
+     "n": 44,
+     "d": 44,
+     "ids": [
+      "G:auth_required:DELETE /api/articles/{slug}",
+      "G:auth_required:GET /api/articles",
+      "G:auth_required:GET /api/articles/{slug}",
+      "G:auth_required:POST /api/articles",
+      "G:auth_required:PUT /api/articles/{slug}",
+      "G:invalid_input:POST /api/articles",
+      "G:invalid_input:POST /api/users",
+      "G:invalid_input:POST /api/users/login",
+      "G:properties:GET /api/articles",
+      "G:properties:GET /api/articles/{slug}",
+      "G:properties:POST /api/articles",
+      "G:properties:POST /api/users",
+      "G:properties:POST /api/users/login",
+      "G:unknown_id:GET /api/articles/{slug}",
+      "G:unknown_id:GET /api/profiles/{username}",
+      "TC-C10-1",
+      "TC-C2-1",
+      "TC-C3-1",
+      "TC-C3-2",
+      "TC-C3-3.a",
+      "TC-C3-3.b",
+      "TC-C3-3.c",
+      "TC-C3-4.a",
+      "TC-C3-4.b",
+      "TC-C3-4.c",
+      "TC-C3-5",
+      "TC-C3-6",
+      "TC-C4-1",
+      "TC-C5-1",
+      "TC-C5-2",
+      "TC-C6-1",
+      "TC-C7-2",
+      "TC-C7-3",
+      "TC-C9-1",
+      "TC-C9-2",
+      "TC-C9-3",
+      "TC-O1-1.1",
+      "TC-O1-1.2",
+      "TC-O1-2",
+      "TC-O1-3",
+      "TC-O2-1.1",
+      "TC-O2-1.2",
+      "TC-O2-2",
+      "TC-O3-3"
+     ]
+    }
+   }
+  }
+ },
+ "worklist": {
+  "P0": [],
+  "P1": [
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-C1-1",
+    "ac": "C-1",
+    "closes_it": "bind TC-C1-1: This case needs a JWT that is already one hour old. The only tools available are the admin token from make.admin(), name and PDF factories, and API calls. None of them can mint a token with a past issue time or wait out an hour, and sleeping and clocks are forbidden, so no request can be sent with an expired token."
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-C1-2",
+    "ac": "C-1",
+    "closes_it": "bind TC-C1-2: The case needs the request to carry `Authorization: Bearer <valid jwt>`, but the available `api` methods only accept a `token` argument, which sends the admin's credentials in the platform's own scheme. No parameter sets a custom Authorization header or chooses the scheme, so the wrong-scheme request cannot be built with these tools. Passing `token=None` would send no credentials at all, which is a different case."
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-C7-1",
+    "ac": "C-7",
+    "closes_it": "bind TC-C7-1: The case needs a second, authenticated non-owner user, but the only identity make provides is the admin, and no route in the excerpt creates users. Row TC-C7-1.2 therefore cannot be set up. Making the article owned by someone else would need a user-creation tool, so the binding cannot be written for this case."
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-C8-1",
+    "ac": "C-8",
+    "closes_it": "bind TC-C8-1: The case needs an existing author whose username the test can address, but the tools provide no way to learn that username or to create a user. The only factory is make.admin(), which returns just a token, and the OpenAPI excerpt has no users or profiles listing route. Without a username, the POST /api/profiles/{username}/follow request cannot be built against the 'existing author' hint."
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-C8-2",
+    "ac": "C-8",
+    "closes_it": "bind TC-C8-2: The hints say only 'existing author' and give no username. The tools offer no way to look up or create a user, and make.admin() returns only a token, so the username to follow cannot be obtained. Following the admin's own account is not a valid substitute for an existing author, so the case cannot be bound."
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-C8-3",
+    "ac": "C-8",
+    "closes_it": "bind TC-C8-3: The case needs a real existing author that the admin does not follow, but the tools provide no way to obtain one. The only provided user is the admin, there is no user factory, and no profile lookup route is in REQUEST routes to discover an existing username. Using a made-up name would test a 404 for an unknown profile, not an idempotent unfollow of an existing author."
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O2-3",
+    "ac": "O-2",
+    "closes_it": "bind TC-O2-3: The case needs a request carrying an Authorization header whose token is empty (\"Token \"). The api helper only takes a token argument and has no headers parameter. The request rules require token=None when REQUEST auth is false, and token=None sends no Authorization header at all, so the request would test anonymous access rather than an empty token header. No available tool sends the empty header, so the case cannot be bound."
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O3-1",
+    "ac": "O-3",
+    "closes_it": "bind TC-O3-1: The case needs an existing profile to request, but the tools provide only the admin token, with no way to learn the admin's username or to create a user or profile. The request path requires a username, and none is available in the hints, the case data, or any factory."
+   },
+   {
+    "what": "signed case not bound to a test",
+    "case": "TC-O3-2",
+    "ac": "O-3",
+    "closes_it": "bind TC-O3-2: The case needs an existing profile to read anonymously, but the only provided user is the admin, and make.admin() returns only a token with no username. No route in the excerpt creates users or profiles, so there is no way to obtain a known existing username to request without authentication."
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "C-1",
+    "case": null,
+    "closes_it": "TC-C1-1, TC-C1-2"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "C-2",
+    "case": null,
+    "closes_it": "TC-C2-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "C-4",
+    "case": null,
+    "closes_it": "TC-C4-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "C-6",
+    "case": null,
+    "closes_it": "TC-C6-1"
+   },
+   {
+    "what": "criterion with no admitted test",
+    "ac": "C-8",
+    "case": null,
+    "closes_it": "TC-C8-1, TC-C8-2, TC-C8-3"
+   }
+  ],
+  "P2": {
+   "findings": [
+    {
+     "finding": "F-reference/TC-C2-1",
+     "class": "INSUFFICIENT_EVIDENCE",
+     "rule": "intermittent, not stable on reference",
+     "dist": "2/3",
+     "evidence": [
+      "ex:reference/a1/TC-C2-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-C3-1",
+     "class": "INSUFFICIENT_EVIDENCE",
+     "rule": "intermittent, not stable on reference",
+     "dist": "2/3",
+     "evidence": [
+      "ex:reference/a1/TC-C3-1"
+     ]
+    },
+    {
+     "finding": "F-reference/TC-C4-1",
+     "class": "INSUFFICIENT_EVIDENCE",
+     "rule": "intermittent, not stable on reference",
+     "dist": "2/3",
+     "evidence": [
+      "ex:reference/a1/TC-C4-1"
+     ]
+    }
+   ],
+   "quarantine": [],
+   "redundant": {
+    "n": 0,
+    "d": 46,
+    "ids": []
+   },
+   "mutation_strength": "not measured"
+  },
+  "P3": [
+   {
+    "what": "spec gap",
+    "ac": "C-3",
+    "case": "TC-C3-3.a",
+    "why": "the served spec and the server agree on this status: the drafted assumption is wrong",
+    "overridden": null,
+    "evidence": [
+     "ex:reference/a1/TC-C3-3.a"
+    ]
+   },
+   {
+    "what": "spec gap",
+    "ac": "C-3",
+    "case": "TC-C3-4.a",
+    "why": "the served spec and the server agree on this status: the drafted assumption is wrong",
+    "overridden": null,
+    "evidence": [
+     "ex:reference/a1/TC-C3-4.a"
+    ]
+   },
+   {
+    "what": "spec gap",
+    "ac": "C-3",
+    "case": "TC-C3-5",
+    "why": "the served spec and the server agree on this status: the drafted assumption is wrong",
+    "overridden": null,
+    "evidence": [
+     "ex:reference/a1/TC-C3-5"
+    ]
+   },
+   {
+    "what": "spec gap",
+    "ac": "C-6",
+    "case": "TC-C6-1",
+    "why": "the served spec and the server agree on this status: the drafted assumption is wrong",
+    "overridden": null,
+    "evidence": [
+     "ex:reference/a1/TC-C6-1"
+    ]
+   },
+   {
+    "what": "spec gap",
+    "ac": "C-7",
+    "case": "TC-C7-3",
+    "why": "the served spec and the server agree on this status: the drafted assumption is wrong",
+    "overridden": null,
+    "evidence": [
+     "ex:reference/a1/TC-C7-3"
+    ]
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-1",
+    "case": null,
+    "why": "Protected operations require the Authorization Token header"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-3",
+    "case": null,
+    "why": "Article lists are paged with offset and limit"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-7",
+    "case": null,
+    "why": "Users can write and edit articles"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-8",
+    "case": null,
+    "why": "Users can follow authors"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "C-9",
+    "case": null,
+    "why": "Users can favourite articles"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-1",
+    "case": null,
+    "why": "Anonymous article list returns 401 per spec despite optional auth"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-2",
+    "case": null,
+    "why": "Anonymous read of article comments returns 401 per spec"
+   },
+   {
+    "what": "assumed criterion (never confirmed by a person)",
+    "ac": "O-3",
+    "case": null,
+    "why": "Anonymous read of a profile returns 401 per spec"
+   }
+  ]
+ },
+ "checks": {
+  "families": {
+   "properties": {
+    "claim": "no 5xx; status and body conform to the served spec (Schemathesis)",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:properties:GET /api/articles",
+      "G:properties:GET /api/articles/{slug}",
+      "G:properties:POST /api/articles",
+      "G:properties:POST /api/users",
+      "G:properties:POST /api/users/login"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 5,
+      "d": 5,
+      "ids": [
+       "G:properties:GET /api/articles",
+       "G:properties:GET /api/articles/{slug}",
+       "G:properties:POST /api/articles",
+       "G:properties:POST /api/users",
+       "G:properties:POST /api/users/login"
+      ]
+     }
+    }
+   },
+   "auth_required": {
+    "claim": "no or invalid credentials: never 2xx on a secured operation, never 5xx",
+    "cases": {
+     "n": 5,
+     "d": null,
+     "ids": [
+      "G:auth_required:DELETE /api/articles/{slug}",
+      "G:auth_required:GET /api/articles",
+      "G:auth_required:GET /api/articles/{slug}",
+      "G:auth_required:POST /api/articles",
+      "G:auth_required:PUT /api/articles/{slug}"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 4,
+      "d": 5,
+      "ids": [
+       "G:auth_required:DELETE /api/articles/{slug}",
+       "G:auth_required:GET /api/articles/{slug}",
+       "G:auth_required:POST /api/articles",
+       "G:auth_required:PUT /api/articles/{slug}"
+      ]
+     },
+     "SPEC_MISMATCH": {
+      "n": 1,
+      "d": 5,
+      "ids": [
+       "G:auth_required:GET /api/articles"
+      ]
+     }
+    }
+   },
+   "unknown_id": {
+    "claim": "an ID that doesn't exist: never 2xx, never 5xx",
+    "cases": {
+     "n": 2,
+     "d": null,
+     "ids": [
+      "G:unknown_id:GET /api/articles/{slug}",
+      "G:unknown_id:GET /api/profiles/{username}"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 2,
+      "d": 2,
+      "ids": [
+       "G:unknown_id:GET /api/articles/{slug}",
+       "G:unknown_id:GET /api/profiles/{username}"
+      ]
+     }
+    }
+   },
+   "invalid_input": {
+    "claim": "a body its schema forbids: 4xx, never 5xx",
+    "cases": {
+     "n": 3,
+     "d": null,
+     "ids": [
+      "G:invalid_input:POST /api/articles",
+      "G:invalid_input:POST /api/users",
+      "G:invalid_input:POST /api/users/login"
+     ]
+    },
+    "outcomes": {
+     "ADMITTED_UNMEASURED": {
+      "n": 3,
+      "d": 3,
+      "ids": [
+       "G:invalid_input:POST /api/articles",
+       "G:invalid_input:POST /api/users",
+       "G:invalid_input:POST /api/users/login"
+      ]
+     }
+    }
+   },
+   "read_back": {
+    "claim": "declared fields round-trip from create to read",
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:read_back:POST /api/articles"
+     ]
+    },
+    "outcomes": {
+     "EXCLUDED": {
+      "n": 1,
+      "d": 1,
+      "ids": [
+       "G:read_back:POST /api/articles"
+      ]
+     }
+    }
+   },
+   "delete_final": {
+    "claim": "a read after delete: never 2xx",
+    "cases": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "G:delete_final:POST /api/articles"
+     ]
+    },
+    "outcomes": {
+     "EXCLUDED": {
+      "n": 1,
+      "d": 1,
+      "ids": [
+       "G:delete_final:POST /api/articles"
+      ]
+     }
+    }
+   }
+  },
+  "excluded": {
+   "no_valid_body": {
+    "n": 2,
+    "d": 46,
+    "ids": [
+     "G:delete_final:POST /api/articles",
+     "G:read_back:POST /api/articles"
+    ]
+   }
+  },
+  "spec_mismatch": [
+   {
+    "group": "G:auth_required:GET /api/articles",
+    "claim": "no or invalid credentials: never 2xx on a secured operation, never 5xx",
+    "findings": {
+     "n": 1,
+     "d": null,
+     "ids": [
+      "F-reference/G:auth_required:GET /api/articles"
+     ]
+    },
+    "rule": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "observed": {
+     "error": "SpecMismatch: [no credentials:2xx] GET /api/articles answered 200 with no credentials; the spec declares no security for it",
+     "request": "GET /api/articles",
+     "status": 200
+    }
+   }
+  ],
+  "spec_mismatch_more": {
+   "n": 0,
+   "d": 1,
+   "ids": []
+  }
+ },
+ "dependencies": [],
+ "scorecard": {
+  "seeded_authored": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "seeded_per_flag": [],
+  "seeded_blind": "not run (M7)",
+  "real_defects": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "mutation_strength": "not measured",
+  "mutation_strength_note": "regression adequacy; the mutation scope (crud/deps/security) sits mostly under the test data, so this measures authentication more than the item rules",
+  "mutation_per_criterion": {
+   "C-10": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-2": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-3": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-4": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-5": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-6": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-7": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "C-9": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:DELETE /api/articles/{slug}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:GET /api/articles": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:GET /api/articles/{slug}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:POST /api/articles": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:auth_required:PUT /api/articles/{slug}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:delete_final:POST /api/articles": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/articles": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:invalid_input:POST /api/users/login": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/articles": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:GET /api/articles/{slug}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/articles": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/users": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:properties:POST /api/users/login": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:read_back:POST /api/articles": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/articles/{slug}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "G:unknown_id:GET /api/profiles/{username}": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-2": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "O-3": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "triage_correct_seeded": {
+   "n": 0,
+   "d": 0,
+   "ids": []
+  },
+  "localisation": {
+   "top1": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top3": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "top5": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   }
+  },
+  "fail_before_pass_after": "not run (M5)",
+  "criteria_without_admitted_test": {
+   "n": 5,
+   "d": 13,
+   "ids": [
+    "C-1",
+    "C-2",
+    "C-4",
+    "C-6",
+    "C-8"
+   ]
+  }
+ },
+ "traceability": [
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-10",
+   "case": "TC-C10-1",
+   "assertions": [
+    "TC-C10-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C10-1"
+  },
+  {
+   "req": [
+    "L4-L4"
+   ],
+   "ac": "C-2",
+   "case": "TC-C2-1",
+   "assertions": [
+    "TC-C2-1/*"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "INTERMITTENT",
+   "dist": "2/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C2-1"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-1",
+   "assertions": [
+    "TC-C3-1/*"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "INTERMITTENT",
+   "dist": "2/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-1"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-2",
+   "assertions": [
+    "TC-C3-2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-2"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-3.a",
+   "assertions": [
+    "TC-C3-3.a/status"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-3.a"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-3.b",
+   "assertions": [
+    "TC-C3-3.b/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-3.b"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-3.c",
+   "assertions": [
+    "TC-C3-3.c/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-3.c"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-4.a",
+   "assertions": [
+    "TC-C3-4.a/status"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-4.a"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-4.b",
+   "assertions": [
+    "TC-C3-4.b/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-4.b"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-4.c",
+   "assertions": [
+    "TC-C3-4.c/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-4.c"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-5",
+   "assertions": [
+    "TC-C3-5/status"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-5"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-3",
+   "case": "TC-C3-6",
+   "assertions": [
+    "TC-C3-6/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C3-6"
+  },
+  {
+   "req": [
+    "L5-L5"
+   ],
+   "ac": "C-4",
+   "case": "TC-C4-1",
+   "assertions": [
+    "TC-C4-1/*"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "INTERMITTENT",
+   "dist": "2/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C4-1"
+  },
+  {
+   "req": [
+    "L6-L6"
+   ],
+   "ac": "C-5",
+   "case": "TC-C5-1",
+   "assertions": [
+    "TC-C5-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C5-1"
+  },
+  {
+   "req": [
+    "L6-L6"
+   ],
+   "ac": "C-5",
+   "case": "TC-C5-2",
+   "assertions": [
+    "TC-C5-2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C5-2"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-6",
+   "case": "TC-C6-1",
+   "assertions": [
+    "TC-C6-1/status"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C6-1"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-7",
+   "case": "TC-C7-2",
+   "assertions": [
+    "TC-C7-2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C7-2"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-7",
+   "case": "TC-C7-3",
+   "assertions": [
+    "TC-C7-3/status"
+   ],
+   "gate": "SPEC_GAP",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C7-3"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-9",
+   "case": "TC-C9-1",
+   "assertions": [
+    "TC-C9-1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C9-1"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-9",
+   "case": "TC-C9-2",
+   "assertions": [
+    "TC-C9-2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C9-2"
+  },
+  {
+   "req": [
+    "L1-L1"
+   ],
+   "ac": "C-9",
+   "case": "TC-C9-3",
+   "assertions": [
+    "TC-C9-3/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-C9-3"
+  },
+  {
+   "req": [
+    "openapi/api/articles/GET.yaml:6",
+    "openapi/api/articles/GET.yaml:29"
+   ],
+   "ac": "O-1",
+   "case": "TC-O1-1.1",
+   "assertions": [
+    "TC-O1-1.1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O1-1.1"
+  },
+  {
+   "req": [
+    "openapi/api/articles/GET.yaml:6",
+    "openapi/api/articles/GET.yaml:29"
+   ],
+   "ac": "O-1",
+   "case": "TC-O1-1.2",
+   "assertions": [
+    "TC-O1-1.2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O1-1.2"
+  },
+  {
+   "req": [
+    "openapi/api/articles/GET.yaml:6",
+    "openapi/api/articles/GET.yaml:29"
+   ],
+   "ac": "O-1",
+   "case": "TC-O1-2",
+   "assertions": [
+    "TC-O1-2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O1-2"
+  },
+  {
+   "req": [
+    "openapi/api/articles/GET.yaml:6",
+    "openapi/api/articles/GET.yaml:29"
+   ],
+   "ac": "O-1",
+   "case": "TC-O1-3",
+   "assertions": [
+    "TC-O1-3/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O1-3"
+  },
+  {
+   "req": [
+    "openapi/api/articles/{slug}/comments/GET.yaml:5",
+    "openapi/api/articles/{slug}/comments/GET.yaml:17"
+   ],
+   "ac": "O-2",
+   "case": "TC-O2-1.1",
+   "assertions": [
+    "TC-O2-1.1/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O2-1.1"
+  },
+  {
+   "req": [
+    "openapi/api/articles/{slug}/comments/GET.yaml:5",
+    "openapi/api/articles/{slug}/comments/GET.yaml:17"
+   ],
+   "ac": "O-2",
+   "case": "TC-O2-1.2",
+   "assertions": [
+    "TC-O2-1.2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O2-1.2"
+  },
+  {
+   "req": [
+    "openapi/api/articles/{slug}/comments/GET.yaml:5",
+    "openapi/api/articles/{slug}/comments/GET.yaml:17"
+   ],
+   "ac": "O-2",
+   "case": "TC-O2-2",
+   "assertions": [
+    "TC-O2-2/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O2-2"
+  },
+  {
+   "req": [
+    "openapi/api/profiles/{username}/GET.yaml:5",
+    "openapi/api/profiles/{username}/GET.yaml:17"
+   ],
+   "ac": "O-3",
+   "case": "TC-O3-3",
+   "assertions": [
+    "TC-O3-3/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/TC-O3-3"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:DELETE /api/articles/{slug}",
+   "case": "G:auth_required:DELETE /api/articles/{slug}",
+   "assertions": [
+    "G:auth_required:DELETE /api/articles/{slug}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:DELETE /api/articles/{slug}"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:GET /api/articles/{slug}",
+   "case": "G:auth_required:GET /api/articles/{slug}",
+   "assertions": [
+    "G:auth_required:GET /api/articles/{slug}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:GET /api/articles/{slug}"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:GET /api/articles",
+   "case": "G:auth_required:GET /api/articles",
+   "assertions": [
+    "no credentials:2xx"
+   ],
+   "gate": "SPEC_MISMATCH",
+   "verdict": "CONSISTENT_FAIL",
+   "dist": "3/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:GET /api/articles"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:POST /api/articles",
+   "case": "G:auth_required:POST /api/articles",
+   "assertions": [
+    "G:auth_required:POST /api/articles/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:POST /api/articles"
+  },
+  {
+   "req": [],
+   "ac": "G:auth_required:PUT /api/articles/{slug}",
+   "case": "G:auth_required:PUT /api/articles/{slug}",
+   "assertions": [
+    "G:auth_required:PUT /api/articles/{slug}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:auth_required:PUT /api/articles/{slug}"
+  },
+  {
+   "req": [],
+   "ac": "G:delete_final:POST /api/articles",
+   "case": "G:delete_final:POST /api/articles",
+   "assertions": [
+    "G:delete_final:POST /api/articles/*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "basis": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/articles",
+   "case": "G:invalid_input:POST /api/articles",
+   "assertions": [
+    "G:invalid_input:POST /api/articles/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/articles"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/users/login",
+   "case": "G:invalid_input:POST /api/users/login",
+   "assertions": [
+    "G:invalid_input:POST /api/users/login/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/users/login"
+  },
+  {
+   "req": [],
+   "ac": "G:invalid_input:POST /api/users",
+   "case": "G:invalid_input:POST /api/users",
+   "assertions": [
+    "G:invalid_input:POST /api/users/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:invalid_input:POST /api/users"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/articles/{slug}",
+   "case": "G:properties:GET /api/articles/{slug}",
+   "assertions": [
+    "G:properties:GET /api/articles/{slug}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:GET /api/articles/{slug}"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:GET /api/articles",
+   "case": "G:properties:GET /api/articles",
+   "assertions": [
+    "G:properties:GET /api/articles/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:GET /api/articles"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/articles",
+   "case": "G:properties:POST /api/articles",
+   "assertions": [
+    "G:properties:POST /api/articles/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:POST /api/articles"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/users/login",
+   "case": "G:properties:POST /api/users/login",
+   "assertions": [
+    "G:properties:POST /api/users/login/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:POST /api/users/login"
+  },
+  {
+   "req": [],
+   "ac": "G:properties:POST /api/users",
+   "case": "G:properties:POST /api/users",
+   "assertions": [
+    "G:properties:POST /api/users/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:properties:POST /api/users"
+  },
+  {
+   "req": [],
+   "ac": "G:read_back:POST /api/articles",
+   "case": "G:read_back:POST /api/articles",
+   "assertions": [
+    "G:read_back:POST /api/articles/*"
+   ],
+   "gate": "EXCLUDED",
+   "verdict": null,
+   "dist": null,
+   "basis": null,
+   "evidence": null
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/articles/{slug}",
+   "case": "G:unknown_id:GET /api/articles/{slug}",
+   "assertions": [
+    "G:unknown_id:GET /api/articles/{slug}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/articles/{slug}"
+  },
+  {
+   "req": [],
+   "ac": "G:unknown_id:GET /api/profiles/{username}",
+   "case": "G:unknown_id:GET /api/profiles/{username}",
+   "assertions": [
+    "G:unknown_id:GET /api/profiles/{username}/*"
+   ],
+   "gate": "ADMITTED_UNMEASURED",
+   "verdict": "PASS",
+   "dist": "0/3",
+   "basis": "real",
+   "evidence": "ex:reference/a1/G:unknown_id:GET /api/profiles/{username}"
+  }
+ ],
+ "coverage": {
+  "by": "case technique (boundary \u2192 boundary; error_exception/error_guessing \u2192 exception; rest \u2192 normal)",
+  "normal": {
+   "n": 29,
+   "d": 44,
+   "ids": [
+    "G:auth_required:DELETE /api/articles/{slug}",
+    "G:auth_required:GET /api/articles",
+    "G:auth_required:GET /api/articles/{slug}",
+    "G:auth_required:POST /api/articles",
+    "G:auth_required:PUT /api/articles/{slug}",
+    "G:invalid_input:POST /api/articles",
+    "G:invalid_input:POST /api/users",
+    "G:invalid_input:POST /api/users/login",
+    "G:properties:GET /api/articles",
+    "G:properties:GET /api/articles/{slug}",
+    "G:properties:POST /api/articles",
+    "G:properties:POST /api/users",
+    "G:properties:POST /api/users/login",
+    "G:unknown_id:GET /api/articles/{slug}",
+    "G:unknown_id:GET /api/profiles/{username}",
+    "TC-C10-1",
+    "TC-C2-1",
+    "TC-C3-1",
+    "TC-C4-1",
+    "TC-C5-1",
+    "TC-C6-1",
+    "TC-C7-2",
+    "TC-C9-1",
+    "TC-O1-1.1",
+    "TC-O1-1.2",
+    "TC-O1-2",
+    "TC-O2-1.1",
+    "TC-O2-1.2",
+    "TC-O2-2"
+   ]
+  },
+  "boundary": {
+   "n": 6,
+   "d": 44,
+   "ids": [
+    "TC-C3-3.a",
+    "TC-C3-3.b",
+    "TC-C3-3.c",
+    "TC-C3-4.a",
+    "TC-C3-4.b",
+    "TC-C3-4.c"
+   ]
+  },
+  "exception": {
+   "n": 9,
+   "d": 44,
+   "ids": [
+    "TC-C3-2",
+    "TC-C3-5",
+    "TC-C3-6",
+    "TC-C5-2",
+    "TC-C7-3",
+    "TC-C9-2",
+    "TC-C9-3",
+    "TC-O1-3",
+    "TC-O3-3"
+   ]
+  }
+ },
+ "uncovered": {
+  "criteria_out_of_scope": [
+   {
+    "criterion": "O-4",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-5",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-6",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-7",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-8",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-9",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-10",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-11",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-12",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-13",
+    "reason": "out of scope in the spec"
+   },
+   {
+    "criterion": "O-14",
+    "reason": "out of scope in the spec"
+   }
+  ],
+  "deferred": [],
+  "skipped_templates": [
+   "C-1: dropped a drafted case: expected '2xx' is not traceable to C-1 (spec allows ['401', '4xx'])",
+   "C-4: skipped minimum template boundary: Default cap is a returned-count rule with no request-side ok and fail literals; covered by the page_window acceptance case",
+   "C-7: decision table leaves out 6 combination(s), e.g. {'caller': 'anonymous', 'article ownership': \"other user's article\"}",
+   "O-1: decision table leaves out 2 combination(s), e.g. {'caller': 'anonymous', 'Authorization header': 'Token <valid jwt>'}",
+   "O-1: skipped minimum template error_exception: No failure outcome is stated for anonymous reads; the decided outcome is success",
+   "O-2: decision table leaves out 2 combination(s), e.g. {'caller': 'anonymous', 'Authorization header': 'Token <valid jwt>'}",
+   "O-2: skipped minimum template error_exception: No failure outcome is stated for anonymous reads; the decided outcome is success",
+   "O-3: decision table leaves out 2 combination(s), e.g. {'caller': 'anonymous', 'Authorization header': 'Token <valid jwt>'}",
+   "O-3: skipped minimum template error_exception: No failure outcome is stated for anonymous reads; the decided outcome is success",
+   "C-1: dropped a drafted case: expected '2xx' is not traceable to C-1 (spec allows ['401', '4xx'])",
+   "C-1: preconditions ['authenticated_user_with_expired_token'] are not factories; moved to steps",
+   "C-1: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "C-2: preconditions ['person_without_account'] are not factories; moved to steps",
+   "C-3: preconditions ['article_list_with_45_articles'] are not factories; moved to steps",
+   "C-3: preconditions ['article_list_with_45_articles'] are not factories; moved to steps",
+   "C-3: preconditions ['article_list_with_45_articles'] are not factories; moved to steps",
+   "C-3: preconditions ['article_list_with_45_articles'] are not factories; moved to steps",
+   "C-3: preconditions ['article_list_with_45_articles'] are not factories; moved to steps",
+   "C-3: preconditions ['article_list_with_45_articles'] are not factories; moved to steps",
+   "C-4: preconditions ['article_list_with_21_articles'] are not factories; moved to steps",
+   "C-5: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "C-5: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "C-6: preconditions ['person_without_account'] are not factories; moved to steps",
+   "C-7: preconditions ['authenticated_user'] are not factories; moved to steps",
+   "C-7: preconditions ['authenticated_user', 'article_owned_by_user', 'other_article_with_same_title'] are not factories; moved to steps",
+   "C-7: preconditions ['authenticated_user', 'article_owned_by_user', 'authenticated_non_owner'] are not factories; moved to steps",
+   "C-8: preconditions ['authenticated_user', 'author_not_yet_followed'] are not factories; moved to steps",
+   "C-8: preconditions ['authenticated_user', 'author_already_followed'] are not factories; moved to steps",
+   "C-8: preconditions ['authenticated_user', 'author_not_followed'] are not factories; moved to steps",
+   "C-9: preconditions ['authenticated_user', 'article_not_favourited'] are not factories; moved to steps",
+   "C-9: preconditions ['authenticated_user', 'article_already_favourited'] are not factories; moved to steps",
+   "C-9: preconditions ['authenticated_user', 'article_not_favourited'] are not factories; moved to steps",
+   "C-10: preconditions ['authenticated_user', 'published_article'] are not factories; moved to steps",
+   "O-1: preconditions ['anonymous_caller', 'published_articles_exist'] are not factories; moved to steps",
+   "O-1: preconditions ['anonymous_caller', 'published_articles_exist'] are not factories; moved to steps",
+   "O-1: preconditions ['anonymous_caller', 'authenticated_user'] are not factories; moved to steps",
+   "O-2: preconditions ['anonymous_caller', 'article_with_comments'] are not factories; moved to steps",
+   "O-2: preconditions ['anonymous_caller', 'article_with_comments'] are not factories; moved to steps",
+   "O-2: preconditions ['anonymous_caller', 'authenticated_user', 'article_with_comments'] are not factories; moved to steps",
+   "O-3: preconditions ['anonymous_caller', 'existing_profile'] are not factories; moved to steps",
+   "O-3: preconditions ['anonymous_caller', 'existing_profile'] are not factories; moved to steps",
+   "O-3: preconditions ['anonymous_caller', 'authenticated_user', 'existing_profile'] are not factories; moved to steps",
+   "C-1: no acceptance case",
+   "C-1: criterion is assumed, not confirmed: check its cases",
+   "C-3: criterion is assumed, not confirmed: check its cases",
+   "C-7: criterion is assumed, not confirmed: check its cases",
+   "C-8: criterion is assumed, not confirmed: check its cases",
+   "C-9: criterion is assumed, not confirmed: check its cases",
+   "O-1: criterion is assumed, not confirmed: check its cases",
+   "O-2: criterion is assumed, not confirmed: check its cases",
+   "O-3: criterion is assumed, not confirmed: check its cases"
+  ],
+  "assumed": [
+   "C-1",
+   "C-3",
+   "C-7",
+   "C-8",
+   "C-9",
+   "O-1",
+   "O-2",
+   "O-3"
+  ],
+  "unbound_cases": [
+   "TC-C1-1",
+   "TC-C1-2",
+   "TC-C7-1",
+   "TC-C8-1",
+   "TC-C8-2",
+   "TC-C8-3",
+   "TC-O2-3",
+   "TC-O3-1",
+   "TC-O3-2"
+  ],
+  "behaviour_with_no_requirement": [],
+  "seeded_race": ""
+ },
+ "ai_decisions": {
+  "spec_answers": {
+   "n": 10,
+   "d": null,
+   "ids": [
+    "0dc3384da13fec11",
+    "136de4a6a5875845",
+    "23c01aaa74589b1b",
+    "3c4655a415f58ce2",
+    "6b583fefe38855b3",
+    "72393bad699731ea",
+    "72f35526550192cc",
+    "b73c0acde5859c6c",
+    "d34bf9cab1a5d78b",
+    "f501cf90e9e33de7"
+   ]
+  },
+  "spec_assumed": {
+   "n": 10,
+   "d": 10,
+   "ids": [
+    "0dc3384da13fec11",
+    "136de4a6a5875845",
+    "23c01aaa74589b1b",
+    "3c4655a415f58ce2",
+    "6b583fefe38855b3",
+    "72393bad699731ea",
+    "72f35526550192cc",
+    "b73c0acde5859c6c",
+    "d34bf9cab1a5d78b",
+    "f501cf90e9e33de7"
+   ]
+  },
+  "cases_llm_drafted": {
+   "n": 32,
+   "d": 32,
+   "ids": [
+    "TC-C1-1",
+    "TC-C1-2",
+    "TC-C10-1",
+    "TC-C2-1",
+    "TC-C3-1",
+    "TC-C3-2",
+    "TC-C3-3",
+    "TC-C3-4",
+    "TC-C3-5",
+    "TC-C3-6",
+    "TC-C4-1",
+    "TC-C5-1",
+    "TC-C5-2",
+    "TC-C6-1",
+    "TC-C7-1",
+    "TC-C7-2",
+    "TC-C7-3",
+    "TC-C8-1",
+    "TC-C8-2",
+    "TC-C8-3",
+    "TC-C9-1",
+    "TC-C9-2",
+    "TC-C9-3",
+    "TC-O1-1",
+    "TC-O1-2",
+    "TC-O1-3",
+    "TC-O2-1",
+    "TC-O2-2",
+    "TC-O2-3",
+    "TC-O3-1",
+    "TC-O3-2",
+    "TC-O3-3"
+   ]
+  },
+  "cases_signoff": {
+   "signed": false,
+   "approved": {
+    "n": 0,
+    "d": 32,
+    "ids": []
+   }
+  },
+  "gate_equivalence": {
+   "equivalent": {
+    "n": 0,
+    "d": 0,
+    "ids": []
+   },
+   "resolution": "not confirmed by a person; counted as survivors"
+  },
+  "triage": "no AI in M4 (rules only; the AI judge is M7)",
+  "overrides": [],
+  "review_decisions": [
+   {
+    "item": 698,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 699,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 700,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 701,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 702,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 703,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 704,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 705,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 706,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 707,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 708,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 709,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 710,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 711,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 712,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 713,
+    "kind": "confirm_observed",
+    "decision": "out_of_scope",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 714,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 715,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 716,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 717,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 718,
+    "kind": "question",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 719,
+    "kind": "signoff",
+    "decision": "defer",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 720,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 721,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 722,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 723,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 724,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 725,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 726,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 727,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   },
+   {
+    "item": 728,
+    "kind": "unbound",
+    "decision": "accept_gap",
+    "by": "unattended",
+    "reason": "unattended default"
+   }
+  ]
+ },
+ "evidence": {},
+ "defects": [],
+ "product": {
+  "summary": {
+   "tests": 46,
+   "admitted": 35,
+   "defects": 0,
+   "problematic": 9,
+   "improve": 23,
+   "approved": 0,
+   "proposed": 32
+  },
+  "defects": [],
+  "causes": [],
+  "problematic_tests": [
+   {
+    "case": "TC-C2-1",
+    "title": "Successful sign-up returns a JWT for the Authorization header",
+    "summary": "Successful sign-up returns no token",
+    "ac": "C-2",
+    "criterion": "Token is issued by sign-up or login",
+    "status": "INSUFFICIENT_EVIDENCE",
+    "reason": "The rules could not decide: needs a look.",
+    "evidence": [
+     "ex:reference/a1/TC-C2-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-C3-1",
+    "title": "Offset and limit select the page returned",
+    "summary": "Offset and limit ignored so the page does not follow the parameters",
+    "ac": "C-3",
+    "criterion": "Article lists are paged with offset and limit",
+    "status": "INSUFFICIENT_EVIDENCE",
+    "reason": "The rules could not decide: needs a look.",
+    "evidence": [
+     "ex:reference/a1/TC-C3-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-C3-3.a",
+    "title": "limit at the 1 limit",
+    "summary": "Limit of 0 accepted as a valid page size",
+    "ac": "C-3",
+    "criterion": "Article lists are paged with offset and limit",
+    "status": "SPEC_GAP",
+    "reason": "Fails, but its requirement was only assumed: check that answer.",
+    "evidence": [
+     "ex:reference/a1/TC-C3-3.a"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-C3-4.a",
+    "title": "offset at the 0 limit",
+    "summary": "Negative offset accepted at the boundary",
+    "ac": "C-3",
+    "criterion": "Article lists are paged with offset and limit",
+    "status": "SPEC_GAP",
+    "reason": "Fails, but its requirement was only assumed: check that answer.",
+    "evidence": [
+     "ex:reference/a1/TC-C3-4.a"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-C3-5",
+    "title": "Negative limit is refused",
+    "summary": "Negative limit causes a server error instead of a 422",
+    "ac": "C-3",
+    "criterion": "Article lists are paged with offset and limit",
+    "status": "SPEC_GAP",
+    "reason": "Fails, but its requirement was only assumed: check that answer.",
+    "evidence": [
+     "ex:reference/a1/TC-C3-5"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-C4-1",
+    "title": "Omitted limit returns at most 20 articles",
+    "summary": "Default limit not applied so more than 20 articles are returned",
+    "ac": "C-4",
+    "criterion": "Article list limit defaults to 20",
+    "status": "INSUFFICIENT_EVIDENCE",
+    "reason": "The rules could not decide: needs a look.",
+    "evidence": [
+     "ex:reference/a1/TC-C4-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-C6-1",
+    "title": "New person can sign up and then log in",
+    "summary": "Sign-up or login fails for a new person with valid details",
+    "ac": "C-6",
+    "criterion": "People can sign up and log in",
+    "status": "SPEC_GAP",
+    "reason": "Fails, but its requirement was only assumed: check that answer.",
+    "evidence": [
+     "ex:reference/a1/TC-C6-1"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "TC-C7-3",
+    "title": "Edit to a title used by another article is refused with 409",
+    "summary": "Duplicate title on update accepted or reported as a server error",
+    "ac": "C-7",
+    "criterion": "Users can write and edit articles",
+    "status": "SPEC_GAP",
+    "reason": "Fails, but its requirement was only assumed: check that answer.",
+    "evidence": [
+     "ex:reference/a1/TC-C7-3"
+    ],
+    "source": "execute",
+    "count": 1
+   },
+   {
+    "case": "G:auth_required:GET /api/articles",
+    "title": "G:auth_required:GET /api/articles",
+    "summary": "",
+    "ac": "G:auth_required:GET /api/articles",
+    "criterion": "",
+    "status": "SPEC_MISMATCH",
+    "reason": "valid HTTP that disagrees with the served spec: server or spec is wrong",
+    "evidence": [
+     "ex:reference/a1/G:auth_required:GET /api/articles"
+    ],
+    "source": "execute",
+    "count": 1
+   }
+  ],
+  "improve": [
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for C-1",
+    "detail": "Protected operations require the Authorization Token header",
+    "ac": "C-1"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for C-2",
+    "detail": "Token is issued by sign-up or login",
+    "ac": "C-2"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for C-4",
+    "detail": "Article list limit defaults to 20",
+    "ac": "C-4"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for C-6",
+    "detail": "People can sign up and log in",
+    "ac": "C-6"
+   },
+   {
+    "kind": "uncovered",
+    "title": "No admitted test for C-8",
+    "detail": "Users can follow authors",
+    "ac": "C-8"
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "Respond 200 with the public article list, since auth is optional",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "Respond 200 with the comments, since auth is optional",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: intended behaviour",
+    "detail": "Respond 200 with the profile, since auth is optional",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: limit maximum",
+    "detail": "Cap at 100 and clamp",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: limit and offset out of range",
+    "detail": "422 validation error",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: token expiry",
+    "detail": "Expires after 1 hour, then 401",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: non-owner edit or delete status",
+    "detail": "403 Forbidden",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: duplicate title on update",
+    "detail": "409 Conflict",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: follow twice or unfollow when not following",
+    "detail": "200 idempotent, no change",
+    "ac": null
+   },
+   {
+    "kind": "assumed",
+    "title": "Answer assumed: favourite twice or unfavourite when not favourited",
+    "detail": "200 idempotent, no change",
+    "ac": null
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-1 is still an assumption",
+    "detail": "Protected operations require the Authorization Token header",
+    "ac": "C-1"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-3 is still an assumption",
+    "detail": "Article lists are paged with offset and limit",
+    "ac": "C-3"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-7 is still an assumption",
+    "detail": "Users can write and edit articles",
+    "ac": "C-7"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-8 is still an assumption",
+    "detail": "Users can follow authors",
+    "ac": "C-8"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "C-9 is still an assumption",
+    "detail": "Users can favourite articles",
+    "ac": "C-9"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-1 is still an assumption",
+    "detail": "Anonymous article list returns 401 per spec despite optional auth",
+    "ac": "O-1"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-2 is still an assumption",
+    "detail": "Anonymous read of article comments returns 401 per spec",
+    "ac": "O-2"
+   },
+   {
+    "kind": "spec_gap",
+    "title": "O-3 is still an assumption",
+    "detail": "Anonymous read of a profile returns 401 per spec",
+    "ac": "O-3"
+   }
+  ],
+  "rules": {
+   "clarify": [],
+   "cases": [],
+   "templates": null,
+   "gate": {
+    "every_criterion": true,
+    "k": 5,
+    "min_kills": 1,
+    "near": 3
+   },
+   "routes": [],
+   "scan": null
+  }
+ }
+}

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="29" time="31.724" timestamp="2026-11-09T14:11:03.707472+00:00" hostname="1231d476fb9e"><testcase classname="test_tc_c10_1" name="test_tc_c10_1[TC-C10-1]" time="0.314" /><testcase classname="test_tc_c2_1" name="test_tc_c2_1[TC-C2-1]" time="0.176" /><testcase classname="test_tc_c3_1" name="test_tc_c3_1[TC-C3-1]" time="9.531" /><testcase classname="test_tc_c3_2" name="test_tc_c3_2[TC-C3-2]" time="9.549" /><testcase classname="test_tc_c3_3" name="test_tc_c3_3[TC-C3-3.a]" time="0.111"><failure message="platform_rt.expect.ExpectationFailed: [TC-C3-3.a/status] expected '422', got 200">make = &lt;platform_rt.blackbox.Make object at 0xffffaa233a80&gt;
+case_id = 'TC-C3-3.a'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c3_3(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        api.get("/api/articles", token=None, params=data)
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=26ec90b23714fcfef2eeb1997c6fb9953deaf397ef75fc81921aadf5d20f6380
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c3_3.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C3-3.a/status', ok = False, expected = '422', actual = 200
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C3-3.a/status] expected '422', got 200
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c3_3" name="test_tc_c3_3[TC-C3-3.b]" time="0.161" /><testcase classname="test_tc_c3_3" name="test_tc_c3_3[TC-C3-3.c]" time="0.206" /><testcase classname="test_tc_c3_4" name="test_tc_c3_4[TC-C3-4.a]" time="0.228"><failure message="platform_rt.expect.ExpectationFailed: [TC-C3-4.a/status] expected '422', got 200">make = &lt;platform_rt.blackbox.Make object at 0xffffaa5eebe0&gt;
+case_id = 'TC-C3-4.a'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c3_4(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin()
+        resp = api.get("/api/articles", token=admin["token"], params=data)
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=940ab2dfd5b0db9546571d195cd383e1b4d7ae6106dd3ae0666c2449394c353f
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c3_4.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C3-4.a/status', ok = False, expected = '422', actual = 200
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C3-4.a/status] expected '422', got 200
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c3_4" name="test_tc_c3_4[TC-C3-4.b]" time="0.180" /><testcase classname="test_tc_c3_4" name="test_tc_c3_4[TC-C3-4.c]" time="0.202" /><testcase classname="test_tc_c3_5" name="test_tc_c3_5[TC-C3-5]" time="0.207"><failure message="platform_rt.expect.ExpectationFailed: [TC-C3-5/status] expected '422', got 200">make = &lt;platform_rt.blackbox.Make object at 0xffffaa240050&gt;, case_id = 'TC-C3-5'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c3_5(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        api.get('/api/articles', token=None, params=data)
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=d920dbe93e41e1a0160977a42a2a6295071abbeffc8902cde766f5fe4832b496
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c3_5.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C3-5/status', ok = False, expected = '422', actual = 200
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C3-5/status] expected '422', got 200
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c3_6" name="test_tc_c3_6[TC-C3-6]" time="0.196" /><testcase classname="test_tc_c4_1" name="test_tc_c4_1[TC-C4-1]" time="4.607" /><testcase classname="test_tc_c5_1" name="test_tc_c5_1[TC-C5-1]" time="0.148" /><testcase classname="test_tc_c5_2" name="test_tc_c5_2[TC-C5-2]" time="0.200" /><testcase classname="test_tc_c6_1" name="test_tc_c6_1[TC-C6-1]" time="0.513"><failure message="platform_rt.expect.ExpectationFailed: [TC-C6-1/status] expected '2xx', got 401">make = &lt;platform_rt.blackbox.Make object at 0xffffaa1a6b10&gt;, case_id = 'TC-C6-1'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c6_1(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        email = hints["email"]; password = "S3cret-pass-123"; username = make.name("user"); api.post("/api/users", token=None, json={"user": {"username": username, "email": email, "password": password}}); api.post("/api/users/login", token=None, json={"user": {"email": email, "password": password}})
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=fee3ff766d1453e6bc1beb5b5cb1df277d1cf6a740e2571f35dacfb5ca3aeb2a
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c6_1.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C6-1/status', ok = False, expected = '2xx', actual = 401
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C6-1/status] expected '2xx', got 401
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c7_2" name="test_tc_c7_2[TC-C7-2]" time="0.109" /><testcase classname="test_tc_c7_3" name="test_tc_c7_3[TC-C7-3]" time="0.720"><failure message="platform_rt.expect.ExpectationFailed: [TC-C7-3/status] expected '409', got 200">make = &lt;platform_rt.blackbox.Make object at 0xffffaa434aa0&gt;, case_id = 'TC-C7-3'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_c7_3(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin()
+        t = admin["token"]
+        dup_title = make.name(hints["title"])
+        other = api.post("/api/articles", token=t, json={"article": {"title": dup_title, "description": "other article", "body": "other body"}})
+        mine = api.post("/api/articles", token=t, json={"article": {"title": make.name("owned"), "description": "owned article", "body": "owned body"}})
+        slug = mine.json()["article"]["slug"]
+        update = api.put(f"/api/articles/{slug}", token=t, json={"article": {"title": dup_title}})
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=8f72f4498bc4fb010f6cd77979b25636c06cf51069ce47ef3da6900ba5e31637
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+
+tests/test_tc_c7_3.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:74: in status
+    _record(id, status_matches(exchange["status"], expected), str(expected),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+aid = 'TC-C7-3/status', ok = False, expected = '409', actual = 200
+
+    def _record(aid: str, ok: bool, expected, actual) -&gt; None:
+        record.current().assertions.append(
+            {"id": aid, "ok": ok, "expected": expected, "actual": actual}
+        )
+        if not ok:
+&gt;           raise ExpectationFailed(aid, f"expected {expected!r}, got {actual!r}")
+E           platform_rt.expect.ExpectationFailed: [TC-C7-3/status] expected '409', got 200
+
+/usr/local/lib/python3.14/site-packages/platform_rt/expect.py:35: ExpectationFailed</failure></testcase><testcase classname="test_tc_c9_1" name="test_tc_c9_1[TC-C9-1]" time="0.313" /><testcase classname="test_tc_c9_2" name="test_tc_c9_2[TC-C9-2]" time="0.607" /><testcase classname="test_tc_c9_3" name="test_tc_c9_3[TC-C9-3]" time="0.425" /><testcase classname="test_tc_o1_1" name="test_tc_o1_1[TC-O1-1.1]" time="0.178" /><testcase classname="test_tc_o1_1" name="test_tc_o1_1[TC-O1-1.2]" time="0.202" /><testcase classname="test_tc_o1_2" name="test_tc_o1_2[TC-O1-2]" time="0.001"><failure message="platform_rt.api.ConformanceError: the binding sent no request">make = &lt;platform_rt.blackbox.Make object at 0xffffaa4666d0&gt;, case_id = 'TC-O1-2'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o1_2(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        token = None
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=224375a8ed8765abbb7231468357cc4c44a17f4e8376e665bd5f98333aaddb4d
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_tc_o1_2.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;platform_rt.api.Api object at 0xffffacab0c20&gt;, case_data = {}
+request = {'auth': None, 'routes': ['GET /api/articles']}
+
+    def under_test(self, case_data: dict | None = None, request: dict | None = None) -&gt; dict:
+        """The exchange the locked block asserts on: the last test request that goes to one of
+        the case's routes with the required auth (`request`) and carries case_data exactly.
+        With TP_CONFORMANCE=0 (guards v1): simply the last test request."""
+        rec = record.current()
+        rec.case_data = case_data
+        steps = [e for e in rec.exchanges if not e["setup"]]
+        if not steps:
+&gt;           raise ConformanceError("the binding sent no request")
+E           platform_rt.api.ConformanceError: the binding sent no request
+
+/usr/local/lib/python3.14/site-packages/platform_rt/api.py:176: ConformanceError</failure></testcase><testcase classname="test_tc_o1_3" name="test_tc_o1_3[TC-O1-3]" time="0.212"><failure message="platform_rt.api.ConformanceError: no request went to ['GET /api/articles'] with token=any; last sent POST /api/articles query={} json={'article': {'title': 'tp-generate-exec-531-28aad4-art', 'description': 'published for public list', 'body': 'body text'}} token=yes">make = &lt;platform_rt.blackbox.Make object at 0xffffaa4fd940&gt;, case_id = 'TC-O1-3'
+
+    @pytest.mark.tp_case(unit=UNIT)
+    @pytest.mark.parametrize("case_id", list(CASE_DATA))
+    def test_tc_o1_3(make, case_id):
+        data, hints = CASE_DATA[case_id], HINTS[case_id]
+        # &gt;&gt;&gt; BINDING
+        admin = make.admin(); api.post("/api/articles", token=admin["token"], json={"article": {"title": make.name("art"), "description": "published for public list", "body": "body text"}})
+        # &lt;&lt;&lt; BINDING
+        # &gt;&gt;&gt; LOCKED sha256=4dad0733c997fb98e8e39d1c0df06a341e321e9b16c70ce3318a38d957f79e79
+&gt;       expect.status(api.under_test(CASE_DATA[case_id], REQUEST[case_id]), EXPECTED[case_id]["status"], id=f"{case_id}/status")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_tc_o1_3.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;platform_rt.api.Api object at 0xffffacab0c20&gt;, case_data = {}
+request = {'auth': None, 'routes': ['GET /api/articles']}
+
+    def under_test(self, case_data: dict | None = None, request: dict | None = None) -&gt; dict:
+        """The exchange the locked block asserts on: the last test request that goes to one of
+        the case's routes with the required auth (`request`) and carries case_data exactly.
+        With TP_CONFORMANCE=0 (guards v1): simply the last test request."""
+        rec = record.current()
+        rec.case_data = case_data
+        steps = [e for e in rec.exchanges if not e["setup"]]
+        if not steps:
+            raise ConformanceError("the binding sent no request")
+        if os.environ.get("TP_CONFORMANCE", "1") == "0":
+            rec.under_test = steps[-1]
+            return steps[-1]
+        fitting = [e for e in steps if _fits(e, request or {})]
+        if not fitting:
+&gt;           raise ConformanceError(
+                f"no request went to {request['routes']} with token="
+                f"{ {None: 'any', True: 'yes', False: 'no'}[request.get('auth')] }; last sent "
+                f"{_summary(steps[-1])}"
+            )
+E           platform_rt.api.ConformanceError: no request went to ['GET /api/articles'] with token=any; last sent POST /api/articles query={} json={'article': {'title': 'tp-generate-exec-531-28aad4-art', 'description': 'published for public list', 'body': 'body text'}} token=yes
+
+/usr/local/lib/python3.14/site-packages/platform_rt/api.py:182: ConformanceError</failure></testcase><testcase classname="test_tc_o2_1" name="test_tc_o2_1[TC-O2-1.1]" time="0.637" /><testcase classname="test_tc_o2_1" name="test_tc_o2_1[TC-O2-1.2]" time="0.601" /><testcase classname="test_tc_o2_2" name="test_tc_o2_2[TC-O2-2]" time="0.602" /><testcase classname="test_tc_o3_3" name="test_tc_o3_3[TC-O3-3]" time="0.405" /></testsuite></testsuites>

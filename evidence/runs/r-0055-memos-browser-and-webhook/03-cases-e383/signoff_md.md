@@ -1,0 +1,48 @@
+# Test cases — sign-off (UNSIGNED)
+
+Flows: FLOW-memos. 0/5 lines approved, 0 carried forward from an earlier sign-off.
+
+## Attention
+
+- C-2: dropped a drafted table: expected '4xx' is not traceable to C-2 (spec allows ['2xx'])
+- C-3: dropped a drafted table: expected '4xx' is not traceable to C-3 (spec allows ['2xx'])
+- O-8: dropped a drafted case: expected '4xx' is not traceable to O-8 (spec allows ['2xx'])
+- O-8: dropped a drafted case: expected '4xx' is not traceable to O-8 (spec allows ['2xx'])
+- O-8: dropped a drafted case: expected '4xx' is not traceable to O-8 (spec allows ['2xx'])
+- O-8: dropped a drafted case: expected '4xx' is not traceable to O-8 (spec allows ['2xx'])
+- C-1: preconditions ['person'] are not factories; moved to steps
+- C-1: preconditions ['person', 'note'] are not factories; moved to steps
+- C-2: preconditions ['person', 'note'] are not factories; moved to steps
+- C-3: preconditions ['person', 'note'] are not factories; moved to steps
+- O-8: preconditions ['person', 'memo'] are not factories; moved to steps
+- O-8: minimum template error_guessing neither used nor skipped with a reason
+- C-1: criterion is assumed, not confirmed: check its cases
+- C-2: criterion is assumed, not confirmed: check its cases
+- O-8: criterion is assumed, not confirmed: check its cases
+
+## Worked examples (boundaries)
+
+
+## FLOW-memos
+
+| id | prio | technique | purpose | expected | catches |
+|---|---|---|---|---|---|
+| TC-O8-1 | P0 | acceptance | The memo creator edits content with a content-only mask and the edit is applied, with update_time set to the server time. | 2xx (literal) | A valid content-only edit fails, or does not refresh update_time to the server time. |
+| TC-C1-1 | P0 | acceptance | A person writes a short note and the note is written. | 2xx (literal) | A valid short note posted by a person is not written. |
+| TC-C3-1 | P0 | acceptance | The creator deletes their own note and the note is deleted. | 2xx (literal) | The creator's delete of their own note leaves the note in place. |
+| TC-C1-2 | P1 | error_exception | Posting a note with an id that already exists is rejected with an already-exists error. | 4xx (literal) | A duplicate note id is accepted, or yields a server error instead of the already-exists rejection. |
+| TC-C2-1 | P1 | acceptance | The creator edits their own note and the edit is applied. | 2xx (literal) | The creator's edit to their own note is refused or not applied. |
+
+## Not tested
+
+- O-1: out of scope in the spec
+- O-2: out of scope in the spec
+- O-3: out of scope in the spec
+- O-4: out of scope in the spec
+- O-5: out of scope in the spec
+- O-6: out of scope in the spec
+- O-7: out of scope in the spec
+- O-9: out of scope in the spec
+- O-10: out of scope in the spec
+- O-11: out of scope in the spec
+- O-12: out of scope in the spec

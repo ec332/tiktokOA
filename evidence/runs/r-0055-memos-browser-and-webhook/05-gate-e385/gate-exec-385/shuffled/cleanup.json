@@ -1,0 +1,89 @@
+{
+ "deleted": [],
+ "failed": [],
+ "unknown_delete_route": [
+  {
+   "path": "/memos.api.MemoService/CreateMemo",
+   "id": null,
+   "location": null,
+   "untracked": "\n\u001cmemos/kXfQGfoKncJ366ukYDfUL5\u0012\rusers/tpadmin\"\u0013tp-local-adac75-ui\n0\u00018\u0001r\u0000z\u0012tp-local-adac75-ui\ufffd\u0001\u0006\b\ufffd\ufffd\ufffd\ufffd\u0006\ufffd\u0001\u0006\b\ufffd\ufffd\ufffd\ufffd\u0006"
+  }
+ ],
+ "deleted_by_test": [
+  {
+   "path": "/api/attachments",
+   "id": "attachments/HxRVxMxko2DEpNmYGyABG7",
+   "location": null
+  },
+  {
+   "path": "/api/spaces",
+   "id": "spaces/0773b4e7-de59-4a12-8484-b2f7637cc2ed",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/BgNCaHJibXnE85wPXoe3eq",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/tp-local-24cfd7-note",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/MygqUhdrQv9ejb6LiRPutF",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/545ZNtNnASy2scfQKXxSyT",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/5z9zkark3DrR3zfkyt7FCn",
+   "location": null
+  },
+  {
+   "path": "/api/spaces",
+   "id": "spaces/e9fe1993-8536-4f2b-b68f-c7b6915457fa",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/fdkwGnWDW6mxertRfDNV3E",
+   "location": null
+  },
+  {
+   "path": "/api/users/tpadmin/webhooks",
+   "id": "users/tpadmin/webhooks/eb50c5083960225a",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/dq4rW3yvrE8asmP9V47f8W",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/Rb92TueiCpA8uVw2bjBJdw",
+   "location": null
+  },
+  {
+   "path": "/api/attachments",
+   "id": "attachments/FZajSeyVXPNKXMRQ5DSY2V",
+   "location": null
+  },
+  {
+   "path": "/api/memos",
+   "id": "memos/45jj9kyU74RXXJ4aYEwvfZ",
+   "location": null
+  },
+  {
+   "path": "/api/users/tpadmin/webhooks",
+   "id": "users/tpadmin/webhooks/80b2b8a016ce324a",
+   "location": null
+  }
+ ]
+}

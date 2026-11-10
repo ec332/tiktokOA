@@ -4,6 +4,8 @@ An AI test platform. Give it a repo URL (or the URL of a system that is already 
 
 Requirement IDs (CR1, SR4, …) refer to `docs/iteration3/requirements.md`. Where each one is shown: [`docs/brief-evidence.md`](docs/brief-evidence.md).
 
+**The records:** [`evidence/`](evidence/README.md) holds the real runs cited here, stage by stage, copied unchanged from the platform's store. `uv run python evidence/verify.py` re-hashes every artifact and checks every sealed run folder.
+
 ## 1. Who it serves, the problem, and where it stops (SR1)
 
 **Users:** a developer or tester with a feature branch or a service, and requirements written in words, who wants to know whether it does what was asked.

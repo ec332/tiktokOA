@@ -1,0 +1,16 @@
+
+ ⚡️ Starting FastAPI in production mode
+ 
+ 🐍 Using import string: app.main:app
+ 
+ 🌐 Server started at http://0.0.0.0:8000
+    Documentation at http://0.0.0.0:8000/docs
+ 
+  Logs:
+ 
+/app/backend/app/core/config.py:75: UserWarning: The value of SECRET_KEY is "changethis", for security, please change it, at least for deployments.
+  warnings.warn(message, stacklevel=1)
+/app/backend/app/core/config.py:75: UserWarning: The value of DATABASE_URL password is "changethis", for security, please change it, at least for deployments.
+  warnings.warn(message, stacklevel=1)
+/app/backend/app/core/config.py:75: UserWarning: The value of FIRST_SUPERUSER_PASSWORD is "changethis", for security, please change it, at least for deployments.
+  warnings.warn(message, stacklevel=1)

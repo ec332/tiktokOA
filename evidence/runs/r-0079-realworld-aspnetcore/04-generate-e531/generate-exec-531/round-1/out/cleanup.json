@@ -1,0 +1,12 @@
+{
+ "deleted": [],
+ "failed": [],
+ "unknown_delete_route": [],
+ "deleted_by_test": [
+  {
+   "path": "/api/articles",
+   "id": "tp-generate-exec-531-4ba783-art",
+   "location": null
+  }
+ ]
+}

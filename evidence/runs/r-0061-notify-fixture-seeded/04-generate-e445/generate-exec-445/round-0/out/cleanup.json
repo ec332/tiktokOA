@@ -1,0 +1,35 @@
+{
+ "deleted": [],
+ "failed": [],
+ "unknown_delete_route": [
+  {
+   "path": "/api/invite",
+   "id": null,
+   "location": null,
+   "untracked": "{'sent': True}"
+  },
+  {
+   "path": "/api/invite",
+   "id": null,
+   "location": null,
+   "untracked": "{'sent': True}"
+  }
+ ],
+ "deleted_by_test": [
+  {
+   "path": "/api/notes",
+   "id": 121,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 122,
+   "location": null
+  },
+  {
+   "path": "/api/notes",
+   "id": 123,
+   "location": null
+  }
+ ]
+}
