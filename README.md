@@ -112,7 +112,7 @@ In the demo material, **screen-recorded playback** marks a recording of a real r
 - A wrong test can still be reported as a defect on a single target; with two implementations, the witness rule sends it to a person.
 - A target's rate limit makes its attempts SUSPECT_ENV, so those cases are incomplete, not judged.
 - Images-only targets (Memos, Paperless) can't host seeded defects; only targets built from source can.
-- The b3 fix-and-retest on RealWorld was not done (§7); the CR3 evidence is the template's real defect and the fixture's seeded ones.
+- A RealWorld defect (express-bookshelf answers 500 to spec-valid article bodies, confirmed by a person) was localised and fixed, and the fix passes 5/5 with no regressions in 31 checks. But the retest is INCONCLUSIVE, not FIXED_CONFIRMED: the app's hard-coded sign-in rate limit kept one check from being observed after the fix (`docs/status/acceptance/003`). The FIXED_CONFIRMED evidence for CR3 is the template's real defect (r-0002) and the fixture's seeded ones (r-0061).
 
 ## 5. Sources (SR2)
 
