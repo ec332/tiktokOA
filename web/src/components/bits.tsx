@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export function Labels({ labels }: { labels: string[] }) {
   return (
     <span className="row" style={{ gap: 4, display: "inline-flex" }}>
@@ -17,4 +19,15 @@ export function Status({ status }: { status: string }) {
 
 export function Loading({ error }: { error?: Error | null }) {
   return error ? <p className="error">{error.message}</p> : <p className="muted">Loading…</p>;
+}
+
+
+/** A page's "How this page works" box: open until the reader collapses it. */
+export function PageInfo({ children }: { children: ReactNode }) {
+  return (
+    <details className="card info" open>
+      <summary>How this page works</summary>
+      <div className="info-body">{children}</div>
+    </details>
+  );
 }

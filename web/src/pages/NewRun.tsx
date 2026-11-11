@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { PageInfo } from "../components/bits";
 
 /** M8 happy path, screen 1: repo + branch → feature → optional rules → Start (skeleton D25). */
 
@@ -214,6 +215,38 @@ export function NewRunPage() {
   return (
     <div className="page">
       <h1>New test run</h1>
+      <PageInfo>
+        <p>Step 2 of the flow: describe what to test, then <strong>Start run</strong>. The run page that opens does the
+          rest and stops for you only twice, at <strong>Clarify</strong> and <strong>Approve</strong>.</p>
+        <h3>Target</h3>
+        <ul>
+          <li><strong>Default</strong> is the FastAPI template, tested from a local git repo and branch. The platform
+            reads its code, plants mutations in the lines your branch changed, locates defects to a file and line, and
+            can prove a fix by retest.</li>
+          <li>A <strong>discovered</strong> target (added on the Targets page) is tested as a black box through its API.
+            There's no branch or route picker, and the whole API is in scope.</li>
+        </ul>
+        <h3>Repository (the template only)</h3>
+        <p>Path to a local git repo, the <em>branch to test</em> and the <em>base</em> it's compared with. The platform
+          clones the branch and never changes your checkout; uncommitted changes aren't in the clone. The diff between
+          base and branch is "the feature". After <strong>Use this branch</strong>, wait for the stack to show healthy.</p>
+        <h3>What to test</h3>
+        <ul>
+          <li><strong>Feature</strong>: a few sentences. The platform turns them into requirements, reads the code for
+            the rest, and asks you about gaps. The usual choice.</li>
+          <li><strong>User story</strong>: a story with acceptance criteria. Each criterion becomes a requirement, so
+            there are fewer questions.</li>
+          <li><strong>Endpoint</strong>: only the endpoints. Requirements come from what the code does, and you confirm
+            each behaviour.</li>
+          <li><strong>Routes to focus on</strong> (optional): limits what's read and tested. Fewer routes is faster and
+            cheaper.</li>
+        </ul>
+        <h3>Rules for this run (optional)</h3>
+        <p>Added after the defaults, which always apply, and for this run only; the report lists them.
+          <em>Clarifications</em> are points the requirements must settle (<em>Suggest rules</em> proposes general ones,
+          unticked). <em>Test cases</em> lines and the four templates shape the test design. <em>Gate</em> sets how many
+          times each test runs and how many planted bugs it must catch.</p>
+      </PageInfo>
       <section className="card row" aria-label="Target">
         <label className="field grow"><span>Target</span>
           <select aria-label="Target" value={profile} onChange={(e) => { setProfile(e.target.value); setChosen(new Set()); if (e.target.value) setMode((m) => (m === "endpoint" ? "feature" : m)); }}>

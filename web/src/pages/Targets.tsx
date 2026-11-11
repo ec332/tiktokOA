@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { api, ok } from "../api/client";
-import { Loading, Status } from "../components/bits";
+import { PageInfo, Loading, Status } from "../components/bits";
 
 /* Shapes of GET /targets and GET /targets/{slug} (tp/stages/discover/targets.py). */
 type Counts = { verified: number; clarify: number; override: number; layers: Record<string, number> };
@@ -39,6 +39,40 @@ export function TargetsPage() {
   return (
     <div className="page">
       <h1>Targets</h1>
+      <PageInfo>
+        <p>Step 1 of the flow for a new system: <strong>Targets → New run → Runs</strong>. A target is a system the
+          platform knows how to start, reach and log in to. You add it once from its repo URL; every later test run on
+          it starts at New run. The built-in FastAPI template needs no discovery and is always available.</p>
+        <h3>Add a target</h3>
+        <ol>
+          <li>Paste the repo URL and click <strong>Discover</strong>. It tests the latest release tag; add
+            <span className="mono">@tag</span> (or <span className="mono">@branch</span>) to pin another, or when the
+            repo has no release tags.</li>
+          <li>Discovery runs as its own run. Open the <em>Started r-NNNN</em> link to follow it.</li>
+          <li>It clones the repo, builds and starts the system on an internal network (from its compose file, or its
+            root Dockerfile), finds its OpenAPI spec, finds how to log in and which token scheme to send, creates a
+            resource and reads it back, and looks for paging, outside services and UI flows.</li>
+          <li>When it can't settle a value on its own (a port, an environment value the app needs to start, a valid
+            request body), the run shows a <strong>Needs you</strong> setup question. Answer it there and discovery
+            resumes. It asks rather than guesses.</li>
+          <li>When discovery succeeds, the target appears in the table below with its profile.</li>
+        </ol>
+        <h3>Reading the table and the profile</h3>
+        <ul>
+          <li><strong>Verified</strong>: fields a probe against the running system confirmed. <strong>Clarify</strong>:
+            fields a person answered. <strong>Override</strong>: hand-written values.</li>
+          <li><strong>Layers</strong>: how each field was found. <em>Convention</em> = a framework's standard (e.g.
+            FastAPI serves <span className="mono">/openapi.json</span>); <em>algorithm</em> = worked out from the repo or
+            the spec; <em>exploration</em> = proposed by AI and kept only after a probe verified it.</li>
+          <li>Click a target's name to see every field with its source, layer and the probe that is its evidence.</li>
+          <li><strong>no conventions</strong> skips the framework conventions so you can see what exploration finds on
+            its own. Leave it off normally.</li>
+        </ul>
+        <h3>Next</h3>
+        <p>Go to <strong>New run</strong> and pick this target in the <em>Target</em> dropdown. A discovered target is
+          tested as a black box: its whole API is in scope. Discovery runs don't appear on the Runs page; reach them
+          from the link above.</p>
+      </PageInfo>
       <form className="row" onSubmit={(e) => { e.preventDefault(); if (url.trim()) add.mutate(); }}>
         <input className="grow" aria-label="Repo URL" placeholder="https://github.com/org/repo[@tag]"
           value={url} onChange={(e) => setUrl(e.target.value)} />

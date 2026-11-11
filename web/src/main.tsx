@@ -36,9 +36,9 @@ function Shell() {
     <div className="shell">
       <nav className="sidebar">
         <span className="brand">Test Platform</span>
+        <Link to="/targets" activeProps={{ className: "active" }}>Targets</Link>
         <Link to="/new" activeProps={{ className: "active" }}>New run</Link>
         <Link to="/runs" activeProps={{ className: "active" }}>Runs</Link>
-        <Link to="/targets" activeProps={{ className: "active" }}>Targets</Link>
         <span className="spacer" />
         <ThemeToggle />
       </nav>

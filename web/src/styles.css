@@ -212,3 +212,9 @@ button.linkish { background: none; border: 0; padding: 0; cursor: pointer; displ
   .activity { position: static; width: 100%; flex-basis: auto; max-height: 420px; }
   .activity.closed button { writing-mode: horizontal-tb; }
 }
+
+details.info { margin-bottom: 16px; font-size: 13.5px; line-height: 1.5; }
+details.info > summary { cursor: pointer; font-weight: 600; }
+.info-body h3 { font-size: 13.5px; margin: 12px 0 4px; }
+.info-body p, .info-body ul, .info-body ol { margin: 4px 0; }
+.info-body ul, .info-body ol { padding-left: 20px; }
