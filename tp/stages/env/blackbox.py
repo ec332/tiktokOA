@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
+from urllib.parse import quote
 
 import httpx
 import yaml
@@ -424,6 +425,8 @@ class Stack:
             svc = {"build": {"context": b["context"], "dockerfile": b["dockerfile"]},
                    "expose": [b["port"]]}  # fmt: skip
             return {"services": {self.r["service"]: svc}}, tree
+        if "compose" not in self.r:  # discovery stopped (a setup question) before reach was set
+            raise BlackboxError("reach has neither a compose file nor a build yet")
         path = tree / self.r["compose"]
         return yaml.safe_load(path.read_text()), path.parent
 
@@ -780,7 +783,7 @@ class Stack:
                 continue
             try:
                 status, _ = self.http("DELETE", target, headers=who)
-            except httpx.HTTPError as err:
+            except (httpx.HTTPError, httpx.InvalidURL) as err:  # best effort: never fatal
                 status = type(err).__name__
             (out["deleted"] if status in (200, 202, 204, 404) else out["failed"]).append(
                 e | {"status": status}
@@ -976,7 +979,8 @@ def delete_path(spec: dict, entry: dict) -> str | None:
     if loc := entry.get("location"):
         cands.append(httpx.URL(loc).path)
     if entry.get("id") is not None:
-        stem = entry["path"].rstrip("/") + f"/{str(entry['id']).split('/')[-1]}"  # names: last part
+        seg = quote(str(entry["id"]).split("/")[-1], safe="")  # names: last part; any text is a URL
+        stem = entry["path"].rstrip("/") + f"/{seg}"
         cands += [stem + "/", stem]
     return next((c for c in cands for p in paths if _matches(p, c)), None)
 

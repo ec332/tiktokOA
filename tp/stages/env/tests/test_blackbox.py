@@ -174,7 +174,9 @@ SPEC = {"paths": {"/api/tags/": {"get": {}, "post": {}}, "/api/tags/{id}/": {"de
     ("entry", "want"),
     [({"path": "/api/tags/", "id": 7, "location": None}, "/api/tags/7/"),
      ({"path": "/api/tasks/", "id": 1, "location": None}, None),
-     ({"path": "/x/", "id": None, "location": "http://h/api/tags/9/"}, "/api/tags/9/")],
+     ({"path": "/x/", "id": None, "location": "http://h/api/tags/9/"}, "/api/tags/9/"),
+     # a fuzzed name the app accepted (r-0083, flatnotes): encoded, or httpx refuses the URL
+     ({"path": "/api/tags/", "id": "a b;\x01", "location": None}, "/api/tags/a%20b%3B%01/")],
 )  # fmt: skip
 def test_delete_path_from_the_spec(entry, want):
     assert bb.delete_path(SPEC, entry) == want
@@ -204,3 +206,16 @@ def test_cleanup_deletes_newest_first_and_lists_leftovers(paperless, tmp_path):
     assert [e["id"] for e in out["deleted"]] == [7] and [e["id"] for e in out["failed"]] == [8]
     assert [e["path"] for e in out["unknown_delete_route"]] == ["/api/tasks/"]
     assert [e["id"] for e in out["deleted_by_test"]] == [9]  # not deleted twice
+
+
+def test_down_before_reach_is_settled_is_a_no_op(paperless):
+    """A Dockerfile repo whose port discovery must ask about: the stack is torn down before reach
+    names a compose file or a build, and that mustn't hide the setup question (r-0081)."""
+    from dataclasses import replace
+
+    p = replace(paperless, fields=paperless.fields | {"reach": profile.Field(
+        {"strategy": "container", "ref": "main"}, "override")})  # fmt: skip
+    stack = bb.Stack(p)
+    with pytest.raises(bb.BlackboxError, match="neither a compose file nor a build"):
+        stack.raw(stack.dir)
+    stack.down()
