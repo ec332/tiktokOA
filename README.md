@@ -1,184 +1,214 @@
 # testplat
 
-An AI test platform. Give it a repo URL (or the URL of a system that is already running) and a requirement in words. It works out how to start, reach and log in to the system, turns the requirement into tests, runs them against the real system, and reports defects with their evidence. A fix counts only once a retest proves it.
+**An AI test platform that finds real defects and proves its claims.** Give it a repo URL (or the URL of a system that's already running) and a requirement in one sentence. It works out how to start, reach and log in to the system, turns the requirement into tests, runs them against the real system, and reports defects with their evidence. A fix counts only once a retest proves it.
 
-Requirement IDs (CR1, SR4, …) refer to `docs/iteration3/requirements.md`. Where each one is shown: [`docs/brief-evidence.md`](docs/brief-evidence.md).
+**The principle:** AI proposes, fixed code decides, and a person decides what "correct" means. A model drafts requirements, test cases, test code, browser flows and fix suggestions. Fixed code decides which tests are trusted, what each result means, where a defect is, and whether a fix is proven.
 
-**The records:** [`evidence/`](evidence/README.md) holds the real runs cited here, stage by stage, copied unchanged from the platform's store. `uv run python evidence/verify.py` re-hashes every artifact and checks every sealed run folder.
+**Who it's for:** a developer or tester with a service or a feature branch, and requirements in words, who wants to know whether it does what was asked, and wants evidence rather than a green tick.
 
-## 1. Who it serves, the problem, and where it stops (SR1)
+---
 
-**Users:** a developer or tester with a feature branch or a service, and requirements written in words, who wants to know whether it does what was asked.
+## What it can do
 
-**The problem:** an AI can write many tests fast, but a generated test can be wrong, flaky, or run against a broken environment, and a rerun that passes proves nothing. The platform lets AI do the understanding and the drafting, and keeps every decision about what counts as evidence in fixed code: a test is admitted only after it runs stably and catches planted bugs; a verdict says what it rests on; a fix is confirmed only by the same sealed tests failing before and passing every time after.
+| Capability | How |
+|---|---|
+| **Requirement → tests → verdict** | A one-sentence brief becomes requirements that cite the code, then test cases, then test code. **Expected values come from fixed calculators, never from the model.** A person settles what "correct" means and signs off on what will run |
+| **Any repo of the right shape, from its URL** | `tp target add <url>` discovers how to start the system (compose or Dockerfile), its OpenAPI spec and base path, its login and token scheme, its outside services and its UI flows. Every field records how it was found, and its evidence. There's no target code, and CI enforces that |
+| **Tests that transfer within a domain** | A domain pack (one spec, pinned implementations) runs the full pipeline on one implementation, then **the same sealed tests** on the others. The **witness rule** turns a disagreement into a defect: if one implementation passes, the expectation can be met |
+| **Beyond pytest and the backend** | Browser flows (`.ui.yaml`): the AI proposes them from the page's accessibility snapshot, a run verifies them, and fixed code replays them in a pinned Chromium with an API read-back. Any new format plugs in through a collector keyed by file suffix |
+| **Beyond the container** | Outside services (webhooks, email) are replaced by **local stand-ins**, and the platform tests how the system uses them, including when they fail. Live systems are reached through a **deny-by-default proxy**. Every result carries an **isolation level** (0 / 1 / 2) and says what it **rests on** (real or simulated) |
+| **Results you can trust** | A test is admitted only after K stable runs, a shuffled run, and catching planted bugs. Every exchange is recorded and sealed. An environment failure is never a product defect. A fix is FIXED_CONFIRMED only with the same test hashes, a fail before, a pass on every run after, no regressions and an unchanged API contract |
 
-**What it covers:**
-- HTTP services you can start from a repo (compose file or Dockerfile) or reach on this Mac: API tests, generic checks from the OpenAPI spec, and browser flows.
-- Outside services the system calls (a webhook, email), replaced by local stand-ins.
-- One spec with several implementations (a domain pack): tests made on one run unchanged on the others, and the disagreements are judged.
+## Results on real systems
 
-**Where it stops:** everything runs on this Mac (no remote hosts, no publishing by default); one sample per run with Claude Haiku 5.5; one run at a time. The known limits are in §4.
+All of these ship in [`evidence/`](evidence/README.md), stage by stage, as the platform wrote them.
 
-## 2. Run it (SR3)
+| System | Language | Result | Run |
+|---|---|---|---|
+| full-stack-fastapi-template, branch `feature/item-pricing` | Python | From a one-sentence brief: 27 signed cases, 6 defects. A real rounding defect was located to file and line, and its fix proven **FIXED_CONFIRMED** (3/3 fail before, 5/5 pass after, 0 regressions) | r-0002 |
+| RealWorld: aspnetcore and express-bookshelf | C#, JavaScript | The same sealed tests on both: AGREE 29 · SPEC_MISMATCH 5 · TO_PERSON 6. **A real defect:** express-bookshelf answers 500 to a spec-valid article where aspnetcore answers 201 | r-0079 → r-0080 |
+| Memos | Go | From a one-line brief, 37 of 42 planned checks ran. A browser flow proposed by AI was verified, then passed 3/3. A webhook stand-in received the call | r-0055 |
+| The notify fixture (built here, with **seeded** defects) | Python | Four seeded defects in outside-service behaviour and the UI, each caught and retested to **FIXED_CONFIRMED** | r-0061 |
+| Paperless-ngx, live | Python | A system the platform didn't start: isolation 2, safe mode, 21 of 35 checks run, 0 leftovers | r-0046 |
+| The template, with a broken stack | — | An environment failure classed ENV: 62 findings, **0 false defects** | r-0001 |
+
+```bash
+uv run python evidence/verify.py
+# 130 artifacts, 15 sealed run folders (15 against a recorded root)
+# all intact
+```
+
+---
+
+## Spin it up
+
+### Requirements
 
 | | Version |
 |---|---|
-| Source | `ec332/tiktokOA`, branch `main` (the submitted version is the commit you check out) |
 | Python, uv | 3.14, uv 0.12 (`pyproject.toml`, `uv.lock`) |
-| Runner library | `platform_rt` 0.11.6 (built into the runner images) |
-| Docker | Docker Desktop 27 (compose v2) |
-| Web UI | Node, React 19, Vite 8 (`web/package.json`) |
-| Model | `claude-haiku-5-5` (needs `ANTHROPIC_API_KEY` in `.env`) |
-| Pinned images | Playwright 1.64.1 with its Chromium (browser runner); Mailpit v1.33.1 (email stand-in) |
-| RealWorld pack | spec at upstream commit `25588846`, sha256 in `packs/realworld/pack.yaml`; implementations pinned to commits |
+| Docker | Docker Desktop 27, compose v2 (for real runs; a few GB of disk for target images) |
+| Node | 23 (for the web UI only) |
+| Model | `claude-haiku-5-5`: an `ANTHROPIC_API_KEY` for real runs (the template run r-0002 cost $0.041) |
+| Pinned images | Playwright 1.64.1 with Chromium (browser runner), Mailpit v1.33.1 (email stand-in) |
+
+### 1. Install and check (no Docker, no model)
 
 ```bash
+git clone https://github.com/ec332/tiktokOA && cd tiktokOA
 uv sync
-uv run pytest -m "not docker"                  # platform tests, no Docker (CI runs this)
-uv run tp run --stub --unattended              # the whole pipeline with stub stages, no Docker, no model
+uv run pytest -m "not docker"            # the platform's tests
+uv run tp run --stub --unattended        # the whole pipeline with stub stages
+uv run python evidence/verify.py         # the shipped real runs are intact
+```
 
-# a new target, from its repo URL
-uv run tp target add https://github.com/usememos/memos      # discovery: how to start, reach, log in
+### 2. Add your key
+
+```bash
+echo 'ANTHROPIC_API_KEY=sk-ant-…' > .env
+```
+
+### 3. Test a repo from its URL
+
+```bash
+uv run tp target add https://github.com/usememos/memos       # discovery: how to start, reach and log in
 uv run tp run --target memos --brief "People write short notes, then edit and delete them."
-
-# a domain pack: the full pipeline on one implementation, the same sealed tests on the other
-uv run tp target add https://github.com/realworld-apps/aspnetcore-realworld-example-app
-uv run tp run --target aspnetcore-realworld-example-app --brief "<the pack's brief>" --unattended
-uv run tp pack run realworld --first r-NNNN    # runs the sealed tests on express-bookshelf, prints the matrix
-
-uv run tp serve                                # API on :8000
-cd web && npm install && npm run dev           # UI on http://localhost:5173
 ```
 
-Without `--unattended`, a run stops at the reviews (Clarify, Approve, Sign-off) for a person: `tp review list`, `tp review resolve <id> approve`, or the web UI. Long Docker runs take minutes; on a Mac, wrap them in `caffeinate -i`.
+If discovery needs a value it can't work out (a port, an env value), it asks:
 
-## 3. How it works (SR5)
-
-```
-input (repo URL or live URL, brief)
-  → discover   how to start, reach and log in; stand-ins; UI flows       AI proposes, probes verify
-  → spec       requirements, each citing the code or the brief           AI, checked
-  → clarify    what "correct" means                                      person
-  → cases      test design; expected values from fixed calculators       AI + fixed code
-  → sign-off   everything that will run                                  person
-  → generate   test code (pytest, .ui.yaml)                              AI, static checks + dry run
-  → gate       K stable runs, a shuffled run, planted bugs               fixed code
-  → env        the system on an internal network, stand-ins              fixed code
-  → execute    K attempts over HTTP, every exchange recorded and sealed  fixed code
-  → triage     class, localisation, fix suggestion                       fixed code (+ AI suggestion, labelled)
-  → report     claim, limits, basis                                      fixed code
-  → retest     same sealed tests on the fixed build                      fixed code
+```bash
+uv run tp review list
+uv run tp review resolve <id> --text "<answer>"
 ```
 
-| Module | Responsibility |
-|---|---|
-| `tp/core` | runs, stage contract, artifact store (content-hashed), events, reviews, target profiles |
-| `tp/stages/<stage>` | one folder per stage above; each consumes and produces typed artifacts |
-| `tp/stages/discover` | the target profile (`data/targets/<slug>/profile.yaml`): every field with its source, layer (convention / algorithm / exploration / clarify) and probe evidence |
-| `platform_rt` | the library inside the runner images: records, generic check families, stand-ins, the browser flow interpreter, the safe-mode proxy |
-| `packs/<domain>` | a domain pack: one spec, a brief, settled answers, implementations pinned to commits |
-| `tp/api`, `web/` | the HTTP API and the web UI (runs, reviews, targets, reports) |
+### 4. Run a domain pack
 
-**Key state:** a run is a chain of stage executions; each output is an artifact addressed by its hash, so a retest can prove it used the same tests. Execute writes a sealed run folder (`data/runs/execute-N/`: `results.jsonl`, `records.sha256`, logs), which the report and retest read.
+```bash
+uv run tp pack run realworld          # full pipeline on the first implementation, sealed tests on the rest
+uv run tp compare r-NNNN r-MMMM       # the case × implementation matrix, each disagreement judged
+```
 
-**Two architecture decisions** (`docs/iteration3/decisions.md`):
+### 5. Test a live system you already run
 
-| | DR-1: a model is used only when proposing | DR-2: local containment at the network edge |
+```bash
+uv run tp target add http://localhost:8010 --live --secret token=$TOKEN
+uv run tp run --target localhost-8010
+uv run tp target clean localhost-8010   # remove anything the run created
+```
+
+### 6. Open the web UI
+
+```bash
+uv run tp serve                       # API on :8000
+cd web && npm ci && npm run dev       # UI on http://localhost:5173
+```
+
+Runs, the run page (each step, every AI call and its cost, the report, retest buttons) and each target's profile.
+
+**Notes**
+- Without `--unattended`, a run stops for a person at Clarify and Sign-off (in the UI, or with `tp review`).
+- Runs with Docker take minutes. On a Mac, wrap them in `caffeinate -i`. One run at a time.
+- Data lives in `data/` (git-ignored; override with `TP_DATA`). Nothing is published unless `TP_PUBLISH=1`.
+
+---
+
+## How it works
+
+```
+input → discover → spec → clarify → cases → sign-off → generate → gate → env → execute → triage → report → retest → deliver
+        AI+probes   AI     person    AI+calc   person    AI+checks  fixed  fixed  fixed     fixed    fixed    fixed    fixed
+```
+
+| Stage | What it does | Code |
 |---|---|---|
-| Decision | What a model proposes (cases, UI flows, dependency wiring) is frozen into data, verified by running, and replayed. No model acts during a test run | The system's outbound traffic reaches only local stand-ins, on an internal Docker network. The runner's traffic to a live system goes through a safe-mode proxy |
-| Instead of | Agents that act at run time (browser agents, self-healing locators); a model as the judge | In-process mocks; recording and replaying real traffic; real third parties |
-| Why | A verdict must be reproducible and explainable from records; a model in the loop makes the same test give different answers (CR4) | Some systems can't be fully isolated (FB-c); this keeps them on the Mac and labels what is simulated (U1, G3) |
-| Cost | Less adaptive: a UI change means proposing the flow again | Simulated, and labelled; no remote level |
-| In the code | `tp/stages/discover/ui_flows.py` (propose, then `verify` by running); `platform_rt/platform_rt/ui.py` replays the frozen steps; `tp/stages/gate` admits a test only after K runs | `tp/stages/env/blackbox.py` (internal run network, inbound-only forwarder); `platform_rt/platform_rt/standin.py`; `tp/stages/discover/dependencies.py` (finds and verifies the wiring); `platform_rt/platform_rt/proxy.py` (safe mode) |
+| Discover | Reach, spec, auth, outside services and UI flows; each field with its source and evidence | `tp/stages/discover/` |
+| Spec, clarify | Requirements that cite the code; a person settles the gaps | `tp/stages/spec/` |
+| Cases, sign-off | Test design; expected values from calculators; a person signs off on everything that will run | `tp/stages/cases/` |
+| Generate | Test code (pytest, `.ui.yaml`), accepted by static checks and a dry run | `tp/stages/generate/`, `platform_rt/collect.py` |
+| Gate | K stable runs, a shuffled run, planted bugs | `tp/stages/gate/` |
+| Env, execute | The system on an internal network with stand-ins; K attempts; every exchange sealed | `tp/stages/env/`, `tp/stages/execute/`, `platform_rt/` |
+| Triage, report | Failure class and location from the raw records; the report leads with its claim, limits and basis | `tp/stages/triage/`, `tp/stages/report/` |
+| Retest, compare | The same sealed tests on a fix, or on another implementation | `tp/stages/retest/`, `tp/core/transfer.py` |
 
-## 4. Labels and known limits (SR4, G3)
-
-Every result in a report carries:
-
-| Label | Meaning |
+| Folder | Holds |
 |---|---|
-| **real** | the assertion ran against the real system |
-| **simulated** | it rests on a local stand-in (a webhook receiver, a mail server), not the real third party |
-| **pre-generated** | from an imported test suite (none in use: the Hurl suite was cut) |
-| **isolation 0 / 1 / 2** | 0 = isolated; 1 = partly isolated (stand-ins); 2 = live and local (a system the platform didn't start) |
-| **AI-proposed** | in the target profile: a value a model proposed, and whether running verified it (`ai_proposed+verified`) |
-| **assumed** | a criterion no person confirmed (unattended runs) |
+| `tp/core/` | The stage contract, the run state machine, content-addressed artifacts, reviews, labels, the model gateway |
+| `platform_rt/` | The runner library: recorder, HTTP client, spec-derived checks, stand-in, browser interpreter, safe-mode proxy |
+| `tp/api/`, `tp/cli/`, `web/` | The HTTP API, the `tp` command, the React UI |
+| `packs/`, `targets/`, `config/` | Domain packs, the template's profile, discovery and safety rules |
+| `evidence/` | Real runs, stage by stage, with `verify.py` |
 
-In the demo material, **screen-recorded playback** marks a recording of a real run, not a live one. Seeded defects are labelled as seeded (the notify fixture, the template's planted-bug patches).
+A walkthrough of one run, stage by stage, is in [`evidence/README.md`](evidence/README.md).
 
-**Known limits:**
-- No remote level: everything runs on this Mac.
-- On black-box targets, localisation is at the API level (operation, request, failed assertion), plus the handler file where the source is there.
-- Black-box targets keep data between attempts (no reset), so some tests are INTERMITTENT; they are labelled and never counted as defects.
-- No factory for a second user or other prepared data on black-box targets: 9 of 55 RealWorld cases stay unbound.
-- A wrong test can still be reported as a defect on a single target; with two implementations, the witness rule sends it to a person.
-- A target's rate limit makes its attempts SUSPECT_ENV, so those cases are incomplete, not judged.
-- Images-only targets (Memos, Paperless) can't host seeded defects; only targets built from source can.
-- A RealWorld defect (express-bookshelf answers 500 to spec-valid article bodies, confirmed by a person) was localised and fixed, and the fix passes 5/5 with no regressions in 31 checks. But the retest is INCONCLUSIVE, not FIXED_CONFIRMED: the app's hard-coded sign-in rate limit kept one check from being observed after the fix (`docs/status/acceptance/003`). The FIXED_CONFIRMED evidence for CR3 is the template's real defect (r-0002) and the fixture's seeded ones (r-0061).
-
-## 5. Sources (SR2)
-
-| Reused as-is | Modified | Own work |
-|---|---|---|
-| FastAPI, Typer, Pydantic, PyYAML, uvicorn, SQLite; React, TanStack Query/Router, Vite | The template's clone (full-stack-fastapi-template): a test-info endpoint and trace-header propagation, in the platform's copy only | The pipeline, stage contract and artifact store |
-| pytest, Docker Compose, mutmut | A target's compose file: rewritten onto an internal network, with stand-ins and a forwarder | Discovery: profiles with per-field provenance, verified by probing |
-| Playwright + Chromium (browser runner), Mailpit (email stand-in) | | The gate (stability, shuffle, planted bugs), execute's sealed records, triage, report, retest |
-| The RealWorld OpenAPI spec (MIT, vendored in `packs/realworld/spec`) | | `platform_rt`: check families, stand-ins, the `.ui.yaml` interpreter, the safe-mode proxy |
-| Targets: Memos, Paperless-ngx, the two RealWorld implementations | | Domain packs, `tp compare` and the witness rule |
-| Claude Haiku 5.5 (in the product); Claude Code (the build assistant) | | The web UI |
-
-**Most valuable contribution:** the proof rules: when a generated test may be trusted (the gate), when a disagreement is a defect (the witness rule), and when a fix is proven (same sealed hashes, fail before, pass every time after, no regressions, unchanged contract).
-
-## 6. A design iteration: the report's first line (SR6)
-
-The same run (r-0046, a live Paperless reached only by URL and token), before and after:
-
-- **Before** (report exec #332): `Strongest claim: Seen on the live system, stable 3/3 · strategies: reach=external, spec=served, auth=token_header, data=spec_derived, state=namespace, mutation=none, safety=safe_mode, checks=pytest_cases`
-- **After** (exec #348): `localhost-8010 · external · isolation 2 (live and local) · Seen on the live system, stable 3/3 · ran 21 of 35; blocked ▸ excluded: NOT_RUN 14/35 (40%) · rests on: real 21/21 (100%)`
-
-**Why:** the old line gave the claim and then a list of strategy names. A reader couldn't tell which system it was, how isolated the run was, how much of the plan ran and why the rest didn't, or whether results rested on the real system or a stand-in. The new line states the claim, then its limits, then its basis. The strategy detail moved below. The same line heads the run page in the UI.
-
-## 7. Corrections where AI was involved (DM4)
-
-**In the product (the platform's own model calls):**
-- Clarify answers override the AI's drafts; a fixed check flags any case that contradicts an answer (r-0001 → r-0002: the rounding test used the wrong mode).
-- A model's proposal is never trusted until running verifies it: a UI flow was repaired once from the page snapshot where it failed (Memos r-0053); a setting Haiku proposed for the webhook allowlist was kept only after a run showed it worked (r-0051).
-- A retest "fix" that passed only by changing the API contract (r-0047, O-12) led to the contract guard (DR-10).
-
-**In the build (the coding assistant), found on real targets and fixed in shared code with a test:**
-- A false P0 on RealWorld came from judging the two implementations against different specs; both now use the pack's one spec (integration/006).
-- Twenty-odd platform bugs exposed by Memos, the fixture and RealWorld (an envelope id, a sign-up taken as the login, `$ref` bodies not followed, …), each fixed with a test that fails without it (integration/002, 004, 006).
-- Three commits once went in on a truncated test run; commits are now gated on the suite's last line (integration/004 §5).
-- The assistant once restarted the API mid-run; the standing rule is now to check for active runs first.
-
-## 8. One issue, end to end (DM5)
-
-**A rate limit read as product failures.** The first RealWorld comparison (r-0073 × r-0074) showed express-bookshelf failing 12 cases that aspnetcore passed.
-
-- **Located:** the sealed records of r-0074 held 70 answers of 429 inside those 12 cases, many on sign-ins rather than the request under test. The app limits sign-ins to 20 per 15 minutes per IP (`lib/users/router.js:9-11`). Triage only looked at the request under test, so the 429s never showed.
-- **Fixed:** a failed attempt that met a 429 anywhere (with no injected fault) is SUSPECT_ENV, an environment problem: triage classes it ENV and `tp compare` counts it as missing, not as a disagreement (`tp/stages/execute/stage.py`, `throttled`; commit `314b482`, with a test).
-- **Result:** r-0079 × r-0080: 6 answers of 429 in 2 cases, both now INCOMPLETE; the comparison moved from AGREE 20 / TO_PERSON 22 to AGREE 29 / TO_PERSON 6 (with the one-spec fix above). Records: `data/runs/execute-545/`.
-- **Remaining limit:** those 2 cases are not judged on express-bookshelf at all. A run that paced its sign-ins could judge them.
-
-## 9. What adding the next one takes (U2)
+### Extending it
 
 | To add | It takes |
 |---|---|
-| A target with the same shape (OpenAPI, a compose or Dockerfile app, JSON bodies, a token login) | `tp target add <repo URL>`; answer the setup questions discovery can't settle. No target code (`tests/test_target_literals.py` bans target names in the platform) |
-| A domain | a `packs/<name>/pack.yaml`: a vendored spec with its hash, a brief, settled answers, implementations pinned to commits. Then `tp pack run <name>` |
-| A test format | a collector keyed by file suffix in `platform_rt/platform_rt/collect.py` that writes the same per-test record; the gate, records, triage and retest apply unchanged (DR-4). `.ui.yaml` is the example |
-| A dependency kind | a stand-in in `platform_rt/platform_rt/standin.py` (or a pinned image, like Mailpit), and its wiring in `tp/stages/discover/dependencies.py`; it must catch a seeded defect in the fixture before it counts (DR-8) |
+| A target of the same shape | `tp target add <url>`, and answers to any setup questions. No code |
+| A domain | A `packs/<name>/pack.yaml`: a vendored spec with its hash, a brief, settled answers, implementations pinned to commits |
+| A test format | A collector keyed by file suffix in `platform_rt/collect.py` |
+| A kind of outside service | A stand-in and its wiring rule. It counts once it catches a seeded defect |
 
-Next domain, costed as a prediction: FHIR (`docs/iteration3/catalog.md`).
+**Where tests transfer next** (predicted, scored 0–10 on a shared spec, maintained implementations, a conformance suite, HTTP/JSON fit and onboarding effort): FHIR R4 8.5 (next) · RealWorld 8 (built) · the Servarr family 7 · OCI distribution 6.5 · Matrix 6.5.
 
-## 10. Earlier demo (iteration 2)
+---
 
-Rehearsed end to end on 2026-11-08, one sample, Claude Haiku 5.5. Evidence: `docs/status/demo/`.
+## Design notes
 
-| # | Command | Run | Result |
-|---|---|---|---|
-| 1 | `tp target add https://github.com/paperless-ngx/paperless-ngx@v3.4.2` → `tp run --target paperless-ngx` | r-0039, r-0040 | Served spec, declared auth, admin from documented env vars; 18 fields verified, 0 overrides. Ceiling **"Stable, property-checked"** |
-| 2 | `tp target add http://localhost:8010 --live --secret token=$TOKEN` → `tp run --target localhost-8010` → `tp target clean` | r-0041, r-0046 | A Paperless the platform didn't start and can't control. Safe mode, ceiling **"Seen on the live system"**, 0 leftovers. **Correction:** at the time, an absolute-URL request could leave through the proxy with the token. Iteration 3 refuses those, along with method overrides and denied reads (`tests/test_p1_proxy.py`, against a fake upstream) |
-| 3 | `tp target add https://github.com/usememos/memos` → `tp run --target memos` | r-0043, r-0044 | Auth found by probing, first admin created, resource-name IDs and token paging detected. 19 verified, 0 clarify, 0 overrides |
-| 4 | `tp target add https://github.com/usememos/memos --no-conventions` | r-0045 | Same fields by exploration alone: 18/19 values equal |
-| 5 | `tp watch --target fastapi-template` on the template fork → push → Scan → draft PR | r-0047 (rehearsal); r-0037 (published) | 3 defects reached FIXED_CONFIRMED. **Correction:** the same run raised 3 false P0s, and one "fix" passed only by changing the API contract; retest now refuses that (`contract_diff`). Its report was rebuilt (exec #347) |
+### Two architecture decisions
+
+| | A model is used only when proposing | Local containment at the network edge |
+|---|---|---|
+| Decision | What a model proposes (cases, UI flows, dependency wiring) is frozen into data, verified by running, and replayed. No model acts during a run | The system's outbound traffic reaches only local stand-ins on an internal network. Traffic to a live system goes through the safe-mode proxy |
+| Instead of | Agents acting at run time; a model as the judge | In-process mocks; record and replay; real third parties |
+| Why | A verdict must be reproducible and explainable from its records | Some systems can't be fully isolated; this keeps them local and labels what's simulated |
+| Trade-off | A UI change means proposing the flow again | Simulated parts are labelled; no remote level |
+| Code | `tp/stages/discover/ui_flows.py`, `platform_rt/platform_rt/ui.py`, `tp/stages/gate/` | `tp/stages/env/blackbox.py`, `platform_rt/platform_rt/standin.py`, `platform_rt/platform_rt/proxy.py` |
+
+### A design iteration: the report's first line
+
+- **Before:** `Strongest claim: Seen on the live system, stable 3/3 · strategies: reach=external, spec=served, auth=token_header, …`
+- **After:** `localhost-8010 · external · isolation 2 (live and local) · Seen on the live system, stable 3/3 · ran 21 of 35; blocked ▸ excluded: NOT_RUN 14/35 (40%) · rests on: real 21/21 (100%)`
+
+The old line gave a claim and then strategy names. A reader couldn't tell which system it was, how isolated the run was, how much of the plan ran, or whether the results rested on the real system. The new line gives the claim, then its limits, then its basis. It heads the run page, the report and the summary (r-0046, report exec #332 versus #348).
+
+### A failure, handled
+
+The first RealWorld comparison showed express-bookshelf failing 12 cases that aspnetcore passed. The sealed records held 70 answers of 429: the app allows 20 sign-ins per 15 minutes (`lib/users/router.js:9-11`). Now a failed attempt that met a 429 is SUSPECT_ENV, an environment problem, so it's left out of the comparison rather than counted as a disagreement (`314b482`, with a test). The matrix went from AGREE 20 / TO_PERSON 22 to AGREE 29 / TO_PERSON 6.
+
+### Corrections where AI was involved
+
+- **In the product:** answers given at Clarify override the AI's drafts, and a fixed check flags any case that contradicts one. A model's proposal (a UI flow, a stand-in setting) is kept only once a run verifies it. A retest "fix" that passed only by changing the API contract led to the contract guard.
+- **In the build:** real targets exposed about 25 platform bugs (an id inside an envelope, a sign-up taken for the login, `$ref` bodies not followed, …). Each was fixed in shared code, with a test that fails without the fix. A false P0 on RealWorld came from judging the two implementations against different specs; both now use the pack's one spec.
+
+### Labels
+
+| Label | Meaning |
+|---|---|
+| **real** / **simulated** | The assertion ran against the real system / rested on a local stand-in |
+| **isolation 0 / 1 / 2** | Isolated / partly isolated (stand-ins) / live and local |
+| **AI-proposed (+verified)** | A value a model proposed, and whether running verified it |
+| **assumed** | A criterion no person confirmed (unattended runs) |
+| **seeded** | A defect planted on purpose (the notify fixture, the template's patches) |
+| **pre-generated** | From an imported test suite (none in use) |
+| **screen-recorded playback** | In demo material: a recording of a real run, not a live one |
+
+### Known limits
+
+- Everything runs on this machine; there is no remote level.
+- On black-box targets, localisation is at the API level, plus the handler file where the source is available. Data isn't reset between attempts, so some rows are INTERMITTENT (labelled, never counted as defects).
+- Cases that need a second user stay unbound on black-box targets (9 of 55 on RealWorld).
+- The RealWorld fix passes 5/5 with 0 regressions, but its retest is INCONCLUSIVE: the app's sign-in rate limit kept one check from being observed.
+
+### Sources
+
+| Reused as-is | Modified | Own work |
+|---|---|---|
+| FastAPI, Typer, Pydantic, PyYAML, uvicorn, SQLite; React, TanStack Query/Router, Vite | The template's clone: a test-info endpoint and trace-header propagation (the platform's copy only) | The pipeline, stage contract and artifact store |
+| pytest, Docker Compose, mutmut, Playwright, Mailpit | A target's compose file, rewritten onto an internal network with stand-ins and a forwarder | Discovery; the gate, sealed records, triage, report and retest |
+| The RealWorld OpenAPI spec (MIT, vendored) | | `platform_rt`: checks, stand-ins, the `.ui.yaml` interpreter, the proxy |
+| Targets: Memos, Paperless-ngx, the RealWorld implementations | | Domain packs, sealed transfer and the witness rule; the web UI |
+| Claude Haiku 5.5 (in the product); Claude Code (the build assistant) | | |
+
+**Most valuable contribution:** the proof rules. When a generated test may be trusted (the gate), when a disagreement is a defect (the witness rule), and when a fix is proven (same sealed hashes, a fail before, a pass on every run after, no regressions, an unchanged contract).
